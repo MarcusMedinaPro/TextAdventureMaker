@@ -17,6 +17,7 @@ using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -45,7 +46,7 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
     }
 });
 
-// Parser config (slice 3 core commands)
+// Parser config (slice 3 core commands + synonyms)
 var parserConfig = new KeywordParserConfig(
     quit: CommandHelper.NewCommands("quit"),
     look: CommandHelper.NewCommands("look"),
@@ -55,7 +56,7 @@ var parserConfig = new KeywordParserConfig(
     unlock: CommandHelper.NewCommands("unlock"),
     take: CommandHelper.NewCommands("take"),
     drop: CommandHelper.NewCommands("drop"),
-    use: CommandHelper.NewCommands("use"),
+    use: CommandHelper.NewCommands("use", "turn", "switch", "light"),
     combine: CommandHelper.NewCommands("combine"),
     pour: CommandHelper.NewCommands("pour"),
     go: CommandHelper.NewCommands("go"),
@@ -66,7 +67,7 @@ var parserConfig = new KeywordParserConfig(
     save: CommandHelper.NewCommands("save"),
     load: CommandHelper.NewCommands("load"),
     all: CommandHelper.NewCommands("all"),
-    ignoreItemTokens: CommandHelper.NewCommands(),
+    ignoreItemTokens: CommandHelper.NewCommands("on"),
     combineSeparators: CommandHelper.NewCommands(),
     pourPrepositions: CommandHelper.NewCommands(),
     directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)

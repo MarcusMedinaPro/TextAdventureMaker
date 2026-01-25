@@ -15,6 +15,12 @@
 ### TDD Approach: Green/Blue
 Skip red phase. Write test → write code → test passes → refactor.
 
+### Slice Workflow Rule (mandatory)
+test → kod → test → refactor → test → commit → update sandbox → låt Marcus testa sandbox → fixa vid behov, korrigera tester, commit igen.
+
+### Fluent Consistency Rule
+Om ett objekt får en property/metod/extension, ge motsvarande funktionalitet till närliggande objekt (t.ex. Item/Key/Door) så API:t förblir konsekvent och lättläst.
+
 ### Language System
 - Single language loaded at runtime via file (e.g., `gamelang.en.txt`, `gamelang.sv.txt`)
 - Default: English

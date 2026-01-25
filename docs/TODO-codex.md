@@ -63,3 +63,5 @@ public Location(string id)
 - Kör `dotnet test` efter varje ändring
 - Filosofi: **GameError** = förlåtande (spellogik), **Exceptions** = programmeringsfel
 - Fluent API & Wiki → se huvudplanen Slice 39-40
+- Slice workflow: test → kod → test → refactor → test → commit → update sandbox → låt Marcus testa sandbox → fixa vid behov, korrigera tester, commit igen
+- Fluent consistency: håll objekt‑API konsekventa (Item/Key/Door etc.) när nya egenskaper/methods läggs till

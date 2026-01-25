@@ -94,6 +94,8 @@ var garden = locationList.Add("garden", "A quiet garden. A flat stone rests near
 var courtyard = locationList.Add("courtyard", "A small courtyard where something waits.");
 var attic = locationList.Add("attic", "Rain drums against the roof. A leak gathers overhead.");
 var office = locationList.Add("office", "A quiet office with a locked terminal.");
+var libraryOutside = locationList.Add("library_outside", "Snow falls quietly outside a locked library.");
+var library = locationList.Add("library", "Warm light and quiet pages surround you.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -105,17 +107,25 @@ cabin.AddItem(itemList["blanket"]);
 garden.AddItem(new Item("stone", "stone", "A heavy flat stone."));
 attic.AddItem(new Item("bucket", "bucket", "A metal bucket."));
 office.AddItem(new Item("note", "post-it note", "A note with a hint: 0420."));
+var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.");
+courtyard.AddItem(libraryKey);
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
 cabin.AddExit(Direction.Up, attic);
 cabin.AddExit(Direction.East, office);
+courtyard.AddExit(Direction.North, libraryOutside);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.");
 var gardenGate = new Door("garden_gate", "garden gate", "An old iron gate.")
     .RequiresKey(gardenKey)
     .SetReaction(DoorAction.Unlock, "The gate creaks open.");
 garden.AddExit(Direction.Out, courtyard, gardenGate);
+
+var libraryDoor = new Door("library_door", "library door", "A heavy wooden door.")
+    .RequiresKey(libraryKey)
+    .SetReaction(DoorAction.Unlock, "The library door unlocks.");
+libraryOutside.AddExit(Direction.In, library, libraryDoor);
 
 // Doors from DSL
 var cabinDoor = adventure.Doors["cabin_door"];
@@ -128,7 +138,7 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library });
 
 // Create NPCs
 var npcList = new NpcList()

@@ -26,6 +26,8 @@ public class KeywordParserTests
             talk: CommandHelper.NewCommands("talk", "speak"),
             attack: CommandHelper.NewCommands("attack", "fight"),
             flee: CommandHelper.NewCommands("flee", "run"),
+            save: CommandHelper.NewCommands("save"),
+            load: CommandHelper.NewCommands("load"),
             all: CommandHelper.NewCommands("all"),
             ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
             combineSeparators: CommandHelper.NewCommands("and", "+"),
@@ -199,6 +201,26 @@ public class KeywordParserTests
         var command = parser.Parse("flee");
 
         Assert.IsType<FleeCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_Save_ReturnsSaveCommand()
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse("save");
+
+        Assert.IsType<SaveCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_Load_ReturnsLoadCommand()
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse("load savegame.json");
+
+        Assert.IsType<LoadCommand>(command);
     }
 
     [Theory]

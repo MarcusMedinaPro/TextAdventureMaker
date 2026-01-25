@@ -33,6 +33,11 @@ public class Stats : IStats
         Health = Clamp(Health, 0, MaxHealth);
     }
 
+    public void SetHealth(int health)
+    {
+        Health = Clamp(health, 0, MaxHealth);
+    }
+
     private static int Clamp(int value, int min, int max)
     {
         if (value < min) return min;

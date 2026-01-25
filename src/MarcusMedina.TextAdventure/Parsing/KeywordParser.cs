@@ -123,6 +123,18 @@ public class KeywordParser : ICommandParser
             return new FleeCommand(target);
         }
 
+        if (_config.Save.Contains(keyword))
+        {
+            var target = ParseItemName(tokens, 1);
+            return new SaveCommand(target);
+        }
+
+        if (_config.Load.Contains(keyword))
+        {
+            var target = ParseItemName(tokens, 1);
+            return new LoadCommand(target);
+        }
+
         if (_config.Go.Contains(keyword))
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)

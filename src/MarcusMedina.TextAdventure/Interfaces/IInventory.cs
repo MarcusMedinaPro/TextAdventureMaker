@@ -15,4 +15,5 @@ public interface IInventory
     bool Add(IItem item);
     bool Remove(IItem item);
     IItem? FindItem(string name);
+    void Clear();
 }

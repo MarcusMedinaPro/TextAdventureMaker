@@ -7,4 +7,5 @@ public interface IStats
     void Damage(int amount);
     void Heal(int amount);
     void SetMaxHealth(int maxHealth);
+    void SetHealth(int health);
 }

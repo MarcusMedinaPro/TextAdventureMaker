@@ -44,6 +44,10 @@ public static class Language
     public const string NoTargetToAttack = "Attack what?";
     public const string NoOneToFight = "There's no one here to fight.";
     public const string NoOneToFlee = "There's no one here to flee from.";
+    public const string SaveSuccessTemplate = "Game saved to {0}.";
+    public const string SaveFailedTemplate = "Failed to save game to {0}.";
+    public const string LoadSuccessTemplate = "Game loaded from {0}.";
+    public const string LoadFailedTemplate = "Failed to load game from {0}.";
 
     public const string DoorLockedTemplate = "The {0} is locked.";
     public const string DoorClosedTemplate = "The {0} is closed.";
@@ -143,4 +147,16 @@ public static class Language
 
     public static string TargetDefeated(string targetName) =>
         TargetDefeatedTemplate.GamePrint(targetName);
+
+    public static string SaveSuccess(string path) =>
+        SaveSuccessTemplate.GamePrint(path);
+
+    public static string SaveFailed(string path) =>
+        SaveFailedTemplate.GamePrint(path);
+
+    public static string LoadSuccess(string path) =>
+        LoadSuccessTemplate.GamePrint(path);
+
+    public static string LoadFailed(string path) =>
+        LoadFailedTemplate.GamePrint(path);
 }

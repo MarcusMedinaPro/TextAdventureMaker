@@ -15,4 +15,6 @@ public interface IGameState
     IEventSystem Events { get; }
     ICombatSystem CombatSystem { get; }
     IWorldState WorldState { get; }
+    ISaveSystem SaveSystem { get; }
+    IReadOnlyCollection<ILocation> Locations { get; }
 }

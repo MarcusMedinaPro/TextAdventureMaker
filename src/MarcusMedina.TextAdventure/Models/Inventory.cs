@@ -49,4 +49,9 @@ public class Inventory : IInventory
         if (string.IsNullOrWhiteSpace(name)) return null;
         return _items.FirstOrDefault(i => i.Matches(name));
     }
+
+    public void Clear()
+    {
+        _items.Clear();
+    }
 }

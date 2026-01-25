@@ -11,4 +11,5 @@ public interface IGameState
     GameError LastMoveErrorCode { get; }
     RecipeBook RecipeBook { get; }
     IInventory Inventory { get; }
+    IEventSystem Events { get; }
 }

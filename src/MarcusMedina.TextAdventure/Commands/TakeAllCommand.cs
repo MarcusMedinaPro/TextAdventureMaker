@@ -2,6 +2,7 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -29,6 +30,7 @@ public class TakeAllCommand : ICommand
                 location.RemoveItem(item);
                 item.Take();
                 taken.Add(item);
+                context.State.Events.Publish(new GameEvent(GameEventType.PickupItem, context.State, location, item));
                 var reaction = item.GetReaction(ItemAction.Take);
                 if (!string.IsNullOrWhiteSpace(reaction))
                 {

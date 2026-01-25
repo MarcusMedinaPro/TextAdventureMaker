@@ -14,14 +14,21 @@ public class GameState : IGameState
     public IStats Stats { get; }
     public IInventory Inventory { get; }
     public RecipeBook RecipeBook { get; }
+    public IEventSystem Events { get; }
 
-    public GameState(ILocation startLocation, IStats? stats = null, IInventory? inventory = null, RecipeBook? recipeBook = null)
+    public GameState(
+        ILocation startLocation,
+        IStats? stats = null,
+        IInventory? inventory = null,
+        RecipeBook? recipeBook = null,
+        IEventSystem? eventSystem = null)
     {
         ArgumentNullException.ThrowIfNull(startLocation);
         CurrentLocation = startLocation;
         Stats = stats ?? new Stats(100);
         Inventory = inventory ?? new Inventory();
         RecipeBook = recipeBook ?? new RecipeBook();
+        Events = eventSystem ?? new EventSystem();
     }
 
     public bool Move(Direction direction)
@@ -52,7 +59,10 @@ public class GameState : IGameState
             return false;
         }
 
+        var previousLocation = CurrentLocation;
+        Events.Publish(new GameEvent(GameEventType.ExitLocation, this, previousLocation));
         CurrentLocation = exit.Target;
+        Events.Publish(new GameEvent(GameEventType.EnterLocation, this, CurrentLocation));
         return true;
     }
 

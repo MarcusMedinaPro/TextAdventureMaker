@@ -2,6 +2,7 @@ using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -27,6 +28,8 @@ public class TalkCommand : ICommand
         {
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
         }
+
+        context.State.Events.Publish(new GameEvent(GameEventType.TalkToNpc, context.State, location, npc: npc));
 
         var dialog = npc.DialogRoot;
         if (dialog == null)

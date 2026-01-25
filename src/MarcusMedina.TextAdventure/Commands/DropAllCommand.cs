@@ -2,6 +2,7 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -24,6 +25,7 @@ public class DropAllCommand : ICommand
             inventory.Remove(item);
             location.AddItem(item);
             item.Drop();
+            context.State.Events.Publish(new GameEvent(GameEventType.DropItem, context.State, location, item));
             var reaction = item.GetReaction(ItemAction.Drop);
             if (!string.IsNullOrWhiteSpace(reaction))
             {

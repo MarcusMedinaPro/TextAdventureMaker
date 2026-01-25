@@ -1,6 +1,7 @@
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -15,7 +16,8 @@ public class TakeCommand : ICommand
 
     public CommandResult Execute(CommandContext context)
     {
-        var item = context.State.CurrentLocation.FindItem(ItemName);
+        var location = context.State.CurrentLocation;
+        var item = location.FindItem(ItemName);
         if (item == null)
         {
             return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
@@ -40,8 +42,9 @@ public class TakeCommand : ICommand
             return CommandResult.Fail(Language.TooHeavy, GameError.ItemTooHeavy);
         }
 
-        context.State.CurrentLocation.RemoveItem(item);
+        location.RemoveItem(item);
         item.Take();
+        context.State.Events.Publish(new GameEvent(GameEventType.PickupItem, context.State, location, item));
 
         var onTake = item.GetReaction(ItemAction.Take);
         return onTake != null

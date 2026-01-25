@@ -1,14 +1,16 @@
-using MarcusMedina.TextAdventure.Models;
+# Forest Adventure (Fluent + shortcuts)
+
+This version leans into the fluent style: implicit operators, tuple constructors, and helper shortcuts.
+
+```csharp
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
-using MarcusMedina.TextAdventure.Commands;
-using MarcusMedina.TextAdventure.Parsing;
-using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
-using MarcusMedina.TextAdventure.Localization;
-using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Models;
+using MarcusMedina.TextAdventure.Parsing;
 
-// Create items (all styles are valid)
+// Items (implicit operators + tuple constructors)
 Key cabinKey = (id: "cabin_key", name: "brass key", description: "A small brass key with worn teeth.");
 cabinKey.SetWeight(0.1f).AddAliases("key", "brass key");
 
@@ -18,18 +20,18 @@ sword.SetWeight(3.5f).AddAliases("blade", "sword", "pointy thing");
 Item apple = (id: "apple", name: "red apple", description: "A crisp red apple.");
 apple.SetWeight(0.4f).AddAliases("apple");
 
+// GameItemList (fluent CRUD)
 var extraItems = new GameItemList()
-    .AddMany("Cat", "Rubber chicken", "Map");
+    .AddMany("cat", "rubber chicken", "map");
 extraItems["cat"].SetWeight(3f).AddAliases("kitten", "kitteh");
 extraItems["rubber chicken"].SetWeight(0.8f).AddAliases("chicken", "rubberchicken");
-extraItems["map"].SetWeight(0.2f).AddAliases("parchment", "chart");
+extraItems.Call("map").SetWeight(0.2f).AddAliases("parchment", "chart");
 
 Glass glass = (id: "glass", name: "glass", description: "A clear drinking glass.");
 glass.SetWeight(0.6f)
-    .SetReaction(ItemAction.Take, "The glas surface is smooth")
-    .SetReaction(ItemAction.Drop, "The glass bounces on the floor") // can we destroy it from this reaction?
+    .SetReaction(ItemAction.Take, "The glass surface is smooth")
+    .SetReaction(ItemAction.Drop, "The glass bounces on the floor")
     .SetReaction(ItemAction.Destroy, "The glass shatters into 1000 pieces");
-    ;
 
 Item ice = (id: "ice", name: "ice", description: "A cold chunk of ice.");
 ice.SetWeight(0.5f)
@@ -65,48 +67,66 @@ letter.SetReadable()
     .RequiresToRead(s => s.Inventory.Items.Any(i => i.Id == "lantern"))
     .SetReadText("Meet me at midnight...");
 
-// Create locations
+// Locations (implicit operators + tuple constructors)
 Location entrance = (
-    id: "entrance", 
+    id: "entrance",
     description: "You stand at the forest gate. It's dark and foreboding."
-    );
+);
 Location forest = (
-    id: "forest", 
+    id: "forest",
     description: "A thick forest surrounds you. A fox watches from the brush."
-    );
+);
 Location cave = (
-    id: "cave", 
+    id: "cave",
     description: "A dark cave with glowing mushrooms. A brass key glints on the ground!"
-    );
+);
 Location deepCave = (
     id: "deep_cave",
     description: "The cave narrows into a jagged tunnel. You hear a distant rumble."
-    );
+);
 Location clearing = (
-    id: "clearing", description: "A sunny clearing with wildflowers. A small cabin stands here."
-    );
+    id: "clearing",
+    description: "A sunny clearing with wildflowers. A small cabin stands here."
+);
 Location cabin = (
-    id: "cabin", 
+    id: "cabin",
     description: "Inside a cozy wooden cabin. A treasure chest sits in the corner!"
-    );
+);
 
 // Place items
 cave.AddItem(cabinKey);
 entrance.AddItem(ice);
 entrance.AddItem(sign);
+entrance.AddItem(extraItems["map"]);
 forest.AddItem(apple);
 forest.AddItem(fire);
 forest.AddItem(lantern);
-entrance.AddItem(extraItems["map"]);
 forest.AddItem(extraItems["cat"]);
-clearing.AddItem(extraItems["rubber chicken"]);
 clearing.AddItem(sword);
 clearing.AddItem(glass);
 clearing.AddItem(tome);
+clearing.AddItem(extraItems["rubber chicken"]);
 cave.AddItem(letter);
 cabin.AddItem(newspaper);
 
-// Create NPCs
+// Door (implicit tuple constructor)
+Door cabinDoor = (id: "cabin_door", name: "cabin door", description: "A sturdy wooden door with iron hinges.");
+cabinDoor
+    .RequiresKey(cabinKey)
+    .SetReaction(DoorAction.Unlock, "The lock clicks open.")
+    .SetReaction(DoorAction.Open, "The door creaks as it swings wide.");
+
+// Exits
+entrance.AddExit(Direction.North, forest);
+forest.AddExit(Direction.East, cave);
+forest.AddExit(Direction.West, clearing);
+cave.AddExit(Direction.North, deepCave);
+clearing.AddExit(Direction.In, cabin, cabinDoor);
+
+// One-way trap
+cave.AddExit(Direction.Down, entrance, oneWay: true);
+
+// NPCs (fluent setup)
 var fox = new Npc("fox", "fox")
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -116,40 +136,28 @@ var fox = new Npc("fox", "fox")
 var dragonPatrol = new PatrolNpcMovement(new[] { cave, deepCave });
 var dragon = new Npc("dragon", "dragon", NpcState.Friendly, stats: new Stats(40))
     .Description("A massive dragon sleeps among the shadows.")
-    .Dialog("The dragon snores softly.");
-dragon.SetMovement(new NoNpcMovement());
+    .Dialog("The dragon snores softly.")
+    .SetMovement(new NoNpcMovement());
 
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 
-// Create locked door
-Door cabinDoor = (id: "cabin_door", name: "cabin door", description: "A sturdy wooden door with iron hinges.");
-cabinDoor.RequiresKey(cabinKey);
-cabinDoor
-    .SetReaction(DoorAction.Unlock, "The lock clicks open.")
-    .SetReaction(DoorAction.Open, "The door creaks as it swings wide.");
-
-// Connect locations
-entrance.AddExit(Direction.North, forest);
-forest.AddExit(Direction.East, cave);
-forest.AddExit(Direction.West, clearing);
-cave.AddExit(Direction.North, deepCave);
-clearing.AddExit(Direction.In, cabin, cabinDoor);  // Locked!
-
-// One-way trap
-cave.AddExit(Direction.Down, entrance, oneWay: true);
-
-// Game state
+// Recipes
 var recipeBook = new RecipeBook()
     .Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
+
+// Game state
 var state = new GameState(entrance, recipeBook: recipeBook);
 var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin };
-var dragonAwake = false;
+
+// Quest
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
     .Start();
 
+// Events
+var dragonAwake = false;
 state.Events.Subscribe(GameEventType.EnterLocation, e =>
 {
     if (dragonAwake) return;
@@ -164,15 +172,7 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
     }
 });
 
-Console.WriteLine("=== FOREST ADVENTURE ===");
-Console.WriteLine("Find the key and unlock the cabin!");
-Console.WriteLine($"Quest started: {dragonHunt.Title} - {dragonHunt.Description}");
-var commands = new[]
-{
-    "go", "look", "talk", "attack", "flee", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
-};
-Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
-
+// Parser config (CommandHelper shortcut)
 var parserConfig = new KeywordParserConfig(
     quit: CommandHelper.NewCommands("quit", "exit", "q"),
     look: CommandHelper.NewCommands("look", "l", "ls"),
@@ -210,87 +210,4 @@ var parserConfig = new KeywordParserConfig(
         ["out"] = Direction.Out
     },
     allowDirectionEnumNames: true);
-
-var parser = new KeywordParser(parserConfig);
-
-void MoveNpcs()
-{
-    var moves = new List<(INpc npc, Location from, Location to)>();
-
-    foreach (var location in locations)
-    {
-        foreach (var npc in location.Npcs.ToList())
-        {
-            var next = npc.GetNextLocation(location, state);
-            if (next is Location nextLocation && !ReferenceEquals(nextLocation, location))
-            {
-                moves.Add((npc, location, nextLocation));
-            }
-        }
-    }
-
-    foreach (var (npc, from, to) in moves)
-    {
-        from.RemoveNpc(npc);
-        to.AddNpc(npc);
-    }
-}
-
-while (true)
-{
-    var lookResult = state.Look();
-    Console.WriteLine($"\n{lookResult.Message}");
-    var inventoryResult = state.InventoryView();
-    Console.WriteLine(inventoryResult.Message);
-
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim().Lower();
-
-    if (string.IsNullOrEmpty(input)) continue;
-
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
-
-    if (!string.IsNullOrWhiteSpace(result.Message))
-    {
-        Console.WriteLine(result.Message);
-    }
-
-    foreach (var reaction in result.ReactionsList)
-    {
-        if (!string.IsNullOrWhiteSpace(reaction))
-        {
-            Console.WriteLine($"> {reaction}");
-        }
-    }
-
-    if (result.ShouldQuit)
-    {
-        break;
-    }
-
-    MoveNpcs();
-
-    if (dragonHunt.CheckProgress(state))
-    {
-        Console.WriteLine($"\n*** QUEST COMPLETE: {dragonHunt.Title}! ***");
-    }
-
-    if (command is GoCommand go && result.Success)
-    {
-        // Win condition
-        if (state.IsCurrentRoomId("cabin"))
-        {
-            Console.WriteLine("\n*** CONGRATULATIONS! You found the treasure! ***");
-            break;
-        }
-
-        // Fall trap
-        if (go.Direction == Direction.Down && state.CurrentLocation.Id == "entrance")
-        {
-            Console.WriteLine("Oops! You fell through a hole and ended up back at the entrance!");
-        }
-    }
-}
-
-Console.WriteLine("\nThanks for playing!");
+```

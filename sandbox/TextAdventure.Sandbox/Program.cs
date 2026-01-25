@@ -103,6 +103,12 @@ var bankCounter = locationList.Add("bank_counter", "A teller waits behind the co
 var alley = locationList.Add("alley", "A dim alley. Footsteps echo behind you.");
 var interviewLobby = locationList.Add("interview_lobby", "A calm lobby with a glass of water.");
 var interviewRoom = locationList.Add("interview_room", "A quiet interview room with two chairs.");
+var stationHall = locationList.Add("station_hall", "A quiet station hall with a flickering departure board.");
+var platform = locationList.Add("platform", "The last train's lights disappear into the night.");
+var sideStreet = locationList.Add("side_street", "A side street with rain-slick pavement.");
+var busStop = locationList.Add("bus_stop", "A lonely bus stop with a torn schedule.");
+var footbridge = locationList.Add("footbridge", "A narrow footbridge over the tracks.");
+var taxiStand = locationList.Add("taxi_stand", "A small taxi stand with no cabs in sight.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -126,6 +132,10 @@ alley.AddItem(new Item("coin", "coin", "A single coin with a dull shine."));
 var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.")
     .SetHint("Hmm, what do we usually use keys for...duh");
 courtyard.AddItem(libraryKey);
+stationHall.AddItem(new Item("board", "departure board", "The next train is marked CANCELLED.").SetTakeable(false));
+stationHall.AddItem(new Item("ticket_stub", "ticket stub", "The punch marks show you were late."));
+busStop.AddItem(new Item("schedule", "schedule", "Next bus in 20 minutes.").SetTakeable(false));
+taxiStand.AddItem(new Item("sign", "rideshare sign", "Maybe a rideshare app could work.").SetTakeable(false));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -139,6 +149,13 @@ bankLobby.AddExit(Direction.North, bankCounter);
 bankCounter.AddExit(Direction.Out, alley);
 bankCounter.AddExit(Direction.East, interviewLobby);
 interviewLobby.AddExit(Direction.In, interviewRoom);
+cafe.AddExit(Direction.South, stationHall);
+stationHall.AddExit(Direction.East, platform);
+stationHall.AddExit(Direction.West, sideStreet);
+sideStreet.AddExit(Direction.South, busStop);
+sideStreet.AddExit(Direction.West, taxiStand);
+platform.AddExit(Direction.North, footbridge);
+footbridge.AddExit(Direction.East, busStop);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -167,7 +184,7 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand });
 
 // Create NPCs
 var npcList = new NpcList()
@@ -234,6 +251,7 @@ interviewRoom.AddNpc(interviewer);
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
 var dragonAwake = false;
+var missedTrainNotified = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
@@ -257,6 +275,16 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
         dragon.Dialog("The dragon roars as it wakes.");
         dragon.SetMovement(dragonPatrol);
         Console.WriteLine("\nThe dragon stirs and awakens!");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (missedTrainNotified) return;
+    if (e.Location != null && e.Location.Id.TextCompare("platform"))
+    {
+        missedTrainNotified = true;
+        Console.WriteLine("\nThe train pulls away as you arrive. You'll need another route.");
     }
 });
 

@@ -104,10 +104,11 @@ var fox = new Npc("fox", "fox")
         .AddOption("Ask about the cabin")
         .AddOption("Ask about the cave"));
 
-var dragon = new Npc("dragon", "dragon", NpcState.Hostile)
-    .Description("A massive dragon with ember-bright eyes.")
-    .Dialog("The dragon rumbles a warning.");
-dragon.SetMovement(new PatrolNpcMovement(new[] { cave, deepCave }));
+var dragonPatrol = new PatrolNpcMovement(new[] { cave, deepCave });
+var dragon = new Npc("dragon", "dragon", NpcState.Friendly)
+    .Description("A massive dragon sleeps among the shadows.")
+    .Dialog("The dragon snores softly.");
+dragon.SetMovement(new NoNpcMovement());
 
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
@@ -134,6 +135,21 @@ var recipeBook = new RecipeBook()
     .Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
 var state = new GameState(entrance, recipeBook: recipeBook);
 var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin };
+var dragonAwake = false;
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (dragonAwake) return;
+    if (e.Location != null && e.Location.Id.TextCompare("cave"))
+    {
+        dragonAwake = true;
+        dragon.SetState(NpcState.Hostile);
+        dragon.Description("A massive dragon rises, eyes blazing.");
+        dragon.Dialog("The dragon roars as it wakes.");
+        dragon.SetMovement(dragonPatrol);
+        Console.WriteLine("\nThe dragon stirs and awakens!");
+    }
+});
 
 Console.WriteLine("=== FOREST ADVENTURE ===");
 Console.WriteLine("Find the key and unlock the cabin!");

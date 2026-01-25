@@ -415,11 +415,11 @@ while (true)
 
 **Mål:** Dörrar som blockerar utgångar, kräver nycklar.
 
-### Task 2.1: IDoor + Door (State: Open, Closed, Locked, Destroyed)
-### Task 2.2: IKey + Key
+### Task 2.1: IDoor + Door (State: Open, Closed, Locked, Destroyed) ✅
+### Task 2.2: IKey + Key ✅
 ### Task 2.3: Door events: OnOpen, OnClose, OnLock, OnUnlock, OnDestroy
-### Task 2.4: Location.AddExit with door
-### Task 2.5: Sandbox — låst dörr till skattkammaren, hitta nyckel
+### Task 2.4: Location.AddExit with door ✅
+### Task 2.5: Sandbox — låst dörr till skattkammaren, hitta nyckel ✅
 
 ---
 
@@ -427,10 +427,10 @@ while (true)
 
 **Mål:** Kommandon som objekt. Keyword-parser. "go north", "look", "quit".
 
-### Task 3.1: ICommand + CommandResult
-### Task 3.2: ICommandParser + KeywordParser
-### Task 3.3: Inbyggda kommandon (GoCommand, LookCommand, QuitCommand, OpenCommand, UnlockCommand)
-### Task 3.4: Sandbox uppdatering — parser istället för raw input
+### Task 3.1: ICommand + CommandResult ✅
+### Task 3.2: ICommandParser + KeywordParser ✅
+### Task 3.3: Inbyggda kommandon (GoCommand, LookCommand, QuitCommand, OpenCommand, UnlockCommand) ✅
+### Task 3.4: Sandbox uppdatering — parser istället för raw input ✅
 
 ---
 
@@ -438,12 +438,15 @@ while (true)
 
 **Mål:** Items i rum, plocka upp, släpp, visa inventory. Containers och kombinationer.
 
-### Task 4.1: IItem + Item (Factory + Prototype)
+**Notis:** Lägg till stöd för synonymer/alias på IItem (t.ex. `Aliases: string[]`) och använd i parser/kommandon.
+**Notis:** När nya item-subklasser (t.ex. Weapon/Potion) införs, ge dem fluent overrides för SetWeight/SetTakeable/AddAliases så chaining behåller typen.
+
+### Task 4.1: IItem + Item (Factory + Prototype) ✅
 - `Takeable: bool`
 - `Weight: float` (optional)
 - Events: OnTake, OnDrop, OnUse, OnDestroy
 
-### Task 4.2: IInventory + Inventory
+### Task 4.2: IInventory + Inventory ✅
 - Configurable limits: ByWeight, ByCount, Unlimited
 - `TakeAll()` method
 
@@ -457,9 +460,49 @@ while (true)
 - `ice + fire → destroy both, create water`
 - Recipe system for crafting
 
-### Task 4.6: TakeCommand, TakeAllCommand, DropCommand, InventoryCommand, UseCommand
+### Task 4.6: TakeCommand, TakeAllCommand, DropCommand, InventoryCommand, UseCommand ✅
 
-### Task 4.7: Sandbox — plocka upp svärd, häll vatten i glas, kombinera items
+### Task 4.7: Readable Items med villkor
+
+```csharp
+// Skylt - läs utan att ta
+var sign = new Item("sign", "Wooden Sign")
+    .SetTakeable(false)
+    .SetReadable(true)
+    .SetReadText("Welcome to the Dark Forest!");
+
+// Tidning - måste ta för att läsa
+var newspaper = new Item("newspaper", "Daily News")
+    .SetTakeable(true)
+    .SetReadable(true)
+    .RequiresTakeToRead()
+    .SetReadText("HEADLINE: Dragon spotted near village!");
+
+// Bok - kan läsa men tar tid (förbrukar drag)
+var tome = new Item("tome", "Ancient Tome")
+    .SetReadable(true)
+    .RequiresTakeToRead()
+    .ReadingCost(3)  // tar 3 drag att läsa
+    .SetReadText("The secret to defeating the dragon is...");
+
+// Hemligt brev - kräver ljus
+var letter = new Item("letter", "Sealed Letter")
+    .SetReadable(true)
+    .RequiresTakeToRead()
+    .RequiresToRead(ctx => ctx.HasLight())
+    .SetReadText("Meet me at midnight...");
+```
+
+**ReadCommand:**
+```csharp
+// "read sign" → visar text direkt
+// "read newspaper" → "You need to pick it up first."
+// "read newspaper" (i inventory) → visar text
+// "read tome" → "You spend 3 turns reading... [text]"
+// "read letter" (mörkt) → "It's too dark to read."
+```
+
+### Task 4.8: Sandbox — plocka upp svärd, häll vatten i glas, kombinera items, läs skylt/tidning ⚠️ (delvis)
 
 ---
 
@@ -683,7 +726,39 @@ game.UseTimeSystem()
     .TicksPerDay(100)
     .OnPhase(TimePhase.Night, ctx => ctx.SetVisibility(0.3f));
 ```
-### Task 21.4: Sandbox — butik stängd på natten, monster spawnar
+### Task 21.4: Move/Turn Limits
+
+```csharp
+// Global drag-begränsning (hela spelet)
+game.UseTimeSystem()
+    .MaxMoves(400)
+    .OnMovesRemaining(50, ctx => ctx.ShowWarning("Time is running out!"))
+    .OnMovesRemaining(10, ctx => ctx.SetMood(Mood.Desperate))
+    .OnMovesExhausted(ctx => ctx.GameOver("You ran out of time."));
+
+// Lokal drag-begränsning (puzzle/sektion)
+var bombPuzzle = game.CreateTimedChallenge("defuse_bomb")
+    .MaxMoves(30)
+    .OnStart(ctx => ctx.ShowMessage("The bomb will explode in 30 moves!"))
+    .OnMovesRemaining(10, ctx => ctx.ShowMessage("10 moves left!"))
+    .OnSuccess(ctx => ctx.Reward("bomb_defused"))
+    .OnFailure(ctx => ctx.Explode());
+
+// Aktivera när spelaren hittar bomben
+room.OnEnter(ctx => bombPuzzle.Start());
+
+// Kolla status
+if (game.MovesRemaining < 100) { ... }
+if (bombPuzzle.IsActive && bombPuzzle.MovesRemaining < 5) { ... }
+```
+
+**Features:**
+- Globalt: `game.MaxMoves(400)` - hela spelet
+- Lokalt: `CreateTimedChallenge()` - specifik puzzle
+- Warnings vid trösklar
+- Olika consequences vid timeout
+
+### Task 21.5: Sandbox — butik stängd på natten, monster spawnar, bomb puzzle med 30 drag
 
 ---
 
@@ -1092,6 +1167,15 @@ game.UseWitnessArc()
     .CollectStories()
     .AssembleTruth()
     .ChangeByUnderstanding();
+```
+
+**The World-Shift Arc**
+```csharp
+game.UseWorldShiftArc()
+    .GradualWorldChange()
+    .PlayerAsCatalyst()  // Inte hjälte
+    .SystemsCollide("ecology", "politics", "magic")
+    .NewEquilibrium();
 ```
 
 ### Task 36.6: DSL för journey templates
@@ -1553,3 +1637,405 @@ World.Add(Archetypes.WanderingMerchant()
 | 36 | Hero's Journey & Narrative Templates | Template, Strategy, Builder | ⬜ |
 | 37 | Generic Chapter System | State, Builder | ⬜ |
 | 38 | Time/Action Triggered Objects | Observer, Scheduler | ⬜ |
+
+### Polish & Documentation (v2+)
+| # | Slice | Patterns | Status |
+|---|-------|----------|--------|
+| 39 | Fluent API & Språksnygghet | Builder, Factory | ⬜ |
+| 40 | GitHub Wiki (TextAdventure.wiki) | - | ⬜ |
+
+---
+
+## Slice 39: Fluent API & Språksnygghet
+
+**Mål:** All syntaktisk socker för snygg, läsbar kod.
+
+### Item Description
+- `Models/Item.cs` - lägg till `Description` property
+- `Interfaces/IItem.cs` - lägg till `string? Description { get; }`
+- Fluent method: `SetDescription(string description)`
+
+### Bulk creation - Items.CreateMany
+```csharp
+public static class Items
+{
+    // Tuple-baserad (JSON-tänk)
+    public static IEnumerable<Item> CreateMany(
+        params (string id, string name, float weight)[] items);
+
+    // Med description
+    public static IEnumerable<Item> CreateMany(
+        params (string id, string name, float weight, string desc)[] items);
+}
+```
+
+### Inline DSL - Location.AddDSLItems
+```csharp
+// Syntax: "Name(weight, takeable|fixed)? | description?"
+location.AddDSLItems(
+    "Sword(2.5kg, takeable)",
+    "Shield(5kg)",
+    "Torch",
+    "Statue(fixed)",
+    "Note | A crumpled letter",
+    "Gem(0.1kg) | A sparkling ruby"
+);
+```
+
+Parser regex: `^(?<name>[\w\s]+)(\((?<props>[^)]+)\))?(\s*\|\s*(?<desc>.+))?$`
+
+### Snabb-add för enkla items
+```csharp
+// Implicit conversion gör detta möjligt
+location.AddItems("Sword", "Shield", "Torch");
+```
+
+### Random Extensions (int)
+
+- [ ] `Extensions/RandomExtensions.cs`
+
+```csharp
+public static class RandomExtensions
+{
+    private static readonly Random _rng = new();
+
+    /// <summary>10.Random() → 0-10</summary>
+    public static int Random(this int max) => _rng.Next(max + 1);
+
+    /// <summary>10.Random(5) → 5-10</summary>
+    public static int Random(this int max, int min) => _rng.Next(min, max + 1);
+
+    /// <summary>6.Dice() → 1-6 (aldrig 0)</summary>
+    public static int Dice(this int sides) => _rng.Next(1, sides + 1);
+
+    /// <summary>6.Dice(2) → 2d6 (2-12)</summary>
+    public static int Dice(this int sides, int count)
+    {
+        var total = 0;
+        for (var i = 0; i < count; i++)
+            total += sides.Dice();
+        return total;
+    }
+}
+```
+
+**Användning:**
+```csharp
+var damage = 6.Dice();           // 1d6 → 1-6
+var attack = 20.Dice();          // 1d20 → 1-20
+var fireball = 6.Dice(3);        // 3d6 → 3-18
+var loot = 100.Random();         // 0-100
+var enemyCount = 5.Random(2);    // 2-5
+```
+
+### Probability Extensions
+
+- [ ] `Extensions/ProbabilityExtensions.cs`
+
+```csharp
+public static class ProbabilityExtensions
+{
+    private static readonly Random _rng = new();
+
+    /// <summary>50.PercentChance() → true/false</summary>
+    public static bool PercentChance(this int percent) =>
+        _rng.Next(100) < percent;
+
+    /// <summary>0.3.Chance() → 30% chans</summary>
+    public static bool Chance(this double probability) =>
+        _rng.NextDouble() < probability;
+}
+```
+
+### Collection Extensions
+
+- [ ] `Extensions/CollectionExtensions.cs`
+
+```csharp
+public static class CollectionExtensions
+{
+    private static readonly Random _rng = new();
+
+    public static T PickRandom<T>(this IList<T> list) =>
+        list[_rng.Next(list.Count)];
+
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source) =>
+        source.OrderBy(_ => _rng.Next());
+
+    public static T WeightedRandom<T>(this IEnumerable<T> source, Func<T, int> weightSelector)
+    {
+        var items = source.ToList();
+        var totalWeight = items.Sum(weightSelector);
+        var roll = _rng.Next(totalWeight);
+        var cumulative = 0;
+        foreach (var item in items)
+        {
+            cumulative += weightSelector(item);
+            if (roll < cumulative) return item;
+        }
+        return items.Last();
+    }
+}
+```
+
+### Time Extensions
+
+- [ ] `Extensions/TimeExtensions.cs`
+
+```csharp
+public static class TimeExtensions
+{
+    public static TimeSpan Milliseconds(this int ms) => TimeSpan.FromMilliseconds(ms);
+    public static TimeSpan Seconds(this int s) => TimeSpan.FromSeconds(s);
+    public static TimeSpan Minutes(this int m) => TimeSpan.FromMinutes(m);
+}
+```
+
+### Console Extensions (OBS: Endast för Console.Write!)
+
+- [ ] `Extensions/ConsoleExtensions.cs`
+
+```csharp
+/// <summary>
+/// VIKTIGT: Dessa extensions fungerar ENDAST med Console.Write.
+/// Om du använder egen output-hantering, implementera IGameOutput istället.
+/// </summary>
+public static class ConsoleExtensions
+{
+    public static void TypewriterPrint(this string text, int delayMs = 50)
+    {
+        foreach (var c in text)
+        {
+            Console.Write(c);
+            Thread.Sleep(delayMs);
+        }
+        Console.WriteLine();
+    }
+}
+```
+
+### Range/Clamp Extensions
+
+- [ ] `Extensions/RangeExtensions.cs`
+
+```csharp
+public static class RangeExtensions
+{
+    public static int Clamp(this int value, int min, int max) =>
+        Math.Max(min, Math.Min(max, value));
+
+    public static bool IsBetween(this int value, int min, int max) =>
+        value >= min && value <= max;
+}
+```
+
+### Conditional Fluent Extensions
+
+- [ ] `Extensions/ConditionalExtensions.cs`
+
+```csharp
+public static class ConditionalExtensions
+{
+    public static ConditionalResult<string> Then(this bool condition, string trueValue) =>
+        new(condition, trueValue);
+
+    public static ConditionalResult<T> Then<T>(this bool condition, Func<T> trueAction) =>
+        new(condition, condition ? trueAction() : default);
+
+    public static void Then(this bool condition, Action action)
+    {
+        if (condition) action();
+    }
+}
+
+public class ConditionalResult<T>
+{
+    private readonly bool _condition;
+    private readonly T? _value;
+
+    public ConditionalResult(bool condition, T? value)
+    {
+        _condition = condition;
+        _value = value;
+    }
+
+    public T Else(T falseValue) => _condition ? _value! : falseValue;
+    public T Else(Func<T> falseAction) => _condition ? _value! : falseAction();
+}
+```
+
+**Användning:**
+```csharp
+// Villkorlig text
+var desc = isDark.Then("Pitch black.").Else("Sunlight streams in.");
+
+// Villkorlig action
+hasKey.Then(() => door.Unlock())
+      .Else(() => Console.WriteLine("The door is locked."));
+
+// Enkel trigger
+isFirstVisit.Then(() => ShowIntro());
+```
+
+### Grammar Extensions (språkberoende - kräver ILanguage override!)
+
+- [ ] `Extensions/GrammarExtensions.cs`
+- [ ] `Interfaces/IGrammarProvider.cs`
+
+```csharp
+public interface IGrammarProvider
+{
+    string WithArticle(string noun);           // "a sword", "an apple", "ett svärd"
+    string Plural(string noun, int count);     // "3 swords", "3 svärd"
+    string NaturalList(IEnumerable<string> items);  // "sword, shield, and torch"
+}
+
+// Default implementation (English)
+public class EnglishGrammar : IGrammarProvider { ... }
+
+// Extensions använder registrerad provider
+public static class GrammarExtensions
+{
+    public static IGrammarProvider Provider { get; set; } = new EnglishGrammar();
+
+    public static string WithArticle(this string noun) => Provider.WithArticle(noun);
+    public static string Plural(this string noun, int count) => Provider.Plural(noun, count);
+    public static IEnumerable<string> ToNaturalList(this IEnumerable<string> items) => ...;
+}
+```
+
+**OBS:** Byt `GrammarExtensions.Provider = new SwedishGrammar()` för svenska.
+
+### Tester
+- `FluentApiTests.cs` - test för CreateMany, AddDSLItems
+- `RandomExtensionsTests.cs` - test för Random, Dice
+- `ProbabilityExtensionsTests.cs` - test för PercentChance, Chance
+- `CollectionExtensionsTests.cs` - test för PickRandom, Shuffle, WeightedRandom
+- `ConditionalExtensionsTests.cs` - test för Then/Else
+- `GrammarExtensionsTests.cs` - test för alla språk
+
+---
+
+## Slice 40: GitHub Wiki (TextAdventure.wiki)
+
+**Mål:** Komplett dokumentation för användare.
+
+### Wiki-sidor
+- **Home** - Projektöversikt och vision
+- **Getting Started** - Installation och första spelet
+- **API Reference** - Fluent API dokumentation
+- **Commands** - Alla inbyggda kommandon (go, take, look, etc.)
+- **DSL Guide** - .adventure filformat
+- **Examples** - Exempelspel (se nedan)
+- **Localization** - Hur man lägger till nya språk
+- **Extending** - Skapa egna commands, parsers, etc.
+- **Storytelling Guide** - Översikt narrativa verktyg
+- **Narrative Arcs** - Alla mallar (se nedan)
+
+### Wiki: Narrative Arcs
+
+Alla inbyggda narrativa mallar med beskrivning och användningsområden.
+
+| Arc | Struktur | Bra för |
+|-----|----------|---------|
+| **Hero's Journey** | Call → Trials → Transformation → Return | Klassiska äventyr, fantasy |
+| **Tragic Arc** | Hybris → Felsteg → Konsekvens → Sen insikt | Mörka berättelser, moraliska val |
+| **Transformation Arc** | Fragmenterad → Skuggkonfrontation → Integration → Ny självbild | Psykologisk mognad, trauma, sorg |
+| **Ensemble Journey** | Flera hjältar → Växlande perspektiv → Gruppkonflikter → Kollektiv seger | Politik, motstånd, "Jedi Council" |
+| **The Descent** | Nedstigning → Kontrollförlust → Möte med tomhet → Förändrad återkomst | Psykologisk skräck, Silent Hill |
+| **Spiral Narrative** | Upprepning → Små variationer → Djupare förståelse | Tidsloopar, minnesglitchar |
+| **Moral Labyrinth** | Inget rätt slut → Alla val kostar → Situationsbunden sanning | Etik, ledarskap, ansvar |
+| **World-Shift Arc** | Gradvis världsförändring → Spelaren som katalysator → Ny jämvikt | Dune-stil, ekologi, politik |
+| **Caretaker Arc** | Reparera → Hela → Skydda → Kamp mot entropi | Mogna, lågmälda spel |
+| **Witness Arc** | Observera → Samla berättelser → Sanning genom förståelse | Textmysterier, detektiv |
+
+### Exempelspel - Creation Styles (ett per stil)
+
+| Stil | Spel | Beskrivning |
+|------|------|-------------|
+| **Fluent Builder** | The Haunted Manor | Klassisk spökhistoria, visar method chaining |
+| **Implicit Conversion** | Quick Escape | Minimalistiskt rum-escape, snabbaste sättet |
+| **Factory/Tuple** | Dungeon Loot | Massa items, visar JSON-tänk bulk creation |
+| **DSL** | Forest Adventure | Config-fil driven, visar `.adventure` format |
+| **Mixed** | The Complete Quest | Kombinerar alla stilar, best practices |
+
+### Exempelspel - Storytelling Features
+
+Dessa ska vara så fluent som möjligt och visa varje storytelling-funktion.
+
+#### 🎭 Narrativ Struktur & Arcs
+| Feature | Spel | Visar |
+|---------|------|-------|
+| **Hero's Journey** | The Chosen One | Full 12-stegs resa |
+| **Tragic Arc** | The King's Folly | Hybris → fall → sen insikt |
+| **Transformation Arc** | Shattered Mirror | Inre resa, trauma, integration |
+| **Ensemble Journey** | The Resistance | Flera hjältar, växlande perspektiv |
+| **The Descent** | Into the Abyss | Katabasis, psykologisk skräck |
+| **Spiral Narrative** | Groundhog Dungeon | Tidsloop med variationer |
+| **Moral Labyrinth** | The Tribunal | Inga rätta svar, etiska val |
+| **World-Shift Arc** | Seeds of Change | Spelaren som katalysator |
+| **Caretaker Arc** | The Lighthouse Keeper | Reparera, hela, skydda |
+| **Witness Arc** | The Collector | Observera, samla sanningen |
+| **Chapters** | The Saga | Akter, kapitelövergångar |
+| **Scene Beats** | The Interview | Dialog-driven, dramatiska pauser |
+
+#### 👥 Karaktärer & Relationer
+| Feature | Spel | Visar |
+|---------|------|-------|
+| **Character Arcs** | The Reluctant Hero | NPC utvecklas genom spelarens val |
+| **Emotional Stakes** | The Last Goodbye | Relationer, förlust, val med konsekvenser |
+
+#### 🌙 Atmosfär & Beskrivningar
+| Feature | Spel | Visar |
+|---------|------|-------|
+| **Mood & Atmosphere** | The Lighthouse | Väder, ljus, ljud påverkar beskrivningar |
+| **Dynamic Descriptions** | The Living Castle | Rum ändras baserat på tid/händelser |
+| **Narrative Voice** | Noir Detective | Berättarröst, stiliserad text |
+
+#### ⏱️ Spänning & Tempo
+| Feature | Spel | Visar |
+|---------|------|-------|
+| **Pacing & Tension** | Countdown | Ökande press, timer-baserad spänning |
+| **Foreshadowing** | Murder Mystery | Ledtrådar som kopplas ihop senare |
+| **Time Triggers** | The Bomb | Objekt aktiveras efter tid/händelser |
+
+#### 🎮 Spelarupplevelse
+| Feature | Spel | Visar |
+|---------|------|-------|
+| **Player Agency** | Branching Paths | Val som faktiskt spelar roll |
+| **Dramatic Irony** | The Traitor | Spelaren vet mer än karaktären |
+
+### Sandbox kommentarer
+
+Sandbox ska visa alla stilar med kommentarer:
+
+```csharp
+// ============================================
+// ITEM CREATION STYLES - Choose your favorite!
+// ============================================
+
+// 1. FLUENT BUILDER - Most readable, full control
+var sword = new Item("sword", "Rusty Sword")
+    .SetWeight(2.5f)
+    .SetTakeable(true)
+    .SetDescription("A worn blade");
+
+// 2. IMPLICIT CONVERSION - Fastest for simple items
+Item torch = "Torch";
+
+// 3. FACTORY/TUPLE - JSON-like bulk creation
+var items = Items.CreateMany(
+    ("gem", "Ruby Gem", 0.1f),
+    ("coin", "Gold Coin", 0.05f)
+);
+
+// 4. DSL - Most compact, config-file friendly
+cave.AddDSLItems(
+    "Gem(0.1kg) | A sparkling ruby",
+    "Torch",
+    "Statue(fixed)"
+);
+
+// 5. PARAMS ARRAY - Quick add simple items
+hall.AddItems("Sword", "Shield", "Torch");
+```

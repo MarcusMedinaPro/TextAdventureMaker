@@ -1,6 +1,6 @@
 # The Locked Drawer
 
-_Slice tag: Slice 6 — Event System (Observer). Demo focuses on door events revealing new items._
+_Slice tag: Slice 2 — Doors + Keys. Demo focuses on locked doors and keys blocking progress._
 
 A tiny, focused demo with one room, a desk, a locked drawer, a photo, and a secret.
 
@@ -10,15 +10,13 @@ A tiny, focused demo with one room, a desk, a locked drawer, a photo, and a secr
 3) Find the key under the blotter.
 4) Unlock the drawer.
 5) Discover a photo.
-6) Read the note on the back.
+6) Notice the note on the back.
 
-## Example (core engine + simple gating)
+## Example (core engine + doors/keys only)
 ```csharp
-using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-using MarcusMedina.TextAdventure.Parsing;
 
 // Location
 var study = new Location("study", "A quiet study with a heavy desk and a single lamp.");
@@ -26,9 +24,7 @@ var study = new Location("study", "A quiet study with a heavy desk and a single 
 // Items
 var key = new Key("drawer_key", "small key", "A small brass key.")
     .SetWeight(0.1f);
-var photo = new Item("photo", "old photo", "A faded photo of a stranger.")
-    .SetReadable()
-    .SetReadText("On the back: 'Meet me at the pier.'");
+var photo = new Item("photo", "old photo", "A faded photo of a stranger.");
 
 study.AddItem(key);
 
@@ -43,45 +39,14 @@ study.AddExit(Direction.In, study, drawer);
 // Game state
 var state = new GameState(study, worldLocations: new[] { study });
 
-// When the drawer is opened, reveal the photo
-state.Events.Subscribe(GameEventType.OpenDoor, e =>
+// Simple flow (no commands yet in Slice 2)
+Console.WriteLine("You find a small key under the blotter.");
+var unlocked = drawer.Unlock(key);
+if (unlocked)
 {
-    if (e.Door != null && e.Door.Id == "drawer")
-    {
-        study.AddItem(photo);
-        Console.WriteLine("Inside the drawer lies an old photo.");
-    }
-});
-
-// Parser config (minimal)
-var parserConfig = new KeywordParserConfig(
-    quit: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "quit" },
-    look: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "look" },
-    inventory: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "inventory" },
-    stats: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "stats" },
-    open: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "open" },
-    unlock: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "unlock" },
-    take: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "take" },
-    drop: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "drop" },
-    use: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "use" },
-    combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine" },
-    pour: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "pour" },
-    go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go" },
-    read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
-    talk: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "talk" },
-    attack: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "attack" },
-    flee: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "flee" },
-    save: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "save" },
-    load: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "load" },
-    all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
-    ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-    combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-    pourPrepositions: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-    directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
-    {
-        ["in"] = Direction.In
-    },
-    allowDirectionEnumNames: true);
-
-var parser = new KeywordParser(parserConfig);
+    drawer.Open();
+    study.AddItem(photo);
+    Console.WriteLine("Inside the drawer lies an old photo.");
+    Console.WriteLine("On the back: 'Meet me at the pier.'");
+}
 ```

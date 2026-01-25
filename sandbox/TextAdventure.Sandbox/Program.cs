@@ -97,6 +97,7 @@ var office = locationList.Add("office", "A quiet office with a locked terminal."
 var libraryOutside = locationList.Add("library_outside", "Snow falls quietly outside a locked library.");
 var library = locationList.Add("library", "Warm light and quiet pages surround you.");
 var meeting = locationList.Add("meeting", "A small meeting room. A mirror hangs by the door.");
+var cafe = locationList.Add("cafe", "A warm café with soft light and a small table.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -111,6 +112,8 @@ office.AddItem(new Item("note", "post-it note", "A note with a hint: 0420."));
 office.AddItem(new Item("coffee", "coffee", "A hot cup of coffee."));
 office.AddItem(new Item("papers", "papers", "Notes for the meeting."));
 meeting.AddItem(new Item("mirror", "mirror", "A mirror for a quick check.").SetTakeable(false));
+cafe.AddItem(new Item("menu", "menu", "A small menu with handwritten specials.").SetTakeable(false));
+cafe.AddItem(new Item("coffee_cup", "coffee", "A fresh cup of coffee."));
 var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.");
 courtyard.AddItem(libraryKey);
 
@@ -120,6 +123,7 @@ cabin.AddExit(Direction.Up, attic);
 cabin.AddExit(Direction.East, office);
 cabin.AddExit(Direction.North, meeting);
 courtyard.AddExit(Direction.North, libraryOutside);
+library.AddExit(Direction.East, cafe);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.");
 var gardenGate = new Door("garden_gate", "garden gate", "An old iron gate.")
@@ -143,11 +147,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm");
+    .AddMany("fox", "dragon", "storm", "date");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -168,9 +172,18 @@ var storm = npcList["storm"]
     .Description("A relentless leak you must endure.")
     .SetMovement(new NoNpcMovement());
 
+var date = npcList["date"]
+    .SetState(NpcState.Friendly)
+    .Description("A calm smile across the table.")
+    .SetDialog(new DialogNode("The café is quiet. They wait for your first words.")
+        .AddOption("Ask about their day")
+        .AddOption("Compliment their outfit")
+        .AddOption("Order coffee"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
+cafe.AddNpc(date);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));

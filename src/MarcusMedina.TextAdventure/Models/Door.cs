@@ -7,6 +7,7 @@ namespace MarcusMedina.TextAdventure.Models;
 public class Door : IDoor
 {
     private string _description = "";
+    private readonly Dictionary<DoorAction, string> _reactions = new();
     public string Id { get; }
     public string Name { get; }
     public string GetDescription() => _description;
@@ -27,6 +28,17 @@ public class Door : IDoor
     public Door Description(string text)
     {
         _description = text;
+        return this;
+    }
+
+    public string? GetReaction(DoorAction action)
+    {
+        return _reactions.TryGetValue(action, out var reaction) ? reaction : null;
+    }
+
+    public Door SetReaction(DoorAction action, string text)
+    {
+        _reactions[action] = text;
         return this;
     }
 
@@ -80,4 +92,5 @@ public class Door : IDoor
     public static implicit operator Door(string name) => new(name.ToId(), name);
 
     IDoor IDoor.Description(string text) => Description(text);
+    IDoor IDoor.SetReaction(DoorAction action, string text) => SetReaction(action, text);
 }

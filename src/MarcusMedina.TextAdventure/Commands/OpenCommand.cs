@@ -23,7 +23,10 @@ public class OpenCommand : ICommand
 
         if (exitWithDoor.Door.Open())
         {
-            return CommandResult.Ok(Language.DoorOpened(exitWithDoor.Door.Name));
+            var reaction = exitWithDoor.Door.GetReaction(DoorAction.Open);
+            return reaction != null
+                ? CommandResult.Ok(Language.DoorOpened(exitWithDoor.Door.Name), reaction)
+                : CommandResult.Ok(Language.DoorOpened(exitWithDoor.Door.Name));
         }
 
         var message = exitWithDoor.Door.State == DoorState.Locked
@@ -33,6 +36,9 @@ public class OpenCommand : ICommand
         var error = exitWithDoor.Door.State == DoorState.Locked
             ? GameError.DoorIsLocked
             : GameError.DoorIsClosed;
-        return CommandResult.Fail(message, error);
+        var failReaction = exitWithDoor.Door.GetReaction(DoorAction.OpenFailed);
+        return failReaction != null
+            ? CommandResult.Fail(message, error, failReaction)
+            : CommandResult.Fail(message, error);
     }
 }

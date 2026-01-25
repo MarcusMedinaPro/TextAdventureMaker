@@ -5,4 +5,5 @@ public interface IFluid
     string Id { get; }
     string Name { get; }
     string GetDescription();
+    IFluid Description(string text);
 }

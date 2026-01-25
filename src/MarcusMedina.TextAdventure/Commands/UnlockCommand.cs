@@ -31,10 +31,16 @@ public class UnlockCommand : ICommand
         {
             if (exitWithDoor.Door.Unlock(key))
             {
-                return CommandResult.Ok(Language.DoorUnlocked(exitWithDoor.Door.Name));
+                var reaction = exitWithDoor.Door.GetReaction(DoorAction.Unlock);
+                return reaction != null
+                    ? CommandResult.Ok(Language.DoorUnlocked(exitWithDoor.Door.Name), reaction)
+                    : CommandResult.Ok(Language.DoorUnlocked(exitWithDoor.Door.Name));
             }
         }
 
-        return CommandResult.Fail(Language.ThatKeyDoesNotFit, GameError.WrongKey);
+        var failReaction = exitWithDoor.Door.GetReaction(DoorAction.UnlockFailed);
+        return failReaction != null
+            ? CommandResult.Fail(Language.ThatKeyDoesNotFit, GameError.WrongKey, failReaction)
+            : CommandResult.Fail(Language.ThatKeyDoesNotFit, GameError.WrongKey);
     }
 }

@@ -12,6 +12,8 @@ public interface IDoor
 
     bool IsPassable { get; }
     IDoor Description(string text);
+    string? GetReaction(DoorAction action);
+    IDoor SetReaction(DoorAction action, string text);
     bool Open();
     bool Close();
     bool Lock(IKey key);

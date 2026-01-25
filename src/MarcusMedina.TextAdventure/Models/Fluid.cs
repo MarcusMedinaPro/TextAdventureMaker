@@ -19,7 +19,7 @@ public class Fluid : IFluid
 
     public string GetDescription() => _description;
 
-    public Fluid Description(string text)
+    public IFluid Description(string text)
     {
         _description = text;
         return this;

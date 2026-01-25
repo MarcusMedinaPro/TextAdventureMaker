@@ -114,6 +114,15 @@ public class DoorTests
     }
 
     [Fact]
+    public void Door_Reaction_CanBeSetAndRead()
+    {
+        var door = new Door("door1", "wooden door")
+            .SetReaction(DoorAction.Open, "It creaks open.");
+
+        Assert.Equal("It creaks open.", door.GetReaction(DoorAction.Open));
+    }
+
+    [Fact]
     public void Door_Close_DoesNothingWhenLocked()
     {
         var key = new Key("key1", "rusty key");

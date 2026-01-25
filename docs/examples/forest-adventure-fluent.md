@@ -145,14 +145,18 @@ clearing.AddExit(Direction.North, shed, doorList["shed door"]);
 cave.AddExit(Direction.Down, entrance, oneWay: true);
 
 // NPCs (fluent setup)
-var fox = new Npc("fox", "fox")
+var npcList = new NpcList()
+    .AddMany("fox", "dragon");
+var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
         .AddOption("Ask about the cabin")
         .AddOption("Ask about the cave"));
 
 var dragonPatrol = new PatrolNpcMovement(new[] { cave, deepCave });
-var dragon = new Npc("dragon", "dragon", NpcState.Friendly, stats: new Stats(40))
+var dragon = npcList["dragon"]
+    .SetState(NpcState.Friendly)
+    .SetStats(new Stats(40))
     .Description("A massive dragon sleeps among the shadows.")
     .Dialog("The dragon snores softly.")
     .SetMovement(new NoNpcMovement());

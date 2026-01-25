@@ -101,7 +101,7 @@ while (true)
     {
         if (!string.IsNullOrWhiteSpace(reaction))
         {
-            Console.WriteLine(reaction);
+            Console.WriteLine($"> {reaction}");
         }
     }
 

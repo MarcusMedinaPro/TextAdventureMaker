@@ -6,4 +6,6 @@ public interface IGameState
 {
     ILocation CurrentLocation { get; }
     bool Move(Direction direction);
+    bool IsCurrentRoomId(string id);
+    GameError LastMoveErrorCode { get; }
 }

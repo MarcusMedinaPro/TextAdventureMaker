@@ -44,7 +44,7 @@ public class KeywordParser : ICommandParser
             return new QuitCommand();
         }
 
-        if (keyword is "look" or "l")
+        if (keyword is "look" or "l" or "ls")
         {
             var target = ParseItemName(tokens, 1);
             return new LookCommand(target);
@@ -70,7 +70,7 @@ public class KeywordParser : ICommandParser
             return new UnlockCommand();
         }
 
-        if (keyword is "take" or "get" or "pickup" or "pick")
+        if (keyword is "take" or "get" or "pickup" or "pick" or "ta")
         {
             if (tokens.Length >= 2 && tokens[1].TextCompare("all"))
             {
@@ -92,7 +92,7 @@ public class KeywordParser : ICommandParser
             return itemName != null ? new DropCommand(itemName) : new UnknownCommand();
         }
 
-        if (keyword is "use")
+        if (keyword is "use" or "eat" or "bite")
         {
             var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
@@ -108,7 +108,7 @@ public class KeywordParser : ICommandParser
             return ParsePour(tokens);
         }
 
-        if (keyword is "go" or "move")
+        if (keyword is "go" or "move" or "cd")
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
                 ? new GoCommand(direction)

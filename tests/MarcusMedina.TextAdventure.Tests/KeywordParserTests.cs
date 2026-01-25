@@ -25,6 +25,7 @@ public class KeywordParserTests
     [Theory]
     [InlineData("look")]
     [InlineData("l")]
+    [InlineData("ls")]
     public void Parse_Look_ReturnsLookCommand(string input)
     {
         var parser = new KeywordParser();
@@ -86,6 +87,17 @@ public class KeywordParserTests
     }
 
     [Theory]
+    [InlineData("ta apple")]
+    public void Parse_Ta_ReturnsTakeCommand(string input)
+    {
+        var parser = new KeywordParser();
+
+        var command = parser.Parse(input);
+
+        Assert.IsType<TakeCommand>(command);
+    }
+
+    [Theory]
     [InlineData("take all")]
     [InlineData("get all")]
     public void Parse_TakeAll_ReturnsTakeAllCommand(string input)
@@ -115,6 +127,29 @@ public class KeywordParserTests
         var command = parser.Parse("use wand");
 
         Assert.IsType<UseCommand>(command);
+    }
+
+    [Theory]
+    [InlineData("eat ice")]
+    [InlineData("bite ice")]
+    public void Parse_EatOrBite_ReturnsUseCommand(string input)
+    {
+        var parser = new KeywordParser();
+
+        var command = parser.Parse(input);
+
+        Assert.IsType<UseCommand>(command);
+    }
+
+    [Theory]
+    [InlineData("cd north")]
+    public void Parse_Cd_ReturnsGoCommand(string input)
+    {
+        var parser = new KeywordParser();
+
+        var command = parser.Parse(input);
+
+        Assert.IsType<GoCommand>(command);
     }
 
     [Theory]

@@ -529,6 +529,83 @@ var letter = new Item("letter", "Sealed Letter")
 ### Task 5.4: TalkCommand ✅
 ### Task 5.5: Sandbox — prata med räven, drake patrullerar mellan grottor ✅
 
+### Task 5.6: Rule-Based Dialog System (from Procedural Storytelling)
+
+*Ersätter/kompletterar dialog-träd med flexibla regler.*
+
+**Koncept:** Dialog väljs baserat på världstillstånd, inte fördefinierad träd.
+
+```csharp
+// Definiera dialog-regler
+npc.AddDialogRule("cat_comment")
+    .When(ctx => ctx.Player.IsLookingAt("cat"))
+    .When(ctx => !ctx.NpcMemory.HasSaid("cat_comment"))
+    .Say("A cat! The Internet must be nearby.")
+    .Then(ctx => ctx.NpcMemory.MarkSaid("cat_comment"));
+
+// Specificitet vinner - regel med fler kriterier väljs
+npc.AddDialogRule("greeting_rain")
+    .When(ctx => ctx.FirstMeeting)
+    .When(ctx => ctx.World.Weather == Weather.Rain)
+    .Say("Terrible weather for traveling, stranger.");
+
+npc.AddDialogRule("greeting_default")
+    .When(ctx => ctx.FirstMeeting)
+    .Say("Hello, stranger.")
+    .Priority(0);  // Fallback
+
+// Memory system
+npc.AddDialogRule("remember_name")
+    .When(ctx => ctx.NpcMemory.Knows("player_name"))
+    .Say($"Ah, {ctx.NpcMemory.Get("player_name")}! Good to see you again.");
+
+// Running gag / progress
+npc.AddDialogRule("bird_joke_progress")
+    .When(ctx => ctx.NpcMemory.GetCounter("bird_jokes") < 3)
+    .Say("Why did the chicken cross the road? To get to the other side!")
+    .Then(ctx => ctx.NpcMemory.Increment("bird_jokes"));
+
+npc.AddDialogRule("bird_joke_exhausted")
+    .When(ctx => ctx.NpcMemory.GetCounter("bird_jokes") >= 3)
+    .Say("I'm all out of bird jokes, I'm afraid.");
+```
+
+**Automatiska triggers:**
+```csharp
+npc.OnSee("player")
+    .After(seconds: 2)
+    .SayOnce("Over here, traveler!");
+
+npc.OnHear("combat")
+    .Flee();
+```
+
+### Task 5.7: Synonym System (from Write Your Own Adventure Programs)
+
+*Tillåt flera ord för samma handling.*
+
+```csharp
+// I parser-konfiguration
+parser.AddSynonyms("take", "get", "grab", "pick", "pickup");
+parser.AddSynonyms("look", "examine", "inspect", "view", "check");
+parser.AddSynonyms("go", "walk", "move", "head", "travel");
+parser.AddSynonyms("attack", "hit", "strike", "fight", "kill");
+
+// Item-specifika alias
+item.AddAliases("sword", "blade", "weapon");
+
+// Automatisk normalisering i parser
+// "get sword" → "take sword"
+// "examine blade" → "look sword"
+```
+
+**"Did you mean?" suggestions:**
+```csharp
+parser.EnableSuggestions(true);
+// Input: "tke sword"
+// Output: "Unknown command. Did you mean 'take sword'?"
+```
+
 ---
 
 ## Slice 6: Event System (Observer)
@@ -1212,6 +1289,139 @@ journey "DragonSlayer" type: hero {
 }
 ```
 
+### Task 36.7: Additional Story Structures (from book research)
+
+**Prescriptive/Fill-in-the-blank (UX Storytelling)**
+```csharp
+game.UsePrescriptiveStructure()
+    .Given("context")
+    .When("event")
+    .Then("outcome");
+```
+
+**Familiar to Foreign (Alice in Wonderland)**
+```csharp
+game.UseFamiliarToForeign()
+    .FamiliarWorld("home")
+    .TransitionEvent("rabbit_hole")
+    .ForeignWorld("wonderland")
+    .ReturnWithInsight();
+```
+
+**Framed Stories**
+```csharp
+// Now-Then-Now (flashback)
+game.UseFramedNarrative()
+    .Present("current_situation")
+    .Flashback("memory")
+    .ReturnWithNewUnderstanding();
+
+// Me-Them-Me (comparison)
+game.UseFramedNarrative()
+    .MyPerspective()
+    .TheirPerspective("other_character")
+    .MyNewUnderstanding();
+
+// Here-There-Here (Odysseus)
+game.UseFramedNarrative()
+    .StartLocation("home")
+    .JourneyTo("foreign_land")
+    .ReturnHome();
+```
+
+**Layered Stories**
+```csharp
+game.UseLayeredNarrative()
+    .AddLayer(1, "surface_impression")
+    .AddLayer(2, "deeper_context")
+    .AddLayer(3, "hidden_truth")
+    .RevealLayersProgressively();
+```
+
+### Task 36.8: Propp's Folktale Functions (Procedural Narrative)
+
+*Från Procedural Storytelling in Game Design*
+
+```csharp
+public enum ProppFunction
+{
+    Absentation,        // En familjemedlem lämnar hemmet
+    Interdiction,       // Hjälten får en varning
+    Violation,          // Varningen ignoreras
+    Reconnaissance,     // Skurken spanar
+    Delivery,           // Skurken får info om hjälten
+    Trickery,           // Skurken försöker lura
+    Complicity,         // Hjälten blir lurad
+    Villainy,           // Skurken skadar någon/något
+    Mediation,          // Hjälten blir medveten om problemet
+    Counteraction,      // Hjälten bestämmer sig för att agera
+    Departure,          // Hjälten ger sig av
+    DonorTest,          // Hjälten testas av givaren
+    HeroReaction,       // Hjälten reagerar på testet
+    AcquisitionOfAgent, // Hjälten får magiskt föremål
+    Guidance,           // Hjälten leds till målet
+    Struggle,           // Hjälten och skurken strider
+    Branding,           // Hjälten märks
+    Victory,            // Skurken besegras
+    LiquidationOfLack,  // Det ursprungliga problemet löses
+    Return,             // Hjälten återvänder
+    Pursuit,            // Hjälten jagas
+    Rescue,             // Hjälten räddas
+    UnrecognizedArrival,// Hjälten kommer hem okänd
+    UnfoundedClaims,    // Falsk hjälte gör anspråk
+    DifficultTask,      // Hjälten får svår uppgift
+    Solution,           // Uppgiften löses
+    Recognition,        // Hjälten erkänns
+    Exposure,           // Falsk hjälte avslöjas
+    Transfiguration,    // Hjälten förändras
+    Punishment,         // Skurken straffas
+    Wedding             // Hjälten gift sig/kröns
+}
+
+// Användning
+game.UseProppianStructure()
+    .RequiredFunctions(
+        ProppFunction.Absentation,
+        ProppFunction.Villainy,
+        ProppFunction.Departure,
+        ProppFunction.AcquisitionOfAgent,
+        ProppFunction.Victory,
+        ProppFunction.Return
+    )
+    .OptionalFunctions(ProppFunction.Pursuit, ProppFunction.Rescue)
+    .ValidateOrder(true);  // Funktioner måste komma i rätt ordning
+```
+
+### Task 36.9: Flashback System
+
+*Från UX Storytelling: Now-Then-Now structure*
+
+```csharp
+// Definiera minnen
+game.AddMemory("childhood_trauma")
+    .SetTrigger(trigger => trigger.OnEnterLocation("old_house"))
+    .SetContent("The smell brings it all back...")
+    .SetDuration(3);  // Antal turns i flashback
+
+// Eller med fluent trigger
+location.TriggerFlashback("memory_id")
+    .When(player.Has("locket"))
+    .WithTransition("Your vision blurs...")
+    .ReturnsTo(currentLocation);
+```
+
+### Task 36.10: Layer-based Descriptions
+
+*Från UX Storytelling: Layered stories*
+
+```csharp
+location.SetLayeredDescription()
+    .FirstVisit("A dusty old library.")
+    .SecondVisit("You notice scratch marks on the floor.")
+    .ThirdVisit("The scratches lead to a hidden panel!")
+    .OnItem("magnifying_glass", "With the glass, you see fingerprints.");
+```
+
 ### Task 36.7: Journey Progress Tracker
 ```
 === YOUR JOURNEY ===
@@ -1656,6 +1866,8 @@ World.Add(Archetypes.WanderingMerchant()
 |---|-------|----------|--------|
 | 39 | Fluent API & Språksnygghet | Builder, Factory | ⬜ |
 | 40 | GitHub Wiki (TextAdventure.wiki) | - | ⬜ |
+| 41 | Testing & Validation Tools | Visitor, Strategy | ⬜ |
+| 42 | Story-LINQ (Narrative Query Language) | LINQ, Builder, State | ⬜ |
 
 ---
 
@@ -1929,9 +2141,8 @@ public static class GrammarExtensions
 
 ---
 
-## Slice 40: GitHub Wiki (TextAdventure.wiki)
-
-**Mål:** Komplett dokumentation för användare.
+## Slice 40: GitHub Wiki (../TextAdventure.wiki)
+**Mål:** Komplett dokumentation för användare på engelska
 
 ### Wiki-sidor
 - **Home** - Projektöversikt och vision
@@ -1944,6 +2155,956 @@ public static class GrammarExtensions
 - **Extending** - Skapa egna commands, parsers, etc.
 - **Storytelling Guide** - Översikt narrativa verktyg
 - **Narrative Arcs** - Alla mallar (se nedan)
+- **Story Structures** - (från böcker: Hero's Journey, Familiar-to-Foreign, Framed, Layered)
+- **Propp's Functions** - Procedural narrative byggstenar
+- **Rule-Based Dialog** - Left 4 Dead-stil dynamisk dialog
+- **Testing Your Adventure** - (från Usborne: test allt, låt andra spela)
+- **Story-LINQ Guide** - Narrativ state management med LINQ-syntax
+
+### Wiki: Reference & Theory (Nörd-sektionen 🤓)
+
+#### 📜 History of Interactive Fiction
+- **1976**: Colossal Cave Adventure (Will Crowther) — den första
+- **1977-1979**: Zork (MIT) — definierade genren
+- **1979-1989**: Infocom-eran — kommersiell höjdpunkt
+- **1990-tal**: Decline & IF-community bildas
+- **2000-tal**: Renaissance via IFComp, Twine, Ink
+- **Idag**: Narrative games, walking simulators, vårt framework
+
+#### 🔬 Parser Theory
+**Tokenization:**
+```
+"take the rusty sword" → ["take", "the", "rusty", "sword"]
+```
+
+**Disambiguation:**
+```
+> take key
+Which key do you mean?
+1. The brass key
+2. The skeleton key
+```
+
+**Parse tree:**
+```
+Command
+├── Verb: "take"
+├── Article: "the" (ignored)
+├── Adjective: "rusty"
+└── Noun: "sword"
+```
+
+**Vårt framework:** KeywordParser hanterar detta automatiskt.
+
+#### 🎓 Design Patterns (varför vi använder dem)
+
+| Pattern | Varför | Exempel i vårt framework |
+|---------|--------|--------------------------|
+| **State** | Objekt byter beteende utan if-else | Door (Open/Closed/Locked), NPC (Friendly/Hostile) |
+| **Command** | Undo, logging, queuing | GoCommand, TakeCommand |
+| **Observer** | Löskopplad event-hantering | EventSystem, OnEnter triggers |
+| **Memento** | Save/Load utan att exponera internals | GameMemento |
+| **Strategy** | Utbytbara algoritmer | CombatSystem, MovementPattern |
+| **Composite** | Träd-strukturer | Containers, Dialog trees |
+| **Factory** | Skapa objekt utan att veta konkret typ | Items.Create("sword") |
+| **Builder** | Fluent konstruktion | GameBuilder, LocationBuilder |
+| **Decorator** | Lägg till beteende runtime | RustyModifier, EnchantedModifier |
+| **Facade** | Förenkla komplext subsystem | OllamaFacade, StoryLinq |
+
+#### ⚠️ Common Pitfalls (Anti-patterns)
+
+| Gör INTE | Gör istället |
+|----------|--------------|
+| Hardcoded strings överallt | Language system / constants |
+| Giant switch-statements | Command pattern + registry |
+| "Guess the verb" puzzles | Synonym system, helpful errors |
+| Maze without purpose | Every room should have meaning |
+| Pixel-hunting (text-version) | Clear, fair descriptions |
+| Softlock utan varning | Validator + point-of-no-return warnings |
+| Dålig inventory management | Weight/count limits, "take all" |
+| One-way doors utan hint | Tydliga "no return" meddelanden |
+
+#### ♿ Accessibility Guide
+
+- **Screen readers**: Strukturerad output, ARIA-liknande hints
+- **Dyslexia-friendly**: Konfigurerbar font, radavstånd, färger
+- **Cognitive load**: "recap" command, quest log, hints system
+- **Motor impairment**: Kortkommandon, command history
+- **Color blindness**: Symboler + färg, aldrig bara färg
+
+#### 🧩 Puzzle Design Theory
+
+**Puzzle-typer:**
+
+| Typ | Exempel | Framework-stöd |
+|-----|---------|----------------|
+| **Lock & Key** | Dörr + nyckel | Door.RequiresKey() |
+| **Combination** | Blanda items | ItemCombinations |
+| **Sequence** | Gör saker i rätt ordning | EventChain |
+| **Information** | Lär dig något, använd det | WorldState flags |
+| **Environment** | Manipulera rummet | Dynamic descriptions |
+| **Dialog** | Säg rätt sak till NPC | Rule-based dialog |
+| **Time-based** | Gör något innan timer | TimedEvents |
+| **Lateral thinking** | Oväntad användning | UseCommand flexibility |
+
+**Difficulty curve:**
+```
+Easy: Lock & Key (1 item, 1 door)
+  ↓
+Medium: Multi-step (key A → door A → key B → door B)
+  ↓
+Hard: Interconnected (item X needed for puzzle Y which gives item Z for puzzle W)
+  ↓
+Expert: Timed multi-step with consequences
+```
+
+#### ✍️ Writing Good Descriptions
+
+**Show, don't tell:**
+```
+❌ "This is a scary room."
+✅ "Shadows pool in the corners. Something drips in the darkness."
+```
+
+**Be specific:**
+```
+❌ "There is a sword here."
+✅ "A notched longsword leans against the wall, rust creeping up the blade."
+```
+
+**Vary sentence structure:**
+```
+❌ "You are in a cave. There is a torch. There is a chest."
+✅ "Firelight dances across the cave walls. A battered chest sits in the corner,
+    its lock long since broken."
+```
+
+**First visit vs return:**
+```
+First: "You push through the undergrowth into a sun-dappled clearing."
+Return: "The familiar clearing opens before you."
+```
+
+#### 📚 Recommended Reading
+
+**Böcker:**
+- *Twisty Little Passages* (Nick Montfort) — IF-historia
+- *Creating Interactive Fiction with Inform 7* (Aaron Reed)
+- *Procedural Storytelling in Game Design* (Short & Adams)
+- *The Art of Game Design* (Jesse Schell)
+
+**Online:**
+- [IFDB](https://ifdb.org) — Interactive Fiction Database
+- [IFComp](https://ifcomp.org) — Årlig tävling
+- [Emily Short's Blog](https://emshort.blog) — Narrative design
+- [Brass Lantern](http://brasslantern.org) — IF-tutorials
+
+**Spel att studera:**
+- *Zork I* — Klassiker, parser-design
+- *Photopia* — Narrativ innovation
+- *Spider and Web* — Unreliable narrator
+- *Anchorhead* — Atmosfär, Lovecraft
+- *80 Days* — Modern IF, choices matter
+- *Disco Elysium* — Dialog-system, skill checks
+- *Leather Goddesses of Phobos* — Puzzles, world-building, humor
+
+
+#### 🔄 Migration Guide
+
+**Från Inform 7:**
+```inform7
+The Kitchen is a room. "A warm, cluttered space."
+The wooden spoon is in the Kitchen.
+```
+```csharp
+var kitchen = new Location("kitchen", "Kitchen")
+    .Description("A warm, cluttered space.");
+var spoon = new Item("spoon", "Wooden Spoon");
+kitchen.AddItem(spoon);
+```
+
+**Från TADS:**
+```tads
+kitchen: Room 'Kitchen'
+    "A warm, cluttered space."
+;
+```
+```csharp
+// Samma som ovan — vårt API är medvetet Inform/TADS-inspirerat
+```
+
+**Från Twine/Ink:**
+```ink
+=== kitchen ===
+A warm, cluttered space.
++ [Take the spoon] -> has_spoon
++ [Leave] -> hallway
+```
+```csharp
+// Story-LINQ för samma effekt:
+story.When(s => s.Location == kitchen)
+    .Choice("Take the spoon", () => player.Take(spoon))
+    .Choice("Leave", () => player.GoTo(hallway));
+```
+
+#### 📊 Comparison with Other Systems
+
+| Feature | Inform 7 | TADS | Twine | Ink | **Vårt** |
+|---------|----------|------|-------|-----|----------|
+| Language | Natural English | C-like | HTML/CSS | Markdown-ish | **C#** |
+| Parser | Built-in | Built-in | None | None | **KeywordParser** |
+| State mgmt | World model | World model | Variables | Variables | **WorldState + Story-LINQ** |
+| Extensible | Limited | Yes | JS | C# | **Full .NET** |
+| IDE support | Inform IDE | TADS WB | Web | Unity/Inky | **VS/Rider** |
+| Testing | Skein | - | - | - | **Validator** |
+| Narrative tools | Basic | Basic | Basic | Weave/Knots | **Story-LINQ, Arcs, Themes** |
+| NuGet/Package | No | No | No | Yes | **Yes** |
+
+#### 📖 Glossary
+
+| Term | Definition |
+|------|------------|
+| **IF** | Interactive Fiction |
+| **Parser** | System som tolkar spelarens input |
+| **CYOA** | Choose Your Own Adventure (inget parsing) |
+| **Softlock** | Spelet kan inte vinnas men fortsätter |
+| **Hardlock** | Spelet kraschar/fastnar |
+| **Feelie** | Fysiskt objekt som medföljer spel |
+| **Implementor** | Person som skapar IF |
+| **Transcript** | Logg av spelarsession |
+| **Walkthrough** | Steg-för-steg lösning |
+| **Hint system** | Gradvis avslöjande av hjälp |
+| **Compass rose** | N/S/E/W navigation |
+| **Inventory puzzle** | Lösning kräver rätt items |
+| **Conversation tree** | Förgrenad dialog |
+| **World model** | Internrepresentation av spelvärlden |
+
+---
+
+### Wiki: Objects & Items (Best Practices)
+
+#### 🗝️ Item Design Principles
+
+**Single Responsibility:**
+```csharp
+// ❌ God-item
+class MagicSword : Item, IWeapon, IKey, ILightSource, IContainer { }
+
+// ✅ Composable
+var sword = new Item("sword")
+    .AsWeapon(damage: 10)
+    .WithEnchantment("glowing")  // Light source via decorator
+    .CanUnlock("magic_door");    // Key-like behavior
+```
+
+**Item Categories:**
+
+| Type | Properties | Use Case |
+|------|------------|----------|
+| **Basic** | id, name, description | Background items |
+| **Takeable** | + weight, takeable=true | Inventory items |
+| **Key** | + unlocks(door_id) | Access control |
+| **Container** | + contents[], capacity | Storage, puzzles |
+| **Readable** | + text, requiresLight | Documents, signs |
+| **Consumable** | + uses, onUse effect | Potions, food |
+| **Weapon** | + damage, durability | Combat |
+| **Light Source** | + brightness, fuel | Dark rooms |
+| **Tool** | + canUseOn(targets) | Specific interactions |
+
+**Naming Conventions:**
+```csharp
+// ID: snake_case, unik
+// Name: Human readable, kan ha prefix
+
+new Item("brass_key", "Brass Key")           // ✅
+new Item("key1", "Key")                       // ❌ Generic
+new Item("the_brass_key", "The Brass Key")   // ❌ Article i ID
+```
+
+#### 🚪 Door Design
+
+```csharp
+// Simple locked door
+door.Locked().RequiresKey("brass_key");
+
+// Combination lock
+door.Locked().RequiresCode("1234");
+
+// Conditional
+door.Locked().OpensWhen(w => w.GetFlag("alarm_disabled"));
+
+// Destructible
+door.Destructible().Health(50).WeakTo("fire");
+
+// One-way
+exit.OneWay().Message("The door slams shut behind you!");
+```
+
+#### 📦 Container Patterns
+
+```csharp
+// Basic chest
+var chest = new Container("chest")
+    .Capacity(10)
+    .InitiallyLocked()
+    .RequiresKey("chest_key");
+
+// Nested containers
+var bag = new Container("bag").Contains(
+    new Container("pouch").Contains(
+        new Item("gem")
+    )
+);
+
+// Type-restricted
+var quiver = new Container<Arrow>("quiver").MaxItems(20);
+var flask = new Container<Liquid>("flask").MaxVolume(500);
+```
+
+---
+
+### Wiki: NPC Design (Best Practices)
+
+#### 👥 NPC Archetypes
+
+| Archetype | Behavior | Example |
+|-----------|----------|---------|
+| **Shopkeeper** | Stationary, trade dialog, inventory | Blacksmith, Innkeeper |
+| **Quest Giver** | Stationary, quest dialog, tracks progress | Village Elder, King |
+| **Guide** | Follows, gives hints, comments on locations | Companion, Fairy |
+| **Guard** | Patrols, blocks access, can be bribed/distracted | Castle Guard |
+| **Enemy** | Hostile, combat AI, drops loot | Goblin, Dragon |
+| **Informant** | Stationary, reveals info based on conditions | Bartender, Spy |
+| **Victim** | Needs rescue, follows after saved | Prisoner, Child |
+| **Merchant** | Wanders, random inventory, haggling | Traveling Trader |
+
+```csharp
+// Quick archetype setup
+var blacksmith = Npc.Shopkeeper("blacksmith", "Gruff Blacksmith")
+    .Sells("sword", "shield", "armor")
+    .Buys(ItemType.Metal)
+    .Greeting("What'll it be?");
+
+var guard = Npc.Guard("guard", "Castle Guard")
+    .Patrols("gate", "courtyard", "tower")
+    .Blocks("throne_room")
+    .CanBeBribed(gold: 50)
+    .CanBeDistracted("noise_elsewhere");
+```
+
+#### 💬 Dialog Design Patterns
+
+**Branching (traditional tree):**
+```csharp
+npc.Dialog()
+    .Say("Greetings, traveler.")
+    .Choice("Ask about the weather", d => d.Say("Storm's coming."))
+    .Choice("Ask about rumors", d => d
+        .Say("Heard the dragon's been spotted.")
+        .Choice("Where?", d2 => d2.Say("North mountains."))
+        .Choice("Thanks", d2 => d2.End())
+    )
+    .Choice("Goodbye", d => d.End());
+```
+
+**Conditional (rule-based):**
+```csharp
+npc.AddDialogRule("knows_player")
+    .When(ctx => ctx.Relationship(npc) > 50)
+    .Say("Ah, my friend! Good to see you again.");
+
+npc.AddDialogRule("default_greeting")
+    .Priority(0)  // Fallback
+    .Say("Hmm? What do you want?");
+```
+
+**Mood-affected:**
+```csharp
+npc.AddDialogRule("angry_greeting")
+    .When(ctx => npc.Mood == Mood.Angry)
+    .Say("What?! Can't you see I'm busy!");
+
+npc.AddDialogRule("happy_greeting")
+    .When(ctx => npc.Mood == Mood.Happy)
+    .Say("Hello there! Lovely day, isn't it?");
+```
+
+**Random variety:**
+```csharp
+npc.AddDialogRule("idle_chatter")
+    .When(ctx => ctx.IsIdleConversation)
+    .SayRandom(
+        "Nice weather we're having.",
+        "Did you hear about the festival?",
+        "My back's been killing me lately."
+    );
+```
+
+#### 🚶 Movement Patterns
+
+```csharp
+// Stationary
+npc.Movement(MovementPattern.None);
+
+// Random wandering
+npc.Movement(MovementPattern.Wander)
+    .InArea("village")
+    .Speed(every: 5);  // Move every 5 ticks
+
+// Patrol route
+npc.Movement(MovementPattern.Patrol)
+    .Route("gate", "courtyard", "tower", "courtyard")
+    .Speed(every: 3);
+
+// Follow player
+npc.Movement(MovementPattern.Follow)
+    .Target(player)
+    .MaxDistance(1);
+
+// Schedule-based
+npc.Movement(MovementPattern.Scheduled)
+    .At(TimePhase.Morning, "bedroom")
+    .At(TimePhase.Day, "shop")
+    .At(TimePhase.Evening, "tavern")
+    .At(TimePhase.Night, "bedroom");
+```
+
+#### 😊 Emotion System
+
+```csharp
+public enum NpcMood
+{
+    Neutral, Happy, Sad, Angry, Fearful, Suspicious, Grateful
+}
+
+// Mood changes based on events
+npc.OnEvent("player_helps")
+    .ShiftMood(Mood.Grateful, +0.5f)
+    .Say("Thank you so much!");
+
+npc.OnEvent("player_steals")
+    .ShiftMood(Mood.Angry, +0.8f)
+    .ShiftRelationship(-30);
+
+// Mood decays over time
+npc.MoodDecay(rate: 0.1f, toward: Mood.Neutral);
+```
+
+#### 📋 Quest-Giving Patterns
+
+```csharp
+// Simple fetch quest
+npc.OffersQuest("fetch_herbs")
+    .Description("Bring me 5 healing herbs.")
+    .Requires(player.Has("herb", count: 5))
+    .Reward(gold: 50, xp: 100)
+    .OnComplete(ctx => ctx.Say("Excellent! Here's your reward."));
+
+// Multi-stage
+npc.OffersQuest("dragon_slayer")
+    .Stage(1, "Find the dragon's lair")
+        .CompleteWhen(w => w.GetFlag("lair_discovered"))
+    .Stage(2, "Retrieve the dragon's weakness from the library")
+        .CompleteWhen(player.Has("dragon_lore"))
+    .Stage(3, "Slay the dragon")
+        .CompleteWhen(w => w.GetFlag("dragon_dead"))
+    .FinalReward(gold: 1000, title: "Dragonslayer");
+
+// Escort quest
+npc.OffersQuest("escort_merchant")
+    .Type(QuestType.Escort)
+    .Escort(merchant)
+    .To("city_gates")
+    .FailIf(merchant.IsDead);
+```
+
+#### ⚔️ Combat Behavior
+
+```csharp
+npc.CombatBehavior()
+    .Aggressive()           // Attacks on sight
+    .TargetPriority(player) // Who to attack first
+    .FleeWhen(health < 20)  // Run away at low health
+    .CallForHelp(radius: 3) // Alert nearby allies
+    .DropOnDeath("gold", "rusty_sword");
+
+// More nuanced
+npc.CombatBehavior()
+    .Defensive()                        // Only attacks if attacked
+    .Warns(count: 2)                    // Warns before attacking
+    .SurrenderWhen(health < 10)         // Gives up
+    .OnSurrender(ctx => ctx.CanSpare()) // Player choice
+    .LootTable(LootTable.Bandit);
+```
+
+#### 🌍 World State Integration
+
+```csharp
+// React to player reputation
+npc.AddDialogRule("hero_greeting")
+    .When(ctx => ctx.World.GetReputation("village") > 80)
+    .Say("The hero of our village! What an honor!");
+
+npc.AddDialogRule("villain_greeting")
+    .When(ctx => ctx.World.GetReputation("village") < -50)
+    .Say("You! Guards! Seize this criminal!")
+    .Then(ctx => ctx.TriggerCombat());
+
+// React to time
+npc.AddDialogRule("night_warning")
+    .When(ctx => ctx.World.TimePhase == TimePhase.Night)
+    .Say("You shouldn't be out at night. Dangerous creatures about.");
+
+// React to world events
+npc.AddDialogRule("after_dragon_death")
+    .When(ctx => ctx.World.GetFlag("dragon_dead"))
+    .Say("I heard you killed the dragon! Amazing!")
+    .Then(ctx => ctx.ShiftRelationship(+20));
+```
+---
+
+### Wiki: Language & Localization
+
+#### 🗣️ Object Grammar
+
+**Articles (a/an/the):**
+```csharp
+// English
+item.Grammar(en => en
+    .Article(Article.Indefinite, "a")   // "a sword"
+    .Article(Article.Definite, "the")); // "the sword"
+
+// Swedish
+item.Grammar(sv => sv
+    .Article(Article.Indefinite, "ett") // "ett svärd"
+    .Article(Article.Definite, "et"));  // "svärdet" (suffix)
+```
+
+**Plurals:**
+```csharp
+item.Grammar(en => en
+    .Singular("key")
+    .Plural("keys"));
+
+item.Grammar(en => en
+    .Singular("knife")
+    .Plural("knives"));  // Irregular
+
+// Auto-detect common patterns
+item.Grammar(en => en.AutoPlural()); // sword → swords
+```
+
+**Natural lists:**
+```csharp
+// "a sword, a shield, and a torch"
+var text = items.ToNaturalList(culture: "en-US");
+
+// "ett svärd, en sköld och en fackla"
+var text = items.ToNaturalList(culture: "sv-SE");
+```
+
+#### 🔤 Command Synonyms
+
+```csharp
+// Global synonyms
+parser.AddSynonyms("en", "take", "get", "grab", "pick up", "acquire");
+parser.AddSynonyms("sv", "ta", "plocka", "hämta", "grip");
+
+// Item-specific
+sword.AddAliases("en", "blade", "weapon", "steel");
+sword.AddAliases("sv", "klinga", "vapen", "stål");
+
+// Verb normalization
+parser.Normalize("pick up") → "take"
+parser.Normalize("plocka upp") → "ta"
+```
+
+#### 🌐 Multi-language Support
+
+```csharp
+// Load language at startup
+game.LoadLanguage("sv-SE", "languages/swedish.json");
+
+// Runtime switching
+game.SetLanguage("en-US");
+
+// Fallback chain
+game.LanguageFallback("sv-SE", "en-US", "en");
+
+// Per-string localization
+location.Description(
+    ("en", "A dark cave."),
+    ("sv", "En mörk grotta."),
+    ("de", "Eine dunkle Höhle.")
+);
+```
+
+---
+
+### Wiki: Advanced Topics
+
+#### ⏰ Time System Deep Dive
+
+```csharp
+// Time phases
+public enum TimePhase { Dawn, Morning, Midday, Afternoon, Dusk, Evening, Night, Midnight }
+
+// Automatic progression
+game.Time.TicksPerPhase = 20;
+game.Time.PhasesPerDay = 8;
+
+// Manual control
+game.Time.Advance(ticks: 5);
+game.Time.SetPhase(TimePhase.Night);
+
+// Time-dependent descriptions
+location.Description()
+    .At(TimePhase.Day, "Sunlight streams through the windows.")
+    .At(TimePhase.Night, "Moonlight casts long shadows.");
+
+// Scheduled events
+game.Time.At(TimePhase.Midnight)
+    .Every(days: 1)
+    .Do(ctx => ctx.SpawnNpc("ghost", "graveyard"));
+```
+
+#### 👁️ Perception System
+
+**Light levels:**
+```csharp
+public enum LightLevel { Pitch, Dark, Dim, Normal, Bright, Blinding }
+
+location.BaseLightLevel(LightLevel.Dark);
+
+// Light sources affect perception
+torch.ProvidesLight(LightLevel.Normal, radius: 2);
+
+// Can't see in darkness
+if (location.EffectiveLightLevel < LightLevel.Dim)
+    return "It's too dark to see.";
+
+// Items revealed at different light levels
+item.VisibleAt(LightLevel.Dim, "You make out a shape in the darkness.");
+item.VisibleAt(LightLevel.Normal, "A rusty sword lies on the ground.");
+```
+
+**Sound:**
+```csharp
+// Sound propagates through locations
+combat.EmitsSound("combat", loudness: 3, radius: 2);
+
+// NPCs react to sound
+npc.OnHear("combat")
+    .InRange(2)
+    .React(ctx => ctx.Investigate());
+
+// Player can hear through walls
+location.OnSound("footsteps")
+    .From(Direction.North)
+    .Message("You hear footsteps from the north.");
+```
+
+**Memory:**
+```csharp
+// Player remembers visited locations
+player.Memory.HasVisited("cave");
+
+// NPCs remember interactions
+npc.Memory.Remember("player_helped", timestamp: game.Time.Now);
+npc.Memory.Recall("player_helped", maxAge: 100); // Within 100 ticks
+
+// Memories fade
+npc.Memory.DecayRate = 0.01f; // Per tick
+```
+
+#### 🤝 Social System
+
+**Relationships:**
+```csharp
+// Player-NPC relationship (-100 to +100)
+player.SetRelationship("blacksmith", 50);  // Friendly
+
+// Relationship thresholds
+npc.DialogWhen(rel => rel < -50, "Get out of my shop, scum!");
+npc.DialogWhen(rel > 50, "Ah, my best customer! Special discount today.");
+
+// Actions affect relationships
+player.OnAction("give_gift", npc)
+    .ShiftRelationship(+10);
+
+player.OnAction("steal_from", npc)
+    .ShiftRelationship(-30);
+```
+
+**Reputation:**
+```csharp
+// Faction-wide reputation
+player.Reputation.With("village").Set(75);
+player.Reputation.With("thieves_guild").Set(-20);
+
+// Reputation spreads
+player.OnAction("heroic_deed")
+    .SpreadReputation("region", +10, decay: 0.5f);
+
+// NPCs check faction reputation
+npc.Faction = "village";
+npc.DialogBasedOnFaction(); // Uses player.Reputation.With("village")
+```
+
+#### 🎯 Intention System (Goal-based AI)
+
+```csharp
+// NPC has goals
+npc.Goals.Add(new Goal("survive", priority: 100));
+npc.Goals.Add(new Goal("earn_money", priority: 50));
+npc.Goals.Add(new Goal("find_love", priority: 30));
+
+// Goals influence behavior
+npc.OnLowHealth()
+    .If(goal => goal.Is("survive"))
+    .Then(flee);
+
+npc.OnSeeItem("gold")
+    .If(goal => goal.Is("earn_money"))
+    .Then(negotiate);
+
+// Goals can conflict
+npc.OnConflict("survive", "protect_child")
+    .Resolve(higherPriority); // or custom logic
+```
+
+#### 🎭 Narrative Logic
+
+**Theme tracking:**
+```csharp
+// Themes are tracked across the game
+game.Themes.Track(Theme.Redemption);
+game.Themes.Track(Theme.Loss);
+
+// Beats affect themes
+beat.Mark(Theme.Redemption, +0.2f);
+
+// Query theme state
+var dominantTheme = game.Themes.Dominant();
+var redemptionProgress = game.Themes.Progress(Theme.Redemption);
+```
+
+**Foreshadowing system:**
+```csharp
+// Plant a seed
+game.Foreshadow("dragon_attack")
+    .Hint(1, "You notice claw marks on the trees.")
+    .Hint(2, "A farmer mentions missing livestock.")
+    .Hint(3, "Smoke rises from the mountains.");
+
+// Callback on reveal
+game.OnForeshadowComplete("dragon_attack")
+    .Do(ctx => ctx.TriggerEvent("dragon_arrives"));
+
+// Players can recall foreshadowing
+player.Memory.Foreshadowing.Contains("dragon_attack");
+```
+
+#### 🔄 Meta Perspective
+
+**Undo system:**
+```csharp
+// Every action creates a checkpoint
+game.EnableUndo(maxHistory: 50);
+
+// Player can undo
+> undo
+"Undoing: open chest"
+
+// Certain actions block undo
+action.CannotUndo("This action is permanent.");
+```
+
+**What-if scenarios:**
+```csharp
+// Branching exploration (debugging/design tool)
+var scenario = game.WhatIf(ctx => {
+    ctx.Player.Take("poison");
+    ctx.Player.Use("poison").On("king");
+});
+
+// Inspect outcome without affecting real state
+scenario.Outcome.GetFlag("king_dead"); // true
+scenario.Consequences; // List of changes
+
+// Discard or apply
+scenario.Discard(); // Nothing happened
+// or
+scenario.Apply(); // Commit changes to real game
+```
+
+---
+
+### Wiki: Game Design Guides (Planning Section)
+
+Dessa sidor hjälper spelskapare att planera innan de kodar.
+
+#### 📝 Planning Your Adventure
+
+**Innehåll:**
+1. **Börja med slutet** — Vad är målet? Vad är "vinst"?
+2. **Grid-metoden** (Usborne) — Rita kartan på rutat papper först
+3. **The Rule of Three** — 3 puzzles, 3 areas, 3 keys
+4. **Scope control** — Börja med 5 rum, expandera senare
+5. **Playtest loop** — Skriv → Testa → Fixa → Upprepa
+
+**Checklista innan kodning:**
+```
+□ Karta ritad (rum + kopplingar)
+□ Alla rum numrerade/namngivna
+□ Mål definierat (vad är "vinst"?)
+□ Kritiska items listade (nycklar, verktyg)
+□ Minst en väg från start till mål verifierad
+□ "Target story" skriven (vad ska spelaren berätta efteråt?)
+```
+
+#### 🗺️ Story → Adventure Mapping
+
+**Från berättelse till spelmekanik:**
+
+| Story Element | Adventure Mechanic |
+|---------------|-------------------|
+| Karaktärens mål | Win condition |
+| Hinder | Locked doors, puzzles |
+| Viktiga föremål | Key items |
+| Bikaraktärer | NPCs med dialog |
+| Plats | Location + description |
+| Tid/press | Turn limits, timed events |
+| Hemligheter | Hidden rooms, conditional text |
+| Karaktärsutveckling | Theme tracking, InnerState |
+| Spänning | Mood shifts, pacing |
+
+**Exempel: Rödluvan → Adventure**
+
+| Story | Mechanic |
+|-------|----------|
+| "Gå till mormors hus" | Goal: reach `grandmas_house` |
+| "Genom skogen" | Locations: `home → forest → crossroads → grandmas_house` |
+| "Vargen lurar" | NPC `wolf` med dialog, blocks path |
+| "Ta inte genvägen" | Two paths: safe (long) vs dangerous (short) |
+| "Korg med mat" | Item `basket` required for win |
+| "Mormor är konstig" | Conditional description based on `wolf_arrived_first` |
+
+#### 🔤 Common Verbs & Nouns
+
+**Standard verbs (alla spel bör stödja):**
+
+| Verb | Aliases | Användning |
+|------|---------|------------|
+| `go` | walk, move, head, travel | Navigation |
+| `look` | examine, inspect, check, view, l | Describe room/item |
+| `take` | get, grab, pick, pickup | Add to inventory |
+| `drop` | put, leave, discard | Remove from inventory |
+| `open` | - | Doors, containers |
+| `close` | shut | Doors, containers |
+| `use` | - | Generic item interaction |
+| `talk` | speak, ask, say | NPC dialog |
+| `read` | - | Signs, books, letters |
+| `inventory` | i, inv, items | Show carried items |
+| `help` | ? | Show commands |
+| `save` | - | Save game |
+| `load` | restore | Load game |
+| `quit` | exit, q | End game |
+
+**Genre-specifika verbs:**
+
+| Genre | Extra Verbs |
+|-------|-------------|
+| Combat | attack, fight, kill, flee, defend |
+| Mystery | search, investigate, accuse |
+| Magic | cast, enchant, dispel |
+| Social | bribe, threaten, persuade, charm |
+| Stealth | hide, sneak, steal, lockpick |
+
+**Common nouns (items):**
+
+| Category | Examples |
+|----------|----------|
+| Keys | key, keycard, password, code |
+| Light | torch, lantern, lamp, candle, flashlight |
+| Containers | bag, chest, box, drawer, safe |
+| Tools | rope, crowbar, hammer, lockpick |
+| Weapons | sword, knife, gun, staff |
+| Documents | letter, book, map, note, diary |
+| Valuables | gold, gem, coin, treasure, artifact |
+
+#### 🎯 Framework Simplification
+
+**Hur vårt framework förenklar planeringen:**
+
+| Traditionellt | Med vårt framework |
+|---------------|-------------------|
+| Skriv parser från scratch | `KeywordParser` + synonymer inbyggt |
+| Manuell state-hantering | `WorldState` + flags/counters |
+| If-else-helvete för dialog | Rule-based dialog system |
+| Svårt att testa | `Validator.FindUnreachableLocations()` |
+| Hårdkodade beskrivningar | Dynamic descriptions + layers |
+| Ingen struktur för story | Story-LINQ + Narrative Arcs |
+
+**Från plan till kod — 1:1 mapping:**
+
+```
+PLAN                          CODE
+────                          ────
+"Rum: Kök"                →   new Location("kitchen", "Kitchen")
+"Utgång norr till hall"   →   .AddExit(Direction.North, hall)
+"Låst dörr"               →   .WithDoor().Locked()
+"Nyckel i lådan"          →   drawer.Contains(key)
+"Prata med kocken"        →   chef.AddDialogRule(...)
+"Mål: hitta receptet"     →   quest.Goal(player.Has("recipe"))
+```
+
+**Story-LINQ mapping:**
+
+```
+PLAN                              STORY-LINQ
+────                              ──────────
+"Spelaren vaknar trött"       →   .DefineNeed(Need.WakeUp)
+"Kaffe gör en pigg"           →   .When(has("coffee")).Satisfy(Need.WakeUp)
+"Stämningen ljusnar"          →   .Shift(s => s.Mood, Mood.Hope)
+"Temat är ensamhet → gemenskap" → .DefineThemeArc(Theme.Connection)
+```
+
+#### 📐 Planning Templates
+
+**Minimal Adventure (5 rum):**
+```
+START ──→ HUB ──→ GOAL
+           │
+           ├──→ PUZZLE_ROOM (has KEY)
+           │
+           └──→ LOCKED_ROOM (needs KEY, has TREASURE)
+```
+
+**Three-Act Adventure:**
+```
+ACT 1: Setup (3 rum)
+  START → VILLAGE → CROSSROADS
+
+ACT 2: Confrontation (5 rum)
+  CROSSROADS → FOREST → CAVE → MOUNTAIN → CASTLE_GATE
+
+ACT 3: Resolution (2 rum)
+  CASTLE_GATE → THRONE_ROOM → ENDING
+```
+
+**Mystery Template:**
+```
+CRIME_SCENE (clue 1)
+     │
+     ├──→ SUSPECT_A_LOCATION (clue 2, alibi)
+     │
+     ├──→ SUSPECT_B_LOCATION (clue 3, motive)
+     │
+     └──→ HIDDEN_LOCATION (requires clues 1+2+3, reveals TRUTH)
+            │
+            └──→ CONFRONTATION (accuse with TRUTH)
+```
 
 ### Wiki: Narrative Arcs
 
@@ -2054,6 +3215,551 @@ hall.AddItems("Sword", "Shield", "Torch");
 ```
 
 ----
+
+## Slice 41: Testing & Validation Tools
+
+**Mål:** Verktyg för att testa och validera textäventyr.
+
+*Från Write Your Own Adventure Programs (Usborne):*
+- "Try every possible command in every situation"
+- "Ask other people to play - they try things you didn't think of"
+- "Testing is for improving puzzles and making sure the game is enjoyable"
+
+### Task 41.1: Reachability Validator
+
+```csharp
+var validator = game.CreateValidator();
+
+// Kontrollera att alla rum går att nå
+var unreachableLocations = validator.FindUnreachableLocations();
+// Output: ["secret_room", "hidden_cave"]
+
+// Kontrollera att alla items går att få tag på
+var unreachableItems = validator.FindUnreachableItems();
+// Output: [("magic_gem", "Requires key that doesn't exist")]
+
+// Kontrollera att alla quests går att klara
+var impossibleQuests = validator.FindImpossibleQuests();
+```
+
+### Task 41.2: Command Coverage Report
+
+```csharp
+// Lista alla möjliga kommandon per rum
+foreach (var location in game.Locations)
+{
+    var commands = validator.GetPossibleCommands(location);
+    Console.WriteLine($"{location.Name}: {string.Join(", ", commands)}");
+}
+
+// Output:
+// Cave: go north, go south, take torch, look, inventory
+// Forest: go east, go west, talk to hermit, attack wolf
+
+// Hitta kommandon som aldrig används
+var unusedCommands = validator.FindUnusedCommands();
+```
+
+### Task 41.3: Automated Playthrough
+
+```csharp
+// "Try everything" automation
+var explorer = game.CreateExplorer();
+
+// Random exploration
+var log = explorer.RandomWalk(maxSteps: 1000);
+
+// Exhaustive exploration (depth-first)
+var allPaths = explorer.ExploreAllPaths();
+
+// Find shortest path to win
+var winPath = explorer.FindWinningPath();
+if (winPath == null)
+    Console.WriteLine("Warning: No winning path exists!");
+
+// Replay a specific path
+explorer.Replay(winPath);
+```
+
+### Task 41.4: Dead-end Detection
+
+```csharp
+// Hitta situationer där spelaren fastnar
+var deadEnds = validator.FindDeadEnds();
+// Output: [
+//   "Using key on wrong door destroys key, can't proceed",
+//   "Taking gem triggers collapse, blocks exit permanently"
+// ]
+
+// Hitta point-of-no-return utan varning
+var noReturnPoints = validator.FindUnmarkedPointsOfNoReturn();
+```
+
+### Task 41.5: Testing Mode (Debug)
+
+```csharp
+game.EnableTestingMode();
+
+// I testing mode:
+// - "teleport <location>" - hoppa till rum
+// - "spawn <item>" - skapa item
+// - "godmode" - immortal
+// - "showmap" - visa alla rum
+// - "showitems" - lista alla items och var de är
+// - "shownpcs" - lista alla NPCs och deras state
+// - "skiptime <ticks>" - hoppa framåt i tid
+// - "setflag <name> <value>" - sätt worldstate
+// - "listcommands" - visa alla kommandon i nuvarande rum
+```
+
+### Task 41.6: Puzzle Dependency Graph
+
+```csharp
+// Generera beroendegraf för puzzles
+var graph = validator.GeneratePuzzleGraph();
+
+// Export till Mermaid
+var mermaid = graph.ToMermaid();
+// Output:
+// graph LR
+//     key --> locked_door
+//     locked_door --> treasure_room
+//     torch --> dark_cave
+//     dark_cave --> ancient_map
+//     ancient_map --> secret_entrance
+
+// Hitta cirkulära beroenden (omöjliga puzzles)
+var circles = graph.FindCircularDependencies();
+```
+
+### Task 41.7: Story Snippet Validation
+
+*Från Procedural Storytelling:*
+> "Skriv exempel på berättelser spelaren skulle berätta, fråga: vad är minsta jag kan göra för att generera fler?"
+
+```csharp
+// Definiera "target stories" - berättelser som ska kunna hända
+validator.AddTargetStory("saved_village")
+    .Requires("dragon_defeated")
+    .Requires("villagers_alive", min: 5)
+    .Requires("reputation", min: 50);
+
+validator.AddTargetStory("tragic_hero")
+    .Requires("saved_kingdom")
+    .Requires("lost_loved_one");
+
+// Verifiera att engine kan producera dem
+var achievable = validator.ValidateTargetStories();
+// Output: [
+//   ("saved_village", true, "Achievable via: kill dragon, save 7 villagers"),
+//   ("tragic_hero", false, "Missing: no way to trigger 'lost_loved_one'")
+// ]
+```
+
+---
+
+## Slice 42: Story-LINQ (Narrative Query Language)
+
+**Mål:** LINQ-inspirerad fluent syntax för narrativ state management. Svaret på livet, universum och allting.
+
+*"Berättelse är inte text. Berättelse är tillståndsförändring med mening."*
+
+### Kärnkoncept
+
+```
+State → Transition → Meaning
+(Var vi är) → (Vad som händer) → (Varför det spelar roll)
+```
+
+### Task 42.1: IStoryState — Narrativt tillstånd
+
+```csharp
+public interface IStoryState
+{
+    // Yttre tillstånd
+    ILocation Location { get; }
+    Mood WorldMood { get; }
+    TimePhase TimePhase { get; }
+
+    // Inre tillstånd
+    InnerState PlayerInnerState { get; }
+    IReadOnlyCollection<Need> ActiveNeeds { get; }
+
+    // Tematisk tracking
+    IReadOnlyDictionary<Theme, float> ThemeProgress { get; }
+
+    // Minne
+    IReadOnlyCollection<string> Memories { get; }
+    IReadOnlyCollection<string> RevealedTruths { get; }
+}
+
+public enum Mood
+{
+    Stillness, Fear, Hope, Decay, Trust,
+    Awakening, Tension, Release, Wonder, Dread
+}
+
+public enum InnerState
+{
+    Drowsy, Groggy, Awake, Alert, Focused,
+    Confused, Determined, Guilty, Healed, Present
+}
+
+public enum Need
+{
+    WakeUp, Safety, Connection, Understanding,
+    Closure, Revenge, Redemption, Rest
+}
+
+public enum Theme
+{
+    Trust, Loss, Growth, Corruption, Hope,
+    Isolation, Connection, Power, Sacrifice, Truth
+}
+```
+
+### Task 42.2: Story-LINQ Operators
+
+```csharp
+public static class StoryLinq
+{
+    // === QUERY OPERATORS ===
+
+    // When - precondition (som Where i LINQ)
+    public static IStoryQuery When(this IStory story,
+        Func<IStoryState, bool> condition);
+
+    // And - kombinera villkor
+    public static IStoryQuery And(this IStoryQuery query,
+        Func<IStoryState, bool> condition);
+
+    // Or - alternativa villkor
+    public static IStoryQuery Or(this IStoryQuery query,
+        Func<IStoryState, bool> condition);
+
+    // === TRANSITION OPERATORS ===
+
+    // Shift - ändra tillstånd
+    public static IStoryQuery Shift<T>(this IStoryQuery query,
+        Expression<Func<IStoryState, T>> property, T newValue);
+
+    // ShiftGradually - ändra över tid
+    public static IStoryQuery ShiftGradually<T>(this IStoryQuery query,
+        Expression<Func<IStoryState, T>> property, T target, int ticks);
+
+    // === MEANING OPERATORS ===
+
+    // Mark - påverka tema
+    public static IStoryQuery Mark(this IStoryQuery query,
+        Theme theme, float delta);
+
+    // Satisfy - uppfyll behov
+    public static IStoryQuery Satisfy(this IStoryQuery query, Need need);
+
+    // Awaken - skapa nytt behov
+    public static IStoryQuery Awaken(this IStoryQuery query, Need need);
+
+    // === NARRATIVE OPERATORS ===
+
+    // Reveal - visa text/sanning
+    public static IStoryQuery Reveal(this IStoryQuery query, string text);
+
+    // Remember - lägg till minne
+    public static IStoryQuery Remember(this IStoryQuery query, string memory);
+
+    // Echo - referera till tidigare minne
+    public static IStoryQuery Echo(this IStoryQuery query, string memoryPattern);
+
+    // === EXECUTION ===
+
+    // AsBeats - materialisera till story beats
+    public static IEnumerable<IStoryBeat> AsBeats(this IStoryQuery query);
+
+    // Execute - kör direkt
+    public static StoryResult Execute(this IStoryQuery query);
+}
+```
+
+### Task 42.3: Fluent Beat Builder
+
+```csharp
+// Definiera ett beat
+story.DefineBeat("morning_coffee")
+    .When(s => s.Player.Has("coffee"))
+    .And(s => s.Location.Id == "livingroom")
+    .And(s => s.PlayerInnerState <= InnerState.Groggy)
+    .Shift(s => s.WorldMood, Mood.Awakening)
+    .Shift(s => s.PlayerInnerState, InnerState.Awake)
+    .Satisfy(Need.WakeUp)
+    .Mark(Theme.Connection, +0.1)  // Morgonritualen binder till hemmet
+    .Reveal("Warmth spreads through you. The day feels possible now.");
+
+// Beats kan ärva från varandra
+story.DefineBeat("morning_coffee_with_book")
+    .Extends("morning_coffee")
+    .And(s => s.Player.Has("book"))
+    .Shift(s => s.PlayerInnerState, InnerState.Present)
+    .Mark(Theme.Growth, +0.2)
+    .Reveal("The words on the page find a quiet mind.");
+```
+
+### Task 42.4: Composable Story Fragments
+
+```csharp
+// Återanvändbara fragment (som LINQ-metoder)
+public static class StoryFragments
+{
+    public static IStoryQuery HasMorningEssentials(this IStoryQuery q) =>
+        q.And(s => s.Player.Has("coffee"))
+         .And(s => s.TimePhase == TimePhase.Morning);
+
+    public static IStoryQuery IsCalm(this IStoryQuery q) =>
+        q.And(s => s.WorldMood.In(Mood.Stillness, Mood.Hope))
+         .And(s => s.PlayerInnerState >= InnerState.Awake);
+
+    public static IStoryQuery SeekingRest(this IStoryQuery q) =>
+        q.And(s => s.ActiveNeeds.Contains(Need.Rest));
+}
+
+// Användning - läsbar som en mening
+story.DefineBeat("peaceful_reading")
+    .When(s => s.Location.HasTag("comfortable"))
+    .HasMorningEssentials()
+    .IsCalm()
+    .And(s => s.Player.Has("book"))
+    .Shift(s => s.PlayerInnerState, InnerState.Present)
+    .Satisfy(Need.Rest)
+    .Mark(Theme.Connection, +0.3);
+```
+
+### Task 42.5: Narrative Query — Fråga berättelsen
+
+```csharp
+// Vilka beats kan aktiveras nu?
+var possibleBeats = story.Beats
+    .Where(b => b.CanActivate(currentState))
+    .OrderByDescending(b => b.Specificity)  // Mest specifika först
+    .ToList();
+
+// Vilka behov är ouppfyllda?
+var unmetNeeds = story.State.ActiveNeeds
+    .Where(n => !n.IsSatisfied)
+    .OrderBy(n => n.Urgency);
+
+// Vilka teman utvecklas?
+var risingThemes = story.State.ThemeProgress
+    .Where(t => t.Value > 0.3f && t.Value < 0.8f)
+    .Select(t => t.Key);
+
+// Hitta alla vägar till ett mål-tillstånd
+var pathsToHope = story.FindPaths(
+    from: currentState,
+    to: s => s.WorldMood == Mood.Hope,
+    maxDepth: 10
+);
+
+// Vilka minnen är relevanta här?
+var echoes = story.State.Memories
+    .Where(m => m.RelatesTo(currentState.Location))
+    .Select(m => m.Echo());
+```
+
+### Task 42.6: Three-Layer Output
+
+```csharp
+// Samma beat, tre uttrycksnivåer
+story.DefineBeat("open_mysterious_door")
+    .When(s => s.Player.Uses("key").On("ancient_door"))
+    .Shift(s => s.WorldMood, Mood.Dread)
+    .Awaken(Need.Understanding)
+    .Mark(Theme.Truth, +0.2)
+    .Mark(Theme.Loss, +0.1)
+
+    // Tre nivåer av berättande
+    .Mechanical("The door opens. Cold air escapes.")
+    .Narrative("Some doors are closed for a reason. This one remembers.")
+    .Psychological("A weight settles in your chest. You wanted to know.");
+
+// Motorn väljer nivå baserat på:
+// - Spelarinställning (prefer_mechanical, prefer_narrative, prefer_psychological)
+// - Tematisk intensitet (hög Theme.Truth → mer psychological)
+// - Pacing (snabba sekvenser → mechanical, lugna → narrative)
+```
+
+### Task 42.7: Character Arcs som Queries
+
+```csharp
+// NPC har sin egen narrativa kurva
+var hermit = story.DefineCharacter("hermit")
+    .WithWound("lost_family")
+    .WithMask("cynicism")
+    .WithNeed("connection")
+    .TransformsWhen(s =>
+        s.Relationship("hermit") > 50 &&
+        s.ThemeProgress[Theme.Trust] > 0.6f
+    );
+
+// Karaktärens dialog som query
+hermit.Says()
+    .When(s => s.FirstMeeting)
+    .And(s => s.WorldMood == Mood.Fear)
+    .Line("Another lost soul. The forest collects them.")
+    .Mark(Theme.Isolation, +0.1);
+
+hermit.Says()
+    .When(s => s.Relationship("hermit") > 30)
+    .And(s => s.Player.Has("family_locket"))
+    .Line("That locket... where did you find it?")
+    .Shift(s => hermit.Mask, "vulnerability")
+    .Awaken(Need.Closure)
+    .Mark(Theme.Connection, +0.3);
+```
+
+### Task 42.8: Theme Arc Tracking
+
+```csharp
+// Definiera tematisk båge
+story.DefineThemeArc(Theme.Trust)
+    .StartsAt(0.0f, "Isolation", "You trust no one. Wise.")
+    .DevelopsAt(0.3f, "First Doubt", "Perhaps not everyone is an enemy.")
+    .DevelopsAt(0.5f, "Tentative Bond", "You find yourself caring.")
+    .DevelopsAt(0.7f, "Tested", "Trust is easy until it costs something.")
+    .ResolvesAt(1.0f, "Mutual Dependence", "Together, or not at all.");
+
+// Query: Var är vi i bågen?
+var trustPhase = story.GetThemePhase(Theme.Trust);
+// => "Tentative Bond" (om ThemeProgress[Trust] == 0.55)
+
+// Automatiska callbacks vid trösklar
+story.OnThemeReaches(Theme.Trust, 0.5f, ctx => {
+    ctx.Reveal("Something has shifted. You catch yourself hoping.");
+    ctx.TriggerBeat("trust_milestone");
+});
+```
+
+### Task 42.9: Story-LINQ DSL
+
+```dsl
+# Deklarativ syntax för icke-programmerare
+
+beat "morning_peace" {
+    when player.has("coffee")
+     and player.has("book")
+     and location.tag("comfortable")
+     and time.phase == morning
+
+    shift mood to stillness
+    shift inner to present
+    satisfy need:rest
+
+    mark theme:connection +0.3
+    mark theme:growth +0.1
+
+    reveal "The world holds its breath. So do you."
+}
+
+character "hermit" {
+    wound: "lost_family"
+    mask: "cynicism"
+    need: "connection"
+
+    transforms when relationship > 50 and theme:trust > 0.6
+
+    says when first_meeting and mood == fear {
+        "Another lost soul. The forest collects them."
+    }
+}
+
+theme_arc "trust" {
+    0.0: "Isolation" -> "You trust no one."
+    0.3: "First Doubt" -> "Perhaps not everyone is an enemy."
+    0.5: "Tentative Bond" -> "You find yourself caring."
+    0.7: "Tested" -> "Trust costs something."
+    1.0: "Mutual Dependence" -> "Together, or not at all."
+}
+```
+
+### Task 42.10: Integration med existerande slices
+
+```csharp
+// Story-LINQ integrerar med Event System (Slice 6)
+story.OnEvent("player_enters_location")
+    .When(s => s.Location.HasTag("childhood_home"))
+    .And(s => s.State.Memories.Contains("happy_childhood"))
+    .Echo("happy_childhood")
+    .Shift(s => s.WorldMood, Mood.Stillness)
+    .Reveal("The smell of old wood. You remember.");
+
+// Integration med NPC Dialog (Slice 5)
+npc.DialogRule()
+    .When(s => s.ThemeProgress[Theme.Trust] > 0.5f)
+    .And(s => s.PlayerInnerState == InnerState.Present)
+    .Say("You're different now. Calmer. What changed?")
+    .Mark(Theme.Growth, +0.1);
+
+// Integration med Quest System (Slice 8)
+quest.OnComplete()
+    .Shift(s => s.WorldMood, Mood.Hope)
+    .Satisfy(Need.Closure)
+    .Mark(Theme.Sacrifice, +0.4)
+    .Reveal("It cost everything. It was worth everything.");
+```
+
+### Task 42.11: Sandbox — Morning Ritual
+
+```csharp
+// Komplett implementation av kaffe-och-bok-scenariot
+
+var morningGame = new GameBuilder()
+    .WithStoryLinq()  // Aktivera Story-LINQ
+    .Build();
+
+// Definiera tillstånd
+morningGame.DefineNeeds(Need.WakeUp, Need.Rest);
+morningGame.DefineThemes(Theme.Connection, Theme.Growth);
+
+// Definiera beats
+morningGame.DefineBeat("leave_bed")
+    .When(s => s.Location.Id == "bedroom")
+    .And(s => s.PlayerPosture == Posture.Lying)
+    .Shift(s => s.PlayerPosture, Posture.Standing)
+    .Shift(s => s.PlayerInnerState, InnerState.Groggy)
+    .Mechanical("You get out of bed.")
+    .Narrative("The day begins, whether you want it to or not.")
+    .Psychological("Inertia broken. Now what?");
+
+morningGame.DefineBeat("brew_coffee")
+    .When(s => s.Location.Id == "kitchen")
+    .And(s => s.Player.Has("mug"))
+    .And(s => s.ActiveNeeds.Contains(Need.WakeUp))
+    .Yields("coffee")
+    .Shift(s => s.WorldMood, Mood.Awakening)
+    .Shift(s => s.PlayerInnerState, InnerState.Awake)
+    .Mark(Theme.Connection, +0.1)
+    .Mechanical("Coffee made.")
+    .Narrative("Warmth enters the body. Consciousness returns.")
+    .Psychological("A small act of self-care.");
+
+morningGame.DefineBeat("peaceful_reading")
+    .When(s => s.Location.Id == "livingroom")
+    .And(s => s.Player.Has("coffee"))
+    .And(s => s.Player.Has("book"))
+    .Shift(s => s.PlayerPosture, Posture.Sitting)
+    .Shift(s => s.PlayerInnerState, InnerState.Present)
+    .Shift(s => s.WorldMood, Mood.Stillness)
+    .Satisfy(Need.WakeUp)
+    .Satisfy(Need.Rest)
+    .Mark(Theme.Connection, +0.3)
+    .Mark(Theme.Growth, +0.2)
+    .Mechanical("You sit down, drink coffee, read.")
+    .Narrative("The world quiets. The book opens like a small, private universe.")
+    .Psychological("Arrival. Presence. Enough.");
+
+// Dramaturgisk båge i 4 beats:
+// Inertia → Awakening → Comfort → Presence
+```
+
+---
 
 En tanke på hur det ska fungera
 

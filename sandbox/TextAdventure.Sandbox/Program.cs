@@ -52,6 +52,9 @@ clearing.AddItem(glass);
 // Create locked door
 Door cabinDoor = "cabin door";
 cabinDoor.RequiresKey(cabinKey);
+cabinDoor
+    .SetReaction(DoorAction.Unlock, "The lock clicks open.")
+    .SetReaction(DoorAction.Open, "The door creaks as it swings wide.");
 
 // Connect locations
 entrance.AddExit(Direction.North, forest);

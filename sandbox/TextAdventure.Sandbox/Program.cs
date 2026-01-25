@@ -6,6 +6,7 @@ using MarcusMedina.TextAdventure.Parsing;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Interfaces;
 
 // Create items (all styles are valid)
 Key cabinKey = (id: "cabin_key", name: "brass key", description: "A small brass key with worn teeth.");
@@ -65,11 +66,15 @@ Location entrance = (
     );
 Location forest = (
     id: "forest", 
-    description: "A thick forest surrounds you. Shadows stretch long between ancient trees."
+    description: "A thick forest surrounds you. A fox watches from the brush."
     );
 Location cave = (
     id: "cave", 
     description: "A dark cave with glowing mushrooms. A brass key glints on the ground!"
+    );
+Location deepCave = (
+    id: "deep_cave",
+    description: "The cave narrows into a jagged tunnel. You hear a distant rumble."
     );
 Location clearing = (
     id: "clearing", description: "A sunny clearing with wildflowers. A small cabin stands here."
@@ -92,6 +97,21 @@ clearing.AddItem(tome);
 cave.AddItem(letter);
 cabin.AddItem(newspaper);
 
+// Create NPCs
+var fox = new Npc("fox", "fox")
+    .Description("A curious fox with bright eyes.")
+    .SetDialog(new DialogNode("The fox tilts its head, listening.")
+        .AddOption("Ask about the cabin")
+        .AddOption("Ask about the cave"));
+
+var dragon = new Npc("dragon", "dragon", NpcState.Hostile)
+    .Description("A massive dragon with ember-bright eyes.")
+    .Dialog("The dragon rumbles a warning.");
+dragon.SetMovement(new PatrolNpcMovement(new[] { cave, deepCave }));
+
+forest.AddNpc(fox);
+cave.AddNpc(dragon);
+
 // Create locked door
 Door cabinDoor = (id: "cabin_door", name: "cabin door", description: "A sturdy wooden door with iron hinges.");
 cabinDoor.RequiresKey(cabinKey);
@@ -103,6 +123,7 @@ cabinDoor
 entrance.AddExit(Direction.North, forest);
 forest.AddExit(Direction.East, cave);
 forest.AddExit(Direction.West, clearing);
+cave.AddExit(Direction.North, deepCave);
 clearing.AddExit(Direction.In, cabin, cabinDoor);  // Locked!
 
 // One-way trap
@@ -112,12 +133,13 @@ cave.AddExit(Direction.Down, entrance, oneWay: true);
 var recipeBook = new RecipeBook()
     .Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
 var state = new GameState(entrance, recipeBook: recipeBook);
+var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin };
 
 Console.WriteLine("=== FOREST ADVENTURE ===");
 Console.WriteLine("Find the key and unlock the cabin!");
 var commands = new[]
 {
-    "go", "look", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
+    "go", "look", "talk", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
 };
 Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
 
@@ -159,6 +181,29 @@ var parserConfig = new KeywordParserConfig(
 
 var parser = new KeywordParser(parserConfig);
 
+void MoveNpcs()
+{
+    var moves = new List<(INpc npc, Location from, Location to)>();
+
+    foreach (var location in locations)
+    {
+        foreach (var npc in location.Npcs.ToList())
+        {
+            var next = npc.GetNextLocation(location, state);
+            if (next is Location nextLocation && !ReferenceEquals(nextLocation, location))
+            {
+                moves.Add((npc, location, nextLocation));
+            }
+        }
+    }
+
+    foreach (var (npc, from, to) in moves)
+    {
+        from.RemoveNpc(npc);
+        to.AddNpc(npc);
+    }
+}
+
 while (true)
 {
     var lookResult = state.Look();
@@ -191,6 +236,8 @@ while (true)
     {
         break;
     }
+
+    MoveNpcs();
 
     if (command is GoCommand go && result.Success)
     {

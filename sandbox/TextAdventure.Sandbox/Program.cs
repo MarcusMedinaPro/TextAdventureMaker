@@ -105,7 +105,7 @@ var fox = new Npc("fox", "fox")
         .AddOption("Ask about the cave"));
 
 var dragonPatrol = new PatrolNpcMovement(new[] { cave, deepCave });
-var dragon = new Npc("dragon", "dragon", NpcState.Friendly)
+var dragon = new Npc("dragon", "dragon", NpcState.Friendly, stats: new Stats(40))
     .Description("A massive dragon sleeps among the shadows.")
     .Dialog("The dragon snores softly.");
 dragon.SetMovement(new NoNpcMovement());

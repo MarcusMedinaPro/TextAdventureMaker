@@ -20,6 +20,7 @@ public class TakeAllCommand : ICommand
 
         var taken = new List<IItem>();
         var skipped = new List<IItem>();
+        var reactions = new List<string>();
 
         foreach (var item in candidates)
         {
@@ -28,6 +29,11 @@ public class TakeAllCommand : ICommand
                 location.RemoveItem(item);
                 item.Take();
                 taken.Add(item);
+                var reaction = item.GetReaction(ItemAction.Take);
+                if (!string.IsNullOrWhiteSpace(reaction))
+                {
+                    reactions.Add(reaction);
+                }
             }
             else
             {
@@ -54,6 +60,8 @@ public class TakeAllCommand : ICommand
             message = $"{message}\n{Language.TakeAllSkipped(skippedList)}";
         }
 
-        return CommandResult.Ok(message);
+        return reactions.Count > 0
+            ? CommandResult.Ok(message, reactions.ToArray())
+            : CommandResult.Ok(message);
     }
 }

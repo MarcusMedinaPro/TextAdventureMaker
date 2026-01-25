@@ -17,15 +17,23 @@ public class DropAllCommand : ICommand
 
         var location = context.State.CurrentLocation;
         var items = inventory.Items.ToList();
+        var reactions = new List<string>();
 
         foreach (var item in items)
         {
             inventory.Remove(item);
             location.AddItem(item);
             item.Drop();
+            var reaction = item.GetReaction(ItemAction.Drop);
+            if (!string.IsNullOrWhiteSpace(reaction))
+            {
+                reactions.Add(reaction);
+            }
         }
 
         var list = items.Select(i => i.Name).CommaJoin();
-        return CommandResult.Ok(Language.DropAll(list));
+        return reactions.Count > 0
+            ? CommandResult.Ok(Language.DropAll(list), reactions.ToArray())
+            : CommandResult.Ok(Language.DropAll(list));
     }
 }

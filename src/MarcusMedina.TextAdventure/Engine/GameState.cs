@@ -15,13 +15,15 @@ public class GameState : IGameState
     public IInventory Inventory { get; }
     public RecipeBook RecipeBook { get; }
     public IEventSystem Events { get; }
+    public ICombatSystem CombatSystem { get; }
 
     public GameState(
         ILocation startLocation,
         IStats? stats = null,
         IInventory? inventory = null,
         RecipeBook? recipeBook = null,
-        IEventSystem? eventSystem = null)
+        IEventSystem? eventSystem = null,
+        ICombatSystem? combatSystem = null)
     {
         ArgumentNullException.ThrowIfNull(startLocation);
         CurrentLocation = startLocation;
@@ -29,6 +31,7 @@ public class GameState : IGameState
         Inventory = inventory ?? new Inventory();
         RecipeBook = recipeBook ?? new RecipeBook();
         Events = eventSystem ?? new EventSystem();
+        CombatSystem = combatSystem ?? new TurnBasedCombat();
     }
 
     public bool Move(Direction direction)

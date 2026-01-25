@@ -11,6 +11,7 @@ public interface INpc
     bool IsAlive { get; }
     INpcMovement Movement { get; }
     IDialogNode? DialogRoot { get; }
+    IStats Stats { get; }
 
     INpc Description(string text);
     INpc SetState(NpcState state);
@@ -18,4 +19,5 @@ public interface INpc
     ILocation? GetNextLocation(ILocation currentLocation, IGameState state);
     INpc Dialog(string text);
     INpc SetDialog(IDialogNode? dialog);
+    INpc SetStats(IStats stats);
 }

@@ -12,15 +12,17 @@ public class Npc : INpc
     public NpcState State { get; private set; }
     public INpcMovement Movement { get; private set; } = new NoNpcMovement();
     public IDialogNode? DialogRoot { get; private set; }
-    public bool IsAlive => State != NpcState.Dead;
+    public IStats Stats { get; private set; }
+    public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
 
-    public Npc(string id, string name, NpcState state = NpcState.Friendly)
+    public Npc(string id, string name, NpcState state = NpcState.Friendly, IStats? stats = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         Id = id;
         Name = name;
         State = state;
+        Stats = stats ?? new Stats(20);
     }
 
     public string GetDescription() => _description;
@@ -60,6 +62,13 @@ public class Npc : INpc
     public INpc SetDialog(IDialogNode? dialog)
     {
         DialogRoot = dialog;
+        return this;
+    }
+
+    public INpc SetStats(IStats stats)
+    {
+        ArgumentNullException.ThrowIfNull(stats);
+        Stats = stats;
         return this;
     }
 }

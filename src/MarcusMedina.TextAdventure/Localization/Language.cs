@@ -37,6 +37,10 @@ public static class Language
     public const string NoSuchNpcHere = "You don't see anyone like that.";
     public const string NpcHasNothingToSay = "They have nothing to say.";
     public const string DialogOptionsLabel = "Options:";
+    public const string PlayerAlreadyDead = "You're already dead.";
+    public const string TargetAlreadyDead = "That target is already dead.";
+    public const string PlayerDefeated = "You collapse from your wounds.";
+    public const string FleeSuccess = "You flee from the fight.";
 
     public const string DoorLockedTemplate = "The {0} is locked.";
     public const string DoorClosedTemplate = "The {0} is closed.";
@@ -57,6 +61,10 @@ public static class Language
     public const string PourResultTemplate = "You pour the {0} into the {1}.";
     public const string ReadingCostTemplate = "You spend {0} turns reading...\n{1}";
     public const string DialogOptionTemplate = "{0}. {1}";
+    public const string AttackTargetTemplate = "You attack the {0}.";
+    public const string AttackDamageTemplate = "You hit for {0} damage.";
+    public const string EnemyAttackTemplate = "The {0} hits you for {1} damage.";
+    public const string TargetDefeatedTemplate = "The {0} is defeated.";
 
     public static string DoorLocked(string doorName) =>
         DoorLockedTemplate.GamePrint(doorName);
@@ -120,4 +128,16 @@ public static class Language
 
     public static string DialogOption(int index, string text) =>
         DialogOptionTemplate.GamePrint(index, text);
+
+    public static string AttackTarget(string targetName) =>
+        AttackTargetTemplate.GamePrint(targetName);
+
+    public static string AttackDamage(int amount) =>
+        AttackDamageTemplate.GamePrint(amount);
+
+    public static string EnemyAttack(string targetName, int amount) =>
+        EnemyAttackTemplate.GamePrint(targetName, amount);
+
+    public static string TargetDefeated(string targetName) =>
+        TargetDefeatedTemplate.GamePrint(targetName);
 }

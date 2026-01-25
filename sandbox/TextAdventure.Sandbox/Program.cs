@@ -127,6 +127,7 @@ var barAlley = locationList.Add("bar_alley", "A narrow alley behind the bar.");
 var nightStreet = locationList.Add("night_street", "A long street with patchy streetlights.");
 var underpass = locationList.Add("underpass", "A shadowy underpass humming with distant traffic.");
 var frontPorch = locationList.Add("front_porch", "A quiet front porch with a locked gate.");
+var park = locationList.Add("park", "A small park with damp grass and a lone bench.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -170,6 +171,8 @@ barAlley.AddItem(new Item("poster", "poster", "A torn poster flaps in the wind."
 nightStreet.AddItem(new Item("streetlight", "streetlight", "A flickering streetlight buzzes overhead.").SetTakeable(false));
 underpass.AddItem(new Item("whistle", "whistle", "A small whistle on a frayed cord."));
 frontPorch.AddItem(new Item("gate", "gate", "The gate is locked, but the house lights are on.").SetTakeable(false));
+park.AddItem(new Item("flyer", "flyer", "LOST DOG: small terrier, answers to Pip."));
+park.AddItem(new Item("bench", "bench", "A damp bench with rain beading on the wood.").SetTakeable(false));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -203,6 +206,7 @@ sideStreet.AddExit(Direction.East, bar);
 bar.AddExit(Direction.South, barAlley);
 barAlley.AddExit(Direction.East, nightStreet);
 nightStreet.AddExit(Direction.East, underpass);
+nightStreet.AddExit(Direction.West, park);
 underpass.AddExit(Direction.North, frontPorch);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
@@ -232,11 +236,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -340,6 +344,13 @@ var stranger = npcList["stranger"]
         .AddOption("Keep walking")
         .AddOption("Ask for directions"));
 
+var dog = npcList["dog"]
+    .SetState(NpcState.Friendly)
+    .Description("A small terrier with an anxious wag.")
+    .SetDialog(new DialogNode("The dog looks up, waiting.")
+        .AddOption("Show the flyer")
+        .AddOption("Offer a hand to sniff"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -354,6 +365,7 @@ apartmentUnit.AddNpc(agent);
 bar.AddNpc(bouncer);
 bar.AddNpc(brawler);
 nightStreet.AddNpc(stranger);
+park.AddNpc(dog);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));

@@ -17,6 +17,10 @@ var sword = ItemFactory.NewItem("rusty sword", 3.5f, "blade", "sword","pointy th
 Item apple = "red apple";
 apple.SetWeight(0.4f).AddAliases("apple");
 
+var glass = new Glass("glass", "glass").SetWeight(0.6f);
+var ice = new Item("ice", "ice").SetWeight(0.5f);
+var fire = new Item("fire", "fire").SetWeight(0.5f);
+
 // Create locations
 Location entrance = "entrance";
 entrance.Description("You stand at the forest gate. It's dark and foreboding.");
@@ -35,8 +39,11 @@ cabin.Description("Inside a cozy wooden cabin. A treasure chest sits in the corn
 
 // Place items
 cave.AddItem(cabinKey);
+entrance.AddItem(ice);
 forest.AddItem(apple);
+forest.AddItem(fire);
 clearing.AddItem(sword);
+clearing.AddItem(glass);
 
 // Create locked door
 Door cabinDoor = "cabin door";
@@ -52,13 +59,15 @@ clearing.AddExit(Direction.In, cabin, cabinDoor);  // Locked!
 cave.AddExit(Direction.Down, entrance, oneWay: true);
 
 // Game state
-var state = new GameState(entrance);
+var recipeBook = new RecipeBook()
+    .Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water")));
+var state = new GameState(entrance, recipeBook: recipeBook);
 
 Console.WriteLine("=== FOREST ADVENTURE ===");
 Console.WriteLine("Find the key and unlock the cabin!");
 var commands = new[]
 {
-    "go", "look", "open", "unlock", "take", "drop", "use", "inventory", "stats", "quit"
+    "go", "look", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
 };
 Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
 

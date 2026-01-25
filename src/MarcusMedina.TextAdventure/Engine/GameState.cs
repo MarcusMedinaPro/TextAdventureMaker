@@ -13,13 +13,15 @@ public class GameState : IGameState
     public GameError LastMoveErrorCode { get; private set; }
     public IStats Stats { get; }
     public IInventory Inventory { get; }
+    public RecipeBook RecipeBook { get; }
 
-    public GameState(ILocation startLocation, IStats? stats = null, IInventory? inventory = null)
+    public GameState(ILocation startLocation, IStats? stats = null, IInventory? inventory = null, RecipeBook? recipeBook = null)
     {
         ArgumentNullException.ThrowIfNull(startLocation);
         CurrentLocation = startLocation;
         Stats = stats ?? new Stats(100);
         Inventory = inventory ?? new Inventory();
+        RecipeBook = recipeBook ?? new RecipeBook();
     }
 
     public bool Move(Direction direction)

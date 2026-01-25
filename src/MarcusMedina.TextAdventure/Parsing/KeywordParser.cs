@@ -98,6 +98,16 @@ public class KeywordParser : ICommandParser
             return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
         }
 
+        if (keyword is "combine" or "mix")
+        {
+            return ParseCombine(tokens);
+        }
+
+        if (keyword is "pour")
+        {
+            return ParsePour(tokens);
+        }
+
         if (keyword is "go" or "move")
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
@@ -138,5 +148,39 @@ public class KeywordParser : ICommandParser
     {
         var target = ParseItemName(tokens, 1);
         return target != null ? new GoToCommand(target) : new UnknownCommand();
+    }
+
+    private static ICommand ParseCombine(string[] tokens)
+    {
+        if (tokens.Length < 3)
+        {
+            return new UnknownCommand();
+        }
+
+        var parts = tokens.Skip(1)
+            .Where(t => !t.TextCompare("and") && !t.TextCompare("+"))
+            .ToArray();
+
+        if (parts.Length < 2)
+        {
+            return new UnknownCommand();
+        }
+
+        var right = parts[^1];
+        var left = parts.Take(parts.Length - 1).SpaceJoin();
+        return new CombineCommand(left, right);
+    }
+
+    private static ICommand ParsePour(string[] tokens)
+    {
+        var index = Array.FindIndex(tokens, t => t.TextCompare("into") || t.TextCompare("in"));
+        if (index <= 1 || index >= tokens.Length - 1)
+        {
+            return new UnknownCommand();
+        }
+
+        var fluid = tokens.Skip(1).Take(index - 1).SpaceJoin();
+        var container = tokens.Skip(index + 1).SpaceJoin();
+        return new PourCommand(fluid, container);
     }
 }

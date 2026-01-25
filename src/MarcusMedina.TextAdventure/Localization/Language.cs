@@ -27,6 +27,8 @@ public static class Language
     public const string TooHeavy = "You're carrying too much.";
     public const string NothingToTake = "There's nothing to take.";
     public const string NothingToDrop = "You have nothing to drop.";
+    public const string CannotCombineItems = "Those items can't be combined.";
+    public const string CannotPourThat = "You can't pour that.";
 
     public const string DoorLockedTemplate = "The {0} is locked.";
     public const string DoorClosedTemplate = "The {0} is closed.";
@@ -43,6 +45,8 @@ public static class Language
     public const string DropAllTemplate = "You drop: {0}.";
     public const string ItemWithWeightTemplate = "{0} ({1})";
     public const string ItemDescriptionTemplate = "It's a {0}.";
+    public const string CombineResultTemplate = "You combine {0} and {1}.";
+    public const string PourResultTemplate = "You pour the {0} into the {1}.";
 
     public static string DoorLocked(string doorName) =>
         DoorLockedTemplate.GamePrint(doorName);
@@ -94,4 +98,10 @@ public static class Language
 
     public static string DoorAlreadyOpenMessage(string doorName) =>
         DoorAlreadyOpen.GamePrint(doorName);
+
+    public static string CombineResult(string left, string right) =>
+        CombineResultTemplate.GamePrint(left, right);
+
+    public static string PourResult(string fluid, string container) =>
+        PourResultTemplate.GamePrint(fluid, container);
 }

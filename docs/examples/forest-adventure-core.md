@@ -1,5 +1,7 @@
 # Forest Adventure (Core API, no shortcuts)
 
+_Slice tag: Slice 4–10 — Foundation demo spanning items, inventory, reactions, NPCs, combat, quests, worldstate, save/load._
+
 This version uses the core API and fluent methods, but **no implicit operators**, **no helper shortcuts**, and **no extensions**.
 
 ```csharp

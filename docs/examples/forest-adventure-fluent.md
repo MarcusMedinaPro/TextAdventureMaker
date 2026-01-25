@@ -1,5 +1,7 @@
 # Forest Adventure (Fluent + shortcuts)
 
+_Slice tag: Slice 4–10 — Foundation demo spanning items, inventory, reactions, NPCs, combat, quests, worldstate, save/load._
+
 This version leans into the fluent style: implicit operators, tuple constructors, and helper shortcuts.
 
 ```csharp

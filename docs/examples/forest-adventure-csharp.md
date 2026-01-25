@@ -1,5 +1,7 @@
 # Forest Adventure (Classic C# style)
 
+_Slice tag: Slice 4–10 — Foundation demo spanning items, inventory, reactions, NPCs, combat, quests, worldstate, save/load._
+
 This version is intentionally “plain C#”: explicit constructors, explicit collections, minimal fluent chaining, and no shortcuts.
 
 ```csharp

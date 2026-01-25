@@ -92,6 +92,7 @@ var locationList = new LocationList();
 var watchtower = locationList.Add("watchtower", "A wind-bitten watchtower overlooking the forest.");
 var garden = locationList.Add("garden", "A quiet garden. A flat stone rests near an old gate.");
 var courtyard = locationList.Add("courtyard", "A small courtyard where something waits.");
+var attic = locationList.Add("attic", "Rain drums against the roof. A leak gathers overhead.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -101,9 +102,11 @@ shed.AddItem(extraItems["shovel"]);
 watchtower.AddItem(itemList["compass"]);
 cabin.AddItem(itemList["blanket"]);
 garden.AddItem(new Item("stone", "stone", "A heavy flat stone."));
+attic.AddItem(new Item("bucket", "bucket", "A metal bucket."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
+cabin.AddExit(Direction.Up, attic);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.");
 var gardenGate = new Door("garden_gate", "garden gate", "An old iron gate.")
@@ -122,11 +125,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon");
+    .AddMany("fox", "dragon", "storm");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -141,8 +144,15 @@ var dragon = npcList["dragon"]
     .Dialog("The dragon snores softly.")
     .SetMovement(new NoNpcMovement());
 
+var storm = npcList["storm"]
+    .SetState(NpcState.Hostile)
+    .SetStats(new Stats(12))
+    .Description("A relentless leak you must endure.")
+    .SetMovement(new NoNpcMovement());
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
+attic.AddNpc(storm);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));

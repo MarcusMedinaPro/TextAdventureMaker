@@ -1,3 +1,7 @@
+// <copyright file="Program.cs" company="Marcus Ackre Medina">
+// Copyright (c) Marcus Ackre Medina. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -115,6 +119,9 @@ var waitingRoom = locationList.Add("waiting_room", "Plastic chairs and a quiet T
 var examRoom = locationList.Add("exam_room", "A clean exam room with a curtained bed.");
 var roadside = locationList.Add("roadside", "Your car sits dead on the shoulder with the hood up.");
 var gasStation = locationList.Add("gas_station", "A small gas station with a service bay.");
+var apartmentLobby = locationList.Add("apartment_lobby", "A tidy lobby with a directory and fresh paint.");
+var apartmentUnit = locationList.Add("apartment_unit", "A bright unit with tall windows and clean floors.");
+var balcony = locationList.Add("balcony", "A small balcony overlooking the street.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -149,6 +156,9 @@ examRoom.AddItem(new Item("results", "test results", "The results are normal.").
 roadside.AddItem(new Item("phone", "phone", "Low battery, but still works."));
 gasStation.AddItem(new Item("wrench", "wrench", "A sturdy wrench for a stubborn bolt."));
 gasStation.AddItem(new Item("jack", "jack", "A heavy jack for lifting the car."));
+apartmentLobby.AddItem(new Item("brochure", "brochure", "A brochure listing amenities and fees."));
+apartmentUnit.AddItem(new Item("inspection", "inspection list", "A checklist of items to review."));
+balcony.AddItem(new Item("view", "view", "The city lights shimmer below.").SetTakeable(false));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -175,6 +185,9 @@ reception.AddExit(Direction.East, waitingRoom);
 waitingRoom.AddExit(Direction.North, examRoom);
 taxiStand.AddExit(Direction.South, roadside);
 roadside.AddExit(Direction.East, gasStation);
+gasStation.AddExit(Direction.North, apartmentLobby);
+apartmentLobby.AddExit(Direction.In, apartmentUnit);
+apartmentUnit.AddExit(Direction.East, balcony);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -203,11 +216,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -280,6 +293,14 @@ var mechanic = npcList["mechanic"]
         .AddOption("Ask for a wrench")
         .AddOption("Ask for a jack"));
 
+var agent = npcList["agent"]
+    .SetState(NpcState.Friendly)
+    .Description("An agent waits with a small stack of keys.")
+    .SetDialog(new DialogNode("Any questions about the unit?")
+        .AddOption("Ask about noise levels")
+        .AddOption("Ask about utilities")
+        .AddOption("Ask about move-in dates"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -290,6 +311,7 @@ interviewRoom.AddNpc(interviewer);
 reception.AddNpc(receptionist);
 examRoom.AddNpc(nurse);
 gasStation.AddNpc(mechanic);
+apartmentUnit.AddNpc(agent);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));

@@ -8,38 +8,33 @@ using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Localization;
 
 // Create items (all styles are valid)
-var cabinKey = new Key("cabin_key", "brass key");
-cabinKey.SetWeight(0.1f);
-cabinKey.AddAliases("key", "brass key");
+Key cabinKey = (id: "cabin_key", name: "brass key", description: "A small brass key with worn teeth.");
+cabinKey.SetWeight(0.1f).AddAliases("key", "brass key");
 
-var sword = ItemFactory.NewItem("rusty sword", 3.5f, "blade", "sword","pointy thing");
+Item sword = (id: "sword", name: "rusty sword", description: "A rusted blade with a dull edge.");
+sword.SetWeight(3.5f).AddAliases("blade", "sword", "pointy thing");
 
-Item apple = "red apple";
+Item apple = (id: "apple", name: "red apple", description: "A crisp red apple.");
 apple.SetWeight(0.4f).AddAliases("apple");
 
-var glass = new Glass("glass", "glass").SetWeight(0.6f);
-var ice = new Item("ice", "ice")
-    .SetWeight(0.5f)
+Glass glass = (id: "glass", name: "glass", description: "A clear drinking glass.");
+glass.SetWeight(0.6f);
+
+Item ice = (id: "ice", name: "ice", description: "A cold chunk of ice.");
+ice.SetWeight(0.5f)
     .SetReaction(ItemAction.Take, "The cold chills your hand.")
     .SetReaction(ItemAction.Drop, "It lands with a soft thump.")
     .SetReaction(ItemAction.Use, "You take a bite. Your teeth ache.");
-var fire = new Item("fire", "fire").SetWeight(0.5f);
+
+Item fire = (id: "fire", name: "fire", description: "A flickering flame.");
+fire.SetWeight(0.5f);
 
 // Create locations
-Location entrance = "entrance";
-entrance.Description("You stand at the forest gate. It's dark and foreboding.");
-
-Location forest = "forest";
-forest.Description("A thick forest surrounds you. Shadows stretch long between ancient trees.");
-
-Location cave = "cave";
-cave.Description("A dark cave with glowing mushrooms. A brass key glints on the ground!");
-
-Location clearing = "clearing";
-clearing.Description("A sunny clearing with wildflowers. A small cabin stands here.");
-
-Location cabin = "cabin";
-cabin.Description("Inside a cozy wooden cabin. A treasure chest sits in the corner!");
+Location entrance = (id: "entrance", description: "You stand at the forest gate. It's dark and foreboding.");
+Location forest = (id: "forest", description: "A thick forest surrounds you. Shadows stretch long between ancient trees.");
+Location cave = (id: "cave", description: "A dark cave with glowing mushrooms. A brass key glints on the ground!");
+Location clearing = (id: "clearing", description: "A sunny clearing with wildflowers. A small cabin stands here.");
+Location cabin = (id: "cabin", description: "Inside a cozy wooden cabin. A treasure chest sits in the corner!");
 
 // Place items
 cave.AddItem(cabinKey);
@@ -50,7 +45,7 @@ clearing.AddItem(sword);
 clearing.AddItem(glass);
 
 // Create locked door
-Door cabinDoor = "cabin door";
+Door cabinDoor = (id: "cabin_door", name: "cabin door", description: "A sturdy wooden door with iron hinges.");
 cabinDoor.RequiresKey(cabinKey);
 cabinDoor
     .SetReaction(DoorAction.Unlock, "The lock clicks open.")
@@ -67,7 +62,7 @@ cave.AddExit(Direction.Down, entrance, oneWay: true);
 
 // Game state
 var recipeBook = new RecipeBook()
-    .Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water")));
+    .Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
 var state = new GameState(entrance, recipeBook: recipeBook);
 
 Console.WriteLine("=== FOREST ADVENTURE ===");

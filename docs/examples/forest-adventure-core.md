@@ -153,12 +153,16 @@ var recipeBook = new RecipeBook()
 // Game state
 var state = new GameState(entrance, recipeBook: recipeBook);
 var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin, shed };
+state.RegisterLocations(locations);
 var dragonAwake = false;
 
 // Quest
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
+    .AddCondition(new WorldFlagCondition("dragon_defeated"))
+    .AddCondition(new WorldCounterCondition("villagers_saved", 1))
+    .AddCondition(new RelationshipCondition("fox", 2))
     .Start();
 
 // Events
@@ -173,6 +177,38 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
         dragon.Dialog("The dragon roars as it wakes.");
         dragon.SetMovement(dragonPatrol);
         Console.WriteLine("\nThe dragon stirs and awakens!");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    state.WorldState.Increment("days_elapsed");
+    if (e.Location != null)
+    {
+        state.WorldState.AddTimeline($"Entered {e.Location.Id}.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.PickupItem, e =>
+{
+    if (e.Item != null && e.Item.Id == "apple")
+    {
+        state.WorldState.Increment("villagers_saved");
+    }
+});
+
+state.Events.Subscribe(GameEventType.TalkToNpc, e =>
+{
+    if (e.Npc != null && e.Npc.Id == "fox")
+    {
+        var reputation = state.WorldState.GetRelationship("fox") + 1;
+        state.WorldState.SetRelationship("fox", reputation);
+        if (reputation >= 2)
+        {
+            e.Npc.SetDialog(new DialogNode("The fox seems to trust you now.")
+                .AddOption("Ask about the dragon")
+                .AddOption("Ask about the shed"));
+        }
     }
 });
 
@@ -194,6 +230,8 @@ var parserConfig = new KeywordParserConfig(
     talk: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "talk", "speak" },
     attack: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "attack", "fight" },
     flee: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "flee", "run" },
+    save: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "save" },
+    load: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "load" },
     all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
     ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
     combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },

@@ -172,6 +172,7 @@ var recipeBook = new RecipeBook()
     .Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
 var state = new GameState(entrance, recipeBook: recipeBook);
 var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin, shed };
+state.RegisterLocations(locations);
 var dragonAwake = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
@@ -234,7 +235,7 @@ Console.WriteLine("Find the key and unlock the cabin!");
 Console.WriteLine($"Quest started: {dragonHunt.Title} - {dragonHunt.Description}");
 var commands = new[]
 {
-    "go", "look", "talk", "attack", "flee", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
+    "go", "look", "talk", "attack", "flee", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "save", "load", "quit"
 };
 Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
 
@@ -255,6 +256,8 @@ var parserConfig = new KeywordParserConfig(
     talk: CommandHelper.NewCommands("talk", "speak"),
     attack: CommandHelper.NewCommands("attack", "fight"),
     flee: CommandHelper.NewCommands("flee", "run"),
+    save: CommandHelper.NewCommands("save"),
+    load: CommandHelper.NewCommands("load"),
     all: CommandHelper.NewCommands("all"),
     ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
     combineSeparators: CommandHelper.NewCommands("and", "+"),

@@ -523,11 +523,11 @@ var letter = new Item("letter", "Sealed Letter")
 
 **Mål:** NPCs i rum, prata med dem, dialog-träd. NPCs rör sig.
 
-### Task 5.1: INpc + Npc (State pattern — Friendly/Hostile/Dead)
-### Task 5.2: Dialog system (Composite — konversationsträd)
-### Task 5.3: NPC Movement (Strategy — None, Random, Patrol, Follow)
-### Task 5.4: TalkCommand
-### Task 5.5: Sandbox — prata med räven, drake patrullerar mellan grottor
+### Task 5.1: INpc + Npc (State pattern — Friendly/Hostile/Dead) ✅
+### Task 5.2: Dialog system (Composite — konversationsträd) ✅
+### Task 5.3: NPC Movement (Strategy — None, Random, Patrol, Follow) ✅
+### Task 5.4: TalkCommand ✅
+### Task 5.5: Sandbox — prata med räven, drake patrullerar mellan grottor ✅
 
 ---
 
@@ -2742,4 +2742,3 @@ Story
         meaning: "You have found shelter, warmth, and understanding."
     );
 ```
-

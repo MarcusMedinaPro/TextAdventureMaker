@@ -139,6 +139,7 @@ var darkHall = locationList.Add("dark_hall", "A hallway swallowed by the power o
 var utilityRoom = locationList.Add("utility_room", "A utility room with humming equipment.");
 var bedroom = locationList.Add("bedroom", "A small bedroom lit by the glow of a phone screen.");
 var doorstep = locationList.Add("doorstep", "A doorstep with a damp welcome mat.");
+var playground = locationList.Add("playground", "An abandoned playground with creaking swings.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -193,6 +194,8 @@ darkHall.AddItem(new Item("flashlight", "flashlight", "A heavy flashlight with w
 utilityRoom.AddItem(new Item("breaker", "breaker box", "A row of breakers labeled by zone.").SetTakeable(false));
 bedroom.AddItem(new Item("landline", "phone", "A phone buzzing with an incoming call.").SetTakeable(false));
 doorstep.AddItem(new Item("package", "package", "A small package with a smudged label."));
+playground.AddItem(new Item("swing", "swing", "A swing creaks in the wind.").SetTakeable(false));
+playground.AddItem(new Item("toy", "stuffed toy", "A worn stuffed toy with a stitched tag."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -238,6 +241,7 @@ maintenance.AddExit(Direction.North, darkHall);
 darkHall.AddExit(Direction.East, utilityRoom);
 frontPorch.AddExit(Direction.In, bedroom);
 frontPorch.AddExit(Direction.South, doorstep);
+park.AddExit(Direction.West, playground);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -275,7 +279,7 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom, elevator, maintenance, darkHall, utilityRoom, bedroom, doorstep });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom, elevator, maintenance, darkHall, utilityRoom, bedroom, doorstep, playground });
 
 // Create NPCs
 var npcList = new NpcList()
@@ -468,6 +472,7 @@ var elevatorStuckNotified = false;
 var outageNotified = false;
 var midnightCallNotified = false;
 var packageNotified = false;
+var playgroundNotified = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
@@ -591,6 +596,16 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
     {
         packageNotified = true;
         Console.WriteLine("\nA package sits on the mat, damp from the rain.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (playgroundNotified) return;
+    if (e.Location != null && e.Location.Id.TextCompare("playground"))
+    {
+        playgroundNotified = true;
+        Console.WriteLine("\nThe swings squeak as the wind picks up.");
     }
 });
 

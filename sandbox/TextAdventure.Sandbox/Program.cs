@@ -138,6 +138,7 @@ var maintenance = locationList.Add("maintenance", "A maintenance corridor lined 
 var darkHall = locationList.Add("dark_hall", "A hallway swallowed by the power outage.");
 var utilityRoom = locationList.Add("utility_room", "A utility room with humming equipment.");
 var bedroom = locationList.Add("bedroom", "A small bedroom lit by the glow of a phone screen.");
+var doorstep = locationList.Add("doorstep", "A doorstep with a damp welcome mat.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -191,6 +192,7 @@ maintenance.AddItem(new Item("panel", "panel", "A loose access panel with a warn
 darkHall.AddItem(new Item("flashlight", "flashlight", "A heavy flashlight with weak batteries."));
 utilityRoom.AddItem(new Item("breaker", "breaker box", "A row of breakers labeled by zone.").SetTakeable(false));
 bedroom.AddItem(new Item("landline", "phone", "A phone buzzing with an incoming call.").SetTakeable(false));
+doorstep.AddItem(new Item("package", "package", "A small package with a smudged label."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -235,6 +237,7 @@ elevator.AddExit(Direction.East, maintenance);
 maintenance.AddExit(Direction.North, darkHall);
 darkHall.AddExit(Direction.East, utilityRoom);
 frontPorch.AddExit(Direction.In, bedroom);
+frontPorch.AddExit(Direction.South, doorstep);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -272,11 +275,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom, elevator, maintenance, darkHall, utilityRoom, bedroom });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom, elevator, maintenance, darkHall, utilityRoom, bedroom, doorstep });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard", "archivist", "operator", "technician", "caller");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard", "archivist", "operator", "technician", "caller", "neighbor");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -423,6 +426,13 @@ var caller = npcList["caller"]
         .AddOption("Ask who this is")
         .AddOption("Hang up"));
 
+var neighbor = npcList["neighbor"]
+    .SetState(NpcState.Friendly)
+    .Description("A neighbor peers from a cracked door.")
+    .SetDialog(new DialogNode("Was this package left for you?")
+        .AddOption("Accept the package")
+        .AddOption("Ask who dropped it off"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -443,6 +453,7 @@ photoArchive.AddNpc(archivist);
 elevator.AddNpc(operatorVoice);
 utilityRoom.AddNpc(technician);
 bedroom.AddNpc(caller);
+doorstep.AddNpc(neighbor);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
@@ -456,6 +467,7 @@ var oldPhotoNotified = false;
 var elevatorStuckNotified = false;
 var outageNotified = false;
 var midnightCallNotified = false;
+var packageNotified = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
@@ -569,6 +581,16 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
     {
         midnightCallNotified = true;
         Console.WriteLine("\nThe phone rings in the silence.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (packageNotified) return;
+    if (e.Location != null && e.Location.Id.TextCompare("doorstep"))
+    {
+        packageNotified = true;
+        Console.WriteLine("\nA package sits on the mat, damp from the rain.");
     }
 });
 

@@ -109,6 +109,10 @@ var sideStreet = locationList.Add("side_street", "A side street with rain-slick 
 var busStop = locationList.Add("bus_stop", "A lonely bus stop with a torn schedule.");
 var footbridge = locationList.Add("footbridge", "A narrow footbridge over the tracks.");
 var taxiStand = locationList.Add("taxi_stand", "A small taxi stand with no cabs in sight.");
+var hospitalEntrance = locationList.Add("hospital_entrance", "Automatic doors slide open to a bright lobby.");
+var reception = locationList.Add("reception", "A reception desk with a stack of forms.");
+var waitingRoom = locationList.Add("waiting_room", "Plastic chairs and a quiet TV loop.");
+var examRoom = locationList.Add("exam_room", "A clean exam room with a curtained bed.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -136,6 +140,10 @@ stationHall.AddItem(new Item("board", "departure board", "The next train is mark
 stationHall.AddItem(new Item("ticket_stub", "ticket stub", "The punch marks show you were late."));
 busStop.AddItem(new Item("schedule", "schedule", "Next bus in 20 minutes.").SetTakeable(false));
 taxiStand.AddItem(new Item("sign", "rideshare sign", "Maybe a rideshare app could work.").SetTakeable(false));
+reception.AddItem(new Item("forms", "intake forms", "Paperwork asking the usual questions."));
+reception.AddItem(new Item("clipboard", "clipboard", "A clipboard for check-in."));
+waitingRoom.AddItem(new Item("magazine", "magazine", "Outdated magazines and a crossword."));
+examRoom.AddItem(new Item("results", "test results", "The results are normal.").SetTakeable(false));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -156,6 +164,10 @@ sideStreet.AddExit(Direction.South, busStop);
 sideStreet.AddExit(Direction.West, taxiStand);
 platform.AddExit(Direction.North, footbridge);
 footbridge.AddExit(Direction.East, busStop);
+busStop.AddExit(Direction.South, hospitalEntrance);
+hospitalEntrance.AddExit(Direction.In, reception);
+reception.AddExit(Direction.East, waitingRoom);
+waitingRoom.AddExit(Direction.North, examRoom);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -184,11 +196,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -240,6 +252,20 @@ var interviewer = npcList["interviewer"]
         .AddOption("Ask about the team")
         .AddOption("Admit you're nervous"));
 
+var receptionist = npcList["receptionist"]
+    .SetState(NpcState.Friendly)
+    .Description("A receptionist with a calm voice.")
+    .SetDialog(new DialogNode("Can I get your name and date of birth?")
+        .AddOption("Hand over the clipboard")
+        .AddOption("Ask about the wait time"));
+
+var nurse = npcList["nurse"]
+    .SetState(NpcState.Friendly)
+    .Description("A nurse taps a tablet, waiting for you.")
+    .SetDialog(new DialogNode("We can bring you in now.")
+        .AddOption("Follow to the exam room")
+        .AddOption("Ask about the tests"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -247,11 +273,14 @@ cafe.AddNpc(date);
 bankCounter.AddNpc(teller);
 alley.AddNpc(mugger);
 interviewRoom.AddNpc(interviewer);
+reception.AddNpc(receptionist);
+examRoom.AddNpc(nurse);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
 var dragonAwake = false;
 var missedTrainNotified = false;
+var hospitalCalled = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
@@ -285,6 +314,16 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
     {
         missedTrainNotified = true;
         Console.WriteLine("\nThe train pulls away as you arrive. You'll need another route.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (hospitalCalled) return;
+    if (e.Location != null && e.Location.Id.TextCompare("waiting_room"))
+    {
+        hospitalCalled = true;
+        Console.WriteLine("\nA nurse calls your name from the hall.");
     }
 });
 

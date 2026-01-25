@@ -1,18 +1,16 @@
 # Morning Ritual
 
-_Slice tag: Slice 10 — Save/Load (Memento). Demo focuses on simple worldstate progression and a calm “routine” loop._
+_Slice tag: Slice 1 — Location + Navigation. Demo focuses on moving between rooms in a simple routine._
 
 A tiny, quiet demo about waking up, making coffee, finding the newspaper, and reading in the sun.
 
 ## Story beats (max ~10 steps)
 1) Wake up in the bedroom.
 2) Walk to the kitchen.
-3) Grab a mug and coffee beans.
-4) Find the newspaper.
-5) Go to the living room.
-6) Sit down and read.
+3) Go to the living room.
+4) Sit down by the window.
 
-## Example (core engine + worldstate flags)
+## Example (core engine + navigation only)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
@@ -29,46 +27,8 @@ bedroom.AddExit(Direction.East, kitchen);
 kitchen.AddExit(Direction.South, livingRoom);
 livingRoom.AddExit(Direction.North, kitchen);
 
-// Items
-var mug = new Item("mug", "mug", "A clean ceramic mug.");
-var beans = new Item("beans", "coffee beans", "Freshly roasted coffee beans.");
-var newspaper = new Item("newspaper", "morning paper", "The morning headlines.")
-    .SetReadable()
-    .SetReadText("You read the headlines. The world feels far away.");
-
-kitchen.AddItem(mug);
-kitchen.AddItem(beans);
-bedroom.AddItem(newspaper);
-
 // Game state
 var state = new GameState(bedroom, worldLocations: new[] { bedroom, kitchen, livingRoom });
-
-// WorldState hooks
-state.Events.Subscribe(GameEventType.PickupItem, e =>
-{
-    if (e.Item == null) return;
-    if (e.Item.Id == "mug") state.WorldState.SetFlag("has_mug", true);
-    if (e.Item.Id == "beans") state.WorldState.SetFlag("has_beans", true);
-    if (e.Item.Id == "newspaper") state.WorldState.SetFlag("has_paper", true);
-});
-
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (e.Location == null || e.Location.Id != "living_room") return;
-
-    var ready = state.WorldState.GetFlag("has_mug")
-        && state.WorldState.GetFlag("has_beans")
-        && state.WorldState.GetFlag("has_paper");
-
-    if (ready)
-    {
-        Console.WriteLine("Coffee in hand, you settle into the couch and start to read.");
-    }
-    else
-    {
-        Console.WriteLine("You feel like you're missing something.");
-    }
-});
 
 // Parser config (minimal)
 var parserConfig = new KeywordParserConfig(

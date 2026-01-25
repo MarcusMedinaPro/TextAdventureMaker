@@ -24,10 +24,30 @@ var apple = new Item("apple", "red apple", "A crisp red apple.")
 
 // GameItemList (CRUD, id from name)
 var extraItems = new GameItemList()
-    .AddMany("cat", "rubber chicken", "map");
+    .AddMany("cat", "rubber chicken", "map", "shovel");
 extraItems["cat"].SetWeight(3f).AddAliases("kitten", "kitteh");
 extraItems["rubber chicken"].SetWeight(0.8f).AddAliases("chicken", "rubberchicken");
 extraItems["map"].SetWeight(0.2f).AddAliases("parchment", "chart");
+extraItems["shovel"].SetWeight(2.5f).AddAliases("spade");
+
+// GameList for keys and doors (explicit id creation)
+var keyList = new GameList<Key>(name =>
+{
+    var id = name.Trim().ToLowerInvariant().Replace(' ', '_');
+    return new Key(id, name);
+});
+keyList.AddMany("shed key");
+keyList["shed key"].SetWeight(0.2f).AddAliases("shedkey");
+
+var doorList = new GameList<Door>(name =>
+{
+    var id = name.Trim().ToLowerInvariant().Replace(' ', '_');
+    return new Door(id, name);
+});
+doorList.AddMany("shed door");
+doorList["shed door"]
+    .RequiresKey(keyList["shed key"])
+    .SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 var glass = new Glass("glass", "glass", "A clear drinking glass.")
     .SetWeight(0.6f)
@@ -76,6 +96,7 @@ var cave = new Location("cave", "A dark cave with glowing mushrooms. A brass key
 var deepCave = new Location("deep_cave", "The cave narrows into a jagged tunnel. You hear a distant rumble.");
 var clearing = new Location("clearing", "A sunny clearing with wildflowers. A small cabin stands here.");
 var cabin = new Location("cabin", "Inside a cozy wooden cabin. A treasure chest sits in the corner!");
+var shed = new Location("shed", "A small wooden shed with tools hanging on the walls.");
 
 // Place items
 cave.AddItem(cabinKey);
@@ -86,10 +107,12 @@ forest.AddItem(apple);
 forest.AddItem(fire);
 forest.AddItem(lantern);
 forest.AddItem(extraItems["cat"]);
+forest.AddItem(keyList["shed key"]);
 clearing.AddItem(sword);
 clearing.AddItem(glass);
 clearing.AddItem(tome);
 clearing.AddItem(extraItems["rubber chicken"]);
+shed.AddItem(extraItems["shovel"]);
 cave.AddItem(letter);
 cabin.AddItem(newspaper);
 
@@ -105,6 +128,7 @@ forest.AddExit(Direction.East, cave);
 forest.AddExit(Direction.West, clearing);
 cave.AddExit(Direction.North, deepCave);
 clearing.AddExit(Direction.In, cabin, cabinDoor);
+clearing.AddExit(Direction.North, shed, doorList["shed door"]);
 
 // One-way trap
 cave.AddExit(Direction.Down, entrance, oneWay: true);
@@ -131,7 +155,7 @@ var recipeBook = new RecipeBook()
 
 // Game state
 var state = new GameState(entrance, recipeBook: recipeBook);
-var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin };
+var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin, shed };
 var dragonAwake = false;
 
 // Quest

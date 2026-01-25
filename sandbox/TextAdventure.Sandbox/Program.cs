@@ -128,6 +128,9 @@ var nightStreet = locationList.Add("night_street", "A long street with patchy st
 var underpass = locationList.Add("underpass", "A shadowy underpass humming with distant traffic.");
 var frontPorch = locationList.Add("front_porch", "A quiet front porch with a locked gate.");
 var park = locationList.Add("park", "A small park with damp grass and a lone bench.");
+var schoolHallway = locationList.Add("school_hallway", "A dim hallway lined with closed doors.");
+var lockedClassroom = locationList.Add("locked_classroom", "A classroom dark behind the glass.");
+var securityOffice = locationList.Add("security_office", "A small office with a wall of monitors.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -173,6 +176,7 @@ underpass.AddItem(new Item("whistle", "whistle", "A small whistle on a frayed co
 frontPorch.AddItem(new Item("gate", "gate", "The gate is locked, but the house lights are on.").SetTakeable(false));
 park.AddItem(new Item("flyer", "flyer", "LOST DOG: small terrier, answers to Pip."));
 park.AddItem(new Item("bench", "bench", "A damp bench with rain beading on the wood.").SetTakeable(false));
+schoolHallway.AddItem(new Item("notice", "notice", "AUTHORIZED PERSONNEL ONLY.").SetTakeable(false));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -208,6 +212,8 @@ barAlley.AddExit(Direction.East, nightStreet);
 nightStreet.AddExit(Direction.East, underpass);
 nightStreet.AddExit(Direction.West, park);
 underpass.AddExit(Direction.North, frontPorch);
+park.AddExit(Direction.North, schoolHallway);
+schoolHallway.AddExit(Direction.West, securityOffice);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -223,6 +229,15 @@ var libraryDoor = new Door("library_door", "library door", "A heavy wooden door.
     .SetHint("It needs a key, duh");
 libraryOutside.AddExit(Direction.In, library, libraryDoor);
 
+var classroomKey = new Key("classroom_key", "classroom key", "A worn key with a scratched tag.")
+    .SetHint("Looks like it fits a classroom door.");
+securityOffice.AddItem(classroomKey);
+var classroomDoor = new Door("classroom_door", "classroom door", "A reinforced classroom door.")
+    .RequiresKey(classroomKey)
+    .SetReaction(DoorAction.Unlock, "The lock pops open.")
+    .SetHint("A keyhole waits here.");
+schoolHallway.AddExit(Direction.East, lockedClassroom, classroomDoor);
+
 coffeeCup.OnUse += _ => coffeeCup.SetHint("Yum! Coffee good!");
 
 // Doors from DSL
@@ -236,11 +251,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -351,6 +366,13 @@ var dog = npcList["dog"]
         .AddOption("Show the flyer")
         .AddOption("Offer a hand to sniff"));
 
+var guard = npcList["guard"]
+    .SetState(NpcState.Friendly)
+    .Description("A night guard watches the hallway.")
+    .SetDialog(new DialogNode("This wing is locked after hours.")
+        .AddOption("Explain why you're here")
+        .AddOption("Ask about the classroom"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -366,6 +388,7 @@ bar.AddNpc(bouncer);
 bar.AddNpc(brawler);
 nightStreet.AddNpc(stranger);
 park.AddNpc(dog);
+schoolHallway.AddNpc(guard);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
@@ -374,6 +397,7 @@ var missedTrainNotified = false;
 var hospitalCalled = false;
 var barTensionNotified = false;
 var nightWalkNotified = false;
+var schoolAlarmNotified = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
@@ -437,6 +461,16 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
     {
         nightWalkNotified = true;
         Console.WriteLine("\nYour footsteps echo. The street feels longer at night.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (schoolAlarmNotified) return;
+    if (e.Location != null && e.Location.Id.TextCompare("school_hallway"))
+    {
+        schoolAlarmNotified = true;
+        Console.WriteLine("\nA soft alarm chirps as you enter the hallway.");
     }
 });
 

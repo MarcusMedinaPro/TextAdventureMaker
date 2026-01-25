@@ -244,90 +244,45 @@ var parserConfig = new KeywordParserConfig(
 
 var parser = new KeywordParser(parserConfig);
 
-void MoveNpcs()
-{
-    var moves = new List<(INpc npc, Location from, Location to)>();
-
-    foreach (var location in locations)
+var game = GameBuilder.Create()
+    .UseState(state)
+    .UseParser(parser)
+    .UsePrompt("> ")
+    .AddTurnStart(g =>
     {
-        foreach (var npc in location.Npcs.ToList())
+        var lookResult = g.State.Look();
+        g.Output.WriteLine($"\n{lookResult.Message}");
+        var inventoryResult = g.State.InventoryView();
+        g.Output.WriteLine(inventoryResult.Message);
+    })
+    .AddTurnEnd((g, command, result) =>
+    {
+        if (!g.State.WorldState.GetFlag("dragon_defeated") && !dragon.IsAlive)
         {
-            var next = npc.GetNextLocation(location, state);
-            if (next is Location nextLocation && !ReferenceEquals(nextLocation, location))
+            g.State.WorldState.SetFlag("dragon_defeated", true);
+            g.State.WorldState.AddTimeline("Dragon defeated.");
+        }
+
+        if (dragonHunt.CheckProgress(g.State))
+        {
+            g.Output.WriteLine($"\n*** QUEST COMPLETE: {dragonHunt.Title}! ***");
+        }
+
+        if (command is GoCommand go && result.Success)
+        {
+            if (g.State.IsCurrentRoomId("cabin"))
             {
-                moves.Add((npc, location, nextLocation));
+                g.Output.WriteLine("\n*** CONGRATULATIONS! You found the treasure! ***");
+                g.RequestStop();
+            }
+            else if (go.Direction == Direction.Down && g.State.CurrentLocation.Id == "entrance")
+            {
+                g.Output.WriteLine("Oops! You fell through a hole and ended up back at the entrance!");
             }
         }
-    }
+    })
+    .Build();
 
-    foreach (var (npc, from, to) in moves)
-    {
-        from.RemoveNpc(npc);
-        to.AddNpc(npc);
-    }
-}
-
-while (true)
-{
-    var lookResult = state.Look();
-    Console.WriteLine($"\n{lookResult.Message}");
-    var inventoryResult = state.InventoryView();
-    Console.WriteLine(inventoryResult.Message);
-
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim().Lower();
-
-    if (string.IsNullOrEmpty(input)) continue;
-
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
-
-    if (!string.IsNullOrWhiteSpace(result.Message))
-    {
-        Console.WriteLine(result.Message);
-    }
-
-    foreach (var reaction in result.ReactionsList)
-    {
-        if (!string.IsNullOrWhiteSpace(reaction))
-        {
-            Console.WriteLine($"> {reaction}");
-        }
-    }
-
-    if (result.ShouldQuit)
-    {
-        break;
-    }
-
-    if (!state.WorldState.GetFlag("dragon_defeated") && !dragon.IsAlive)
-    {
-        state.WorldState.SetFlag("dragon_defeated", true);
-        state.WorldState.AddTimeline("Dragon defeated.");
-    }
-
-    MoveNpcs();
-
-    if (dragonHunt.CheckProgress(state))
-    {
-        Console.WriteLine($"\n*** QUEST COMPLETE: {dragonHunt.Title}! ***");
-    }
-
-    if (command is GoCommand go && result.Success)
-    {
-        // Win condition
-        if (state.IsCurrentRoomId("cabin"))
-        {
-            Console.WriteLine("\n*** CONGRATULATIONS! You found the treasure! ***");
-            break;
-        }
-
-        // Fall trap
-        if (go.Direction == Direction.Down && state.CurrentLocation.Id == "entrance")
-        {
-            Console.WriteLine("Oops! You fell through a hole and ended up back at the entrance!");
-        }
-    }
-}
+game.Run();
 
 Console.WriteLine("\nThanks for playing!");

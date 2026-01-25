@@ -1,9 +1,49 @@
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 
 namespace MarcusMedina.TextAdventure.Parsing;
 
 public sealed class KeywordParserConfig
 {
+    public static KeywordParserConfig Default { get; } = new(
+        quit: CommandHelper.NewCommands("quit", "exit", "q"),
+        look: CommandHelper.NewCommands("look", "l"),
+        inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
+        stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
+        open: CommandHelper.NewCommands("open"),
+        unlock: CommandHelper.NewCommands("unlock"),
+        take: CommandHelper.NewCommands("take", "get", "pickup", "pick"),
+        drop: CommandHelper.NewCommands("drop"),
+        use: CommandHelper.NewCommands("use"),
+        combine: CommandHelper.NewCommands("combine", "mix"),
+        pour: CommandHelper.NewCommands("pour"),
+        go: CommandHelper.NewCommands("go", "move"),
+        read: CommandHelper.NewCommands("read"),
+        talk: CommandHelper.NewCommands("talk", "speak"),
+        attack: CommandHelper.NewCommands("attack", "fight"),
+        flee: CommandHelper.NewCommands("flee", "run"),
+        save: CommandHelper.NewCommands("save"),
+        load: CommandHelper.NewCommands("load"),
+        all: CommandHelper.NewCommands("all"),
+        ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
+        combineSeparators: CommandHelper.NewCommands("and", "+"),
+        pourPrepositions: CommandHelper.NewCommands("into", "in"),
+        directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["n"] = Direction.North,
+            ["s"] = Direction.South,
+            ["e"] = Direction.East,
+            ["w"] = Direction.West,
+            ["ne"] = Direction.NorthEast,
+            ["nw"] = Direction.NorthWest,
+            ["se"] = Direction.SouthEast,
+            ["sw"] = Direction.SouthWest,
+            ["u"] = Direction.Up,
+            ["d"] = Direction.Down,
+            ["in"] = Direction.In,
+            ["out"] = Direction.Out
+        },
+        allowDirectionEnumNames: true);
     public ISet<string> Quit { get; }
     public ISet<string> Look { get; }
     public ISet<string> Inventory { get; }

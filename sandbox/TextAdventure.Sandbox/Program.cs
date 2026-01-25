@@ -96,6 +96,7 @@ var attic = locationList.Add("attic", "Rain drums against the roof. A leak gathe
 var office = locationList.Add("office", "A quiet office with a locked terminal.");
 var libraryOutside = locationList.Add("library_outside", "Snow falls quietly outside a locked library.");
 var library = locationList.Add("library", "Warm light and quiet pages surround you.");
+var meeting = locationList.Add("meeting", "A small meeting room. A mirror hangs by the door.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -107,6 +108,9 @@ cabin.AddItem(itemList["blanket"]);
 garden.AddItem(new Item("stone", "stone", "A heavy flat stone."));
 attic.AddItem(new Item("bucket", "bucket", "A metal bucket."));
 office.AddItem(new Item("note", "post-it note", "A note with a hint: 0420."));
+office.AddItem(new Item("coffee", "coffee", "A hot cup of coffee."));
+office.AddItem(new Item("papers", "papers", "Notes for the meeting."));
+meeting.AddItem(new Item("mirror", "mirror", "A mirror for a quick check.").SetTakeable(false));
 var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.");
 courtyard.AddItem(libraryKey);
 
@@ -114,6 +118,7 @@ forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
 cabin.AddExit(Direction.Up, attic);
 cabin.AddExit(Direction.East, office);
+cabin.AddExit(Direction.North, meeting);
 courtyard.AddExit(Direction.North, libraryOutside);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.");
@@ -138,7 +143,7 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting });
 
 // Create NPCs
 var npcList = new NpcList()

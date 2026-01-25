@@ -57,7 +57,7 @@ public sealed class TurnBasedCombat : ICombatSystem
         return CommandResult.Ok(builder.ToString());
     }
 
-    public CommandResult Flee(IGameState state, INpc target)
+    public CommandResult Flee(IGameState state, INpc? target = null)
     {
         return CommandResult.Ok(Language.FleeSuccess);
     }

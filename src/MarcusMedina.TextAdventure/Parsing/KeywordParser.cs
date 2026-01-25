@@ -111,6 +111,18 @@ public class KeywordParser : ICommandParser
             return new TalkCommand(target);
         }
 
+        if (_config.Attack.Contains(keyword))
+        {
+            var target = ParseItemName(tokens, 1);
+            return new AttackCommand(target);
+        }
+
+        if (_config.Flee.Contains(keyword))
+        {
+            var target = ParseItemName(tokens, 1);
+            return new FleeCommand(target);
+        }
+
         if (_config.Go.Contains(keyword))
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)

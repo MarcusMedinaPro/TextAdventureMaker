@@ -23,6 +23,8 @@ public class KeywordParserTests
             go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go", "move", "cd" },
             read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
             talk: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "talk", "speak" },
+            attack: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "attack", "fight" },
+            flee: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "flee", "run" },
             all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
             ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
             combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },
@@ -176,6 +178,26 @@ public class KeywordParserTests
         var command = parser.Parse("talk fox");
 
         Assert.IsType<TalkCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_Attack_ReturnsAttackCommand()
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse("attack troll");
+
+        Assert.IsType<AttackCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_Flee_ReturnsFleeCommand()
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse("flee");
+
+        Assert.IsType<FleeCommand>(command);
     }
 
     [Theory]

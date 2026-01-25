@@ -18,6 +18,8 @@ public sealed class KeywordParserConfig
     public ISet<string> Go { get; }
     public ISet<string> Read { get; }
     public ISet<string> Talk { get; }
+    public ISet<string> Attack { get; }
+    public ISet<string> Flee { get; }
 
     public ISet<string> All { get; }
     public ISet<string> IgnoreItemTokens { get; }
@@ -42,6 +44,8 @@ public sealed class KeywordParserConfig
         ISet<string> go,
         ISet<string> read,
         ISet<string> talk,
+        ISet<string> attack,
+        ISet<string> flee,
         ISet<string> all,
         ISet<string> ignoreItemTokens,
         ISet<string> combineSeparators,
@@ -63,6 +67,8 @@ public sealed class KeywordParserConfig
         Go = go ?? throw new ArgumentNullException(nameof(go));
         Read = read ?? throw new ArgumentNullException(nameof(read));
         Talk = talk ?? throw new ArgumentNullException(nameof(talk));
+        Attack = attack ?? throw new ArgumentNullException(nameof(attack));
+        Flee = flee ?? throw new ArgumentNullException(nameof(flee));
         All = all ?? throw new ArgumentNullException(nameof(all));
         IgnoreItemTokens = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
         CombineSeparators = combineSeparators ?? throw new ArgumentNullException(nameof(combineSeparators));

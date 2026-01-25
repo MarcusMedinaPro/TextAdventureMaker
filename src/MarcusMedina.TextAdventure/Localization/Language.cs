@@ -41,6 +41,9 @@ public static class Language
     public const string TargetAlreadyDead = "That target is already dead.";
     public const string PlayerDefeated = "You collapse from your wounds.";
     public const string FleeSuccess = "You flee from the fight.";
+    public const string NoTargetToAttack = "Attack what?";
+    public const string NoOneToFight = "There's no one here to fight.";
+    public const string NoOneToFlee = "There's no one here to flee from.";
 
     public const string DoorLockedTemplate = "The {0} is locked.";
     public const string DoorClosedTemplate = "The {0} is closed.";

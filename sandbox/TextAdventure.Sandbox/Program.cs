@@ -155,7 +155,7 @@ Console.WriteLine("=== FOREST ADVENTURE ===");
 Console.WriteLine("Find the key and unlock the cabin!");
 var commands = new[]
 {
-    "go", "look", "talk", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
+    "go", "look", "talk", "attack", "flee", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
 };
 Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
 
@@ -174,6 +174,8 @@ var parserConfig = new KeywordParserConfig(
     go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go", "move", "cd" },
     read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
     talk: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "talk", "speak" },
+    attack: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "attack", "fight" },
+    flee: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "flee", "run" },
     all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
     ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
     combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },

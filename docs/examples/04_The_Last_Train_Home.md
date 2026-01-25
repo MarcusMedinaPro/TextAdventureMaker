@@ -13,6 +13,7 @@ _Slice tag: Slice 4 — Items + Inventory. Demo focuses on items, pickup, invent
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -82,6 +83,14 @@ while (true)
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
         Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
     }
 
     if (result.ShouldQuit) break;

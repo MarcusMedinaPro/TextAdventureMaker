@@ -12,6 +12,7 @@ _Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swappin
 ```csharp
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
@@ -49,6 +50,14 @@ while (true)
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
         Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
     }
 
     if (result.ShouldQuit) break;

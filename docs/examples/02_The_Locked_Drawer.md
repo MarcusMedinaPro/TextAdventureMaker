@@ -16,7 +16,9 @@ A tiny, focused demo with one room, a desk, a locked drawer, a photo, and a secr
 ```csharp
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
+using MarcusMedina.TextAdventure.Parsing;
 
 // Location
 var study = new Location("study", "A quiet study with a heavy desk and a single lamp.");
@@ -39,14 +41,31 @@ study.AddExit(Direction.In, study, drawer);
 // Game state
 var state = new GameState(study, worldLocations: new[] { study });
 
-// Simple flow (no commands yet in Slice 2)
-Console.WriteLine("You find a small key under the blotter.");
-var unlocked = drawer.Unlock(key);
-if (unlocked)
+// Parser + loop
+var parser = new KeywordParser(KeywordParserConfig.Default);
+
+while (true)
 {
-    drawer.Open();
-    study.AddItem(photo);
-    Console.WriteLine("Inside the drawer lies an old photo.");
-    Console.WriteLine("On the back: 'Meet me at the pier.'");
+    Console.Write("\n> ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrWhiteSpace(input)) continue;
+
+    var command = parser.Parse(input);
+    var result = state.Execute(command);
+
+    if (!string.IsNullOrWhiteSpace(result.Message))
+    {
+        Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
+    }
+
+    if (result.ShouldQuit) break;
 }
 ```

@@ -15,6 +15,7 @@ _Slice tag: Slice 3 — Command Pattern + Parser. Demo focuses on parsing comman
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -89,6 +90,14 @@ while (true)
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
         Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
     }
 
     if (command is GoCommand go && go.Direction == Direction.Down)

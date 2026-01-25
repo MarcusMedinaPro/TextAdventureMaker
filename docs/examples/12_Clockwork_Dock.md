@@ -25,6 +25,7 @@ location: ferry | The ferry creaks as it powers up.
 ## Example (load DSL)
 ```csharp
 using MarcusMedina.TextAdventure.Dsl;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Parsing;
 
 var parser = new AdventureDslParser();
@@ -32,4 +33,29 @@ var adventure = parser.ParseFile("clockwork.adventure");
 
 var state = adventure.State;
 var commandParser = new KeywordParser(KeywordParserConfig.Default);
+
+while (true)
+{
+    Console.Write("\n> ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrWhiteSpace(input)) continue;
+
+    var command = commandParser.Parse(input);
+    var result = state.Execute(command);
+
+    if (!string.IsNullOrWhiteSpace(result.Message))
+    {
+        Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
+    }
+
+    if (result.ShouldQuit) break;
+}
 ```

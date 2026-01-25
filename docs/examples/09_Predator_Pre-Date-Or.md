@@ -22,6 +22,7 @@ A tiny, choice-driven demo about getting ready for a date. The player chooses pa
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -100,13 +101,7 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
 });
 
 // Optional: skip the date entirely (ends the game)
-// In your main input loop, allow a direct choice:
-// if (input == "skip date" || input == "stay home")
-// {
-//     state.WorldState.SetFlag("skip_date", true);
-//     Console.WriteLine("You decide to stay in. Game over.");
-//     Environment.Exit(0);
-// }
+// (Handled in the loop below)
 
 // Parser config (minimal)
 var parserConfig = new KeywordParserConfig(
@@ -140,4 +135,36 @@ var parserConfig = new KeywordParserConfig(
     allowDirectionEnumNames: true);
 
 var parser = new KeywordParser(parserConfig);
+
+// Input loop
+while (true)
+{
+    Console.Write("\n> ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrEmpty(input)) continue;
+
+    if (input.TextCompare("skip date") || input.TextCompare("stay home"))
+    {
+        state.WorldState.SetFlag("skip_date", true);
+        Console.WriteLine("You decide to stay in. Game over.");
+        break;
+    }
+
+    var command = parser.Parse(input);
+    var result = state.Execute(command);
+    if (!string.IsNullOrWhiteSpace(result.Message))
+    {
+        Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
+    }
+
+    if (result.ShouldQuit) break;
+}
 ```

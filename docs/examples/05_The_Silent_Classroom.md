@@ -14,6 +14,7 @@ _Slice tag: Slice 5 — NPCs + Dialog + Movement. Demo focuses on talking to an 
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -74,6 +75,14 @@ while (true)
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
         Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
     }
 
     if (result.ShouldQuit) break;

@@ -8,6 +8,7 @@ This version is intentionally “plain C#”: explicit constructors, explicit co
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -258,4 +259,29 @@ var parserConfig = new KeywordParserConfig(
     allowDirectionEnumNames: true);
 
 var parser = new KeywordParser(parserConfig);
+
+while (true)
+{
+    Console.Write("\n> ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrWhiteSpace(input)) continue;
+
+    var command = parser.Parse(input);
+    var result = state.Execute(command);
+
+    if (!string.IsNullOrWhiteSpace(result.Message))
+    {
+        Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine($"> {reaction}");
+        }
+    }
+
+    if (result.ShouldQuit) break;
+}
 ```

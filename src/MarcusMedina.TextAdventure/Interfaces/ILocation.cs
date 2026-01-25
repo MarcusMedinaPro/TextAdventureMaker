@@ -10,7 +10,11 @@ public interface ILocation
     Exit? GetExit(Direction direction);
     IReadOnlyDictionary<Direction, Exit> Exits { get; }
     IReadOnlyList<IItem> Items { get; }
+    IReadOnlyList<INpc> Npcs { get; }
     void AddItem(IItem item);
     bool RemoveItem(IItem item);
     IItem? FindItem(string name);
+    void AddNpc(INpc npc);
+    bool RemoveNpc(INpc npc);
+    INpc? FindNpc(string name);
 }

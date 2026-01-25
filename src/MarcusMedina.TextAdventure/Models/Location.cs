@@ -1,4 +1,5 @@
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 
@@ -10,9 +11,11 @@ public class Location : ILocation
     private string _description = "";
     private readonly Dictionary<Direction, Exit> _exits = new();
     private readonly List<IItem> _items = new();
+    private readonly List<INpc> _npcs = new();
 
     public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
     public IReadOnlyList<IItem> Items => _items;
+    public IReadOnlyList<INpc> Npcs => _npcs;
 
     public Location(string id)
     {
@@ -78,6 +81,22 @@ public class Location : ILocation
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
         return _items.FirstOrDefault(i => i.Matches(name));
+    }
+
+    public void AddNpc(INpc npc)
+    {
+        _npcs.Add(npc);
+    }
+
+    public bool RemoveNpc(INpc npc)
+    {
+        return _npcs.Remove(npc);
+    }
+
+    public INpc? FindNpc(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        return _npcs.FirstOrDefault(n => n.Name.TextCompare(name));
     }
 
     public static implicit operator Location(string id) => new(id);

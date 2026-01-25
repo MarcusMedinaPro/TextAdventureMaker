@@ -176,6 +176,9 @@ var dragonAwake = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
+    .AddCondition(new WorldFlagCondition("dragon_defeated"))
+    .AddCondition(new WorldCounterCondition("villagers_saved", 1))
+    .AddCondition(new RelationshipCondition("fox", 2))
     .Start();
 
 state.Events.Subscribe(GameEventType.EnterLocation, e =>
@@ -189,6 +192,40 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
         dragon.Dialog("The dragon roars as it wakes.");
         dragon.SetMovement(dragonPatrol);
         Console.WriteLine("\nThe dragon stirs and awakens!");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    state.WorldState.Increment("days_elapsed");
+    if (e.Location != null)
+    {
+        state.WorldState.AddTimeline($"Entered {e.Location.Id}.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.PickupItem, e =>
+{
+    if (e.Item == null) return;
+    if (e.Item.Id == "apple")
+    {
+        state.WorldState.Increment("villagers_saved");
+    }
+});
+
+state.Events.Subscribe(GameEventType.TalkToNpc, e =>
+{
+    if (e.Npc == null) return;
+    if (e.Npc.Id == "fox")
+    {
+        var reputation = state.WorldState.GetRelationship("fox") + 1;
+        state.WorldState.SetRelationship("fox", reputation);
+        if (reputation >= 2)
+        {
+            e.Npc.SetDialog(new DialogNode("The fox seems to trust you now.")
+                .AddOption("Ask about the dragon")
+                .AddOption("Ask about the shed"));
+        }
     }
 });
 
@@ -295,6 +332,12 @@ while (true)
     if (result.ShouldQuit)
     {
         break;
+    }
+
+    if (!state.WorldState.GetFlag("dragon_defeated") && !dragon.IsAlive)
+    {
+        state.WorldState.SetFlag("dragon_defeated", true);
+        state.WorldState.AddTimeline("Dragon defeated.");
     }
 
     MoveNpcs();

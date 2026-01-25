@@ -1,0 +1,42 @@
+using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
+
+public sealed class GameMemento : IMemento
+{
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public string CurrentLocationId { get; set; } = "";
+    public List<string> InventoryItemIds { get; set; } = new();
+    public int Health { get; set; }
+    public int MaxHealth { get; set; }
+    public Dictionary<string, bool> Flags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, int> Counters { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, int> Relationships { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public List<string> Timeline { get; set; } = new();
+
+    public GameMemento()
+    {
+    }
+
+    public GameMemento(
+        string currentLocationId,
+        IEnumerable<string> inventoryItemIds,
+        int health,
+        int maxHealth,
+        Dictionary<string, bool> flags,
+        Dictionary<string, int> counters,
+        Dictionary<string, int> relationships,
+        List<string> timeline)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(currentLocationId);
+        CurrentLocationId = currentLocationId;
+        InventoryItemIds = inventoryItemIds?.ToList() ?? new List<string>();
+        Health = health;
+        MaxHealth = maxHealth;
+        Flags = flags ?? new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        Counters = counters ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        Relationships = relationships ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        Timeline = timeline ?? new List<string>();
+        CreatedAt = DateTimeOffset.UtcNow;
+    }
+}

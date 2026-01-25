@@ -29,8 +29,8 @@ public class LocationTests
 
         hall.AddExit(Direction.North, bedroom);
 
-        Assert.Equal(bedroom, hall.GetExit(Direction.North));
-        Assert.Equal(hall, bedroom.GetExit(Direction.South)); // Auto-created!
+        Assert.Equal(bedroom, hall.GetExit(Direction.North)?.Target);
+        Assert.Equal(hall, bedroom.GetExit(Direction.South)?.Target);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class LocationTests
 
         hall.AddExit(Direction.Down, pit, oneWay: true);
 
-        Assert.Equal(pit, hall.GetExit(Direction.Down));
-        Assert.Null(pit.GetExit(Direction.Up)); // No return!
+        Assert.Equal(pit, hall.GetExit(Direction.Down)?.Target);
+        Assert.Null(pit.GetExit(Direction.Up));
     }
 }

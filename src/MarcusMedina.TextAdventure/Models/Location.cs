@@ -8,9 +8,9 @@ public class Location : ILocation
 {
     public string Id { get; }
     private string _description = "";
-    private readonly Dictionary<Direction, ILocation> _exits = new();
+    private readonly Dictionary<Direction, Exit> _exits = new();
 
-    public IReadOnlyDictionary<Direction, ILocation> Exits => _exits;
+    public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
 
     public Location(string id)
     {
@@ -27,19 +27,32 @@ public class Location : ILocation
 
     public Location AddExit(Direction direction, ILocation target, bool oneWay = false)
     {
-        _exits[direction] = target;
+        _exits[direction] = new Exit(target, null, oneWay);
 
         if (!oneWay && target is Location targetLoc)
         {
             var opposite = DirectionHelper.GetOpposite(direction);
-            targetLoc._exits[opposite] = this;
+            targetLoc._exits[opposite] = new Exit(this);
         }
 
         return this;
     }
 
-    public ILocation? GetExit(Direction direction)
+    public Location AddExit(Direction direction, ILocation target, IDoor door, bool oneWay = false)
     {
-        return _exits.TryGetValue(direction, out var loc) ? loc : null;
+        _exits[direction] = new Exit(target, door, oneWay);
+
+        if (!oneWay && target is Location targetLoc)
+        {
+            var opposite = DirectionHelper.GetOpposite(direction);
+            targetLoc._exits[opposite] = new Exit(this, door); // Same door from other side
+        }
+
+        return this;
+    }
+
+    public Exit? GetExit(Direction direction)
+    {
+        return _exits.TryGetValue(direction, out var exit) ? exit : null;
     }
 }

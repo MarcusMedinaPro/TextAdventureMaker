@@ -6,6 +6,7 @@ namespace MarcusMedina.TextAdventure.Engine;
 public class GameState : IGameState
 {
     public ILocation CurrentLocation { get; private set; }
+    public string? LastMoveError { get; private set; }
 
     public GameState(ILocation startLocation)
     {
@@ -14,9 +15,24 @@ public class GameState : IGameState
 
     public bool Move(Direction direction)
     {
-        var target = CurrentLocation.GetExit(direction);
-        if (target == null) return false;
-        CurrentLocation = target;
+        LastMoveError = null;
+        var exit = CurrentLocation.GetExit(direction);
+
+        if (exit == null)
+        {
+            LastMoveError = "You can't go that way.";
+            return false;
+        }
+
+        if (!exit.IsPassable)
+        {
+            LastMoveError = exit.Door?.State == DoorState.Locked
+                ? $"The {exit.Door.Name} is locked."
+                : $"The {exit.Door?.Name} is closed.";
+            return false;
+        }
+
+        CurrentLocation = exit.Target;
         return true;
     }
 }

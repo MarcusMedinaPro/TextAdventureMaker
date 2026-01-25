@@ -1,5 +1,7 @@
 # Predator ("Pre‑Date‑Or")
 
+_Slice tag: Slice 9 — World State System. Demo focuses on flags/relationships driving the outcome._
+
 A tiny, choice-driven demo about getting ready for a date. The player chooses pants, shirt, perfume, shaving, and hair length. The winning combo is:
 **long hair + beard + jeans + t‑shirt + blazer**.
 

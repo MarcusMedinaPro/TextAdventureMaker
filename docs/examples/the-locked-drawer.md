@@ -1,5 +1,7 @@
 # The Locked Drawer
 
+_Slice tag: Slice 6 — Event System (Observer). Demo focuses on door events revealing new items._
+
 A tiny, focused demo with one room, a desk, a locked drawer, a photo, and a secret.
 
 ## Story beats (max ~10 steps)

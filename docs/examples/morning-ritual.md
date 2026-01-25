@@ -1,5 +1,7 @@
 # Morning Ritual
 
+_Slice tag: Slice 10 — Save/Load (Memento). Demo focuses on simple worldstate progression and a calm “routine” loop._
+
 A tiny, quiet demo about waking up, making coffee, finding the newspaper, and reading in the sun.
 
 ## Story beats (max ~10 steps)

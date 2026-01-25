@@ -88,7 +88,8 @@ var cave = new Location("cave", "A dark cave with glowing mushrooms. A brass key
 var deepCave = new Location("deep_cave", "The cave narrows into a jagged tunnel. You hear a distant rumble.");
 var clearing = new Location("clearing", "A sunny clearing with wildflowers. A small cabin stands here.");
 var cabin = new Location("cabin", "Inside a cozy wooden cabin. A treasure chest sits in the corner!");
-var shed = new Location("shed", "A small wooden shed with tools hanging on the walls.");
+var locationList = new LocationList();
+var shed = locationList.Add("shed", "A small wooden shed with tools hanging on the walls.");
 
 // Place items
 cave.AddItem(cabinKey);

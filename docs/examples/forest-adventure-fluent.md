@@ -103,10 +103,8 @@ Location cabin = (
     id: "cabin",
     description: "Inside a cozy wooden cabin. A treasure chest sits in the corner!"
 );
-Location shed = (
-    id: "shed",
-    description: "A small wooden shed with tools hanging on the walls."
-);
+var locationList = new LocationList();
+var shed = locationList.Add("shed", "A small wooden shed with tools hanging on the walls.");
 
 // Place items
 cave.AddItem(cabinKey);

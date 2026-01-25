@@ -2,10 +2,10 @@ using MarcusMedina.TextAdventure.Enums;
 
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface INpc
+public interface INpc : IGameEntity
 {
-    string Id { get; }
-    string Name { get; }
+    new string Id { get; }
+    new string Name { get; }
     string GetDescription();
     NpcState State { get; }
     bool IsAlive { get; }

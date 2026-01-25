@@ -2,10 +2,10 @@ using MarcusMedina.TextAdventure.Enums;
 
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface IDoor
+public interface IDoor : IGameEntity
 {
-    string Id { get; }
-    string Name { get; }
+    new string Id { get; }
+    new string Name { get; }
     string GetDescription();
     DoorState State { get; }
     IKey? RequiredKey { get; }

@@ -2,10 +2,10 @@ using MarcusMedina.TextAdventure.Enums;
 
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface IItem
+public interface IItem : IGameEntity
 {
-    string Id { get; }
-    string Name { get; }
+    new string Id { get; }
+    new string Name { get; }
     string GetDescription();
     bool Takeable { get; }
     float Weight { get; }

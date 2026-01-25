@@ -1,0 +1,26 @@
+using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
+
+public class ItemDecoratorTests
+{
+    [Fact]
+    public void RustyModifier_PrefixesNameAndDescription()
+    {
+        var item = new Item("sword", "sword").Description("A sharp blade.");
+        var rusty = new RustyModifier(item);
+
+        Assert.Equal("rusty sword", rusty.Name);
+        Assert.Contains("rusty", rusty.GetDescription(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void EnchantedModifier_PrefixesNameAndDescription()
+    {
+        var item = new Item("ring", "ring").Description("A silver ring.");
+        var enchanted = new EnchantedModifier(item);
+
+        Assert.Equal("enchanted ring", enchanted.Name);
+        Assert.Contains("magical", enchanted.GetDescription(), StringComparison.OrdinalIgnoreCase);
+    }
+}

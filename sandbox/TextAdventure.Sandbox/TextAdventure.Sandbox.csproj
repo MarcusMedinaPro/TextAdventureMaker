@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <None Include="lang\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="forest.adventure" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>

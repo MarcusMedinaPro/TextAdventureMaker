@@ -8,6 +8,7 @@ public class Item : IItem
 {
     private readonly List<string> _aliases = new();
     private readonly Dictionary<ItemAction, string> _reactions = new();
+    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private string? _readText;
     private bool _readable;
     private bool _requiresTakeToRead;
@@ -17,6 +18,7 @@ public class Item : IItem
 
     public string Id { get; }
     public string Name { get; }
+    public IDictionary<string, string> Properties => _properties;
     public string GetDescription() => _description;
     public bool Takeable { get; private set; }
     public float Weight { get; private set; }

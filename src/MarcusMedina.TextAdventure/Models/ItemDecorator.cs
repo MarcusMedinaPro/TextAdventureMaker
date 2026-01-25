@@ -14,6 +14,7 @@ public abstract class ItemDecorator : IItem
 
     public virtual string Id => Inner.Id;
     public virtual string Name => Inner.Name;
+    public virtual IDictionary<string, string> Properties => Inner.Properties;
     public virtual bool Takeable => Inner.Takeable;
     public virtual float Weight => Inner.Weight;
     public virtual IReadOnlyList<string> Aliases => Inner.Aliases;

@@ -8,8 +8,10 @@ public class Door : IDoor
 {
     private string _description = "";
     private readonly Dictionary<DoorAction, string> _reactions = new();
+    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     public string Id { get; }
     public string Name { get; }
+    public IDictionary<string, string> Properties => _properties;
     public string GetDescription() => _description;
     public DoorState State { get; private set; }
     public IKey? RequiredKey { get; private set; }

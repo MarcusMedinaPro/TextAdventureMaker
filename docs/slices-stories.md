@@ -116,86 +116,90 @@ This document maps slices to demo stories and explains why each story fits the e
 - **Story:** First Date at the Café
 - **Why it fits:** dialog choices with light consequence
 
-20) **Slice 20 — The Bank Errand**
+20) **Slice 20 — Hints & Properties**
+- **Story:** Hints & Properties
+- **Why it fits:** metadata + dynamic hints on items, keys, doors, NPCs
+
+21) **Slice 21 — The Bank Errand**
 - **Story:** The Bank Errand
 - **Why it fits:** small transactional flow with state checks
 
-21) **Slice 21 — Street Robbery**
+22) **Slice 22 — Street Robbery**
 - **Story:** Street Robbery
 - **Why it fits:** simple threat flow with branching outcomes
 
-22) **Slice 22 — Job Interview**
+23) **Slice 23 — Job Interview**
 - **Story:** Job Interview
 - **Why it fits:** structured dialog steps with success/fail states
 
-23) **Slice 23 — Missed Train**
+24) **Slice 24 — Missed Train**
 - **Story:** Missed Train
 - **Why it fits:** path choice + alternate route options
 
-24) **Slice 24 — The Hospital Visit**
+25) **Slice 25 — The Hospital Visit**
 - **Story:** The Hospital Visit
 - **Why it fits:** staged access, check-in, and result flow
 
-25) **Slice 25 — The Broken Car**
+26) **Slice 26 — The Broken Car**
 - **Story:** The Broken Car
 - **Why it fits:** chain of dependencies (tools, phone, fix)
 
-26) **Slice 26 — Apartment Viewing**
+27) **Slice 27 — Apartment Viewing**
 - **Story:** Apartment Viewing
 - **Why it fits:** questions + reveal loop
 
-27) **Slice 27 — The Bar Fight**
+28) **Slice 28 — The Bar Fight**
 - **Story:** The Bar Fight
 - **Why it fits:** escalation + de-escalation choice
 
-28) **Slice 28 — The Night Walk Home**
+29) **Slice 29 — The Night Walk Home**
 - **Story:** The Night Walk Home
 - **Why it fits:** tension + risk assessment beats
 
-29) **Slice 29 — The Lost Dog**
+30) **Slice 30 — The Lost Dog**
 - **Story:** The Lost Dog
 - **Why it fits:** multi-location follow + rescue + payoff
 
-30) **Slice 30 — The Locked Classroom**
+31) **Slice 31 — The Locked Classroom**
 - **Story:** The Locked Classroom
 - **Why it fits:** navigation + alarm constraint
 
-31) **Slice 31 — The Old Photograph**
+32) **Slice 32 — The Old Photograph**
 - **Story:** The Old Photograph
 - **Why it fits:** clue chain to meaning
 
-32) **Slice 32 — The Elevator Stuck**
+33) **Slice 33 — The Elevator Stuck**
 - **Story:** The Elevator Stuck
 - **Why it fits:** limited space, stress, and communication
 
-33) **Slice 33 — The Power Outage**
+34) **Slice 34 — The Power Outage**
 - **Story:** The Power Outage
 - **Why it fits:** light/dark gating + sequential fixes
 
-34) **Slice 34 — The Midnight Phone Call**
+35) **Slice 35 — The Midnight Phone Call**
 - **Story:** The Midnight Phone Call
 - **Why it fits:** remote dialog + branching response
 
-35) **Slice 35 — The Package at the Door**
+36) **Slice 36 — The Package at the Door**
 - **Story:** The Package at the Door
 - **Why it fits:** trust/choice with consequence
 
-36) **Slice 36 — The Abandoned Playground**
+37) **Slice 37 — The Abandoned Playground**
 - **Story:** The Abandoned Playground
 - **Why it fits:** atmosphere and delayed reveals
 
-37) **Slice 37 — The Late Bus**
+38) **Slice 38 — The Late Bus**
 - **Story:** The Late Bus
 - **Why it fits:** waiting loop + alternative decision
 
-38) **Slice 38 — The Forgotten Lunchbox**
+39) **Slice 39 — The Forgotten Lunchbox**
 - **Story:** The Forgotten Lunchbox
 - **Why it fits:** memory loop + retrieval
 
-39) **Slice 39 — The Storm Shelter**
+40) **Slice 40 — The Storm Shelter**
 - **Story:** The Storm Shelter
 - **Why it fits:** group safety + resource pacing
 
-40) **Slice 40 — The Final Light**
+41) **Slice 41 — The Final Light**
 - **Story:** The Final Light
 - **Why it fits:** calm closure + full-system integration

@@ -6,9 +6,11 @@ namespace MarcusMedina.TextAdventure.Models;
 public class Npc : INpc
 {
     private string _description = "";
+    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
 
     public string Id { get; }
     public string Name { get; }
+    public IDictionary<string, string> Properties => _properties;
     public NpcState State { get; private set; }
     public INpcMovement Movement { get; private set; } = new NoNpcMovement();
     public IDialogNode? DialogRoot { get; private set; }

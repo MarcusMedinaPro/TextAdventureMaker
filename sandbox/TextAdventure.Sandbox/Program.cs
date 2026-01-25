@@ -109,12 +109,15 @@ cabin.AddItem(itemList["blanket"]);
 garden.AddItem(new Item("stone", "stone", "A heavy flat stone."));
 attic.AddItem(new Item("bucket", "bucket", "A metal bucket."));
 office.AddItem(new Item("note", "post-it note", "A note with a hint: 0420."));
-office.AddItem(new Item("coffee", "coffee", "A hot cup of coffee."));
+var coffeeCup = new Item("coffee", "coffee", "A hot cup of coffee.")
+    .SetHint("This cup would look nicer with some coffee in it");
+office.AddItem(coffeeCup);
 office.AddItem(new Item("papers", "papers", "Notes for the meeting."));
 meeting.AddItem(new Item("mirror", "mirror", "A mirror for a quick check.").SetTakeable(false));
 cafe.AddItem(new Item("menu", "menu", "A small menu with handwritten specials.").SetTakeable(false));
 cafe.AddItem(new Item("coffee_cup", "coffee", "A fresh cup of coffee."));
-var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.");
+var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.")
+    .SetHint("Hmm, what do we usually use keys for...duh");
 courtyard.AddItem(libraryKey);
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
@@ -125,16 +128,21 @@ cabin.AddExit(Direction.North, meeting);
 courtyard.AddExit(Direction.North, libraryOutside);
 library.AddExit(Direction.East, cafe);
 
-var gardenKey = new Key("garden_key", "iron key", "A small iron key.");
+var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
+    .SetHint("Hmm, what do we usually use keys for...duh");
 var gardenGate = new Door("garden_gate", "garden gate", "An old iron gate.")
     .RequiresKey(gardenKey)
-    .SetReaction(DoorAction.Unlock, "The gate creaks open.");
+    .SetReaction(DoorAction.Unlock, "The gate creaks open.")
+    .SetHint("It needs a key, duh");
 garden.AddExit(Direction.Out, courtyard, gardenGate);
 
 var libraryDoor = new Door("library_door", "library door", "A heavy wooden door.")
     .RequiresKey(libraryKey)
-    .SetReaction(DoorAction.Unlock, "The library door unlocks.");
+    .SetReaction(DoorAction.Unlock, "The library door unlocks.")
+    .SetHint("It needs a key, duh");
 libraryOutside.AddExit(Direction.In, library, libraryDoor);
+
+coffeeCup.OnUse += _ => coffeeCup.SetHint("Yum! Coffee good!");
 
 // Doors from DSL
 var cabinDoor = adventure.Doors["cabin_door"];
@@ -224,6 +232,15 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
             garden.AddItem(gardenKey);
             Console.WriteLine("You lift the stone and find a key beneath it.");
         }
+    }
+});
+
+state.Events.Subscribe(GameEventType.UnlockDoor, e =>
+{
+    if (e.Door == null) return;
+    if (e.Door.Id.TextCompare("garden_gate") || e.Door.Id.TextCompare("library_door"))
+    {
+        e.Door.SetHint("It's a nice unlocked door.");
     }
 });
 
@@ -340,6 +357,36 @@ var game = GameBuilder.Create()
         {
             loginQuestComplete = true;
             g.Output.WriteLine($"\n*** QUEST COMPLETE: {loginQuest.Title}! ***");
+        }
+
+        if (command is LookCommand look && !string.IsNullOrWhiteSpace(look.Target))
+        {
+            var location = g.State.CurrentLocation;
+            IGameEntity? entityHint = location.FindItem(look.Target)
+                ?? g.State.Inventory.FindItem(look.Target);
+
+            if (entityHint == null)
+            {
+                entityHint = location.Exits.Values
+                    .Select(e => e.Door)
+                    .FirstOrDefault(d => d != null && (look.Target.TextCompare("door") || d.Name.TextCompare(look.Target)));
+            }
+
+            if (entityHint == null)
+            {
+                entityHint = location.Exits.Values
+                    .Select(e => e.Door?.RequiredKey)
+                    .FirstOrDefault(k => k != null && k.Name.TextCompare(look.Target));
+            }
+
+            if (entityHint != null)
+            {
+                var hint = entityHint.GetHint();
+                if (!string.IsNullOrWhiteSpace(hint))
+                {
+                    g.Output.WriteLine($"Hint: {hint}");
+                }
+            }
         }
 
         if (command is GoCommand go && result.Success)

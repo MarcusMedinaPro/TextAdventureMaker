@@ -131,6 +131,8 @@ var park = locationList.Add("park", "A small park with damp grass and a lone ben
 var schoolHallway = locationList.Add("school_hallway", "A dim hallway lined with closed doors.");
 var lockedClassroom = locationList.Add("locked_classroom", "A classroom dark behind the glass.");
 var securityOffice = locationList.Add("security_office", "A small office with a wall of monitors.");
+var photoArchive = locationList.Add("photo_archive", "A small archive with labeled boxes and old frames.");
+var familyRoom = locationList.Add("family_room", "A quiet room with a soft lamp and a worn sofa.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -177,6 +179,8 @@ frontPorch.AddItem(new Item("gate", "gate", "The gate is locked, but the house l
 park.AddItem(new Item("flyer", "flyer", "LOST DOG: small terrier, answers to Pip."));
 park.AddItem(new Item("bench", "bench", "A damp bench with rain beading on the wood.").SetTakeable(false));
 schoolHallway.AddItem(new Item("notice", "notice", "AUTHORIZED PERSONNEL ONLY.").SetTakeable(false));
+photoArchive.AddItem(new Item("photograph", "old photograph", "A faded photo of a family by a lake."));
+familyRoom.AddItem(new Item("album", "photo album", "An album with a page marked by a ribbon."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -214,6 +218,8 @@ nightStreet.AddExit(Direction.West, park);
 underpass.AddExit(Direction.North, frontPorch);
 park.AddExit(Direction.North, schoolHallway);
 schoolHallway.AddExit(Direction.West, securityOffice);
+lockedClassroom.AddExit(Direction.North, photoArchive);
+photoArchive.AddExit(Direction.East, familyRoom);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -251,11 +257,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard", "archivist");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -373,6 +379,13 @@ var guard = npcList["guard"]
         .AddOption("Explain why you're here")
         .AddOption("Ask about the classroom"));
 
+var archivist = npcList["archivist"]
+    .SetState(NpcState.Friendly)
+    .Description("An archivist carefully dusts a frame.")
+    .SetDialog(new DialogNode("Looking for a specific year?")
+        .AddOption("Ask about the old photograph")
+        .AddOption("Ask about the family room"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -389,6 +402,7 @@ bar.AddNpc(brawler);
 nightStreet.AddNpc(stranger);
 park.AddNpc(dog);
 schoolHallway.AddNpc(guard);
+photoArchive.AddNpc(archivist);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
@@ -398,6 +412,7 @@ var hospitalCalled = false;
 var barTensionNotified = false;
 var nightWalkNotified = false;
 var schoolAlarmNotified = false;
+var oldPhotoNotified = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
@@ -471,6 +486,16 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
     {
         schoolAlarmNotified = true;
         Console.WriteLine("\nA soft alarm chirps as you enter the hallway.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (oldPhotoNotified) return;
+    if (e.Location != null && e.Location.Id.TextCompare("photo_archive"))
+    {
+        oldPhotoNotified = true;
+        Console.WriteLine("\nDust motes drift as you open a box of photographs.");
     }
 });
 

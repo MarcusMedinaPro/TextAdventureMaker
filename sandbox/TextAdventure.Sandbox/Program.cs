@@ -142,6 +142,8 @@ var doorstep = locationList.Add("doorstep", "A doorstep with a damp welcome mat.
 var playground = locationList.Add("playground", "An abandoned playground with creaking swings.");
 var lateBusStop = locationList.Add("late_bus_stop", "A bus stop with a flickering arrival display.");
 var cafeteria = locationList.Add("cafeteria", "A quiet cafeteria with stacked chairs.");
+var shelterEntrance = locationList.Add("shelter_entrance", "A storm shelter entrance with sandbags piled high.");
+var shelterHall = locationList.Add("shelter_hall", "A narrow hall lined with cots and blankets.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -200,6 +202,8 @@ playground.AddItem(new Item("swing", "swing", "A swing creaks in the wind.").Set
 playground.AddItem(new Item("toy", "stuffed toy", "A worn stuffed toy with a stitched tag."));
 lateBusStop.AddItem(new Item("display", "arrival display", "SERVICE DELAYED flashes in amber.").SetTakeable(false));
 cafeteria.AddItem(new Item("lunchbox", "lunchbox", "A forgotten lunchbox with a sticker."));
+shelterEntrance.AddItem(new Item("radio", "radio", "A weather radio crackles with updates.").SetTakeable(false));
+shelterHall.AddItem(new Item("blanket", "blanket", "A folded blanket on a cot."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -239,6 +243,8 @@ underpass.AddExit(Direction.North, frontPorch);
 park.AddExit(Direction.North, schoolHallway);
 schoolHallway.AddExit(Direction.West, securityOffice);
 schoolHallway.AddExit(Direction.South, cafeteria);
+nightStreet.AddExit(Direction.South, shelterEntrance);
+shelterEntrance.AddExit(Direction.In, shelterHall);
 lockedClassroom.AddExit(Direction.North, photoArchive);
 photoArchive.AddExit(Direction.East, familyRoom);
 apartmentLobby.AddExit(Direction.Up, elevator);
@@ -285,11 +291,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom, elevator, maintenance, darkHall, utilityRoom, bedroom, doorstep, playground, lateBusStop, cafeteria });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom, elevator, maintenance, darkHall, utilityRoom, bedroom, doorstep, playground, lateBusStop, cafeteria, shelterEntrance, shelterHall });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard", "archivist", "operator", "technician", "caller", "neighbor", "commuter", "janitor");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard", "archivist", "operator", "technician", "caller", "neighbor", "commuter", "janitor", "coordinator");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -457,6 +463,13 @@ var janitor = npcList["janitor"]
         .AddOption("Ask about the lunchbox")
         .AddOption("Ask about the hallway"));
 
+var coordinator = npcList["coordinator"]
+    .SetState(NpcState.Friendly)
+    .Description("A shelter coordinator checks names off a list.")
+    .SetDialog(new DialogNode("Find a cot and stay warm.")
+        .AddOption("Ask about the storm")
+        .AddOption("Offer to help"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -480,6 +493,7 @@ bedroom.AddNpc(caller);
 doorstep.AddNpc(neighbor);
 lateBusStop.AddNpc(commuter);
 cafeteria.AddNpc(janitor);
+shelterHall.AddNpc(coordinator);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
@@ -497,6 +511,7 @@ var packageNotified = false;
 var playgroundNotified = false;
 var lateBusNotified = false;
 var lunchboxNotified = false;
+var shelterNotified = false;
 var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
     .AddCondition(new HasItemCondition("sword"))
     .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
@@ -650,6 +665,16 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
     {
         lunchboxNotified = true;
         Console.WriteLine("\nA lunchbox sits alone on a table.");
+    }
+});
+
+state.Events.Subscribe(GameEventType.EnterLocation, e =>
+{
+    if (shelterNotified) return;
+    if (e.Location != null && e.Location.Id.TextCompare("shelter_hall"))
+    {
+        shelterNotified = true;
+        Console.WriteLine("\nThe shelter smells of damp coats and coffee.");
     }
 });
 

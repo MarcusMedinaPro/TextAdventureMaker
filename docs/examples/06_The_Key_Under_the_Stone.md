@@ -14,6 +14,7 @@ _Slice tag: Slice 6 — Event System (Observer). Demo focuses on events revealin
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
@@ -49,28 +50,28 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
 
 // Parser config (minimal)
 var parserConfig = new KeywordParserConfig(
-    quit: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "quit" },
-    look: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "look" },
-    inventory: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "inventory" },
-    stats: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "stats" },
-    open: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "open" },
-    unlock: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "unlock" },
-    take: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "take" },
-    drop: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "drop" },
-    use: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "use" },
-    combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine" },
-    pour: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "pour" },
-    go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go" },
-    read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
-    talk: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "talk" },
-    attack: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "attack" },
-    flee: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "flee" },
-    save: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "save" },
-    load: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "load" },
-    all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
-    ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-    combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-    pourPrepositions: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+    quit: CommandHelper.NewCommands("quit"),
+    look: CommandHelper.NewCommands("look"),
+    inventory: CommandHelper.NewCommands("inventory"),
+    stats: CommandHelper.NewCommands("stats"),
+    open: CommandHelper.NewCommands("open"),
+    unlock: CommandHelper.NewCommands("unlock"),
+    take: CommandHelper.NewCommands("take"),
+    drop: CommandHelper.NewCommands("drop"),
+    use: CommandHelper.NewCommands("use"),
+    combine: CommandHelper.NewCommands("combine"),
+    pour: CommandHelper.NewCommands("pour"),
+    go: CommandHelper.NewCommands("go"),
+    read: CommandHelper.NewCommands("read"),
+    talk: CommandHelper.NewCommands("talk"),
+    attack: CommandHelper.NewCommands("attack"),
+    flee: CommandHelper.NewCommands("flee"),
+    save: CommandHelper.NewCommands("save"),
+    load: CommandHelper.NewCommands("load"),
+    all: CommandHelper.NewCommands("all"),
+    ignoreItemTokens: CommandHelper.NewCommands(),
+    combineSeparators: CommandHelper.NewCommands(),
+    pourPrepositions: CommandHelper.NewCommands(),
     directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
         ["n"] = Direction.North

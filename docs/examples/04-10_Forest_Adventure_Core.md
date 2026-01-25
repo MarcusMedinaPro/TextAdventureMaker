@@ -8,6 +8,7 @@ This version uses the core API and fluent methods, but **no implicit operators**
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
@@ -217,28 +218,28 @@ state.Events.Subscribe(GameEventType.TalkToNpc, e =>
 
 // Parser config
 var parserConfig = new KeywordParserConfig(
-    quit: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "quit", "exit", "q" },
-    look: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "look", "l", "ls" },
-    inventory: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "inventory", "inv", "i" },
-    stats: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "stats", "stat", "hp", "health" },
-    open: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "open" },
-    unlock: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "unlock" },
-    take: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "take", "get", "pickup", "pick" },
-    drop: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "drop" },
-    use: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "use", "eat", "bite" },
-    combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine", "mix" },
-    pour: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "pour" },
-    go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go", "move", "cd" },
-    read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
-    talk: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "talk", "speak" },
-    attack: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "attack", "fight" },
-    flee: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "flee", "run" },
-    save: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "save" },
-    load: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "load" },
-    all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
-    ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
-    combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },
-    pourPrepositions: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "into", "in" },
+    quit: CommandHelper.NewCommands("quit", "exit", "q"),
+    look: CommandHelper.NewCommands("look", "l", "ls"),
+    inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
+    stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
+    open: CommandHelper.NewCommands("open"),
+    unlock: CommandHelper.NewCommands("unlock"),
+    take: CommandHelper.NewCommands("take", "get", "pickup", "pick"),
+    drop: CommandHelper.NewCommands("drop"),
+    use: CommandHelper.NewCommands("use", "eat", "bite"),
+    combine: CommandHelper.NewCommands("combine", "mix"),
+    pour: CommandHelper.NewCommands("pour"),
+    go: CommandHelper.NewCommands("go", "move", "cd"),
+    read: CommandHelper.NewCommands("read"),
+    talk: CommandHelper.NewCommands("talk", "speak"),
+    attack: CommandHelper.NewCommands("attack", "fight"),
+    flee: CommandHelper.NewCommands("flee", "run"),
+    save: CommandHelper.NewCommands("save"),
+    load: CommandHelper.NewCommands("load"),
+    all: CommandHelper.NewCommands("all"),
+    ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
+    combineSeparators: CommandHelper.NewCommands("and", "+"),
+    pourPrepositions: CommandHelper.NewCommands("into", "in"),
     directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
         ["n"] = Direction.North,

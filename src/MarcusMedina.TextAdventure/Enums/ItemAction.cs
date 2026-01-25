@@ -6,6 +6,8 @@ public enum ItemAction
     Drop,
     Use,
     Destroy,
+    Read,
+    ReadFailed,
     TakeFailed,
     DropFailed,
     UseFailed

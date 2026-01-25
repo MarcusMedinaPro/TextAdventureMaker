@@ -29,6 +29,10 @@ public static class Language
     public const string NothingToDrop = "You have nothing to drop.";
     public const string CannotCombineItems = "Those items can't be combined.";
     public const string CannotPourThat = "You can't pour that.";
+    public const string NothingToRead = "There's nothing to read.";
+    public const string CannotReadThat = "You can't read that.";
+    public const string MustTakeToRead = "You need to pick it up first.";
+    public const string TooDarkToRead = "It's too dark to read.";
 
     public const string DoorLockedTemplate = "The {0} is locked.";
     public const string DoorClosedTemplate = "The {0} is closed.";
@@ -47,6 +51,7 @@ public static class Language
     public const string ItemDescriptionTemplate = "It's a {0}.";
     public const string CombineResultTemplate = "You combine {0} and {1}.";
     public const string PourResultTemplate = "You pour the {0} into the {1}.";
+    public const string ReadingCostTemplate = "You spend {0} turns reading...\n{1}";
 
     public static string DoorLocked(string doorName) =>
         DoorLockedTemplate.GamePrint(doorName);
@@ -104,4 +109,7 @@ public static class Language
 
     public static string PourResult(string fluid, string container) =>
         PourResultTemplate.GamePrint(fluid, container);
+
+    public static string ReadingCost(int turns, string text) =>
+        ReadingCostTemplate.GamePrint(turns, text);
 }

@@ -10,4 +10,5 @@ public interface IGameState
     bool IsCurrentRoomId(string id);
     GameError LastMoveErrorCode { get; }
     RecipeBook RecipeBook { get; }
+    IInventory Inventory { get; }
 }

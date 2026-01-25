@@ -17,9 +17,13 @@ public abstract class ItemDecorator : IItem
     public virtual bool Takeable => Inner.Takeable;
     public virtual float Weight => Inner.Weight;
     public virtual IReadOnlyList<string> Aliases => Inner.Aliases;
+    public virtual bool Readable => Inner.Readable;
+    public virtual bool RequiresTakeToRead => Inner.RequiresTakeToRead;
+    public virtual int ReadingCost => Inner.ReadingCost;
 
     public virtual string GetDescription() => Inner.GetDescription();
     public virtual IItem Description(string text) => Inner.Description(text);
+    public virtual string? GetReadText() => Inner.GetReadText();
 
     public event Action<IItem>? OnTake
     {
@@ -48,6 +52,12 @@ public abstract class ItemDecorator : IItem
     public virtual bool Matches(string name) => Inner.Matches(name);
     public virtual string? GetReaction(ItemAction action) => Inner.GetReaction(action);
     public virtual IItem SetReaction(ItemAction action, string text) => Inner.SetReaction(action, text);
+    public virtual bool CanRead(IGameState state) => Inner.CanRead(state);
+    public virtual IItem SetReadable(bool readable = true) => Inner.SetReadable(readable);
+    public virtual IItem SetReadText(string text) => Inner.SetReadText(text);
+    public virtual IItem RequireTakeToRead() => Inner.RequireTakeToRead();
+    public virtual IItem SetReadingCost(int turns) => Inner.SetReadingCost(turns);
+    public virtual IItem RequiresToRead(Func<IGameState, bool> predicate) => Inner.RequiresToRead(predicate);
     public virtual void Take() => Inner.Take();
     public virtual void Drop() => Inner.Drop();
     public virtual void Use() => Inner.Use();

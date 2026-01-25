@@ -43,6 +43,36 @@ public class Key : Item, IKey
         return this;
     }
 
+    public new Key SetReadable(bool readable = true)
+    {
+        base.SetReadable(readable);
+        return this;
+    }
+
+    public new Key SetReadText(string text)
+    {
+        base.SetReadText(text);
+        return this;
+    }
+
+    public new Key RequireTakeToRead()
+    {
+        base.RequireTakeToRead();
+        return this;
+    }
+
+    public new Key SetReadingCost(int turns)
+    {
+        base.SetReadingCost(turns);
+        return this;
+    }
+
+    public new Key RequiresToRead(Func<IGameState, bool> predicate)
+    {
+        base.RequiresToRead(predicate);
+        return this;
+    }
+
     public static implicit operator Key((string id, string name, string description) data) =>
         new(data.id, data.name, data.description);
 }

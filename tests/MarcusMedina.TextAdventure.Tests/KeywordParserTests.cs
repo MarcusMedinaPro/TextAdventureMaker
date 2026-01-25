@@ -21,6 +21,7 @@ public class KeywordParserTests
             combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine", "mix" },
             pour: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "pour" },
             go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go", "move", "cd" },
+            read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
             all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
             ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
             combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },
@@ -154,6 +155,16 @@ public class KeywordParserTests
         var command = parser.Parse("use wand");
 
         Assert.IsType<UseCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_Read_ReturnsReadCommand()
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse("read sign");
+
+        Assert.IsType<ReadCommand>(command);
     }
 
     [Theory]

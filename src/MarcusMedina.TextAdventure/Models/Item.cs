@@ -8,6 +8,11 @@ public class Item : IItem
 {
     private readonly List<string> _aliases = new();
     private readonly Dictionary<ItemAction, string> _reactions = new();
+    private string? _readText;
+    private bool _readable;
+    private bool _requiresTakeToRead;
+    private int _readingCost;
+    private Func<IGameState, bool>? _readCondition;
     private string _description = "";
 
     public string Id { get; }
@@ -16,6 +21,9 @@ public class Item : IItem
     public bool Takeable { get; private set; }
     public float Weight { get; private set; }
     public IReadOnlyList<string> Aliases => _aliases;
+    public bool Readable => _readable;
+    public bool RequiresTakeToRead => _requiresTakeToRead;
+    public int ReadingCost => _readingCost;
 
     public event Action<IItem>? OnTake;
     public event Action<IItem>? OnDrop;
@@ -85,6 +93,44 @@ public class Item : IItem
     public IItem SetReaction(ItemAction action, string text)
     {
         _reactions[action] = text;
+        return this;
+    }
+
+    public bool CanRead(IGameState state)
+    {
+        return _readCondition == null || _readCondition(state);
+    }
+
+    public IItem SetReadable(bool readable = true)
+    {
+        _readable = readable;
+        return this;
+    }
+
+    public IItem SetReadText(string text)
+    {
+        _readText = text;
+        _readable = true;
+        return this;
+    }
+
+    public string? GetReadText() => _readText;
+
+    public IItem RequireTakeToRead()
+    {
+        _requiresTakeToRead = true;
+        return this;
+    }
+
+    public IItem SetReadingCost(int turns)
+    {
+        _readingCost = Math.Max(0, turns);
+        return this;
+    }
+
+    public IItem RequiresToRead(Func<IGameState, bool> predicate)
+    {
+        _readCondition = predicate ?? throw new ArgumentNullException(nameof(predicate));
         return this;
     }
 

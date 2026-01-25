@@ -104,6 +104,7 @@ var parserConfig = new KeywordParserConfig(
     combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine", "mix" },
     pour: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "pour" },
     go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go", "move", "cd" },
+    read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
     all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
     ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
     combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },

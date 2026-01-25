@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/sandbox/">
+    <Project Path="sandbox/TextAdventure.Sandbox/TextAdventure.Sandbox.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/MarcusMedina.TextAdventure.AI/MarcusMedina.TextAdventure.AI.csproj" />
+    <Project Path="src/MarcusMedina.TextAdventure/MarcusMedina.TextAdventure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MarcusMedina.TextAdventure.Tests/MarcusMedina.TextAdventure.Tests.csproj" />
+  </Folder>
+</Solution>

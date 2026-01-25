@@ -86,16 +86,6 @@ public class KeywordParserTests
         Assert.IsType<TakeCommand>(command);
     }
 
-    [Theory]
-    [InlineData("ta apple")]
-    public void Parse_Ta_ReturnsTakeCommand(string input)
-    {
-        var parser = new KeywordParser();
-
-        var command = parser.Parse(input);
-
-        Assert.IsType<TakeCommand>(command);
-    }
 
     [Theory]
     [InlineData("take all")]

@@ -70,7 +70,7 @@ public class KeywordParser : ICommandParser
             return new UnlockCommand();
         }
 
-        if (keyword is "take" or "get" or "pickup" or "pick" or "ta")
+        if (keyword is "take" or "get" or "pickup" or "pick")
         {
             if (tokens.Length >= 2 && tokens[1].TextCompare("all"))
             {

@@ -463,19 +463,19 @@ while (true)
 - Configurable limits: ByWeight, ByCount, Unlimited
 - `TakeAll()` method
 
-### Task 4.3: Item Decorators (RustyModifier, EnchantedModifier)
+### Task 4.3: Item Decorators (RustyModifier, EnchantedModifier) ✅
 
-### Task 4.4: IContainer<T> — items that hold other items
+### Task 4.4: IContainer<T> — items that hold other items ✅
 - `Glass : IContainer<IFluid>`
 - `Chest : IContainer<IItem>`
 
-### Task 4.5: Item Combinations
+### Task 4.5: Item Combinations ✅
 - `ice + fire → destroy both, create water`
 - Recipe system for crafting
 
 ### Task 4.6: TakeCommand, TakeAllCommand, DropCommand, InventoryCommand, UseCommand ✅
 
-### Task 4.7: Readable Items med villkor
+### Task 4.7: Readable Items med villkor ✅
 
 ```csharp
 // Skylt - läs utan att ta
@@ -488,20 +488,20 @@ var sign = new Item("sign", "Wooden Sign")
 var newspaper = new Item("newspaper", "Daily News")
     .SetTakeable(true)
     .SetReadable(true)
-    .RequiresTakeToRead()
+    .RequireTakeToRead()
     .SetReadText("HEADLINE: Dragon spotted near village!");
 
 // Bok - kan läsa men tar tid (förbrukar drag)
 var tome = new Item("tome", "Ancient Tome")
     .SetReadable(true)
-    .RequiresTakeToRead()
-    .ReadingCost(3)  // tar 3 drag att läsa
+    .RequireTakeToRead()
+    .SetReadingCost(3)  // tar 3 drag att läsa
     .SetReadText("The secret to defeating the dragon is...");
 
 // Hemligt brev - kräver ljus
 var letter = new Item("letter", "Sealed Letter")
     .SetReadable(true)
-    .RequiresTakeToRead()
+    .RequireTakeToRead()
     .RequiresToRead(ctx => ctx.HasLight())
     .SetReadText("Meet me at midnight...");
 ```
@@ -515,7 +515,7 @@ var letter = new Item("letter", "Sealed Letter")
 // "read letter" (mörkt) → "It's too dark to read."
 ```
 
-### Task 4.8: Sandbox — plocka upp svärd, häll vatten i glas, kombinera items, läs skylt/tidning ⚠️ (delvis)
+### Task 4.8: Sandbox — plocka upp svärd, häll vatten i glas, kombinera items, läs skylt/tidning ✅
 
 ---
 
@@ -2052,3 +2052,397 @@ cave.AddDSLItems(
 // 5. PARAMS ARRAY - Quick add simple items
 hall.AddItems("Sword", "Shield", "Torch");
 ```
+
+----
+
+En tanke på hur det ska fungera
+
+*storytelling som kodstruktur*, inte som löpande text.
+
+Om vi tänker rent arkitektoniskt kan du se berättelsen som tre lager som samverkar:
+
+1. **Tillstånd (State)** – hur världen *är*
+2. **Händelser (Events)** – vad som *händer*
+3. **Mening (Narrative Logic)** – varför det *betyder något*
+
+I kod kan det bli ungefär så här.
+
+---
+
+### 1. Story som tillståndsmaskin
+
+Berättelsen är inte en linje, utan ett nät av tillstånd:
+
+```csharp
+StoryState {
+    WorldMood: Fear | Hope | Decay | Trust
+    PlayerInnerState: Confused | Determined | Guilty | Healed
+    Factions: { Order: Weakening, Chaos: Rising }
+}
+```
+
+Alltså: inte “kapitel 1, kapitel 2”, utan *existentiella lägen*.
+
+---
+
+### 2. Story Beats som kodobjekt
+
+Varje betydelsefull händelse är ett objekt med:
+
+```csharp
+StoryBeat {
+    Id: "MeetTheHermit"
+    Preconditions: Player.Has("Lantern") && WorldMood == Fear
+    Effect:
+        WorldMood = Hope
+        PlayerInnerState = LessAlone
+    Symbol: "Light in Darkness"
+    MemoryTag: "FirstTrust"
+}
+```
+
+Detta är inte bara quest-logik.
+Det är dramaturgisk semantik.
+
+---
+
+### 3. Tematiska bågar som system, inte manus
+
+```csharp
+ThemeArc "Trust" {
+    StartsAt: Isolation
+    DevelopsThrough: Betrayal, Repair
+    ResolvesAt: MutualDependence
+}
+```
+
+Och varje StoryBeat deklarerar vilket tema den påverkar:
+
+```csharp
+AffectsTheme("Trust", +0.2)
+```
+
+---
+
+### 4. Karaktärer som narrativa processer
+
+NPC är inte bara state machines, utan *pågående berättelser*:
+
+```csharp
+CharacterArc "Hermit" {
+    Wound: "LostFamily"
+    Mask: "Cynical"
+    Need: "Connection"
+    TransformationCondition: PlayerShowsConsistency
+}
+```
+
+---
+
+### 5. Orsak → Konsekvens → Betydelse
+
+Varje handling får tre lager:
+
+```csharp
+Action: OpenDoor
+Consequence: ReleaseMonster
+Meaning: "Curiosity has a cost"
+```
+
+Motorn kan då visa olika berättarröster:
+
+– Mekanisk: “The door opens. A creature emerges.”
+– Narrativ: “Some things were sealed for a reason.”
+– Psykologisk: “You feel responsible.”
+
+---
+
+### 6. Struktur som kan bli DSL
+
+Exempel på framtida “Story DSL”:
+
+```dsl
+beat "LightInTheDark" {
+    when player.enters Cave and player.has Lantern
+    shift world.mood from Fear to Hope
+    reveal memory "You are not alone"
+    mark theme Trust += 1
+}
+```
+
+---
+
+Om jag ska sammanfatta kärnan:
+
+Berättelse i kod =
+inte text → struktur
+inte sekvens → relation
+inte plot → tillståndsförändring med mening
+
+Du bygger inte:
+
+“En historia.”
+
+Du bygger:
+
+“Ett system som skapar meningsfull förändring.”
+
+## Exempel
+
+OK vi säger exempelvis ett spel där spelaren  ligger i sin säng och ska gå till köket göra kaffe, ta kaffe, gå till vardagsrum, hämta en bok, sätta sig i soffan dricka kaffe och läsa boken hur skulle det beskrivas i detta fluent state
+
+Bra, det här är ett perfekt mikroscenario att visa hur “story som tillstånd” fungerar.
+
+Vi beskriver det inte som steg, utan som **meningsfulla övergångar mellan tillstånd**.
+
+Först definierar vi världens och spelarens narrativa tillstånd:
+
+```csharp
+StoryState {
+    Location: Bedroom
+    PlayerPosture: LyingInBed
+    WorldMood: MorningStillness
+    PlayerNeed: WakeUp
+    InnerState: Drowsy
+}
+```
+
+Nu definierar vi *beats* som inte bara är handlingar, utan förändrar tillstånd och mening.
+
+### Beat 1 – Stiga upp
+
+```csharp
+StoryBeat "LeaveBed" {
+    Preconditions:
+        Location == Bedroom
+        PlayerPosture == LyingInBed
+
+    Effects:
+        PlayerPosture = Standing
+        InnerState = Groggy
+        Theme("Transition") += 0.2
+
+    Meaning:
+        "The day begins. Inertia is broken."
+}
+```
+
+### Beat 2 – Gå till köket och göra kaffe
+
+```csharp
+StoryBeat "BrewCoffee" {
+    Preconditions:
+        Location == Kitchen
+        PlayerHas("Mug")
+        PlayerNeed == WakeUp
+
+    Effects:
+        PlayerHas("Coffee")
+        InnerState = WarmingUp
+        WorldMood = Awakening
+        Theme("Comfort") += 0.3
+
+    Meaning:
+        "Warmth enters the body. Consciousness returns."
+}
+```
+
+### Beat 3 – Ta boken i vardagsrummet
+
+```csharp
+StoryBeat "FindBook" {
+    Preconditions:
+        Location == LivingRoom
+        BookIsPresent
+        InnerState >= Awake
+
+    Effects:
+        PlayerHas("Book")
+        Theme("Contemplation") += 0.2
+
+    Meaning:
+        "The mind reaches for stories."
+}
+```
+
+### Beat 4 – Sätta sig, dricka kaffe, läsa
+
+Det här är kul: det är egentligen *ett nytt existentiellt tillstånd*.
+
+```csharp
+StoryBeat "SettleWithBook" {
+    Preconditions:
+        Location == LivingRoom
+        PlayerHas("Coffee")
+        PlayerHas("Book")
+        PlayerPosture == Standing
+
+    Effects:
+        PlayerPosture = Sitting
+        InnerState = CalmFocus
+        WorldMood = QuietPresence
+        PlayerNeed = None
+        Theme("Rest") += 0.5
+        Theme("Meaning") += 0.2
+
+    Meaning:
+        "The world slows. Attention becomes presence."
+}
+```
+
+Nu kan motorn uttrycka samma händelse på tre nivåer:
+
+### Mekanisk nivå
+
+“You sit down. You drink coffee. You read the book.”
+
+### Narrativ nivå
+
+“With the warmth of the cup in your hands, the room grows still. The book opens like a small, private world.”
+
+### Psykologisk nivå
+
+“A sense of arrival replaces the morning’s restlessness.”
+
+Allt detta kommer från **samma state transition**.
+
+Det viktiga är att historien inte ligger i texten – den ligger i:
+
+– Förändring av behov
+– Förändring av inre tillstånd
+– Förändring av stämning
+– Tematisk progression
+
+Så din “kaffe och bok”-sekvens är i själva verket:
+
+Inertia → Awakening → Comfort → Presence
+
+Det är redan en komplett dramaturgisk båge.
+
+## Exempel på spelkörning
+
+Om vi låter samma scenario spelas igenom i din motor, med både mekanik och narrativt lager, skulle en spelrunda kunna se ut ungefär så här:
+
+---
+
+**Starttillstånd**
+
+> You are lying in bed.
+> Morning light filters through the curtains.
+> You feel heavy, half-awake.
+
+Tillstånd:
+Location = Bedroom
+Posture = Lying
+InnerState = Drowsy
+Need = WakeUp
+
+---
+
+**Spelaren skriver:**
+`get up`
+
+Motorn matchar beat: *LeaveBed*
+
+> You swing your legs over the edge of the bed and stand up.
+> The day has begun, whether you like it or not.
+
+Tillstånd nu:
+Posture = Standing
+InnerState = Groggy
+Theme(Transition) +
+
+---
+
+**Spelaren:**
+`go kitchen`
+
+> The kitchen is quiet. The coffee maker waits on the counter.
+
+Location = Kitchen
+
+---
+
+**Spelaren:**
+`brew coffee`
+
+Beat: *BrewCoffee*
+
+> You fill the mug and start the machine.
+> The smell of coffee slowly pushes the fog out of your mind.
+
+Tillstånd:
+HasCoffee = true
+InnerState = WarmingUp
+WorldMood = Awakening
+Theme(Comfort) +
+
+---
+
+**Spelaren:**
+`take coffee`
+`go living room`
+
+> The living room is still. A book lies on the table by the sofa.
+
+---
+
+**Spelaren:**
+`take book`
+
+Beat: *FindBook*
+
+> You pick up the book. Its weight feels familiar.
+
+HasBook = true
+Theme(Contemplation) +
+
+---
+
+**Spelaren:**
+`sit down`
+
+Motorn ser: Location = LivingRoom, HasCoffee, HasBook, Posture = Standing
+Beat: *SettleWithBook*
+
+> You sit down on the sofa, the warm cup in your hands.
+> You open the book.
+> The world grows quiet in a way that feels intentional.
+
+Tillstånd:
+Posture = Sitting
+InnerState = CalmFocus
+WorldMood = QuietPresence
+Need = None
+Theme(Rest) +
+Theme(Meaning) +
+
+---
+
+**Nu är berättelsen “klar” utan att vara slut.**
+
+Spelaren har gått från:
+
+Drowsy → Awake → Comforted → Present
+
+Och systemet vet varför det är ett avslut:
+
+– Behovet “WakeUp” är uppfyllt
+– Inre tillstånd är stabilt
+– Temat “Rest” har nått sitt mål
+– Inga drivande konflikter kvar
+
+Så motorn skulle kunna lägga till, helt automatiskt:
+
+> For a moment, there is nothing you need to do.
+> And that, too, is part of the story.
+
+Det fina är att exakt samma struktur kan skala till:
+
+– Trauma-berättelser
+– Krigsdraman
+– Kärlek
+– Skräck
+– Existentiell tomhet
+
+Det är bara tillstånd, behov, teman och övergångar.

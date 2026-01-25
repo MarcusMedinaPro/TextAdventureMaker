@@ -113,6 +113,8 @@ var hospitalEntrance = locationList.Add("hospital_entrance", "Automatic doors sl
 var reception = locationList.Add("reception", "A reception desk with a stack of forms.");
 var waitingRoom = locationList.Add("waiting_room", "Plastic chairs and a quiet TV loop.");
 var examRoom = locationList.Add("exam_room", "A clean exam room with a curtained bed.");
+var roadside = locationList.Add("roadside", "Your car sits dead on the shoulder with the hood up.");
+var gasStation = locationList.Add("gas_station", "A small gas station with a service bay.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -144,6 +146,9 @@ reception.AddItem(new Item("forms", "intake forms", "Paperwork asking the usual 
 reception.AddItem(new Item("clipboard", "clipboard", "A clipboard for check-in."));
 waitingRoom.AddItem(new Item("magazine", "magazine", "Outdated magazines and a crossword."));
 examRoom.AddItem(new Item("results", "test results", "The results are normal.").SetTakeable(false));
+roadside.AddItem(new Item("phone", "phone", "Low battery, but still works."));
+gasStation.AddItem(new Item("wrench", "wrench", "A sturdy wrench for a stubborn bolt."));
+gasStation.AddItem(new Item("jack", "jack", "A heavy jack for lifting the car."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
@@ -168,6 +173,8 @@ busStop.AddExit(Direction.South, hospitalEntrance);
 hospitalEntrance.AddExit(Direction.In, reception);
 reception.AddExit(Direction.East, waitingRoom);
 waitingRoom.AddExit(Direction.North, examRoom);
+taxiStand.AddExit(Direction.South, roadside);
+roadside.AddExit(Direction.East, gasStation);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -196,11 +203,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -266,6 +273,13 @@ var nurse = npcList["nurse"]
         .AddOption("Follow to the exam room")
         .AddOption("Ask about the tests"));
 
+var mechanic = npcList["mechanic"]
+    .SetState(NpcState.Friendly)
+    .Description("A mechanic wipes grease from their hands.")
+    .SetDialog(new DialogNode("Need a tool or a lift?")
+        .AddOption("Ask for a wrench")
+        .AddOption("Ask for a jack"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
@@ -275,6 +289,7 @@ alley.AddNpc(mugger);
 interviewRoom.AddNpc(interviewer);
 reception.AddNpc(receptionist);
 examRoom.AddNpc(nurse);
+gasStation.AddNpc(mechanic);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));

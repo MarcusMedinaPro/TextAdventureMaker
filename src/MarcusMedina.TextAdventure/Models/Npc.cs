@@ -11,6 +11,7 @@ public class Npc : INpc
     public string Name { get; }
     public NpcState State { get; private set; }
     public INpcMovement Movement { get; private set; } = new NoNpcMovement();
+    public IDialogNode? DialogRoot { get; private set; }
     public bool IsAlive => State != NpcState.Dead;
 
     public Npc(string id, string name, NpcState state = NpcState.Friendly)
@@ -48,5 +49,17 @@ public class Npc : INpc
         ArgumentNullException.ThrowIfNull(currentLocation);
         ArgumentNullException.ThrowIfNull(state);
         return Movement.GetNextLocation(currentLocation, state);
+    }
+
+    public INpc Dialog(string text)
+    {
+        DialogRoot = new DialogNode(text);
+        return this;
+    }
+
+    public INpc SetDialog(IDialogNode? dialog)
+    {
+        DialogRoot = dialog;
+        return this;
     }
 }

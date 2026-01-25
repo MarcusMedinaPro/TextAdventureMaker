@@ -105,6 +105,12 @@ public class KeywordParser : ICommandParser
             return target != null ? new ReadCommand(target) : new UnknownCommand();
         }
 
+        if (_config.Talk.Contains(keyword))
+        {
+            var target = ParseItemName(tokens, 1);
+            return new TalkCommand(target);
+        }
+
         if (_config.Go.Contains(keyword))
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)

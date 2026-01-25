@@ -33,6 +33,10 @@ public static class Language
     public const string CannotReadThat = "You can't read that.";
     public const string MustTakeToRead = "You need to pick it up first.";
     public const string TooDarkToRead = "It's too dark to read.";
+    public const string NoOneToTalkTo = "There's no one here to talk to.";
+    public const string NoSuchNpcHere = "You don't see anyone like that.";
+    public const string NpcHasNothingToSay = "They have nothing to say.";
+    public const string DialogOptionsLabel = "Options:";
 
     public const string DoorLockedTemplate = "The {0} is locked.";
     public const string DoorClosedTemplate = "The {0} is closed.";
@@ -52,6 +56,7 @@ public static class Language
     public const string CombineResultTemplate = "You combine {0} and {1}.";
     public const string PourResultTemplate = "You pour the {0} into the {1}.";
     public const string ReadingCostTemplate = "You spend {0} turns reading...\n{1}";
+    public const string DialogOptionTemplate = "{0}. {1}";
 
     public static string DoorLocked(string doorName) =>
         DoorLockedTemplate.GamePrint(doorName);
@@ -112,4 +117,7 @@ public static class Language
 
     public static string ReadingCost(int turns, string text) =>
         ReadingCostTemplate.GamePrint(turns, text);
+
+    public static string DialogOption(int index, string text) =>
+        DialogOptionTemplate.GamePrint(index, text);
 }

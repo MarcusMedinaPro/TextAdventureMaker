@@ -80,4 +80,44 @@ public class EventEmissionTests
         Assert.Equal(npc, talkEvent?.Npc);
         Assert.Equal(location, talkEvent?.Location);
     }
+
+    [Fact]
+    public void OpenCommand_PublishesDoorOpenEvent()
+    {
+        var events = new EventSystem();
+        var location = new Location("hall");
+        var next = new Location("yard");
+        var door = new Door("gate", "gate");
+        location.AddExit(Direction.North, next, door);
+        var state = new GameState(location, eventSystem: events);
+
+        GameEvent? openEvent = null;
+        events.Subscribe(GameEventType.OpenDoor, e => openEvent = e);
+
+        new OpenCommand().Execute(new CommandContext(state));
+
+        Assert.Equal(door, openEvent?.Door);
+        Assert.Equal(location, openEvent?.Location);
+    }
+
+    [Fact]
+    public void UnlockCommand_PublishesDoorUnlockEvent()
+    {
+        var events = new EventSystem();
+        var location = new Location("hall");
+        var next = new Location("yard");
+        var key = new Key("gate_key", "gate key");
+        var door = new Door("gate", "gate").RequiresKey(key);
+        location.AddExit(Direction.North, next, door);
+        var state = new GameState(location, eventSystem: events);
+        state.Inventory.Add(key);
+
+        GameEvent? unlockEvent = null;
+        events.Subscribe(GameEventType.UnlockDoor, e => unlockEvent = e);
+
+        new UnlockCommand().Execute(new CommandContext(state));
+
+        Assert.Equal(door, unlockEvent?.Door);
+        Assert.Equal(location, unlockEvent?.Location);
+    }
 }

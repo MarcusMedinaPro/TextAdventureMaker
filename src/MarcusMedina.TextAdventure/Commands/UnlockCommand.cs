@@ -1,6 +1,7 @@
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -31,6 +32,7 @@ public class UnlockCommand : ICommand
         {
             if (exitWithDoor.Door.Unlock(key))
             {
+                context.State.Events.Publish(new GameEvent(GameEventType.UnlockDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
                 var reaction = exitWithDoor.Door.GetReaction(DoorAction.Unlock);
                 return reaction != null
                     ? CommandResult.Ok(Language.DoorUnlocked(exitWithDoor.Door.Name), reaction)

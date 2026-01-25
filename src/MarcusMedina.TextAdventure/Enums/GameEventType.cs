@@ -7,5 +7,7 @@ public enum GameEventType
     PickupItem = 2,
     DropItem = 3,
     TalkToNpc = 4,
-    CombatStart = 5
+    CombatStart = 5,
+    OpenDoor = 6,
+    UnlockDoor = 7
 }

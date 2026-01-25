@@ -1,6 +1,7 @@
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -23,6 +24,7 @@ public class OpenCommand : ICommand
 
         if (exitWithDoor.Door.Open())
         {
+            context.State.Events.Publish(new GameEvent(GameEventType.OpenDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
             var reaction = exitWithDoor.Door.GetReaction(DoorAction.Open);
             return reaction != null
                 ? CommandResult.Ok(Language.DoorOpened(exitWithDoor.Door.Name), reaction)

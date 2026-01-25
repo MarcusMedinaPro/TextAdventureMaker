@@ -101,6 +101,8 @@ var cafe = locationList.Add("cafe", "A warm café with soft light and a small ta
 var bankLobby = locationList.Add("bank_lobby", "A quiet bank lobby with a ticket machine.");
 var bankCounter = locationList.Add("bank_counter", "A teller waits behind the counter.");
 var alley = locationList.Add("alley", "A dim alley. Footsteps echo behind you.");
+var interviewLobby = locationList.Add("interview_lobby", "A calm lobby with a glass of water.");
+var interviewRoom = locationList.Add("interview_room", "A quiet interview room with two chairs.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -135,6 +137,8 @@ library.AddExit(Direction.East, cafe);
 library.AddExit(Direction.North, bankLobby);
 bankLobby.AddExit(Direction.North, bankCounter);
 bankCounter.AddExit(Direction.Out, alley);
+bankCounter.AddExit(Direction.East, interviewLobby);
+interviewLobby.AddExit(Direction.In, interviewRoom);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -163,11 +167,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -211,12 +215,21 @@ var mugger = npcList["mugger"]
         .AddOption("Try to talk your way out")
         .AddOption("Throw a coin and run"));
 
+var interviewer = npcList["interviewer"]
+    .SetState(NpcState.Friendly)
+    .Description("An interviewer with a kind smile.")
+    .SetDialog(new DialogNode("Thanks for coming. Ready to begin?")
+        .AddOption("Talk about your experience")
+        .AddOption("Ask about the team")
+        .AddOption("Admit you're nervous"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
 cafe.AddNpc(date);
 bankCounter.AddNpc(teller);
 alley.AddNpc(mugger);
+interviewRoom.AddNpc(interviewer);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));

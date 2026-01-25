@@ -136,6 +136,10 @@ var recipeBook = new RecipeBook()
 var state = new GameState(entrance, recipeBook: recipeBook);
 var locations = new List<Location> { entrance, forest, cave, deepCave, clearing, cabin };
 var dragonAwake = false;
+var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
+    .AddCondition(new HasItemCondition("sword"))
+    .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
+    .Start();
 
 state.Events.Subscribe(GameEventType.EnterLocation, e =>
 {
@@ -153,6 +157,7 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
 
 Console.WriteLine("=== FOREST ADVENTURE ===");
 Console.WriteLine("Find the key and unlock the cabin!");
+Console.WriteLine($"Quest started: {dragonHunt.Title} - {dragonHunt.Description}");
 var commands = new[]
 {
     "go", "look", "talk", "attack", "flee", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
@@ -160,26 +165,26 @@ var commands = new[]
 Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
 
 var parserConfig = new KeywordParserConfig(
-    quit: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "quit", "exit", "q" },
-    look: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "look", "l", "ls" },
-    inventory: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "inventory", "inv", "i" },
-    stats: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "stats", "stat", "hp", "health" },
-    open: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "open" },
-    unlock: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "unlock" },
-    take: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "take", "get", "pickup", "pick" },
-    drop: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "drop" },
-    use: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "use", "eat", "bite" },
-    combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine", "mix" },
-    pour: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "pour" },
-    go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go", "move", "cd" },
-    read: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "read" },
-    talk: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "talk", "speak" },
-    attack: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "attack", "fight" },
-    flee: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "flee", "run" },
-    all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
-    ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
-    combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },
-    pourPrepositions: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "into", "in" },
+    quit: CommandHelper.NewCommands("quit", "exit", "q"),
+    look: CommandHelper.NewCommands("look", "l", "ls"),
+    inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
+    stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
+    open: CommandHelper.NewCommands("open"),
+    unlock: CommandHelper.NewCommands("unlock"),
+    take: CommandHelper.NewCommands("take", "get", "pickup", "pick"),
+    drop: CommandHelper.NewCommands("drop"),
+    use: CommandHelper.NewCommands("use", "eat", "bite"),
+    combine: CommandHelper.NewCommands("combine", "mix"),
+    pour: CommandHelper.NewCommands("pour"),
+    go: CommandHelper.NewCommands("go", "move", "cd"),
+    read: CommandHelper.NewCommands("read"),
+    talk: CommandHelper.NewCommands("talk", "speak"),
+    attack: CommandHelper.NewCommands("attack", "fight"),
+    flee: CommandHelper.NewCommands("flee", "run"),
+    all: CommandHelper.NewCommands("all"),
+    ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
+    combineSeparators: CommandHelper.NewCommands("and", "+"),
+    pourPrepositions: CommandHelper.NewCommands("into", "in"),
     directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
         ["n"] = Direction.North,
@@ -256,6 +261,11 @@ while (true)
     }
 
     MoveNpcs();
+
+    if (dragonHunt.CheckProgress(state))
+    {
+        Console.WriteLine($"\n*** QUEST COMPLETE: {dragonHunt.Title}! ***");
+    }
 
     if (command is GoCommand go && result.Success)
     {

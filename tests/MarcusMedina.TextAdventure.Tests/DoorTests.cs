@@ -15,6 +15,15 @@ public class DoorTests
     }
 
     [Fact]
+    public void Door_InvalidIdOrName_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => new Door("", "door"));
+        Assert.Throws<ArgumentException>(() => new Door("id", ""));
+        Assert.Throws<ArgumentNullException>(() => new Door(null!, "door"));
+        Assert.Throws<ArgumentNullException>(() => new Door("id", null!));
+    }
+
+    [Fact]
     public void Door_CanBeOpened()
     {
         var door = new Door("door1", "wooden door");
@@ -93,5 +102,67 @@ public class DoorTests
 
         Assert.Equal(DoorState.Destroyed, door.State);
         Assert.True(door.IsPassable);
+    }
+
+    [Fact]
+    public void Door_CanHaveDescription()
+    {
+        var door = new Door("door1", "wooden door")
+            .Description("An old oak door with iron hinges.");
+
+        Assert.Equal("An old oak door with iron hinges.", door.GetDescription());
+    }
+
+    [Fact]
+    public void Door_Close_DoesNothingWhenLocked()
+    {
+        var key = new Key("key1", "rusty key");
+        var door = new Door("door1", "iron door").RequiresKey(key);
+
+        Assert.False(door.Close());
+        Assert.Equal(DoorState.Locked, door.State);
+    }
+
+    [Fact]
+    public void Door_Close_ClosesWhenOpen()
+    {
+        var door = new Door("door1", "iron door");
+        door.Open();
+
+        Assert.True(door.Close());
+        Assert.Equal(DoorState.Closed, door.State);
+        Assert.False(door.IsPassable);
+    }
+
+    [Fact]
+    public void Door_Lock_FailsWhenOpen()
+    {
+        var key = new Key("key1", "rusty key");
+        var door = new Door("door1", "iron door");
+        door.Open();
+
+        Assert.False(door.Lock(key));
+        Assert.Equal(DoorState.Open, door.State);
+    }
+
+    [Fact]
+    public void Door_Lock_FailsWhenDestroyed()
+    {
+        var key = new Key("key1", "rusty key");
+        var door = new Door("door1", "iron door");
+        door.Destroy();
+
+        Assert.False(door.Lock(key));
+        Assert.Equal(DoorState.Destroyed, door.State);
+    }
+
+    [Fact]
+    public void Door_Unlock_FailsIfNotLocked()
+    {
+        var key = new Key("key1", "rusty key");
+        var door = new Door("door1", "iron door");
+
+        Assert.False(door.Unlock(key));
+        Assert.Equal(DoorState.Closed, door.State);
     }
 }

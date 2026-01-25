@@ -13,6 +13,14 @@ public class LocationTests
     }
 
     [Fact]
+    public void Location_InvalidId_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => new Location(""));
+        Assert.Throws<ArgumentException>(() => new Location(" "));
+        Assert.Throws<ArgumentNullException>(() => new Location(null!));
+    }
+
+    [Fact]
     public void Location_ShouldHaveDescription()
     {
         var loc = new Location("cave")

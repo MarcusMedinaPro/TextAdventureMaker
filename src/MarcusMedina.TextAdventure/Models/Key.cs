@@ -2,14 +2,33 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public class Key : IKey
+public class Key : Item, IKey
 {
-    public string Id { get; }
-    public string Name { get; }
-
-    public Key(string id, string name)
+    public Key(string id, string name) : base(id, name)
     {
-        Id = id;
-        Name = name;
+    }
+
+    public new Key SetTakeable(bool takeable)
+    {
+        base.SetTakeable(takeable);
+        return this;
+    }
+
+    public new Key SetWeight(float weight)
+    {
+        base.SetWeight(weight);
+        return this;
+    }
+
+    public new Key AddAliases(params string[] aliases)
+    {
+        base.AddAliases(aliases);
+        return this;
+    }
+
+    public new Key Description(string text)
+    {
+        base.Description(text);
+        return this;
     }
 }

@@ -12,6 +12,7 @@ public class Exit
 
     public Exit(ILocation target, IDoor? door = null, bool isOneWay = false)
     {
+        ArgumentNullException.ThrowIfNull(target);
         Target = target;
         Door = door;
         IsOneWay = isOneWay;

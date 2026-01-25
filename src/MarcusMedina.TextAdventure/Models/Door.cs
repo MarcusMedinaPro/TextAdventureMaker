@@ -1,12 +1,15 @@
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
 public class Door : IDoor
 {
+    private string _description = "";
     public string Id { get; }
     public string Name { get; }
+    public string GetDescription() => _description;
     public DoorState State { get; private set; }
     public IKey? RequiredKey { get; private set; }
 
@@ -14,9 +17,17 @@ public class Door : IDoor
 
     public Door(string id, string name, DoorState initialState = DoorState.Closed)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
         Id = id;
         Name = name;
         State = initialState;
+    }
+
+    public Door Description(string text)
+    {
+        _description = text;
+        return this;
     }
 
     public Door RequiresKey(IKey key)
@@ -65,4 +76,8 @@ public class Door : IDoor
         State = DoorState.Destroyed;
         return true;
     }
+
+    public static implicit operator Door(string name) => new(name.ToId(), name);
+
+    IDoor IDoor.Description(string text) => Description(text);
 }

@@ -9,4 +9,8 @@ public interface ILocation
     string GetDescription();
     Exit? GetExit(Direction direction);
     IReadOnlyDictionary<Direction, Exit> Exits { get; }
+    IReadOnlyList<IItem> Items { get; }
+    void AddItem(IItem item);
+    bool RemoveItem(IItem item);
+    IItem? FindItem(string name);
 }

@@ -9,11 +9,14 @@ public class Location : ILocation
     public string Id { get; }
     private string _description = "";
     private readonly Dictionary<Direction, Exit> _exits = new();
+    private readonly List<IItem> _items = new();
 
     public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
+    public IReadOnlyList<IItem> Items => _items;
 
     public Location(string id)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
         Id = id;
     }
 
@@ -55,4 +58,22 @@ public class Location : ILocation
     {
         return _exits.TryGetValue(direction, out var exit) ? exit : null;
     }
+
+    public void AddItem(IItem item)
+    {
+        _items.Add(item);
+    }
+
+    public bool RemoveItem(IItem item)
+    {
+        return _items.Remove(item);
+    }
+
+    public IItem? FindItem(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        return _items.FirstOrDefault(i => i.Matches(name));
+    }
+
+    public static implicit operator Location(string id) => new(id);
 }

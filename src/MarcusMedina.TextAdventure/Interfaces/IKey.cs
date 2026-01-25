@@ -1,7 +1,5 @@
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface IKey
+public interface IKey : IItem
 {
-    string Id { get; }
-    string Name { get; }
 }

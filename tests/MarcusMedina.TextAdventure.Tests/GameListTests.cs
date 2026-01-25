@@ -43,9 +43,11 @@ public class GameListTests
         var items = new ItemList().AddMany("cat");
         var keys = new KeyList().AddMany("shed key");
         var doors = new DoorList().AddMany("shed door");
+        var npcs = new NpcList().AddMany("fox");
 
         Assert.Equal("cat", items["cat"].Name);
         Assert.Equal("shed_key", keys["shed key"].Id);
         Assert.Equal("shed_door", doors["shed door"].Id);
+        Assert.Equal("fox", npcs["fox"].Name);
     }
 }

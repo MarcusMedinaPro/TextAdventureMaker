@@ -8,21 +8,12 @@ namespace MarcusMedina.TextAdventure.Parsing;
 
 public class KeywordParser : ICommandParser
 {
-    private static readonly Dictionary<string, Direction> DirectionAliases = new(StringComparer.OrdinalIgnoreCase)
+    private readonly KeywordParserConfig _config;
+
+    public KeywordParser(KeywordParserConfig config)
     {
-        ["n"] = Direction.North,
-        ["s"] = Direction.South,
-        ["e"] = Direction.East,
-        ["w"] = Direction.West,
-        ["ne"] = Direction.NorthEast,
-        ["nw"] = Direction.NorthWest,
-        ["se"] = Direction.SouthEast,
-        ["sw"] = Direction.SouthWest,
-        ["u"] = Direction.Up,
-        ["d"] = Direction.Down,
-        ["in"] = Direction.In,
-        ["out"] = Direction.Out
-    };
+        _config = config ?? throw new ArgumentNullException(nameof(config));
+    }
 
     public ICommand Parse(string input)
     {
@@ -39,40 +30,40 @@ public class KeywordParser : ICommandParser
 
         var keyword = tokens[0].Lower();
 
-        if (keyword is "quit" or "exit" or "q")
+        if (_config.Quit.Contains(keyword))
         {
             return new QuitCommand();
         }
 
-        if (keyword is "look" or "l" or "ls")
+        if (_config.Look.Contains(keyword))
         {
             var target = ParseItemName(tokens, 1);
             return new LookCommand(target);
         }
 
-        if (keyword is "inventory" or "inv" or "i")
+        if (_config.Inventory.Contains(keyword))
         {
             return new InventoryCommand();
         }
 
-        if (keyword is "stats" or "stat" or "hp" or "health")
+        if (_config.Stats.Contains(keyword))
         {
             return new StatsCommand();
         }
 
-        if (keyword is "open")
+        if (_config.Open.Contains(keyword))
         {
             return new OpenCommand();
         }
 
-        if (keyword is "unlock")
+        if (_config.Unlock.Contains(keyword))
         {
             return new UnlockCommand();
         }
 
-        if (keyword is "take" or "get" or "pickup" or "pick")
+        if (_config.Take.Contains(keyword))
         {
-            if (tokens.Length >= 2 && tokens[1].TextCompare("all"))
+            if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
             {
                 return new TakeAllCommand();
             }
@@ -81,9 +72,9 @@ public class KeywordParser : ICommandParser
             return itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
         }
 
-        if (keyword is "drop")
+        if (_config.Drop.Contains(keyword))
         {
-            if (tokens.Length >= 2 && tokens[1].TextCompare("all"))
+            if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
             {
                 return new DropAllCommand();
             }
@@ -92,23 +83,23 @@ public class KeywordParser : ICommandParser
             return itemName != null ? new DropCommand(itemName) : new UnknownCommand();
         }
 
-        if (keyword is "use" or "eat" or "bite")
+        if (_config.Use.Contains(keyword))
         {
             var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
         }
 
-        if (keyword is "combine" or "mix")
+        if (_config.Combine.Contains(keyword))
         {
             return ParseCombine(tokens);
         }
 
-        if (keyword is "pour")
+        if (_config.Pour.Contains(keyword))
         {
             return ParsePour(tokens);
         }
 
-        if (keyword is "go" or "move" or "cd")
+        if (_config.Go.Contains(keyword))
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
                 ? new GoCommand(direction)
@@ -120,17 +111,23 @@ public class KeywordParser : ICommandParser
             : new UnknownCommand();
     }
 
-    private static bool TryParseDirection(string token, out Direction direction)
+    private bool TryParseDirection(string token, out Direction direction)
     {
-        if (DirectionAliases.TryGetValue(token, out direction))
+        if (_config.DirectionAliases.TryGetValue(token, out direction))
         {
             return true;
         }
 
-        return Enum.TryParse(token, true, out direction);
+        if (_config.AllowDirectionEnumNames)
+        {
+            return Enum.TryParse(token, true, out direction);
+        }
+
+        direction = default;
+        return false;
     }
 
-    private static string? ParseItemName(string[] tokens, int startIndex)
+    private string? ParseItemName(string[] tokens, int startIndex)
     {
         if (tokens.Length <= startIndex)
         {
@@ -138,19 +135,19 @@ public class KeywordParser : ICommandParser
         }
 
         var parts = tokens.Skip(startIndex)
-            .Where(t => !t.TextCompare("up") && !t.TextCompare("to"))
+            .Where(t => !_config.IgnoreItemTokens.Contains(t))
             .ToArray();
 
         return parts.Length == 0 ? null : parts.SpaceJoin();
     }
 
-    private static ICommand ParseGoTarget(string[] tokens)
+    private ICommand ParseGoTarget(string[] tokens)
     {
         var target = ParseItemName(tokens, 1);
         return target != null ? new GoToCommand(target) : new UnknownCommand();
     }
 
-    private static ICommand ParseCombine(string[] tokens)
+    private ICommand ParseCombine(string[] tokens)
     {
         if (tokens.Length < 3)
         {
@@ -158,7 +155,7 @@ public class KeywordParser : ICommandParser
         }
 
         var parts = tokens.Skip(1)
-            .Where(t => !t.TextCompare("and") && !t.TextCompare("+"))
+            .Where(t => !_config.CombineSeparators.Contains(t))
             .ToArray();
 
         if (parts.Length < 2)
@@ -171,9 +168,9 @@ public class KeywordParser : ICommandParser
         return new CombineCommand(left, right);
     }
 
-    private static ICommand ParsePour(string[] tokens)
+    private ICommand ParsePour(string[] tokens)
     {
-        var index = Array.FindIndex(tokens, t => t.TextCompare("into") || t.TextCompare("in"));
+        var index = Array.FindIndex(tokens, t => _config.PourPrepositions.Contains(t));
         if (index <= 1 || index >= tokens.Length - 1)
         {
             return new UnknownCommand();

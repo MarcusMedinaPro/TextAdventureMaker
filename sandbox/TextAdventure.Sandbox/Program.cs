@@ -91,7 +91,41 @@ var commands = new[]
 };
 Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
 
-var parser = new KeywordParser();
+var parserConfig = new KeywordParserConfig(
+    quit: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "quit", "exit", "q" },
+    look: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "look", "l", "ls" },
+    inventory: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "inventory", "inv", "i" },
+    stats: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "stats", "stat", "hp", "health" },
+    open: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "open" },
+    unlock: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "unlock" },
+    take: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "take", "get", "pickup", "pick", "ta" },
+    drop: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "drop" },
+    use: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "use", "eat", "bite" },
+    combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine", "mix" },
+    pour: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "pour" },
+    go: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "go", "move", "cd" },
+    all: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "all" },
+    ignoreItemTokens: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "up", "to" },
+    combineSeparators: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "and", "+" },
+    pourPrepositions: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "into", "in" },
+    directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["n"] = Direction.North,
+        ["s"] = Direction.South,
+        ["e"] = Direction.East,
+        ["w"] = Direction.West,
+        ["ne"] = Direction.NorthEast,
+        ["nw"] = Direction.NorthWest,
+        ["se"] = Direction.SouthEast,
+        ["sw"] = Direction.SouthWest,
+        ["u"] = Direction.Up,
+        ["d"] = Direction.Down,
+        ["in"] = Direction.In,
+        ["out"] = Direction.Out
+    },
+    allowDirectionEnumNames: true);
+
+var parser = new KeywordParser(parserConfig);
 
 while (true)
 {

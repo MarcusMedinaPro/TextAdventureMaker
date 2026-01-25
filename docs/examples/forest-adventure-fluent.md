@@ -28,11 +28,11 @@ extraItems["rubber chicken"].SetWeight(0.8f).AddAliases("chicken", "rubberchicke
 extraItems.Call("map").SetWeight(0.2f).AddAliases("parchment", "chart");
 extraItems["shovel"].SetWeight(2.5f).AddAliases("spade");
 
-var keyList = new GameList<Key>(name => new Key(name.ToId(), name))
+var keyList = new KeyList()
     .AddMany("shed key");
 keyList["shed key"].SetWeight(0.2f).AddAliases("shedkey");
 
-var doorList = new GameList<Door>(name => new Door(name.ToId(), name))
+var doorList = new DoorList()
     .AddMany("shed door");
 doorList["shed door"]
     .RequiresKey(keyList["shed key"])

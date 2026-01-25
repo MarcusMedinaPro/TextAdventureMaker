@@ -30,21 +30,13 @@ extraItems["rubber chicken"].SetWeight(0.8f).AddAliases("chicken", "rubberchicke
 extraItems["map"].SetWeight(0.2f).AddAliases("parchment", "chart");
 extraItems["shovel"].SetWeight(2.5f).AddAliases("spade");
 
-// GameList for keys and doors (explicit id creation)
-var keyList = new GameList<Key>(name =>
-{
-    var id = name.Trim().ToLowerInvariant().Replace(' ', '_');
-    return new Key(id, name);
-});
-keyList.AddMany("shed key");
+// Wrapper lists for keys and doors
+var keyList = new KeyList()
+    .AddMany("shed key");
 keyList["shed key"].SetWeight(0.2f).AddAliases("shedkey");
 
-var doorList = new GameList<Door>(name =>
-{
-    var id = name.Trim().ToLowerInvariant().Replace(' ', '_');
-    return new Door(id, name);
-});
-doorList.AddMany("shed door");
+var doorList = new DoorList()
+    .AddMany("shed door");
 doorList["shed door"]
     .RequiresKey(keyList["shed key"])
     .SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");

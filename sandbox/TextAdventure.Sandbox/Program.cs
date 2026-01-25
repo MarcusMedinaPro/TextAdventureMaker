@@ -25,6 +25,11 @@ extraItems["rubber chicken"].SetWeight(0.8f).AddAliases("chicken", "rubberchicke
 extraItems["map"].SetWeight(0.2f).AddAliases("parchment", "chart");
 extraItems["shovel"].SetWeight(2.5f).AddAliases("spade");
 
+var itemList = new ItemList()
+    .AddMany("Torch", "Rope");
+itemList["torch"].SetWeight(1.1f).AddAliases("light");
+itemList["rope"].SetWeight(1.8f).AddAliases("coil");
+
 Glass glass = (id: "glass", name: "glass", description: "A clear drinking glass.");
 glass.SetWeight(0.6f)
     .SetReaction(ItemAction.Take, "The glas surface is smooth")
@@ -96,12 +101,12 @@ Location shed = (
     );
 
 // Create keys and doors (list + direct styles)
-var keyList = new GameList<Key>(name => new Key(name.ToId(), name));
-keyList.AddMany("shed key");
+var keyList = new KeyList()
+    .AddMany("shed key");
 keyList["shed key"].SetWeight(0.2f).AddAliases("shedkey");
 
-var doorList = new GameList<Door>(name => new Door(name.ToId(), name));
-doorList.AddMany("shed door");
+var doorList = new DoorList()
+    .AddMany("shed door");
 doorList["shed door"]
     .RequiresKey(keyList["shed key"])
     .SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
@@ -114,12 +119,14 @@ forest.AddItem(apple);
 forest.AddItem(fire);
 forest.AddItem(lantern);
 forest.AddItem(keyList["shed key"]);
+forest.AddItem(itemList["torch"]);
 entrance.AddItem(extraItems["map"]);
 forest.AddItem(extraItems["cat"]);
 clearing.AddItem(extraItems["rubber chicken"]);
 clearing.AddItem(sword);
 clearing.AddItem(glass);
 clearing.AddItem(tome);
+clearing.AddItem(itemList["rope"]);
 shed.AddItem(extraItems["shovel"]);
 cave.AddItem(letter);
 cabin.AddItem(newspaper);

@@ -31,21 +31,13 @@ extraItems["rubber chicken"].SetWeight(0.8f);
 extraItems["map"].SetWeight(0.2f);
 extraItems["shovel"].SetWeight(2.5f);
 
-// GameList for keys and doors
-var keyList = new GameList<Key>(name =>
-{
-    var id = name.Trim().ToLowerInvariant().Replace(' ', '_');
-    return new Key(id, name);
-});
+// Wrapper lists for keys and doors
+var keyList = new KeyList();
 keyList.AddMany("shed key");
 keyList["shed key"].SetWeight(0.2f);
 keyList["shed key"].AddAliases("shedkey");
 
-var doorList = new GameList<Door>(name =>
-{
-    var id = name.Trim().ToLowerInvariant().Replace(' ', '_');
-    return new Door(id, name);
-});
+var doorList = new DoorList();
 doorList.AddMany("shed door");
 doorList["shed door"].RequiresKey(keyList["shed key"]);
 doorList["shed door"].SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");

@@ -93,6 +93,7 @@ var watchtower = locationList.Add("watchtower", "A wind-bitten watchtower overlo
 var garden = locationList.Add("garden", "A quiet garden. A flat stone rests near an old gate.");
 var courtyard = locationList.Add("courtyard", "A small courtyard where something waits.");
 var attic = locationList.Add("attic", "Rain drums against the roof. A leak gathers overhead.");
+var office = locationList.Add("office", "A quiet office with a locked terminal.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -103,10 +104,12 @@ watchtower.AddItem(itemList["compass"]);
 cabin.AddItem(itemList["blanket"]);
 garden.AddItem(new Item("stone", "stone", "A heavy flat stone."));
 attic.AddItem(new Item("bucket", "bucket", "A metal bucket."));
+office.AddItem(new Item("note", "post-it note", "A note with a hint: 0420."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
 clearing.AddExit(Direction.South, garden);
 cabin.AddExit(Direction.Up, attic);
+cabin.AddExit(Direction.East, office);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.");
 var gardenGate = new Door("garden_gate", "garden gate", "An old iron gate.")
@@ -125,7 +128,7 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office });
 
 // Create NPCs
 var npcList = new NpcList()
@@ -164,6 +167,10 @@ var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and sla
     .AddCondition(new WorldCounterCondition("villagers_saved", 1))
     .AddCondition(new RelationshipCondition("fox", 2))
     .Start();
+var loginQuest = new Quest("login", "Access the Terminal", "Find the password hint and log in.")
+    .AddCondition(new HasItemCondition("note"))
+    .Start();
+var loginQuestComplete = false;
 
 state.Events.Subscribe(GameEventType.EnterLocation, e =>
 {
@@ -299,6 +306,12 @@ var game = GameBuilder.Create()
         if (dragonHunt.CheckProgress(g.State))
         {
             g.Output.WriteLine($"\n*** QUEST COMPLETE: {dragonHunt.Title}! ***");
+        }
+
+        if (!loginQuestComplete && loginQuest.CheckProgress(g.State))
+        {
+            loginQuestComplete = true;
+            g.Output.WriteLine($"\n*** QUEST COMPLETE: {loginQuest.Title}! ***");
         }
 
         if (command is GoCommand go && result.Success)

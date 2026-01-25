@@ -393,6 +393,16 @@
         "build": {
           "build/net8.0/xunit.runner.visualstudio.props": {}
         }
+      },
+      "MarcusMedina.TextAdventure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/MarcusMedina.TextAdventure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MarcusMedina.TextAdventure.dll": {}
+        }
       }
     }
   },
@@ -903,10 +913,16 @@
         "xunit.runner.visualstudio.3.1.4.nupkg.sha512",
         "xunit.runner.visualstudio.nuspec"
       ]
+    },
+    "MarcusMedina.TextAdventure/1.0.0": {
+      "type": "project",
+      "path": "../../src/MarcusMedina.TextAdventure/MarcusMedina.TextAdventure.csproj",
+      "msbuildProject": "../../src/MarcusMedina.TextAdventure/MarcusMedina.TextAdventure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "MarcusMedina.TextAdventure >= 1.0.0",
       "Microsoft.NET.Test.Sdk >= 17.14.1",
       "coverlet.collector >= 6.0.4",
       "xunit >= 2.9.3",
@@ -937,7 +953,11 @@
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "/mnt/c/git/MarcusMedina/TextAdventure/src/MarcusMedina.TextAdventure/MarcusMedina.TextAdventure.csproj": {
+              "projectPath": "/mnt/c/git/MarcusMedina/TextAdventure/src/MarcusMedina.TextAdventure/MarcusMedina.TextAdventure.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

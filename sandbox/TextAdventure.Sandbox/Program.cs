@@ -90,6 +90,8 @@ doorList["watchtower door"]
 
 var locationList = new LocationList();
 var watchtower = locationList.Add("watchtower", "A wind-bitten watchtower overlooking the forest.");
+var garden = locationList.Add("garden", "A quiet garden. A flat stone rests near an old gate.");
+var courtyard = locationList.Add("courtyard", "A small courtyard where something waits.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -98,8 +100,16 @@ clearing.AddItem(extraItems["rubber chicken"]);
 shed.AddItem(extraItems["shovel"]);
 watchtower.AddItem(itemList["compass"]);
 cabin.AddItem(itemList["blanket"]);
+garden.AddItem(new Item("stone", "stone", "A heavy flat stone."));
 
 forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
+clearing.AddExit(Direction.South, garden);
+
+var gardenKey = new Key("garden_key", "iron key", "A small iron key.");
+var gardenGate = new Door("garden_gate", "garden gate", "An old iron gate.")
+    .RequiresKey(gardenKey)
+    .SetReaction(DoorAction.Unlock, "The gate creaks open.");
+garden.AddExit(Direction.Out, courtyard, gardenGate);
 
 // Doors from DSL
 var cabinDoor = adventure.Doors["cabin_door"];
@@ -112,7 +122,7 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower });
+state.RegisterLocations(new[] { watchtower, garden, courtyard });
 
 // Create NPCs
 var npcList = new NpcList()
@@ -156,6 +166,19 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
         dragon.Dialog("The dragon roars as it wakes.");
         dragon.SetMovement(dragonPatrol);
         Console.WriteLine("\nThe dragon stirs and awakens!");
+    }
+});
+
+state.Events.Subscribe(GameEventType.PickupItem, e =>
+{
+    if (e.Item == null) return;
+    if (e.Item.Id.TextCompare("stone"))
+    {
+        if (!garden.Items.Contains(gardenKey) && !state.Inventory.Items.Contains(gardenKey))
+        {
+            garden.AddItem(gardenKey);
+            Console.WriteLine("You lift the stone and find a key beneath it.");
+        }
     }
 });
 

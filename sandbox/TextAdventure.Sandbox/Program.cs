@@ -33,6 +33,31 @@ ice.SetWeight(0.5f)
 Item fire = (id: "fire", name: "fire", description: "A flickering flame.");
 fire.SetWeight(0.5f);
 
+Item lantern = (id: "lantern", name: "lantern", description: "A lantern that casts a warm glow.");
+lantern.SetWeight(1.2f);
+
+Item sign = (id: "sign", name: "wooden sign", description: "A weathered wooden sign.");
+sign.SetTakeable(false)
+    .SetReadable()
+    .SetReadText("Welcome to the Dark Forest!");
+
+Item newspaper = (id: "newspaper", name: "daily news", description: "A crinkled newspaper.");
+newspaper.SetReadable()
+    .RequireTakeToRead()
+    .SetReadText("HEADLINE: Dragon spotted near village!");
+
+Item tome = (id: "tome", name: "ancient tome", description: "A heavy book with faded runes.");
+tome.SetReadable()
+    .RequireTakeToRead()
+    .SetReadingCost(3)
+    .SetReadText("The secret to defeating the dragon is...");
+
+Item letter = (id: "letter", name: "sealed letter", description: "A sealed letter with red wax.");
+letter.SetReadable()
+    .RequireTakeToRead()
+    .RequiresToRead(s => s.Inventory.Items.Any(i => i.Id == "lantern"))
+    .SetReadText("Meet me at midnight...");
+
 // Create locations
 Location entrance = (
     id: "entrance", 
@@ -57,10 +82,15 @@ Location cabin = (
 // Place items
 cave.AddItem(cabinKey);
 entrance.AddItem(ice);
+entrance.AddItem(sign);
 forest.AddItem(apple);
 forest.AddItem(fire);
+forest.AddItem(lantern);
 clearing.AddItem(sword);
 clearing.AddItem(glass);
+clearing.AddItem(tome);
+cave.AddItem(letter);
+cabin.AddItem(newspaper);
 
 // Create locked door
 Door cabinDoor = (id: "cabin_door", name: "cabin door", description: "A sturdy wooden door with iron hinges.");
@@ -87,7 +117,7 @@ Console.WriteLine("=== FOREST ADVENTURE ===");
 Console.WriteLine("Find the key and unlock the cabin!");
 var commands = new[]
 {
-    "go", "look", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
+    "go", "look", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "quit"
 };
 Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
 
@@ -98,7 +128,7 @@ var parserConfig = new KeywordParserConfig(
     stats: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "stats", "stat", "hp", "health" },
     open: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "open" },
     unlock: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "unlock" },
-    take: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "take", "get", "pickup", "pick", "ta" },
+    take: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "take", "get", "pickup", "pick" },
     drop: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "drop" },
     use: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "use", "eat", "bite" },
     combine: new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "combine", "mix" },

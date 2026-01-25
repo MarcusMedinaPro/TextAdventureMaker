@@ -10,6 +10,7 @@ public class Npc : INpc
     public string Id { get; }
     public string Name { get; }
     public NpcState State { get; private set; }
+    public INpcMovement Movement { get; private set; } = new NoNpcMovement();
     public bool IsAlive => State != NpcState.Dead;
 
     public Npc(string id, string name, NpcState state = NpcState.Friendly)
@@ -33,5 +34,19 @@ public class Npc : INpc
     {
         State = state;
         return this;
+    }
+
+    public INpc SetMovement(INpcMovement movement)
+    {
+        ArgumentNullException.ThrowIfNull(movement);
+        Movement = movement;
+        return this;
+    }
+
+    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
+    {
+        ArgumentNullException.ThrowIfNull(currentLocation);
+        ArgumentNullException.ThrowIfNull(state);
+        return Movement.GetNextLocation(currentLocation, state);
     }
 }

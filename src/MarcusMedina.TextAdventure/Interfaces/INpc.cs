@@ -9,7 +9,10 @@ public interface INpc
     string GetDescription();
     NpcState State { get; }
     bool IsAlive { get; }
+    INpcMovement Movement { get; }
 
     INpc Description(string text);
     INpc SetState(NpcState state);
+    INpc SetMovement(INpcMovement movement);
+    ILocation? GetNextLocation(ILocation currentLocation, IGameState state);
 }

@@ -1,3 +1,4 @@
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
@@ -6,6 +7,7 @@ namespace MarcusMedina.TextAdventure.Models;
 public class Item : IItem
 {
     private readonly List<string> _aliases = new();
+    private readonly Dictionary<ItemAction, string> _reactions = new();
     private string _description = "";
 
     public string Id { get; }
@@ -68,6 +70,17 @@ public class Item : IItem
 
         if (Name.TextCompare(token)) return true;
         return _aliases.Any(a => a.TextCompare(token));
+    }
+
+    public string? GetReaction(ItemAction action)
+    {
+        return _reactions.TryGetValue(action, out var reaction) ? reaction : null;
+    }
+
+    public IItem SetReaction(ItemAction action, string text)
+    {
+        _reactions[action] = text;
+        return this;
     }
 
     public void Take()

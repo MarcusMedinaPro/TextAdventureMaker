@@ -1,3 +1,4 @@
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
@@ -45,6 +46,8 @@ public abstract class ItemDecorator : IItem
     }
 
     public virtual bool Matches(string name) => Inner.Matches(name);
+    public virtual string? GetReaction(ItemAction action) => Inner.GetReaction(action);
+    public virtual IItem SetReaction(ItemAction action, string text) => Inner.SetReaction(action, text);
     public virtual void Take() => Inner.Take();
     public virtual void Drop() => Inner.Drop();
     public virtual void Use() => Inner.Use();

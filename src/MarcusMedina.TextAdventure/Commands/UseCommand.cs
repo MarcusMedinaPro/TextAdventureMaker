@@ -22,6 +22,9 @@ public class UseCommand : ICommand
         }
 
         item.Use();
-        return CommandResult.Ok(Language.UseItem(item.Name));
+        var onUse = item.GetReaction(ItemAction.Use);
+        return onUse != null
+            ? CommandResult.Ok(Language.UseItem(item.Name), onUse)
+            : CommandResult.Ok(Language.UseItem(item.Name));
     }
 }

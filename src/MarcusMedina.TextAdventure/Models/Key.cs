@@ -1,3 +1,4 @@
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
@@ -29,6 +30,12 @@ public class Key : Item, IKey
     public new Key Description(string text)
     {
         base.Description(text);
+        return this;
+    }
+
+    public new Key SetReaction(ItemAction action, string text)
+    {
+        base.SetReaction(action, text);
         return this;
     }
 }

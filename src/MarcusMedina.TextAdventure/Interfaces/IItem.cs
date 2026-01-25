@@ -1,3 +1,5 @@
+using MarcusMedina.TextAdventure.Enums;
+
 namespace MarcusMedina.TextAdventure.Interfaces;
 
 public interface IItem
@@ -16,6 +18,8 @@ public interface IItem
 
     bool Matches(string name);
     IItem Description(string text);
+    string? GetReaction(ItemAction action);
+    IItem SetReaction(ItemAction action, string text);
     void Take();
     void Drop();
     void Use();

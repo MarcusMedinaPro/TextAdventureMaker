@@ -25,6 +25,9 @@ public class DropCommand : ICommand
         context.State.CurrentLocation.AddItem(item);
         item.Drop();
 
-        return CommandResult.Ok(Language.DropItem(item.Name));
+        var onDrop = item.GetReaction(ItemAction.Drop);
+        return onDrop != null
+            ? CommandResult.Ok(Language.DropItem(item.Name), onDrop)
+            : CommandResult.Ok(Language.DropItem(item.Name));
     }
 }

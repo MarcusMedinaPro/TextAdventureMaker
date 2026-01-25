@@ -18,7 +18,11 @@ Item apple = "red apple";
 apple.SetWeight(0.4f).AddAliases("apple");
 
 var glass = new Glass("glass", "glass").SetWeight(0.6f);
-var ice = new Item("ice", "ice").SetWeight(0.5f);
+var ice = new Item("ice", "ice")
+    .SetWeight(0.5f)
+    .SetReaction(ItemAction.Take, "The cold chills your hand.")
+    .SetReaction(ItemAction.Drop, "It lands with a soft thump.")
+    .SetReaction(ItemAction.Use, "You take a bite. Your teeth ache.");
 var fire = new Item("fire", "fire").SetWeight(0.5f);
 
 // Create locations
@@ -91,6 +95,14 @@ while (true)
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
         Console.WriteLine(result.Message);
+    }
+
+    foreach (var reaction in result.ReactionsList)
+    {
+        if (!string.IsNullOrWhiteSpace(reaction))
+        {
+            Console.WriteLine(reaction);
+        }
     }
 
     if (result.ShouldQuit)

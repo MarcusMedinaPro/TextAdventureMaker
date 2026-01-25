@@ -23,7 +23,10 @@ public class TakeCommand : ICommand
 
         if (!item.Takeable)
         {
-            return CommandResult.Fail(Language.CannotTakeItem, GameError.ItemNotTakeable);
+            var reaction = item.GetReaction(ItemAction.TakeFailed);
+            return reaction != null
+                ? CommandResult.Fail(Language.CannotTakeItem, GameError.ItemNotTakeable, reaction)
+                : CommandResult.Fail(Language.CannotTakeItem, GameError.ItemNotTakeable);
         }
 
         var inventory = context.State.Inventory;
@@ -40,6 +43,9 @@ public class TakeCommand : ICommand
         context.State.CurrentLocation.RemoveItem(item);
         item.Take();
 
-        return CommandResult.Ok(Language.TakeItem(item.Name));
+        var onTake = item.GetReaction(ItemAction.Take);
+        return onTake != null
+            ? CommandResult.Ok(Language.TakeItem(item.Name), onTake)
+            : CommandResult.Ok(Language.TakeItem(item.Name));
     }
 }

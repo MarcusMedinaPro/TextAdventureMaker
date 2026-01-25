@@ -100,6 +100,7 @@ var meeting = locationList.Add("meeting", "A small meeting room. A mirror hangs 
 var cafe = locationList.Add("cafe", "A warm café with soft light and a small table.");
 var bankLobby = locationList.Add("bank_lobby", "A quiet bank lobby with a ticket machine.");
 var bankCounter = locationList.Add("bank_counter", "A teller waits behind the counter.");
+var alley = locationList.Add("alley", "A dim alley. Footsteps echo behind you.");
 
 entrance.AddItem(extraItems["map"]);
 entrance.AddItem(keyList["watchtower key"]);
@@ -119,6 +120,7 @@ meeting.AddItem(new Item("mirror", "mirror", "A mirror for a quick check.").SetT
 cafe.AddItem(new Item("menu", "menu", "A small menu with handwritten specials.").SetTakeable(false));
 cafe.AddItem(new Item("coffee_cup", "coffee", "A fresh cup of coffee."));
 bankLobby.AddItem(new Item("ticket", "number ticket", "Your place in line."));
+alley.AddItem(new Item("coin", "coin", "A single coin with a dull shine."));
 var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.")
     .SetHint("Hmm, what do we usually use keys for...duh");
 courtyard.AddItem(libraryKey);
@@ -132,6 +134,7 @@ courtyard.AddExit(Direction.North, libraryOutside);
 library.AddExit(Direction.East, cafe);
 library.AddExit(Direction.North, bankLobby);
 bankLobby.AddExit(Direction.North, bankCounter);
+bankCounter.AddExit(Direction.Out, alley);
 
 var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
     .SetHint("Hmm, what do we usually use keys for...duh");
@@ -160,11 +163,11 @@ cabinDoor
 shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
 
 // Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter });
+state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley });
 
 // Create NPCs
 var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller");
+    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger");
 var fox = npcList["fox"]
     .Description("A curious fox with bright eyes.")
     .SetDialog(new DialogNode("The fox tilts its head, listening.")
@@ -200,11 +203,20 @@ var teller = npcList["teller"]
         .AddOption("Fix my account issue")
         .AddOption("Ask about fees"));
 
+var mugger = npcList["mugger"]
+    .SetState(NpcState.Hostile)
+    .SetStats(new Stats(15))
+    .Description("A shadow steps forward, hand in pocket.")
+    .SetDialog(new DialogNode("Give me your wallet.")
+        .AddOption("Try to talk your way out")
+        .AddOption("Throw a coin and run"));
+
 forest.AddNpc(fox);
 cave.AddNpc(dragon);
 attic.AddNpc(storm);
 cafe.AddNpc(date);
 bankCounter.AddNpc(teller);
+alley.AddNpc(mugger);
 
 // Recipes
 state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));

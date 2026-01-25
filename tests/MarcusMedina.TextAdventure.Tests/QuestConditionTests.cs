@@ -37,10 +37,16 @@ public class QuestConditionTests
         var state = new GameState(location);
         state.Inventory.Add(new Item("sword", "sword"));
         var npc = new Npc("dragon", "Dragon").SetState(NpcState.Dead);
+        state.WorldState.SetFlag("dragon_defeated", true);
+        state.WorldState.Increment("villagers_saved", 2);
+        state.WorldState.SetRelationship("fox", 5);
 
         var quest = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
             .AddCondition(new HasItemCondition("sword"))
             .AddCondition(new NpcStateCondition(npc, NpcState.Dead))
+            .AddCondition(new WorldFlagCondition("dragon_defeated"))
+            .AddCondition(new WorldCounterCondition("villagers_saved", 2))
+            .AddCondition(new RelationshipCondition("fox", 5))
             .Start();
 
         var completed = quest.CheckProgress(state);

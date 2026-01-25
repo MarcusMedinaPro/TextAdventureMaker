@@ -8,4 +8,7 @@ public interface IQuestConditionVisitor
     bool Visit(NpcStateCondition condition);
     bool Visit(AllOfCondition condition);
     bool Visit(AnyOfCondition condition);
+    bool Visit(WorldFlagCondition condition);
+    bool Visit(WorldCounterCondition condition);
+    bool Visit(RelationshipCondition condition);
 }

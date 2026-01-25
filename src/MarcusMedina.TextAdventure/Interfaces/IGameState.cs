@@ -14,4 +14,5 @@ public interface IGameState
     IStats Stats { get; }
     IEventSystem Events { get; }
     ICombatSystem CombatSystem { get; }
+    IWorldState WorldState { get; }
 }

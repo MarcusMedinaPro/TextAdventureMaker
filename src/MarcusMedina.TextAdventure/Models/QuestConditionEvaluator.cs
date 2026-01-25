@@ -33,4 +33,19 @@ public sealed class QuestConditionEvaluator : IQuestConditionVisitor
     {
         return condition.Conditions.Any(child => child.Accept(this));
     }
+
+    public bool Visit(WorldFlagCondition condition)
+    {
+        return _state.WorldState.GetFlag(condition.Key) == condition.Expected;
+    }
+
+    public bool Visit(WorldCounterCondition condition)
+    {
+        return _state.WorldState.GetCounter(condition.Key) >= condition.Minimum;
+    }
+
+    public bool Visit(RelationshipCondition condition)
+    {
+        return _state.WorldState.GetRelationship(condition.NpcId) >= condition.Minimum;
+    }
 }

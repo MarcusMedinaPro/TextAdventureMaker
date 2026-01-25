@@ -4,7 +4,7 @@ A tiny, choice-driven demo about getting ready for a date. The player chooses pa
 **long hair + beard + jeans + t‑shirt + blazer**.
 
 ## Story beats (max ~10 steps)
-1) Wake up in your room. Big date tonight.
+1) Wake up in your room. Big date tonight (or skip it).
 2) Pick pants (jeans vs chinos).
 3) Pick shirt (t‑shirt vs dress shirt).
 4) Grab a blazer.
@@ -13,7 +13,7 @@ A tiny, choice-driven demo about getting ready for a date. The player chooses pa
 7) Choose hair (short vs long).
 8) Check the mirror.
 9) If the winning combo is set, confidence boost.
-10) Leave for the date.
+10) Decide: go on the date or skip it (skip ends the game).
 
 ## Example (core engine + simple worldstate flags)
 ```csharp
@@ -96,6 +96,15 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
         Console.WriteLine("Something feels off... maybe rethink your choices.");
     }
 });
+
+// Optional: skip the date entirely (ends the game)
+// In your main input loop, allow a direct choice:
+// if (input == "skip date" || input == "stay home")
+// {
+//     state.WorldState.SetFlag("skip_date", true);
+//     Console.WriteLine("You decide to stay in. Game over.");
+//     Environment.Exit(0);
+// }
 
 // Parser config (minimal)
 var parserConfig = new KeywordParserConfig(

@@ -123,6 +123,15 @@ public class DoorTests
     }
 
     [Fact]
+    public void Door_CanUseTupleConstructor()
+    {
+        Door door = (id: "gate", name: "iron gate", description: "A heavy iron gate.");
+
+        Assert.Equal("iron gate", door.Name);
+        Assert.Equal("A heavy iron gate.", door.GetDescription());
+    }
+
+    [Fact]
     public void Door_Close_DoesNothingWhenLocked()
     {
         var key = new Key("key1", "rusty key");

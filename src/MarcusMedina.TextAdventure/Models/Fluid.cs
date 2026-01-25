@@ -17,6 +17,11 @@ public class Fluid : IFluid
         Name = name;
     }
 
+    public Fluid(string id, string name, string description) : this(id, name)
+    {
+        _description = description ?? "";
+    }
+
     public string GetDescription() => _description;
 
     public IFluid Description(string text)
@@ -24,4 +29,7 @@ public class Fluid : IFluid
         _description = text;
         return this;
     }
+
+    public static implicit operator Fluid((string id, string name, string description) data) =>
+        new(data.id, data.name, data.description);
 }

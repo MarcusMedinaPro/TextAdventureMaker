@@ -52,4 +52,14 @@ public class LocationTests
         Assert.Equal(pit, hall.GetExit(Direction.Down)?.Target);
         Assert.Null(pit.GetExit(Direction.Up));
     }
+
+    [Fact]
+    public void Location_CanUseDescriptionConstructorAndTuple()
+    {
+        var cave = new Location("cave", "A dark cave.");
+        Location cellar = (id: "cellar", description: "A damp cellar.");
+
+        Assert.Equal("A dark cave.", cave.GetDescription());
+        Assert.Equal("A damp cellar.", cellar.GetDescription());
+    }
 }

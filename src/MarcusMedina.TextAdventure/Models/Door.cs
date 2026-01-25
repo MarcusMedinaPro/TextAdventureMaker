@@ -25,6 +25,12 @@ public class Door : IDoor
         State = initialState;
     }
 
+    public Door(string id, string name, string description, DoorState initialState = DoorState.Closed)
+        : this(id, name, initialState)
+    {
+        _description = description ?? "";
+    }
+
     public Door Description(string text)
     {
         _description = text;
@@ -93,4 +99,7 @@ public class Door : IDoor
 
     IDoor IDoor.Description(string text) => Description(text);
     IDoor IDoor.SetReaction(DoorAction action, string text) => SetReaction(action, text);
+
+    public static implicit operator Door((string id, string name, string description) data) =>
+        new(data.id, data.name, data.description);
 }

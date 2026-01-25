@@ -20,6 +20,11 @@ public class Location : ILocation
         Id = id;
     }
 
+    public Location(string id, string description) : this(id)
+    {
+        _description = description ?? "";
+    }
+
     public Location Description(string text)
     {
         _description = text;
@@ -76,4 +81,6 @@ public class Location : ILocation
     }
 
     public static implicit operator Location(string id) => new(id);
+    public static implicit operator Location((string id, string description) data) =>
+        new(data.id, data.description);
 }

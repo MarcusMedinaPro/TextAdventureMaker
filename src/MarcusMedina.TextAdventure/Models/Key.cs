@@ -9,6 +9,10 @@ public class Key : Item, IKey
     {
     }
 
+    public Key(string id, string name, string description) : base(id, name, description)
+    {
+    }
+
     public new Key SetTakeable(bool takeable)
     {
         base.SetTakeable(takeable);
@@ -38,4 +42,7 @@ public class Key : Item, IKey
         base.SetReaction(action, text);
         return this;
     }
+
+    public static implicit operator Key((string id, string name, string description) data) =>
+        new(data.id, data.name, data.description);
 }

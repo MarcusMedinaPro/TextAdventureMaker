@@ -32,6 +32,11 @@ public class Item : IItem
         Weight = 0f;
     }
 
+    public Item(string id, string name, string description) : this(id, name)
+    {
+        _description = description ?? "";
+    }
+
     public Item SetTakeable(bool takeable)
     {
         Takeable = takeable;
@@ -105,4 +110,7 @@ public class Item : IItem
 
     public static implicit operator Item(string name) =>
         new(name.ToId(), name);
+
+    public static implicit operator Item((string id, string name, string description) data) =>
+        new(data.id, data.name, data.description);
 }

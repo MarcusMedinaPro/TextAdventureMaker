@@ -43,6 +43,15 @@ public class ItemTests
     }
 
     [Fact]
+    public void Item_CanUseTupleConstructor()
+    {
+        Item torch = (id: "torch", name: "Torch", description: "A smoky torch.");
+
+        Assert.Equal("Torch", torch.Name);
+        Assert.Equal("A smoky torch.", torch.GetDescription());
+    }
+
+    [Fact]
     public void ItemFactory_DerivesIdFromName()
     {
         var item = ItemFactory.NewItem("Red Apple", 0.5f);

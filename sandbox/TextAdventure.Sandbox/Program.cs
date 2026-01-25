@@ -8,6 +8,12 @@ using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Interfaces;
 
+var languagePath = Path.Combine(AppContext.BaseDirectory, "lang", "gamelang.sv.txt");
+if (File.Exists(languagePath))
+{
+    Language.SetProvider(new FileLanguageProvider(languagePath));
+}
+
 // Create items (all styles are valid)
 Key cabinKey = (id: "cabin_key", name: "brass key", description: "A small brass key with worn teeth.");
 cabinKey.SetWeight(0.1f).AddAliases("key", "brass key");

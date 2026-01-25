@@ -4,6 +4,10 @@
     <ProjectReference Include="..\..\src\MarcusMedina.TextAdventure\MarcusMedina.TextAdventure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="lang\*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>

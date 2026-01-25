@@ -21,6 +21,13 @@ test → kod → test → refactor → test → commit → update sandbox → l�
 ### Fluent Consistency Rule
 Om ett objekt får en property/metod/extension, ge motsvarande funktionalitet till närliggande objekt (t.ex. Item/Key/Door) så API:t förblir konsekvent och lättläst.
 
+### Language Generic
+
+Varje kommando ska kunna ha språk-specifika nyckelord (t.ex. "go" på engelska, "gå" på svenska). Detta möjliggörs genom att ICommandParser hanterar språk och mappar inmatning till ICommand-objekt.
+
+Finns det bättre sätt att göra detta?
+Kom med förslag.
+
 ### Language System
 - Single language loaded at runtime via file (e.g., `gamelang.en.txt`, `gamelang.sv.txt`)
 - Default: English

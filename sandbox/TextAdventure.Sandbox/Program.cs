@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Parsing;
@@ -39,41 +38,22 @@ hallway.AddExit(Direction.Down, basement, basementDoor);
 
 var state = new GameState(hallway, worldLocations: new[] { hallway, basement });
 state.Inventory.Add(flashlight);
-var parserConfig = new KeywordParserConfig(
-    quit: CommandHelper.NewCommands("quit", "exit", "q"),
-    look: CommandHelper.NewCommands("look", "l", "ls"),
-    inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
-    stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
-    open: CommandHelper.NewCommands("open"),
-    unlock: CommandHelper.NewCommands("unlock"),
-    take: CommandHelper.NewCommands("take", "get", "pickup", "pick"),
-    drop: CommandHelper.NewCommands("drop"),
-    use: CommandHelper.NewCommands("use", "turn", "switch", "light"),
-    combine: CommandHelper.NewCommands("combine", "mix"),
-    pour: CommandHelper.NewCommands("pour"),
-    go: CommandHelper.NewCommands("go", "move"),
-    read: CommandHelper.NewCommands("read"),
-    talk: CommandHelper.NewCommands("talk", "speak"),
-    attack: CommandHelper.NewCommands("attack", "fight"),
-    flee: CommandHelper.NewCommands("flee", "run"),
-    save: CommandHelper.NewCommands("save"),
-    load: CommandHelper.NewCommands("load"),
-    all: CommandHelper.NewCommands("all"),
-    ignoreItemTokens: CommandHelper.NewCommands("up", "to", "on", "off"),
-    combineSeparators: CommandHelper.NewCommands("and", "+"),
-    pourPrepositions: CommandHelper.NewCommands("into", "in"),
-    directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
+var isKeyRevealed = false;
+
+var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
+    .WithStats("stats")
+    .WithTake("take", "get")
+    .WithUse("use", "turn", "switch", "light", "torch")
+    .WithGo("go")
+    .WithIgnoreItemTokens("on", "off")
+    .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
-        ["n"] = Direction.North,
-        ["s"] = Direction.South,
-        ["e"] = Direction.East,
-        ["w"] = Direction.West,
-        ["u"] = Direction.Up,
         ["d"] = Direction.Down,
-        ["in"] = Direction.In,
-        ["out"] = Direction.Out
-    },
-    allowDirectionEnumNames: true);
+        ["down"] = Direction.Down,
+        ["u"] = Direction.Up,
+        ["up"] = Direction.Up
+    })
+    .Build();
 var parser = new KeywordParser(parserConfig);
 
 Console.WriteLine("=== LIGHT IN THE BASEMENT (Slice 3) ===");
@@ -91,39 +71,17 @@ bool WantsOff(string input)
     return input.Contains("off", StringComparison.OrdinalIgnoreCase);
 }
 
-void RevealKey()
+bool WantsOn(string input)
 {
-    if (hallway.Items.Contains(key)) return;
-    hallway.AddItem(key);
-    Console.WriteLine("> The brass key glints under the table.");
+    return input.Contains("on", StringComparison.OrdinalIgnoreCase);
 }
 
-bool HandleFlashlightUse(string input, ICommand command)
+void RevealKey()
 {
-    if (!IsFlashlightCommand(command)) return false;
-
-    var lightOn = state.WorldState.GetFlag("flashlight_on");
-    if (WantsOff(input))
-    {
-        if (lightOn)
-        {
-            state.WorldState.SetFlag("flashlight_on", false);
-            Console.WriteLine("The light goes out.");
-        }
-        else
-        {
-            Console.WriteLine("It's already off.");
-        }
-        return true;
-    }
-
-    if (!lightOn)
-    {
-        state.WorldState.SetFlag("flashlight_on", true);
-    }
-
-    RevealKey();
-    return false;
+    if (isKeyRevealed) return;
+    isKeyRevealed = true;
+    hallway.AddItem(key);
+    Console.WriteLine("> The brass key glints under the table.");
 }
 
 void WriteResult(CommandResult result)
@@ -160,9 +118,37 @@ while (true)
     if (string.IsNullOrWhiteSpace(input)) continue;
 
     var command = parser.Parse(input);
-    var result = state.Execute(command);
-
     var lightOn = state.WorldState.GetFlag("flashlight_on");
+    var isFlashlightCommand = IsFlashlightCommand(command);
+
+    if (isFlashlightCommand && WantsOff(input))
+    {
+        if (lightOn)
+        {
+            state.WorldState.SetFlag("flashlight_on", false);
+            Console.WriteLine("The light goes out.");
+        }
+        else
+        {
+            Console.WriteLine("It's already off.");
+        }
+        continue;
+    }
+
+    if (isFlashlightCommand && lightOn && !WantsOn(input))
+    {
+        state.WorldState.SetFlag("flashlight_on", false);
+        Console.WriteLine("The light goes out.");
+        continue;
+    }
+
+    if (command is TakeCommand && !lightOn)
+    {
+        ShowDark();
+        continue;
+    }
+
+    var result = state.Execute(command);
 
     if (command is LookCommand && !lightOn)
     {
@@ -177,7 +163,11 @@ while (true)
         else WriteResult(result);
     }
 
-    if (HandleFlashlightUse(input, command)) continue;
+    if (isFlashlightCommand && !lightOn)
+    {
+        state.WorldState.SetFlag("flashlight_on", true);
+        RevealKey();
+    }
 
     if (result.ShouldQuit) break;
 }

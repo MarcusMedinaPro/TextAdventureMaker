@@ -10,77 +10,54 @@ _Slice tag: Slice 4 — Items + Inventory. Demo focuses on items, pickup, invent
 
 ## Example (items + inventory)
 ```csharp
+using System;
+using System.Collections.Generic;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
-using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Locations
-var platform = new Location("platform", "A quiet platform. The last train waits.");
+var platform = new Location("platform", "A quiet platform. The last train waits in the rain.");
+var carriage = new Location("carriage", "Warm light, tired faces, a seat by the window.");
 
-// Items
-var ticket = new Item("ticket", "train ticket", "A single-ride ticket.");
+var ticket = new Item("ticket", "train ticket", "A single-ride ticket with a faded stamp.")
+    .SetWeight(0.01f)
+    .AddAliases("ticket", "pass");
+
+var tea = new Item("thermos", "tea thermos", "A dented thermos that smells of black tea.")
+    .SetWeight(0.6f)
+    .AddAliases("thermos", "tea")
+    .SetReaction(ItemAction.Use, "You take a careful sip. It warms your hands.");
+
 platform.AddItem(ticket);
+platform.AddItem(tea);
+platform.AddExit(Direction.In, carriage, oneWay: true);
 
-// Game state
-var state = new GameState(platform, worldLocations: new[] { platform });
+var state = new GameState(platform, worldLocations: new[] { platform, carriage });
 
-// Parser config (slice 4 core commands)
-var parserConfig = new KeywordParserConfig(
-    quit: CommandHelper.NewCommands("quit"),
-    look: CommandHelper.NewCommands("look"),
-    inventory: CommandHelper.NewCommands("inventory"),
-    stats: CommandHelper.NewCommands("stats"),
-    open: CommandHelper.NewCommands("open"),
-    unlock: CommandHelper.NewCommands("unlock"),
-    take: CommandHelper.NewCommands("take"),
-    drop: CommandHelper.NewCommands("drop"),
-    use: CommandHelper.NewCommands("use"),
-    combine: CommandHelper.NewCommands("combine"),
-    pour: CommandHelper.NewCommands("pour"),
-    go: CommandHelper.NewCommands("go"),
-    read: CommandHelper.NewCommands("read"),
-    talk: CommandHelper.NewCommands("talk"),
-    attack: CommandHelper.NewCommands("attack"),
-    flee: CommandHelper.NewCommands("flee"),
-    save: CommandHelper.NewCommands("save"),
-    load: CommandHelper.NewCommands("load"),
-    all: CommandHelper.NewCommands("all"),
-    ignoreItemTokens: CommandHelper.NewCommands(),
-    combineSeparators: CommandHelper.NewCommands(),
-    pourPrepositions: CommandHelper.NewCommands(),
-    directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase),
-    allowDirectionEnumNames: true);
-
+var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
+    .WithLook("look", "l")
+    .WithInventory("inventory", "inv", "i")
+    .WithTake("take", "get", "pick")
+    .WithDrop("drop")
+    .WithUse("use")
+    .WithGo("go", "move")
+    .WithIgnoreItemTokens("on", "off")
+    .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["in"] = Direction.In,
+        ["out"] = Direction.Out
+    })
+    .Build();
 var parser = new KeywordParser(parserConfig);
 
-// Simple choice loop
-while (true)
+Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
+Console.WriteLine("Commands: Look, Take <Item>, Drop <Item>, Use <Item>, Inventory, Go In/Out, Board, Quit");
+
+void WriteResult(CommandResult result)
 {
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrEmpty(input)) continue;
-
-    if (string.Equals(input, "board", StringComparison.OrdinalIgnoreCase))
-    {
-        var hasTicket = state.Inventory.Items.Any(i => i.Id == "ticket");
-        Console.WriteLine(hasTicket
-            ? "You board the train. The city fades behind you."
-            : "You need a ticket to board.");
-        break;
-    }
-
-    if (string.Equals(input, "stay", StringComparison.OrdinalIgnoreCase))
-    {
-        Console.WriteLine("You let the train go. You stay behind.");
-        break;
-    }
-
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
         Console.WriteLine(result.Message);
@@ -92,6 +69,51 @@ while (true)
         {
             Console.WriteLine($"> {reaction}");
         }
+    }
+}
+
+void ShowLookResult(CommandResult result)
+{
+    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    WriteResult(result);
+}
+
+while (true)
+{
+    Console.Write("\n> ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrWhiteSpace(input)) continue;
+
+    if (input.Equals("board", StringComparison.OrdinalIgnoreCase))
+    {
+        var hasTicket = state.Inventory.FindItem("ticket") != null;
+        if (!hasTicket)
+        {
+            Console.WriteLine("You need a ticket to board.");
+            continue;
+        }
+
+        state.Move(Direction.In);
+        Console.WriteLine("You board the train. The city fades behind you.");
+        continue;
+    }
+
+    if (input.Equals("stay", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("You let the train go. You stay behind.");
+        break;
+    }
+
+    var command = parser.Parse(input);
+    var result = state.Execute(command);
+
+    if (command is LookCommand)
+    {
+        ShowLookResult(result);
+    }
+    else
+    {
+        WriteResult(result);
     }
 
     if (result.ShouldQuit) break;

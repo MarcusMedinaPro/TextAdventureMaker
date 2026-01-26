@@ -4,85 +4,51 @@
 // </copyright>
 using System;
 using System.Collections.Generic;
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
-using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Parsing;
-using MarcusMedina.TextAdventure.Interfaces;
 
-// Slice 1 + 2 + 3: Location + Navigation + Doors + Keys + Parser
+// Slice 1 + 2 + 3 + 4: Location + Navigation + Doors + Keys + Parser + Items/Inventory
 
-var hallway = new Location("hallway", "It's dark. You can't see anything.");
-var basement = new Location("basement", "Cold air and old stone. It smells of dust.");
+var platform = new Location("platform", "A quiet platform. The last train waits in the rain.");
+var carriage = new Location("carriage", "Warm light, tired faces, a seat by the window.");
 
-var key = new Key("basement_key", "basement key", "A small key with a stamped B.")
-    .AddAliases("key", "basement")
-    .SetWeight(0.02f);
+var ticket = new Item("ticket", "train ticket", "A single-ride ticket with a faded stamp.")
+    .SetWeight(0.01f)
+    .AddAliases("ticket", "pass");
 
-var flashlight = new Item("flashlight", "flashlight", "A small torch with a stiff switch.")
-    .AddAliases("torch", "light", "flash", "lamp")
-    .SetWeight(0.2f)
-    .SetReaction(ItemAction.Use, "Click. A clean circle of light blooms in the dark.");
+var tea = new Item("thermos", "tea thermos", "A dented thermos that smells of black tea.")
+    .SetWeight(0.6f)
+    .AddAliases("thermos", "tea")
+    .SetReaction(ItemAction.Use, "You take a careful sip. It warms your hands.");
 
-// The key is hidden until the flashlight is used.
+platform.AddItem(ticket);
+platform.AddItem(tea);
+platform.AddExit(Direction.In, carriage, oneWay: true);
 
-var basementDoor = new Door("basement_door", "basement door", "A solid door with a heavy latch.")
-    .RequiresKey(key)
-    .SetReaction(DoorAction.Unlock, "The lock gives way with a dry click.")
-    .SetReaction(DoorAction.Open, "The door creaks open.")
-    .SetReaction(DoorAction.OpenFailed, "It will not move.");
-
-hallway.AddExit(Direction.Down, basement, basementDoor);
-
-var state = new GameState(hallway, worldLocations: new[] { hallway, basement });
-state.Inventory.Add(flashlight);
-var isKeyRevealed = false;
+var state = new GameState(platform, worldLocations: new[] { platform, carriage });
 
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
-    .WithStats("stats")
-    .WithTake("take", "get")
-    .WithUse("use", "turn", "switch", "light", "torch")
-    .WithGo("go")
+    .WithLook("look", "l")
+    .WithInventory("inventory", "inv", "i")
+    .WithTake("take", "get", "pick")
+    .WithDrop("drop")
+    .WithUse("use")
+    .WithGo("go", "move")
     .WithIgnoreItemTokens("on", "off")
     .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
-        ["d"] = Direction.Down,
-        ["down"] = Direction.Down,
-        ["u"] = Direction.Up,
-        ["up"] = Direction.Up
+        ["in"] = Direction.In,
+        ["out"] = Direction.Out
     })
     .Build();
 var parser = new KeywordParser(parserConfig);
 
-Console.WriteLine("=== LIGHT IN THE BASEMENT (Slice 3) ===");
-Console.WriteLine("Commands: Look, Take <Item>, Unlock/Open Door, Go Down, Use/Turn On/Off Flashlight, Inventory, Quit");
-
-bool IsFlashlightCommand(ICommand command)
-{
-    if (command is not UseCommand use) return false;
-    var item = state.Inventory.FindItem(use.ItemName);
-    return item != null && item.Id.TextCompare("flashlight");
-}
-
-bool WantsOff(string input)
-{
-    return input.Contains("off", StringComparison.OrdinalIgnoreCase);
-}
-
-bool WantsOn(string input)
-{
-    return input.Contains("on", StringComparison.OrdinalIgnoreCase);
-}
-
-void RevealKey()
-{
-    if (isKeyRevealed) return;
-    isKeyRevealed = true;
-    hallway.AddItem(key);
-    Console.WriteLine("> The brass key glints under the table.");
-}
+Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
+Console.WriteLine("Commands: Look, Take <Item>, Drop <Item>, Use <Item>, Inventory, Go In/Out, Board, Quit");
 
 void WriteResult(CommandResult result)
 {
@@ -100,11 +66,6 @@ void WriteResult(CommandResult result)
     }
 }
 
-void ShowDark()
-{
-    Console.WriteLine("It's dark. You can't see anything.");
-}
-
 void ShowLookResult(CommandResult result)
 {
     Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
@@ -117,56 +78,36 @@ while (true)
     var input = Console.ReadLine()?.Trim();
     if (string.IsNullOrWhiteSpace(input)) continue;
 
+    if (input.Equals("board", StringComparison.OrdinalIgnoreCase))
+    {
+        var hasTicket = state.Inventory.FindItem("ticket") != null;
+        if (!hasTicket)
+        {
+            Console.WriteLine("You need a ticket to board.");
+            continue;
+        }
+
+        state.Move(Direction.In);
+        Console.WriteLine("You board the train. The city fades behind you.");
+        continue;
+    }
+
+    if (input.Equals("stay", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("You let the train go. You stay behind.");
+        break;
+    }
+
     var command = parser.Parse(input);
-    var lightOn = state.WorldState.GetFlag("flashlight_on");
-    var isFlashlightCommand = IsFlashlightCommand(command);
-
-    if (isFlashlightCommand && WantsOff(input))
-    {
-        if (lightOn)
-        {
-            state.WorldState.SetFlag("flashlight_on", false);
-            Console.WriteLine("The light goes out.");
-        }
-        else
-        {
-            Console.WriteLine("It's already off.");
-        }
-        continue;
-    }
-
-    if (isFlashlightCommand && lightOn && !WantsOn(input))
-    {
-        state.WorldState.SetFlag("flashlight_on", false);
-        Console.WriteLine("The light goes out.");
-        continue;
-    }
-
-    if (command is TakeCommand && !lightOn)
-    {
-        ShowDark();
-        continue;
-    }
-
     var result = state.Execute(command);
 
-    if (command is LookCommand && !lightOn)
+    if (command is LookCommand)
     {
-        ShowDark();
+        ShowLookResult(result);
     }
     else
     {
-        if (command is LookCommand)
-        {
-            ShowLookResult(result);
-        }
-        else WriteResult(result);
-    }
-
-    if (isFlashlightCommand && !lightOn)
-    {
-        state.WorldState.SetFlag("flashlight_on", true);
-        RevealKey();
+        WriteResult(result);
     }
 
     if (result.ShouldQuit) break;

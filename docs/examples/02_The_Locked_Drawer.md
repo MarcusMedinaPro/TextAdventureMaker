@@ -85,12 +85,12 @@ var hallway = new Location("hallway", "A quiet hallway with a window and a small
 var study = new Location("study", "A quiet study with a heavy desk and a single lamp.");
 
 var key = new Key("study_key", "brass key", "A small brass key with a worn bow.")
-    .SetWeight(0.01f);
-key.AddAliases("key", "brass");
+    .SetWeight(0.01f)
+    .AddAliases("key", "brass");
 
 var photo = new Item("photo", "old photo", "A faded photo of a stranger.")
-    .SetWeight(0.05f);
-photo.AddAliases("photo", "picture", "image", "old photo", "old");
+    .SetWeight(0.05f)
+    .AddAliases("photo", "picture", "image", "old photo", "old");
 
 hallway.AddItem(key);
 study.AddItem(photo);

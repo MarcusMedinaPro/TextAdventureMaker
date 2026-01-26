@@ -785,6 +785,7 @@ quest.AddStage("find_sword")
 ## Slice 20: Conditional Event Chains
 
 **Mål:** Sekvenser av events som påverkar varandra.
+**Notis:** Kodbasen använder för närvarande Slice 20 för Hints & Properties (se `docs/examples/20_Hints_and_Properties.md`).
 
 ### Task 20.1: IEventChain + ICondition interfaces
 ### Task 20.2: Time/location/state triggers
@@ -1812,62 +1813,65 @@ World.Add(Archetypes.WanderingMerchant()
 ## Sammanfattning av slices
 
 ### Core Engine (v1)
+**Status legend:** ✅ implemented in code · 🟨 demo/docs only · ⬜ planned
 | # | Slice | Patterns | Status |
 |---|-------|----------|--------|
-| 1 | Location + Navigation | - | ⬜ |
-| 2 | Doors + Keys | State | ⬜ |
-| 3 | Command + Parser | Command, Chain of Responsibility | ⬜ |
-| 4 | Items + Inventory | Factory, Prototype, Decorator, Composite | ⬜ |
-| 5 | NPCs + Dialog + Movement | State, Composite, Strategy | ⬜ |
-| 6 | Event System | Observer | ⬜ |
-| 7 | Combat | Strategy, Command | ⬜ |
-| 8 | Quest System | State, Visitor | ⬜ |
-| 9 | World State System | - | ⬜ |
-| 10 | Save/Load | Memento | ⬜ |
-| 11 | Language System | Flyweight | ⬜ |
-| 12 | DSL Parser | Template Method | ⬜ |
-| 13 | GameBuilder | Builder, Facade | ⬜ |
-| 14 | Loggers | Observer, Proxy | ⬜ |
-| 15 | Pathfinder | Strategy | ⬜ |
-| 16 | AI-paket | Facade, Strategy | ⬜ |
-| 17 | NuGet-paketering | - | ⬜ |
+| 1 | Location + Navigation | - | ✅ |
+| 2 | Doors + Keys | State | ✅ |
+| 3 | Command + Parser | Command, Chain of Responsibility | ✅ |
+| 4 | Items + Inventory | Factory, Prototype, Decorator, Composite | ✅ |
+| 5 | NPCs + Dialog + Movement | State, Composite, Strategy | ✅ |
+| 6 | Event System | Observer | ✅ |
+| 7 | Combat | Strategy, Command | ✅ |
+| 8 | Quest System | State, Visitor | ✅ |
+| 9 | World State System | - | ✅ |
+| 10 | Save/Load | Memento | ✅ |
+| 11 | Language System | Flyweight | ✅ |
+| 12 | DSL Parser | Template Method | ✅ |
+| 13 | GameBuilder | Builder, Facade | ✅ |
+| 14 | Loggers | Observer, Proxy | 🟨 |
+| 15 | Pathfinder | Strategy | 🟨 |
+| 16 | AI-paket | Facade, Strategy | 🟨 |
+| 17 | NuGet-paketering | - | 🟨 |
 
 ### Advanced Systems (v1.5)
 | # | Slice | Patterns | Status |
 |---|-------|----------|--------|
-| 18 | Story Branches & Consequences | State | ⬜ |
-| 19 | Multi-Stage Quests | State, Strategy | ⬜ |
-| 20 | Conditional Event Chains | Chain of Responsibility | ⬜ |
-| 21 | Time System | Observer, Strategy | ⬜ |
-| 22 | Faction & Reputation | Observer | ⬜ |
-| 23 | Random Event Pool | Strategy | ⬜ |
-| 24 | Location Discovery | - | ⬜ |
-| 25 | Story Mapper Tool | - | ⬜ |
+| 18 | Story Branches & Consequences | State | 🟨 |
+| 19 | Multi-Stage Quests | State, Strategy | 🟨 |
+| 20 | Hints & Properties (current impl) | - | ✅ |
+| 21 | Time System | Observer, Strategy | ✅ |
+| 22 | Faction & Reputation | Observer | ✅ |
+| 23 | Random Event Pool | Strategy | ✅ |
+| 24 | Location Discovery | - | ✅ |
+| 25 | Story Mapper Tool | - | 🟨 |
 
 ### Storytelling Systems (v2)
 | # | Slice | Patterns | Status |
 |---|-------|----------|--------|
-| 26 | Mood & Atmosphere | State, Observer | ⬜ |
-| 27 | Dynamic Descriptions | Strategy, Template | ⬜ |
-| 28 | Character Arc Tracking | State | ⬜ |
-| 29 | Pacing & Tension | Observer, State | ⬜ |
-| 30 | Foreshadowing & Callbacks | Observer | ⬜ |
-| 31 | Scene Transitions & Beats | State, Command | ⬜ |
-| 32 | Emotional Stakes | Observer | ⬜ |
-| 33 | Narrative Voice | Strategy | ⬜ |
-| 34 | Player Agency Tracking | Observer | ⬜ |
-| 35 | Dramatic Irony Tracker | Observer | ⬜ |
-| 36 | Hero's Journey & Narrative Templates | Template, Strategy, Builder | ⬜ |
-| 37 | Generic Chapter System | State, Builder | ⬜ |
-| 38 | Time/Action Triggered Objects | Observer, Scheduler | ⬜ |
+| 26 | Mood & Atmosphere | State, Observer | 🟨 |
+| 27 | Dynamic Descriptions | Strategy, Template | 🟨 |
+| 28 | Character Arc Tracking | State | 🟨 |
+| 29 | Pacing & Tension | Observer, State | 🟨 |
+| 30 | Foreshadowing & Callbacks | Observer | 🟨 |
+| 31 | Scene Transitions & Beats | State, Command | 🟨 |
+| 32 | Emotional Stakes | Observer | 🟨 |
+| 33 | Narrative Voice | Strategy | 🟨 |
+| 34 | Player Agency Tracking | Observer | 🟨 |
+| 35 | Dramatic Irony Tracker | Observer | 🟨 |
+| 36 | Hero's Journey & Narrative Templates | Template, Strategy, Builder | 🟨 |
+| 37 | Generic Chapter System | State, Builder | 🟨 |
+| 38 | Time/Action Triggered Objects | Observer, Scheduler | 🟨 |
 
 ### Polish & Documentation (v2+)
 | # | Slice | Patterns | Status |
 |---|-------|----------|--------|
-| 39 | Fluent API & Språksnygghet | Builder, Factory | ⬜ |
-| 40 | GitHub Wiki (TextAdventure.wiki) | - | ⬜ |
+| 39 | Fluent API & Språksnygghet | Builder, Factory | 🟨 |
+| 40 | GitHub Wiki (TextAdventure.wiki) | - | 🟨 |
 | 41 | Testing & Validation Tools | Visitor, Strategy | ⬜ |
 | 42 | Story-LINQ (Narrative Query Language) | LINQ, Builder, State | ⬜ |
+| 43 | Map Generator | - | ⬜ |
+| 44 | String Case Utilities | - | ✅ |
 
 ---
 
@@ -4448,3 +4452,30 @@ Story
         meaning: "You have found shelter, warmth, and understanding."
     );
 ```
+
+---
+
+## Slice 43: Map Generator
+
+**Mål:** Skapa en enkel map generator som kan rendera en ASCII-karta baserat på location-grafen och exits.
+
+### Förslag på funktioner
+- `MapGenerator.Render(GameState state)` → `string`
+- Valfritt: `MapGenerator.Render(ILocation start, int maxDepth)` → `string`
+
+### Krav
+- Fungerar med Slice 1 (Location + Exits) utan extra beroenden.
+- Möjlig att använda i sandbox för att visa en karta vid `look`.
+
+---
+
+## Slice 44: String Case Utilities
+
+**Mål:** Enkla stränghelpers för casing i UI/texter.
+
+### Funktioner
+- `string.ToProperCase()` — Title Case.
+- `string.ToSentenceCase()` — Första bokstaven versal, resten gemener.
+- `string.ToCrazyCaps()` — Slumpad versal/gemen per bokstav.
+
+**Notis:** Använder `Random.Shared`.

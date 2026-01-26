@@ -2,864 +2,452 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Models;
+using System;
+using System.Linq;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
-using MarcusMedina.TextAdventure.Commands;
-using MarcusMedina.TextAdventure.Parsing;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Helpers;
-using MarcusMedina.TextAdventure.Localization;
-using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Dsl;
+using MarcusMedina.TextAdventure.Models;
 
-var languagePath = Path.Combine(AppContext.BaseDirectory, "lang", "gamelang.sv.txt");
-if (File.Exists(languagePath))
+// Slice 1 + 2: Location + Navigation + Doors + Keys
+// Commands tested here (manual):
+// - look
+// - look <item>
+// - north/south/east/west (n/s/e/w)
+// - go <direction>
+// - take <item>
+// - unlock east
+// - open east
+// - close east
+// - lock east
+// - destroy east
+// - inventory
+// - quit
+
+var hallway = new Location("hallway", "A quiet hallway with a window and a small table.");
+var study = new Location("study", "A quiet study with a heavy desk and a single lamp.");
+
+var key = new Key("study_key", "brass key", "A small brass key with a worn bow.")
+    .SetWeight(0.01f);
+key.AddAliases("key", "brass");
+
+var photo = new Item("photo", "old photo", "A faded photo of a stranger.")
+    .SetWeight(0.05f);
+photo.AddAliases("photo", "picture", "image", "old photo", "old");
+
+hallway.AddItem(key);
+study.AddItem(photo);
+
+var studyDoor = new Door("study_door", "study door", "A sturdy door with a brass plate.")
+    .RequiresKey(key)
+    .SetReaction(DoorAction.Unlock, "The lock clicks.")
+    .SetReaction(DoorAction.UnlockFailed, "The key does not fit.")
+    .SetReaction(DoorAction.Open, "The door swings open.")
+    .SetReaction(DoorAction.OpenFailed, "The door refuses to budge.")
+    .SetReaction(DoorAction.Close, "The door clicks shut.")
+    .SetReaction(DoorAction.Lock, "You hear the lock catch.")
+    .SetReaction(DoorAction.Destroy, "In a Hulk inspired rage you attack the door. Splinters fly. CRASH, BANG, KABOOM!!!\n The hinges snap and the door slumps aside.");
+
+hallway.AddExit(Direction.East, study, studyDoor);
+
+var state = new GameState(hallway, worldLocations: new[] { hallway, study });
+
+Console.WriteLine("=== THE LOCKED STUDY (Slice 2) ===");
+Console.WriteLine("Commands: Look, Look <Item>, Go <Direction>, Take <Item>, Unlock/Open/Close/Lock/Destroy Door, Inventory, North/South/East/West, Quit");
+
+void ShowRoom()
 {
-    Language.SetProvider(new FileLanguageProvider(languagePath));
+    var location = state.CurrentLocation;
+    Console.WriteLine($"\nRoom: {location.Id.ToProperCase()}");
+    Console.WriteLine(location.GetDescription());
+
+    var items = location.Items.Select(item => item.Name.ToProperCase()).ToList();
+    Console.WriteLine(items.Count > 0
+        ? $"In the room you can see the following things: {items.CommaJoin()}"
+        : "Items: None");
+
+    var exits = location.Exits
+        .Select(kvp =>
+        {
+            var direction = kvp.Key.ToString().ToLowerInvariant().ToProperCase();
+            var door = kvp.Value.Door;
+            if (door == null) return direction;
+            var stateText = door.State.ToString().ToLowerInvariant().ToProperCase();
+            return $"{direction} ({door.Name.ToProperCase()}, {stateText})";
+        });
+
+    Console.WriteLine($"Exits: {exits.CommaJoin()}");
+
 }
 
-var adventurePath = Path.Combine(AppContext.BaseDirectory, "forest.adventure");
-var adventure = new AdventureDslParser().ParseFile(adventurePath);
-var state = adventure.State;
-
-// Locations from DSL
-var entrance = adventure.Locations["entrance"];
-var forest = adventure.Locations["forest"];
-var cave = adventure.Locations["cave"];
-var deepCave = adventure.Locations["deep_cave"];
-var clearing = adventure.Locations["clearing"];
-var cabin = adventure.Locations["cabin"];
-var shed = adventure.Locations["shed"];
-
-// Items and keys from DSL
-var ice = adventure.Items["ice"];
-var sign = adventure.Items["sign"];
-var fire = adventure.Items["fire"];
-var letter = adventure.Items["letter"];
-var glass = adventure.Items["glass"];
-var tome = adventure.Items["tome"];
-var newspaper = adventure.Items["newspaper"];
-
-ice.SetReaction(ItemAction.Take, "The cold chills your hand.")
-    .SetReaction(ItemAction.Drop, "It lands with a soft thump.")
-    .SetReaction(ItemAction.Use, "You take a bite. Your teeth ache.");
-
-sign.SetTakeable(false)
-    .SetReadable()
-    .SetReadText("Welcome to the Dark Forest!");
-
-fire.SetWeight(0.5f);
-
-letter.SetReadable()
-    .RequireTakeToRead()
-    .RequiresToRead(s => s.Inventory.Items.Any(i => i.Id == "lantern"))
-    .SetReadText("🎶 Meet me at midnight... 🎵");
-
-glass.SetReaction(ItemAction.Take, "The glas surface is smooth")
-    .SetReaction(ItemAction.Drop, "The glass bounces on the floor")
-    .SetReaction(ItemAction.Destroy, "The glass shatters into 1000 pieces");
-
-tome.SetReadable()
-    .RequireTakeToRead()
-    .SetReadingCost(3)
-    .SetReadText("The secret to defeating the dragon is...");
-
-newspaper.SetReadable()
-    .RequireTakeToRead()
-    .SetReadText("HEADLINE: Dragon spotted near village!");
-
-// Extras (still showing different creation styles)
-var extraItems = new GameItemList()
-    .AddMany("Cat", "Rubber chicken", "Map", "Shovel");
-extraItems["cat"].SetWeight(3f).AddAliases("kitten", "kitteh");
-extraItems["rubber chicken"].SetWeight(0.8f).AddAliases("chicken", "rubberchicken");
-extraItems["map"].SetWeight(0.2f).AddAliases("parchment", "chart");
-extraItems["shovel"].SetWeight(2.5f).AddAliases("spade");
-
-var itemList = new ItemList()
-    .AddMany("Compass", "Blanket");
-itemList["compass"].SetWeight(0.3f).AddAliases("northfinder");
-itemList["blanket"].SetWeight(1.0f);
-
-var keyList = new KeyList()
-    .AddMany("watchtower key");
-keyList["watchtower key"].SetWeight(0.2f).AddAliases("watchkey");
-
-var doorList = new DoorList()
-    .AddMany("watchtower door");
-doorList["watchtower door"]
-    .RequiresKey(keyList["watchtower key"])
-    .SetReaction(DoorAction.Unlock, "The watchtower door unlocks with a click.");
-
-var locationList = new LocationList();
-var watchtower = locationList.Add("watchtower", "A wind-bitten watchtower overlooking the forest.");
-var garden = locationList.Add("garden", "A quiet garden. A flat stone rests near an old gate.");
-var courtyard = locationList.Add("courtyard", "A small courtyard where something waits.");
-var attic = locationList.Add("attic", "Rain drums against the roof. A leak gathers overhead.");
-var office = locationList.Add("office", "A quiet office with a locked terminal.");
-var libraryOutside = locationList.Add("library_outside", "Snow falls quietly outside a locked library.");
-var library = locationList.Add("library", "Warm light and quiet pages surround you.");
-var meeting = locationList.Add("meeting", "A small meeting room. A mirror hangs by the door.");
-var cafe = locationList.Add("cafe", "A warm café with soft light and a small table.");
-var bankLobby = locationList.Add("bank_lobby", "A quiet bank lobby with a ticket machine.");
-var bankCounter = locationList.Add("bank_counter", "A teller waits behind the counter.");
-var alley = locationList.Add("alley", "A dim alley. Footsteps echo behind you.");
-var interviewLobby = locationList.Add("interview_lobby", "A calm lobby with a glass of water.");
-var interviewRoom = locationList.Add("interview_room", "A quiet interview room with two chairs.");
-var stationHall = locationList.Add("station_hall", "A quiet station hall with a flickering departure board.");
-var platform = locationList.Add("platform", "The last train's lights disappear into the night.");
-var sideStreet = locationList.Add("side_street", "A side street with rain-slick pavement.");
-var busStop = locationList.Add("bus_stop", "A lonely bus stop with a torn schedule.");
-var footbridge = locationList.Add("footbridge", "A narrow footbridge over the tracks.");
-var taxiStand = locationList.Add("taxi_stand", "A small taxi stand with no cabs in sight.");
-var hospitalEntrance = locationList.Add("hospital_entrance", "Automatic doors slide open to a bright lobby.");
-var reception = locationList.Add("reception", "A reception desk with a stack of forms.");
-var waitingRoom = locationList.Add("waiting_room", "Plastic chairs and a quiet TV loop.");
-var examRoom = locationList.Add("exam_room", "A clean exam room with a curtained bed.");
-var roadside = locationList.Add("roadside", "Your car sits dead on the shoulder with the hood up.");
-var gasStation = locationList.Add("gas_station", "A small gas station with a service bay.");
-var apartmentLobby = locationList.Add("apartment_lobby", "A tidy lobby with a directory and fresh paint.");
-var apartmentUnit = locationList.Add("apartment_unit", "A bright unit with tall windows and clean floors.");
-var balcony = locationList.Add("balcony", "A small balcony overlooking the street.");
-var bar = locationList.Add("bar", "A noisy bar with clinking glasses.");
-var barAlley = locationList.Add("bar_alley", "A narrow alley behind the bar.");
-var nightStreet = locationList.Add("night_street", "A long street with patchy streetlights.");
-var underpass = locationList.Add("underpass", "A shadowy underpass humming with distant traffic.");
-var frontPorch = locationList.Add("front_porch", "A quiet front porch with a locked gate.");
-var park = locationList.Add("park", "A small park with damp grass and a lone bench.");
-var schoolHallway = locationList.Add("school_hallway", "A dim hallway lined with closed doors.");
-var lockedClassroom = locationList.Add("locked_classroom", "A classroom dark behind the glass.");
-var securityOffice = locationList.Add("security_office", "A small office with a wall of monitors.");
-var photoArchive = locationList.Add("photo_archive", "A small archive with labeled boxes and old frames.");
-var familyRoom = locationList.Add("family_room", "A quiet room with a soft lamp and a worn sofa.");
-var elevator = locationList.Add("elevator", "A cramped elevator with a flickering display.");
-var maintenance = locationList.Add("maintenance", "A maintenance corridor lined with panels.");
-var darkHall = locationList.Add("dark_hall", "A hallway swallowed by the power outage.");
-var utilityRoom = locationList.Add("utility_room", "A utility room with humming equipment.");
-var bedroom = locationList.Add("bedroom", "A small bedroom lit by the glow of a phone screen.");
-var doorstep = locationList.Add("doorstep", "A doorstep with a damp welcome mat.");
-var playground = locationList.Add("playground", "An abandoned playground with creaking swings.");
-var lateBusStop = locationList.Add("late_bus_stop", "A bus stop with a flickering arrival display.");
-var cafeteria = locationList.Add("cafeteria", "A quiet cafeteria with stacked chairs.");
-var shelterEntrance = locationList.Add("shelter_entrance", "A storm shelter entrance with sandbags piled high.");
-var shelterHall = locationList.Add("shelter_hall", "A narrow hall lined with cots and blankets.");
-
-entrance.AddItem(extraItems["map"]);
-entrance.AddItem(keyList["watchtower key"]);
-forest.AddItem(extraItems["cat"]);
-clearing.AddItem(extraItems["rubber chicken"]);
-shed.AddItem(extraItems["shovel"]);
-watchtower.AddItem(itemList["compass"]);
-cabin.AddItem(itemList["blanket"]);
-garden.AddItem(new Item("stone", "stone", "A heavy flat stone."));
-attic.AddItem(new Item("bucket", "bucket", "A metal bucket."));
-office.AddItem(new Item("note", "post-it note", "A note with a hint: 0420."));
-var coffeeCup = new Item("coffee", "coffee", "A hot cup of coffee.")
-    .SetHint("This cup would look nicer with some coffee in it");
-office.AddItem(coffeeCup);
-office.AddItem(new Item("papers", "papers", "Notes for the meeting."));
-meeting.AddItem(new Item("mirror", "mirror", "A mirror for a quick check.").SetTakeable(false));
-cafe.AddItem(new Item("menu", "menu", "A small menu with handwritten specials.").SetTakeable(false));
-cafe.AddItem(new Item("coffee_cup", "coffee", "A fresh cup of coffee."));
-bankLobby.AddItem(new Item("ticket", "number ticket", "Your place in line."));
-alley.AddItem(new Item("coin", "coin", "A single coin with a dull shine."));
-var libraryKey = new Key("library_key", "library key", "Cold metal in your hand.")
-    .SetHint("Hmm, what do we usually use keys for...duh");
-courtyard.AddItem(libraryKey);
-stationHall.AddItem(new Item("board", "departure board", "The next train is marked CANCELLED.").SetTakeable(false));
-stationHall.AddItem(new Item("ticket_stub", "ticket stub", "The punch marks show you were late."));
-busStop.AddItem(new Item("schedule", "schedule", "Next bus in 20 minutes.").SetTakeable(false));
-taxiStand.AddItem(new Item("sign", "rideshare sign", "Maybe a rideshare app could work.").SetTakeable(false));
-reception.AddItem(new Item("forms", "intake forms", "Paperwork asking the usual questions."));
-reception.AddItem(new Item("clipboard", "clipboard", "A clipboard for check-in."));
-waitingRoom.AddItem(new Item("magazine", "magazine", "Outdated magazines and a crossword."));
-examRoom.AddItem(new Item("results", "test results", "The results are normal.").SetTakeable(false));
-roadside.AddItem(new Item("phone", "phone", "Low battery, but still works."));
-gasStation.AddItem(new Item("wrench", "wrench", "A sturdy wrench for a stubborn bolt."));
-gasStation.AddItem(new Item("jack", "jack", "A heavy jack for lifting the car."));
-apartmentLobby.AddItem(new Item("brochure", "brochure", "A brochure listing amenities and fees."));
-apartmentUnit.AddItem(new Item("inspection", "inspection list", "A checklist of items to review."));
-balcony.AddItem(new Item("view", "view", "The city lights shimmer below.").SetTakeable(false));
-bar.AddItem(new Item("stool", "bar stool", "A sturdy stool bolted to the floor.").SetTakeable(false));
-bar.AddItem(new Item("glass", "glass", "An empty glass with a chipped rim."));
-barAlley.AddItem(new Item("poster", "poster", "A torn poster flaps in the wind.").SetTakeable(false));
-nightStreet.AddItem(new Item("streetlight", "streetlight", "A flickering streetlight buzzes overhead.").SetTakeable(false));
-underpass.AddItem(new Item("whistle", "whistle", "A small whistle on a frayed cord."));
-frontPorch.AddItem(new Item("gate", "gate", "The gate is locked, but the house lights are on.").SetTakeable(false));
-park.AddItem(new Item("flyer", "flyer", "LOST DOG: small terrier, answers to Pip."));
-park.AddItem(new Item("bench", "bench", "A damp bench with rain beading on the wood.").SetTakeable(false));
-schoolHallway.AddItem(new Item("notice", "notice", "AUTHORIZED PERSONNEL ONLY.").SetTakeable(false));
-photoArchive.AddItem(new Item("photograph", "old photograph", "A faded photo of a family by a lake."));
-familyRoom.AddItem(new Item("album", "photo album", "An album with a page marked by a ribbon."));
-elevator.AddItem(new Item("button", "emergency button", "A red button under a plastic cover.").SetTakeable(false));
-maintenance.AddItem(new Item("panel", "panel", "A loose access panel with a warning label.").SetTakeable(false));
-darkHall.AddItem(new Item("flashlight", "flashlight", "A heavy flashlight with weak batteries."));
-utilityRoom.AddItem(new Item("breaker", "breaker box", "A row of breakers labeled by zone.").SetTakeable(false));
-bedroom.AddItem(new Item("landline", "phone", "A phone buzzing with an incoming call.").SetTakeable(false));
-doorstep.AddItem(new Item("package", "package", "A small package with a smudged label."));
-playground.AddItem(new Item("swing", "swing", "A swing creaks in the wind.").SetTakeable(false));
-playground.AddItem(new Item("toy", "stuffed toy", "A worn stuffed toy with a stitched tag."));
-lateBusStop.AddItem(new Item("display", "arrival display", "SERVICE DELAYED flashes in amber.").SetTakeable(false));
-cafeteria.AddItem(new Item("lunchbox", "lunchbox", "A forgotten lunchbox with a sticker."));
-shelterEntrance.AddItem(new Item("radio", "radio", "A weather radio crackles with updates.").SetTakeable(false));
-shelterHall.AddItem(new Item("blanket", "blanket", "A folded blanket on a cot."));
-
-forest.AddExit(Direction.NorthEast, watchtower, doorList["watchtower door"]);
-clearing.AddExit(Direction.South, garden);
-cabin.AddExit(Direction.Up, attic);
-cabin.AddExit(Direction.East, office);
-cabin.AddExit(Direction.North, meeting);
-courtyard.AddExit(Direction.North, libraryOutside);
-library.AddExit(Direction.East, cafe);
-library.AddExit(Direction.North, bankLobby);
-bankLobby.AddExit(Direction.North, bankCounter);
-bankCounter.AddExit(Direction.Out, alley);
-bankCounter.AddExit(Direction.East, interviewLobby);
-interviewLobby.AddExit(Direction.In, interviewRoom);
-cafe.AddExit(Direction.South, stationHall);
-stationHall.AddExit(Direction.East, platform);
-stationHall.AddExit(Direction.West, sideStreet);
-sideStreet.AddExit(Direction.South, busStop);
-sideStreet.AddExit(Direction.West, taxiStand);
-platform.AddExit(Direction.North, footbridge);
-footbridge.AddExit(Direction.East, busStop);
-busStop.AddExit(Direction.South, hospitalEntrance);
-busStop.AddExit(Direction.East, lateBusStop);
-hospitalEntrance.AddExit(Direction.In, reception);
-reception.AddExit(Direction.East, waitingRoom);
-waitingRoom.AddExit(Direction.North, examRoom);
-taxiStand.AddExit(Direction.South, roadside);
-roadside.AddExit(Direction.East, gasStation);
-gasStation.AddExit(Direction.North, apartmentLobby);
-apartmentLobby.AddExit(Direction.In, apartmentUnit);
-apartmentUnit.AddExit(Direction.East, balcony);
-sideStreet.AddExit(Direction.East, bar);
-bar.AddExit(Direction.South, barAlley);
-barAlley.AddExit(Direction.East, nightStreet);
-nightStreet.AddExit(Direction.East, underpass);
-nightStreet.AddExit(Direction.West, park);
-underpass.AddExit(Direction.North, frontPorch);
-park.AddExit(Direction.North, schoolHallway);
-schoolHallway.AddExit(Direction.West, securityOffice);
-schoolHallway.AddExit(Direction.South, cafeteria);
-nightStreet.AddExit(Direction.South, shelterEntrance);
-shelterEntrance.AddExit(Direction.In, shelterHall);
-lockedClassroom.AddExit(Direction.North, photoArchive);
-photoArchive.AddExit(Direction.East, familyRoom);
-apartmentLobby.AddExit(Direction.Up, elevator);
-elevator.AddExit(Direction.East, maintenance);
-maintenance.AddExit(Direction.North, darkHall);
-darkHall.AddExit(Direction.East, utilityRoom);
-frontPorch.AddExit(Direction.In, bedroom);
-frontPorch.AddExit(Direction.South, doorstep);
-park.AddExit(Direction.West, playground);
-
-var gardenKey = new Key("garden_key", "iron key", "A small iron key.")
-    .SetHint("Hmm, what do we usually use keys for...duh");
-var gardenGate = new Door("garden_gate", "garden gate", "An old iron gate.")
-    .RequiresKey(gardenKey)
-    .SetReaction(DoorAction.Unlock, "The gate creaks open.")
-    .SetHint("It needs a key, duh");
-garden.AddExit(Direction.Out, courtyard, gardenGate);
-
-var libraryDoor = new Door("library_door", "library door", "A heavy wooden door.")
-    .RequiresKey(libraryKey)
-    .SetReaction(DoorAction.Unlock, "The library door unlocks.")
-    .SetHint("It needs a key, duh");
-libraryOutside.AddExit(Direction.In, library, libraryDoor);
-
-var classroomKey = new Key("classroom_key", "classroom key", "A worn key with a scratched tag.")
-    .SetHint("Looks like it fits a classroom door.");
-securityOffice.AddItem(classroomKey);
-var classroomDoor = new Door("classroom_door", "classroom door", "A reinforced classroom door.")
-    .RequiresKey(classroomKey)
-    .SetReaction(DoorAction.Unlock, "The lock pops open.")
-    .SetHint("A keyhole waits here.");
-schoolHallway.AddExit(Direction.East, lockedClassroom, classroomDoor);
-
-coffeeCup.OnUse += _ => coffeeCup.SetHint("Yum! Coffee good!");
-
-// Doors from DSL
-var cabinDoor = adventure.Doors["cabin_door"];
-var shedDoor = adventure.Doors["shed_door"];
-
-cabinDoor
-    .SetReaction(DoorAction.Unlock, "The lock clicks open.")
-    .SetReaction(DoorAction.Open, "The door creaks as it swings wide.");
-
-shedDoor.SetReaction(DoorAction.Unlock, "The shed door unlocks with a click.");
-
-// Register extra locations for save/load
-state.RegisterLocations(new[] { watchtower, garden, courtyard, attic, office, libraryOutside, library, meeting, cafe, bankLobby, bankCounter, alley, interviewLobby, interviewRoom, stationHall, platform, sideStreet, busStop, footbridge, taxiStand, hospitalEntrance, reception, waitingRoom, examRoom, roadside, gasStation, apartmentLobby, apartmentUnit, balcony, bar, barAlley, nightStreet, underpass, frontPorch, park, schoolHallway, lockedClassroom, securityOffice, photoArchive, familyRoom, elevator, maintenance, darkHall, utilityRoom, bedroom, doorstep, playground, lateBusStop, cafeteria, shelterEntrance, shelterHall });
-
-// Create NPCs
-var npcList = new NpcList()
-    .AddMany("fox", "dragon", "storm", "date", "teller", "mugger", "interviewer", "receptionist", "nurse", "mechanic", "agent", "bouncer", "brawler", "stranger", "dog", "guard", "archivist", "operator", "technician", "caller", "neighbor", "commuter", "janitor", "coordinator");
-var fox = npcList["fox"]
-    .Description("A curious fox with bright eyes.")
-    .SetDialog(new DialogNode("The fox tilts its head, listening.")
-        .AddOption("Ask about the cabin")
-        .AddOption("Ask about the cave"));
-
-var dragonPatrol = new PatrolNpcMovement(new[] { cave, deepCave });
-var dragon = npcList["dragon"]
-    .SetState(NpcState.Friendly)
-    .SetStats(new Stats(40))
-    .Description("A massive dragon sleeps among the shadows.")
-    .Dialog("The dragon snores softly.")
-    .SetMovement(new NoNpcMovement());
-
-var storm = npcList["storm"]
-    .SetState(NpcState.Hostile)
-    .SetStats(new Stats(12))
-    .Description("A relentless leak you must endure.")
-    .SetMovement(new NoNpcMovement());
-
-var date = npcList["date"]
-    .SetState(NpcState.Friendly)
-    .Description("A calm smile across the table.")
-    .SetDialog(new DialogNode("The café is quiet. They wait for your first words.")
-        .AddOption("Ask about their day")
-        .AddOption("Compliment their outfit")
-        .AddOption("Order coffee"));
-
-var teller = npcList["teller"]
-    .SetState(NpcState.Friendly)
-    .Description("A patient teller taps the desk.")
-    .SetDialog(new DialogNode("How can I help you today?")
-        .AddOption("Fix my account issue")
-        .AddOption("Ask about fees"));
-
-var mugger = npcList["mugger"]
-    .SetState(NpcState.Hostile)
-    .SetStats(new Stats(15))
-    .Description("A shadow steps forward, hand in pocket.")
-    .SetDialog(new DialogNode("Give me your wallet.")
-        .AddOption("Try to talk your way out")
-        .AddOption("Throw a coin and run"));
-
-var interviewer = npcList["interviewer"]
-    .SetState(NpcState.Friendly)
-    .Description("An interviewer with a kind smile.")
-    .SetDialog(new DialogNode("Thanks for coming. Ready to begin?")
-        .AddOption("Talk about your experience")
-        .AddOption("Ask about the team")
-        .AddOption("Admit you're nervous"));
-
-var receptionist = npcList["receptionist"]
-    .SetState(NpcState.Friendly)
-    .Description("A receptionist with a calm voice.")
-    .SetDialog(new DialogNode("Can I get your name and date of birth?")
-        .AddOption("Hand over the clipboard")
-        .AddOption("Ask about the wait time"));
-
-var nurse = npcList["nurse"]
-    .SetState(NpcState.Friendly)
-    .Description("A nurse taps a tablet, waiting for you.")
-    .SetDialog(new DialogNode("We can bring you in now.")
-        .AddOption("Follow to the exam room")
-        .AddOption("Ask about the tests"));
-
-var mechanic = npcList["mechanic"]
-    .SetState(NpcState.Friendly)
-    .Description("A mechanic wipes grease from their hands.")
-    .SetDialog(new DialogNode("Need a tool or a lift?")
-        .AddOption("Ask for a wrench")
-        .AddOption("Ask for a jack"));
-
-var agent = npcList["agent"]
-    .SetState(NpcState.Friendly)
-    .Description("An agent waits with a small stack of keys.")
-    .SetDialog(new DialogNode("Any questions about the unit?")
-        .AddOption("Ask about noise levels")
-        .AddOption("Ask about utilities")
-        .AddOption("Ask about move-in dates"));
-
-var bouncer = npcList["bouncer"]
-    .SetState(NpcState.Friendly)
-    .Description("A bouncer watches the room with folded arms.")
-    .SetDialog(new DialogNode("Keep it calm in here.")
-        .AddOption("Back off")
-        .AddOption("Ask for help"));
-
-var brawler = npcList["brawler"]
-    .SetState(NpcState.Hostile)
-    .SetStats(new Stats(10))
-    .Description("A restless patron looks for a fight.")
-    .SetDialog(new DialogNode("What are you looking at?")
-        .AddOption("Apologize and step away")
-        .AddOption("Stand your ground"));
-
-var stranger = npcList["stranger"]
-    .SetState(NpcState.Hostile)
-    .SetStats(new Stats(8))
-    .Description("A stranger lingers in the shadows.")
-    .SetDialog(new DialogNode("You lost?")
-        .AddOption("Keep walking")
-        .AddOption("Ask for directions"));
-
-var dog = npcList["dog"]
-    .SetState(NpcState.Friendly)
-    .Description("A small terrier with an anxious wag.")
-    .SetDialog(new DialogNode("The dog looks up, waiting.")
-        .AddOption("Show the flyer")
-        .AddOption("Offer a hand to sniff"));
-
-var guard = npcList["guard"]
-    .SetState(NpcState.Friendly)
-    .Description("A night guard watches the hallway.")
-    .SetDialog(new DialogNode("This wing is locked after hours.")
-        .AddOption("Explain why you're here")
-        .AddOption("Ask about the classroom"));
-
-var archivist = npcList["archivist"]
-    .SetState(NpcState.Friendly)
-    .Description("An archivist carefully dusts a frame.")
-    .SetDialog(new DialogNode("Looking for a specific year?")
-        .AddOption("Ask about the old photograph")
-        .AddOption("Ask about the family room"));
-
-var operatorVoice = npcList["operator"]
-    .SetState(NpcState.Friendly)
-    .Description("A calm voice crackles over the intercom.")
-    .SetDialog(new DialogNode("We're aware of the issue. Stay calm.")
-        .AddOption("Ask how long it will take")
-        .AddOption("Describe your situation"));
-
-var technician = npcList["technician"]
-    .SetState(NpcState.Friendly)
-    .Description("A technician flips through a clipboard.")
-    .SetDialog(new DialogNode("We can route power back to this wing.")
-        .AddOption("Ask which breaker to flip")
-        .AddOption("Offer to help"));
-
-var caller = npcList["caller"]
-    .SetState(NpcState.Friendly)
-    .Description("A familiar voice waits on the line.")
-    .SetDialog(new DialogNode("Is now a good time to talk?")
-        .AddOption("Answer calmly")
-        .AddOption("Ask who this is")
-        .AddOption("Hang up"));
-
-var neighbor = npcList["neighbor"]
-    .SetState(NpcState.Friendly)
-    .Description("A neighbor peers from a cracked door.")
-    .SetDialog(new DialogNode("Was this package left for you?")
-        .AddOption("Accept the package")
-        .AddOption("Ask who dropped it off"));
-
-var commuter = npcList["commuter"]
-    .SetState(NpcState.Friendly)
-    .Description("A commuter checks the arrival screen.")
-    .SetDialog(new DialogNode("They're running late again.")
-        .AddOption("Wait it out")
-        .AddOption("Look for another option"));
-
-var janitor = npcList["janitor"]
-    .SetState(NpcState.Friendly)
-    .Description("A janitor folds up a caution sign.")
-    .SetDialog(new DialogNode("Looking for something?")
-        .AddOption("Ask about the lunchbox")
-        .AddOption("Ask about the hallway"));
-
-var coordinator = npcList["coordinator"]
-    .SetState(NpcState.Friendly)
-    .Description("A shelter coordinator checks names off a list.")
-    .SetDialog(new DialogNode("Find a cot and stay warm.")
-        .AddOption("Ask about the storm")
-        .AddOption("Offer to help"));
-
-forest.AddNpc(fox);
-cave.AddNpc(dragon);
-attic.AddNpc(storm);
-cafe.AddNpc(date);
-bankCounter.AddNpc(teller);
-alley.AddNpc(mugger);
-interviewRoom.AddNpc(interviewer);
-reception.AddNpc(receptionist);
-examRoom.AddNpc(nurse);
-gasStation.AddNpc(mechanic);
-apartmentUnit.AddNpc(agent);
-bar.AddNpc(bouncer);
-bar.AddNpc(brawler);
-nightStreet.AddNpc(stranger);
-park.AddNpc(dog);
-schoolHallway.AddNpc(guard);
-photoArchive.AddNpc(archivist);
-elevator.AddNpc(operatorVoice);
-utilityRoom.AddNpc(technician);
-bedroom.AddNpc(caller);
-doorstep.AddNpc(neighbor);
-lateBusStop.AddNpc(commuter);
-cafeteria.AddNpc(janitor);
-shelterHall.AddNpc(coordinator);
-
-// Recipes
-state.RecipeBook.Add(new ItemCombinationRecipe("ice", "fire", () => new FluidItem("water", "water", "Clear and cold.")));
-var dragonAwake = false;
-var missedTrainNotified = false;
-var hospitalCalled = false;
-var barTensionNotified = false;
-var nightWalkNotified = false;
-var schoolAlarmNotified = false;
-var oldPhotoNotified = false;
-var elevatorStuckNotified = false;
-var outageNotified = false;
-var midnightCallNotified = false;
-var packageNotified = false;
-var playgroundNotified = false;
-var lateBusNotified = false;
-var lunchboxNotified = false;
-var shelterNotified = false;
-var dragonHunt = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")
-    .AddCondition(new HasItemCondition("sword"))
-    .AddCondition(new NpcStateCondition(dragon, NpcState.Dead))
-    .AddCondition(new WorldFlagCondition("dragon_defeated"))
-    .AddCondition(new WorldCounterCondition("villagers_saved", 1))
-    .AddCondition(new RelationshipCondition("fox", 2))
-    .Start();
-var loginQuest = new Quest("login", "Access the Terminal", "Find the password hint and log in.")
-    .AddCondition(new HasItemCondition("note"))
-    .Start();
-var loginQuestComplete = false;
-
-state.Events.Subscribe(GameEventType.PickupItem, e =>
+Direction? ParseDirection(string token)
 {
-    if (dragonAwake) return;
-    if (e.Location != null && e.Location.Id.TextCompare("cave"))
+    return token switch
     {
-        dragonAwake = true;
-        dragon.SetState(NpcState.Hostile);
-        dragon.Description("A massive dragon rises, eyes blazing.");
-        dragon.Dialog("The dragon roars as it wakes.");
-        dragon.SetMovement(dragonPatrol);
-        Console.WriteLine("\nThe dragon stirs and awakens!");
+        "north" or "n" => Direction.North,
+        "south" or "s" => Direction.South,
+        "east" or "e" => Direction.East,
+        "west" or "w" => Direction.West,
+        _ => null
+    };
+}
+
+Direction? ResolveDoorDirection(string token)
+{
+    if (token == "door")
+    {
+        var doorExits = state.CurrentLocation.Exits
+            .Where(kvp => kvp.Value.Door != null)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        if (doorExits.Count == 1) return doorExits[0];
+        return null;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
+    return ParseDirection(token);
+}
+
+bool TryShowDoor(string token)
 {
-    if (missedTrainNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("platform"))
+    var direction = ResolveDoorDirection(token);
+    if (direction == null) return false;
+
+    var exit = state.CurrentLocation.GetExit(direction.Value);
+    if (exit?.Door == null) return false;
+
+    var door = exit.Door;
+    Console.WriteLine($"{door.Name.ToProperCase()}: {door.GetDescription()} ({door.State.ToString().ToLowerInvariant().ToProperCase()})");
+    return true;
+}
+
+void ShowInventory()
+{
+    var items = state.Inventory.Items.Select(i => i.Name);
+    if (!items.Any())
     {
-        missedTrainNotified = true;
-        Console.WriteLine("\nThe train pulls away as you arrive. You'll need another route.");
+        Console.WriteLine("You carry nothing.");
+        return;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
+    var totalWeight = state.Inventory.TotalWeight;
+    Console.WriteLine($"You carry: {items.CommaJoin()} (Total weight: {totalWeight:0.##})");
+}
+
+bool HandleLook(string input)
 {
-    if (hospitalCalled) return;
-    if (e.Location != null && e.Location.Id.TextCompare("waiting_room"))
+    if (input == "look")
     {
-        hospitalCalled = true;
-        Console.WriteLine("\nA nurse calls your name from the hall.");
+        ShowRoom();
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (barTensionNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("bar"))
+    if (!input.StartsWith("look ")) return false;
+
+    var token = input.Replace("look ", "").Trim();
+    if (string.IsNullOrWhiteSpace(token))
     {
-        barTensionNotified = true;
-        Console.WriteLine("\nThe room goes quiet for a moment. Tension hangs in the air.");
+        Console.WriteLine("Look at what?");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (nightWalkNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("night_street"))
+    if (TryShowDoor(token))
     {
-        nightWalkNotified = true;
-        Console.WriteLine("\nYour footsteps echo. The street feels longer at night.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (schoolAlarmNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("school_hallway"))
+    var item = state.CurrentLocation.FindItem(token) ?? state.Inventory.FindItem(token);
+    if (item == null)
     {
-        schoolAlarmNotified = true;
-        Console.WriteLine("\nA soft alarm chirps as you enter the hallway.");
+        Console.WriteLine($"You do not see a {token} here.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
+    Console.WriteLine($"{item.Name.ToProperCase()}: {item.GetDescription()}");
+    return true;
+}
+
+bool HandleInventory(string input)
 {
-    if (oldPhotoNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("photo_archive"))
+    if (input is not ("inventory" or "i")) return false;
+    ShowInventory();
+    return true;
+}
+
+bool HandleTake(string input)
+{
+    if (!input.StartsWith("take ")) return false;
+
+    var token = input.Replace("take ", "").Trim();
+    if (string.IsNullOrWhiteSpace(token))
     {
-        oldPhotoNotified = true;
-        Console.WriteLine("\nDust motes drift as you open a box of photographs.");
+        Console.WriteLine("Take what? Try: take key.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (elevatorStuckNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("elevator"))
+    var foundItem = state.CurrentLocation.FindItem(token);
+    if (foundItem == null)
     {
-        elevatorStuckNotified = true;
-        Console.WriteLine("\nThe elevator shudders and stops between floors.");
+        Console.WriteLine($"There is no {token} here.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
+    state.CurrentLocation.RemoveItem(foundItem);
+    state.Inventory.Add(foundItem);
+    Console.WriteLine($"You take the {foundItem.Name.ToProperCase()}.");
+    return true;
+}
+
+bool HandleUnlock(string input)
 {
-    if (outageNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("dark_hall"))
+    if (!input.StartsWith("unlock ")) return false;
+
+    var token = input.Replace("unlock ", "").Trim();
+    var direction = ResolveDoorDirection(token);
+    if (direction == null)
     {
-        outageNotified = true;
-        Console.WriteLine("\nThe lights are out. Your footsteps sound louder.");
+        Console.WriteLine("Unlock which door? Try: unlock east.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (midnightCallNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("bedroom"))
+    var exit = state.CurrentLocation.GetExit(direction.Value);
+    if (exit?.Door == null)
     {
-        midnightCallNotified = true;
-        Console.WriteLine("\nThe phone rings in the silence.");
+        Console.WriteLine("There is no door that way.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (packageNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("doorstep"))
+    var keyInInventory = state.Inventory.Items.OfType<Key>().FirstOrDefault();
+    if (keyInInventory == null)
     {
-        packageNotified = true;
-        Console.WriteLine("\nA package sits on the mat, damp from the rain.");
+        Console.WriteLine("You do not have a key.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (playgroundNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("playground"))
+    var unlocked = exit.Door.Unlock(keyInInventory);
+    if (unlocked)
     {
-        playgroundNotified = true;
-        Console.WriteLine("\nThe swings squeak as the wind picks up.");
+        Console.WriteLine(exit.Door.GetReaction(DoorAction.Unlock) ?? "Unlocked.");
     }
-});
-
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (lateBusNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("late_bus_stop"))
+    else
     {
-        lateBusNotified = true;
-        Console.WriteLine("\nThe display flashes DELAYED. No engine sounds yet.");
+        Console.WriteLine(exit.Door.GetReaction(DoorAction.UnlockFailed) ?? "It will not unlock.");
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
+    return true;
+}
+
+bool HandleOpen(string input)
 {
-    if (lunchboxNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("cafeteria"))
+    if (!input.StartsWith("open ")) return false;
+
+    var token = input.Replace("open ", "").Trim();
+    var direction = ResolveDoorDirection(token);
+    if (direction == null)
     {
-        lunchboxNotified = true;
-        Console.WriteLine("\nA lunchbox sits alone on a table.");
+        Console.WriteLine("Open which door? Try: open east.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (shelterNotified) return;
-    if (e.Location != null && e.Location.Id.TextCompare("shelter_hall"))
+    var exit = state.CurrentLocation.GetExit(direction.Value);
+    if (exit?.Door == null)
     {
-        shelterNotified = true;
-        Console.WriteLine("\nThe shelter smells of damp coats and coffee.");
+        Console.WriteLine("There is no door that way.");
+        return true;
     }
-});
 
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
+    var opened = exit.Door.Open();
+    Console.WriteLine(opened
+        ? (exit.Door.GetReaction(DoorAction.Open) ?? "Opened.")
+        : (exit.Door.GetReaction(DoorAction.OpenFailed) ?? "It will not open."));
+    return true;
+}
+
+bool HandleClose(string input)
 {
-    if (e.Item == null) return;
-    if (e.Item.Id.TextCompare("stone"))
+    if (!input.StartsWith("close ")) return false;
+
+    var token = input.Replace("close ", "").Trim();
+    var direction = ResolveDoorDirection(token);
+    if (direction == null)
     {
-        if (!garden.Items.Contains(gardenKey) && !state.Inventory.Items.Contains(gardenKey))
+        Console.WriteLine("Close which door? Try: close east.");
+        return true;
+    }
+
+    var exit = state.CurrentLocation.GetExit(direction.Value);
+    if (exit?.Door == null)
+    {
+        Console.WriteLine("There is no door that way.");
+        return true;
+    }
+
+    var closed = exit.Door.Close();
+    Console.WriteLine(closed
+        ? (exit.Door.GetReaction(DoorAction.Close) ?? "Closed.")
+        : "It will not close.");
+    return true;
+}
+
+bool HandleLock(string input)
+{
+    if (!input.StartsWith("lock ")) return false;
+
+    var token = input.Replace("lock ", "").Trim();
+    var direction = ResolveDoorDirection(token);
+    if (direction == null)
+    {
+        Console.WriteLine("Lock which door? Try: lock east.");
+        return true;
+    }
+
+    var exit = state.CurrentLocation.GetExit(direction.Value);
+    if (exit?.Door == null)
+    {
+        Console.WriteLine("There is no door that way.");
+        return true;
+    }
+
+    var keyInInventory = state.Inventory.Items.OfType<Key>().FirstOrDefault();
+    if (keyInInventory == null)
+    {
+        Console.WriteLine("You do not have a key.");
+        return true;
+    }
+
+    var locked = exit.Door.Lock(keyInInventory);
+    Console.WriteLine(locked
+        ? (exit.Door.GetReaction(DoorAction.Lock) ?? "Locked.")
+        : "It will not lock.");
+    return true;
+}
+
+bool HandleDestroy(string input)
+{
+    if (!input.StartsWith("destroy ")) return false;
+
+    var token = input.Replace("destroy ", "").Trim();
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        Console.WriteLine("Destroy what? Try: destroy door.");
+        return true;
+    }
+
+    var direction = ResolveDoorDirection(token);
+    if (direction != null)
+    {
+        var exit = state.CurrentLocation.GetExit(direction.Value);
+        if (exit?.Door == null)
         {
-            garden.AddItem(gardenKey);
-            Console.WriteLine("You lift the stone and find a key beneath it.");
-        }
-    }
-});
-
-state.Events.Subscribe(GameEventType.UnlockDoor, e =>
-{
-    if (e.Door == null) return;
-    if (e.Door.Id.TextCompare("garden_gate") || e.Door.Id.TextCompare("library_door"))
-    {
-        e.Door.SetHint("It's a nice unlocked door.");
-    }
-});
-
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    state.WorldState.Increment("days_elapsed");
-    if (e.Location != null)
-    {
-        state.WorldState.AddTimeline($"Entered {e.Location.Id}.");
-    }
-});
-
-state.Events.Subscribe(GameEventType.PickupItem, e =>
-{
-    if (e.Item == null) return;
-    if (e.Item.Id == "apple")
-    {
-        state.WorldState.Increment("villagers_saved");
-    }
-});
-
-state.Events.Subscribe(GameEventType.TalkToNpc, e =>
-{
-    if (e.Npc == null) return;
-    if (e.Npc.Id == "fox")
-    {
-        var reputation = state.WorldState.GetRelationship("fox") + 1;
-        state.WorldState.SetRelationship("fox", reputation);
-        if (reputation >= 2)
-        {
-            e.Npc.SetDialog(new DialogNode("The fox seems to trust you now.")
-                .AddOption("Ask about the dragon")
-                .AddOption("Ask about the shed"));
-        }
-    }
-});
-
-Console.WriteLine("=== FOREST ADVENTURE ===");
-Console.WriteLine("Find the key and unlock the cabin!");
-Console.WriteLine($"Quest started: {dragonHunt.Title} - {dragonHunt.Description}");
-var commands = new[]
-{
-    "go", "look", "talk", "attack", "flee", "read", "open", "unlock", "take", "drop", "use", "inventory", "stats", "combine", "pour", "save", "load", "quit"
-};
-Console.WriteLine($"Commands: {commands.CommaJoin()} (or just type a direction)\n");
-
-var parserConfig = new KeywordParserConfig(
-    quit: CommandHelper.NewCommands("quit", "exit", "q"),
-    look: CommandHelper.NewCommands("look", "l", "ls"),
-    inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
-    stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
-    open: CommandHelper.NewCommands("open"),
-    unlock: CommandHelper.NewCommands("unlock"),
-    take: CommandHelper.NewCommands("take", "get", "pickup", "pick"),
-    drop: CommandHelper.NewCommands("drop"),
-    use: CommandHelper.NewCommands("use", "eat", "bite"),
-    combine: CommandHelper.NewCommands("combine", "mix"),
-    pour: CommandHelper.NewCommands("pour"),
-    go: CommandHelper.NewCommands("go", "move", "cd"),
-    read: CommandHelper.NewCommands("read"),
-    talk: CommandHelper.NewCommands("talk", "speak"),
-    attack: CommandHelper.NewCommands("attack", "fight"),
-    flee: CommandHelper.NewCommands("flee", "run"),
-    save: CommandHelper.NewCommands("save"),
-    load: CommandHelper.NewCommands("load"),
-    all: CommandHelper.NewCommands("all"),
-    ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
-    combineSeparators: CommandHelper.NewCommands("and", "+"),
-    pourPrepositions: CommandHelper.NewCommands("into", "in"),
-    directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
-    {
-        ["n"] = Direction.North,
-        ["s"] = Direction.South,
-        ["e"] = Direction.East,
-        ["w"] = Direction.West,
-        ["ne"] = Direction.NorthEast,
-        ["nw"] = Direction.NorthWest,
-        ["se"] = Direction.SouthEast,
-        ["sw"] = Direction.SouthWest,
-        ["u"] = Direction.Up,
-        ["d"] = Direction.Down,
-        ["in"] = Direction.In,
-        ["out"] = Direction.Out
-    },
-    allowDirectionEnumNames: true);
-
-var parser = new KeywordParser(parserConfig);
-
-var game = GameBuilder.Create()
-    .UseState(state)
-    .UseParser(parser)
-    .UsePrompt("> ")
-    .AddTurnStart(g =>
-    {
-        var lookResult = g.State.Look();
-        g.Output.WriteLine($"\n{lookResult.Message}");
-        var inventoryResult = g.State.InventoryView();
-        g.Output.WriteLine(inventoryResult.Message);
-    })
-    .AddTurnEnd((g, command, result) =>
-    {
-        if (!g.State.WorldState.GetFlag("dragon_defeated") && !dragon.IsAlive)
-        {
-            g.State.WorldState.SetFlag("dragon_defeated", true);
-            g.State.WorldState.AddTimeline("Dragon defeated.");
+            Console.WriteLine("There is no door that way.");
+            return true;
         }
 
-        if (dragonHunt.CheckProgress(g.State))
+        exit.Door.Destroy();
+        Console.WriteLine(exit.Door.GetReaction(DoorAction.Destroy) ?? "Destroyed.");
+        return true;
+    }
+
+    var item = state.CurrentLocation.FindItem(token) ?? state.Inventory.FindItem(token);
+    if (item == null)
+    {
+        Console.WriteLine($"You do not see a {token} here.");
+        return true;
+    }
+
+    var reaction = item.GetReaction(ItemAction.Destroy);
+    if (string.IsNullOrWhiteSpace(reaction))
+    {
+        Console.WriteLine($"Don't be silly. You are not destroying the {item.Name.ToProperCase()}.");
+        return true;
+    }
+
+    if (state.Inventory.Items.Contains(item))
+    {
+        state.Inventory.Remove(item);
+    }
+    else
+    {
+        state.CurrentLocation.RemoveItem(item);
+    }
+
+    Console.WriteLine(reaction);
+    return true;
+}
+
+bool HandleGo(string input)
+{
+    if (!input.StartsWith("go ")) return false;
+
+    var token = input.Replace("go ", "").Trim();
+    var direction = ParseDirection(token);
+    if (direction == null)
+    {
+        Console.WriteLine("Go where? Try: go east.");
+        return true;
+    }
+
+    var moved = state.Move(direction.Value);
+    if (moved)
+    {
+        ShowRoom();
+    }
+    else
+    {
+        Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
+    }
+
+    return true;
+}
+
+ShowRoom();
+
+while (true)
+{
+    Console.Write("\n> ");
+    var input = Console.ReadLine()?.Trim().ToLowerInvariant();
+    if (string.IsNullOrWhiteSpace(input)) continue;
+
+    if (input == "quit" || input == "exit" || input == "/exit" || input == "/quit") break;
+
+    if (HandleLook(input)) continue;
+    if (HandleInventory(input)) continue;
+
+    if (input == "take")
+    {
+        Console.WriteLine("Take what? Try: take key.");
+        continue;
+    }
+
+    if (HandleTake(input)) continue;
+    if (HandleUnlock(input)) continue;
+    if (HandleOpen(input)) continue;
+    if (HandleClose(input)) continue;
+    if (HandleLock(input)) continue;
+    if (HandleDestroy(input)) continue;
+
+    var directionInput = ParseDirection(input);
+    if (directionInput != null)
+    {
+        var moved = state.Move(directionInput.Value);
+        if (moved)
         {
-            g.Output.WriteLine($"\n*** QUEST COMPLETE: {dragonHunt.Title}! ***");
+            ShowRoom();
         }
-
-        if (!loginQuestComplete && loginQuest.CheckProgress(g.State))
+        else
         {
-            loginQuestComplete = true;
-            g.Output.WriteLine($"\n*** QUEST COMPLETE: {loginQuest.Title}! ***");
+            Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
         }
+        continue;
+    }
 
-        if (command is LookCommand look && !string.IsNullOrWhiteSpace(look.Target))
-        {
-            var location = g.State.CurrentLocation;
-            IGameEntity? entityHint = location.FindItem(look.Target)
-                ?? g.State.Inventory.FindItem(look.Target);
+    if (HandleGo(input)) continue;
 
-            if (entityHint == null)
-            {
-                entityHint = location.Exits.Values
-                    .Select(e => e.Door)
-                    .FirstOrDefault(d => d != null && (look.Target.TextCompare("door") || d.Name.TextCompare(look.Target)));
-            }
+    if (input.StartsWith("use "))
+    {
+        Console.WriteLine("Try: unlock door, open door, or lock door.");
+        continue;
+    }
 
-            if (entityHint == null)
-            {
-                entityHint = location.Exits.Values
-                    .Select(e => e.Door?.RequiredKey)
-                    .FirstOrDefault(k => k != null && k.Name.TextCompare(look.Target));
-            }
-
-            if (entityHint != null)
-            {
-                var hint = entityHint.GetHint();
-                if (!string.IsNullOrWhiteSpace(hint))
-                {
-                    g.Output.WriteLine($"Hint: {hint}");
-                }
-            }
-        }
-
-        if (command is GoCommand go && result.Success)
-        {
-            if (g.State.IsCurrentRoomId("cabin"))
-            {
-                g.Output.WriteLine("\n*** CONGRATULATIONS! You found the treasure! ***");
-                g.RequestStop();
-            }
-            else if (go.Direction == Direction.Down && g.State.CurrentLocation.Id == "entrance")
-            {
-                g.Output.WriteLine("Oops! You fell through a hole and ended up back at the entrance!");
-            }
-        }
-    })
-    .Build();
-
-game.Run();
-
-Console.WriteLine("\nThanks for playing!");
+    Console.WriteLine("Try: look, look <item>, go <direction>, take <item>, unlock/open/close/lock/destroy door, inventory, quit.");
+}

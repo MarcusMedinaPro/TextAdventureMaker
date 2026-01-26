@@ -1,18 +1,28 @@
 # Down the Stairwell That Never Ends
 
-_Slice tag: Slice 45 — Descent (Creepypasta style)._
+    _Slice tag: Slice 45 — Descent (Creepypasta style, British English)._
 
-## Premise
-Trapphuset under huset hade bara tre våningar. Nu har du passerat tolv. Mobilen har slutat visa täckning, men någon går fortfarande ovanför dig.
 
-## Story beats (max ~6 steps)
-    1) Introduce the disturbance.
-    2) Offer a single, uneasy choice.
-    3) Reveal a subtle change in the world.
-    4) Force a consequence or realization.
-    5) Close on an unresolved echo.
+    ## Premise
+    The stairwell beneath the house had only three floors. Now you have passed twelve. Your phone shows no signal, yet you still hear footsteps above you.
 
-    ## Example (minimal setup)
+    ## Arc structure
+    - Descent → Each floor deepens the unease.
+- Loss of control → Signal dies, exits vanish.
+- Confrontation → Something waits below.
+- Return changed → You never see stairwells the same.
+
+    ## Story beats (max ~8 steps)
+1) The disturbance arrives and feels personal.
+2) A rule is broken or a boundary is crossed.
+3) A clue reveals the scale of the problem.
+4) A choice narrows the world.
+5) The environment answers back.
+6) A truth is forced into view.
+7) A price is paid, willingly or not.
+8) The ending leaves a lingering echo.
+
+    ## Example (detailed setup)
     ```csharp
     using MarcusMedina.TextAdventure.Engine;
     using MarcusMedina.TextAdventure.Enums;
@@ -20,13 +30,25 @@ Trapphuset under huset hade bara tre våningar. Nu har du passerat tolv. Mobilen
     using MarcusMedina.TextAdventure.Models;
     using MarcusMedina.TextAdventure.Parsing;
 
-    Location start = (id: "start", description: "A quiet room with a wrong feeling.");
-    Location threshold = (id: "threshold", description: "A place you shouldn't have reached.");
+    Location room = (id: "room", description: "A small room with a low, uneasy hum.");
+    Location hall = (id: "hall", description: "A corridor that feels longer than it should.");
+    Location threshold = (id: "threshold", description: "A place you should not have reached.");
 
-    start.AddExit(Direction.North, threshold);
-    start.AddItem(new Item("note", "note", "A note that shouldn't be here."));
+    room.AddExit(Direction.North, hall);
+    hall.AddExit(Direction.North, threshold);
 
-    var state = new GameState(start, worldLocations: new[] { start, threshold });
+    room.AddItem(new Item("note", "note", "A note written in your own hand."));
+    hall.AddItem(new Item("key", "key", "A cold key with no teeth."));
+
+    var watcher = new Npc("watcher", "watcher")
+        .Description("A still figure that might be a shadow.")
+        .SetDialog(new DialogNode("You are not late, only early.")
+            .AddOption("Ask who they are")
+            .AddOption("Say nothing"));
+
+    hall.AddNpc(watcher);
+
+    var state = new GameState(room, worldLocations: new[] { room, hall, threshold });
     var parser = new KeywordParser(KeywordParserConfig.Default);
 
     var game = GameBuilder.Create()
@@ -37,6 +59,13 @@ Trapphuset under huset hade bara tre våningar. Nu har du passerat tolv. Mobilen
             var look = g.State.Look();
             g.Output.WriteLine($"
 {look.Message}");
+        })
+        .AddTurnEnd((g, command, result) =>
+        {
+            if (g.State.CurrentLocation.Id == "threshold")
+            {
+                g.Output.WriteLine("The air tastes of iron and rain.");
+            }
         })
         .Build();
 

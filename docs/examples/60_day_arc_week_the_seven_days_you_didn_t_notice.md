@@ -1,18 +1,27 @@
 # The Seven Days You Didn’t Notice
 
-_Slice tag: Slice 60 — Day Arc Week (Creepypasta style)._
+    _Slice tag: Slice 60 — Day Arc Week (Creepypasta style, British English)._
 
-## Premise
-Måndag: Allt är normalt, förutom att ingen möter din blick. Tisdag: Klockan går fel, alltid lika mycket. Onsdag: Samma låt spelas samtidigt på olika stationer. Torsdag: Ditt namn står i ett mötesprotokoll du inte minns. Fredag: Din spegelbild stannar kvar för länge. Lördag: Steg hörs i lägenheten, men följer ingen. Söndag: Du vaknar till ljudet av kaffe som bryggs – fast du fortfarande ligger i sängen.
 
-## Story beats (max ~6 steps)
-    1) Introduce the disturbance.
-    2) Offer a single, uneasy choice.
-    3) Reveal a subtle change in the world.
-    4) Force a consequence or realization.
-    5) Close on an unresolved echo.
+    ## Premise
+    Monday: everything is normal, except no one meets your gaze. Tuesday: the clock is wrong by the same amount. Wednesday: the same song plays on different stations at once. Thursday: your name appears in a meeting record you do not remember. Friday: your reflection lingers too long. Saturday: footsteps are heard in the flat, but follow no one. Sunday: you wake to the sound of coffee brewing, even though you are still in bed.
 
-    ## Example (minimal setup)
+    ## Arc structure
+    - Monday–Sunday → Each day reveals a new fracture.
+- Accumulation → The week becomes a pattern.
+- Realisation → You have been counted, not living.
+
+    ## Story beats (max ~8 steps)
+1) The disturbance arrives and feels personal.
+2) A rule is broken or a boundary is crossed.
+3) A clue reveals the scale of the problem.
+4) A choice narrows the world.
+5) The environment answers back.
+6) A truth is forced into view.
+7) A price is paid, willingly or not.
+8) The ending leaves a lingering echo.
+
+    ## Example (detailed setup)
     ```csharp
     using MarcusMedina.TextAdventure.Engine;
     using MarcusMedina.TextAdventure.Enums;
@@ -20,13 +29,25 @@ Måndag: Allt är normalt, förutom att ingen möter din blick. Tisdag: Klockan 
     using MarcusMedina.TextAdventure.Models;
     using MarcusMedina.TextAdventure.Parsing;
 
-    Location start = (id: "start", description: "A quiet room with a wrong feeling.");
-    Location threshold = (id: "threshold", description: "A place you shouldn't have reached.");
+    Location room = (id: "room", description: "A small room with a low, uneasy hum.");
+    Location hall = (id: "hall", description: "A corridor that feels longer than it should.");
+    Location threshold = (id: "threshold", description: "A place you should not have reached.");
 
-    start.AddExit(Direction.North, threshold);
-    start.AddItem(new Item("note", "note", "A note that shouldn't be here."));
+    room.AddExit(Direction.North, hall);
+    hall.AddExit(Direction.North, threshold);
 
-    var state = new GameState(start, worldLocations: new[] { start, threshold });
+    room.AddItem(new Item("note", "note", "A note written in your own hand."));
+    hall.AddItem(new Item("key", "key", "A cold key with no teeth."));
+
+    var watcher = new Npc("watcher", "watcher")
+        .Description("A still figure that might be a shadow.")
+        .SetDialog(new DialogNode("You are not late, only early.")
+            .AddOption("Ask who they are")
+            .AddOption("Say nothing"));
+
+    hall.AddNpc(watcher);
+
+    var state = new GameState(room, worldLocations: new[] { room, hall, threshold });
     var parser = new KeywordParser(KeywordParserConfig.Default);
 
     var game = GameBuilder.Create()
@@ -37,6 +58,13 @@ Måndag: Allt är normalt, förutom att ingen möter din blick. Tisdag: Klockan 
             var look = g.State.Look();
             g.Output.WriteLine($"
 {look.Message}");
+        })
+        .AddTurnEnd((g, command, result) =>
+        {
+            if (g.State.CurrentLocation.Id == "threshold")
+            {
+                g.Output.WriteLine("The air tastes of iron and rain.");
+            }
         })
         .Build();
 

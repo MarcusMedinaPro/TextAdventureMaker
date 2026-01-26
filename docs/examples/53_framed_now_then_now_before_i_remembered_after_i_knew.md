@@ -1,18 +1,27 @@
 # Before I Remembered, After I Knew
 
-_Slice tag: Slice 53 — Framed Now Then Now (Creepypasta style)._
+    _Slice tag: Slice 53 — Framed Now Then Now (Creepypasta style, British English)._
 
-## Premise
-Nu: du sitter i ditt kök. Då: du var i källaren. Nu igen: men dina skor är fortfarande blöta av något som inte är vatten.
 
-## Story beats (max ~6 steps)
-    1) Introduce the disturbance.
-    2) Offer a single, uneasy choice.
-    3) Reveal a subtle change in the world.
-    4) Force a consequence or realization.
-    5) Close on an unresolved echo.
+    ## Premise
+    Now: you sit in your kitchen. Then: you were in the cellar. Now again: but your shoes are still wet with something that is not water.
 
-    ## Example (minimal setup)
+    ## Arc structure
+    - Now → Present calm is fragile.
+- Then → The memory returns.
+- Now again → The present is changed by it.
+
+    ## Story beats (max ~8 steps)
+1) The disturbance arrives and feels personal.
+2) A rule is broken or a boundary is crossed.
+3) A clue reveals the scale of the problem.
+4) A choice narrows the world.
+5) The environment answers back.
+6) A truth is forced into view.
+7) A price is paid, willingly or not.
+8) The ending leaves a lingering echo.
+
+    ## Example (detailed setup)
     ```csharp
     using MarcusMedina.TextAdventure.Engine;
     using MarcusMedina.TextAdventure.Enums;
@@ -20,13 +29,25 @@ Nu: du sitter i ditt kök. Då: du var i källaren. Nu igen: men dina skor är f
     using MarcusMedina.TextAdventure.Models;
     using MarcusMedina.TextAdventure.Parsing;
 
-    Location start = (id: "start", description: "A quiet room with a wrong feeling.");
-    Location threshold = (id: "threshold", description: "A place you shouldn't have reached.");
+    Location room = (id: "room", description: "A small room with a low, uneasy hum.");
+    Location hall = (id: "hall", description: "A corridor that feels longer than it should.");
+    Location threshold = (id: "threshold", description: "A place you should not have reached.");
 
-    start.AddExit(Direction.North, threshold);
-    start.AddItem(new Item("note", "note", "A note that shouldn't be here."));
+    room.AddExit(Direction.North, hall);
+    hall.AddExit(Direction.North, threshold);
 
-    var state = new GameState(start, worldLocations: new[] { start, threshold });
+    room.AddItem(new Item("note", "note", "A note written in your own hand."));
+    hall.AddItem(new Item("key", "key", "A cold key with no teeth."));
+
+    var watcher = new Npc("watcher", "watcher")
+        .Description("A still figure that might be a shadow.")
+        .SetDialog(new DialogNode("You are not late, only early.")
+            .AddOption("Ask who they are")
+            .AddOption("Say nothing"));
+
+    hall.AddNpc(watcher);
+
+    var state = new GameState(room, worldLocations: new[] { room, hall, threshold });
     var parser = new KeywordParser(KeywordParserConfig.Default);
 
     var game = GameBuilder.Create()
@@ -37,6 +58,13 @@ Nu: du sitter i ditt kök. Då: du var i källaren. Nu igen: men dina skor är f
             var look = g.State.Look();
             g.Output.WriteLine($"
 {look.Message}");
+        })
+        .AddTurnEnd((g, command, result) =>
+        {
+            if (g.State.CurrentLocation.Id == "threshold")
+            {
+                g.Output.WriteLine("The air tastes of iron and rain.");
+            }
         })
         .Build();
 

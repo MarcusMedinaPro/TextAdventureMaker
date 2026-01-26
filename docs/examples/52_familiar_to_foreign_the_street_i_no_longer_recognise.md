@@ -1,16 +1,16 @@
-# The Guard Who Lowered His Weapon
+# The Street I No Longer Recognise
 
-    _Slice tag: Slice 58 — Character Arc (Creepypasta style, British English)._
+    _Slice tag: Slice 52 — Familiar To Foreign (Creepypasta style, British English)._
 
 
     ## Premise
-    The guard stopped aiming at the doorway when he realised the threat was not there. It stood behind him.
+    You walk home from work. Same street, same house numbers. Yet every window is dark, and no mirror shows your reflection.
 
     ## Arc structure
-    - Mask → The guard holds his aim.
-- Crack → Doubt enters.
-- Choice → He lowers the weapon.
-- Change → He sees the real threat.
+    - Familiar → The street is yours.
+- Transition → Shadows swallow the windows.
+- Foreign → Mirrors refuse you.
+- Return with insight → You no longer feel at home.
 
     ## Story beats (max ~8 steps)
 1) The disturbance arrives and feels personal.

@@ -127,6 +127,7 @@ var parser = new KeywordParser(parserConfig);
 
 Console.WriteLine("=== LIGHT IN THE BASEMENT (Slice 3) ===");
 Console.WriteLine("Commands: Look, Take <Item>, Unlock/Open Door, Go Down, Use/Turn On/Off Flashlight, Inventory, Quit");
+Console.WriteLine("It's dark. You can't see anything.");
 
 bool IsFlashlightCommand(ICommand command)
 {

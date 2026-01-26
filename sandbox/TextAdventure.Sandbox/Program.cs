@@ -36,7 +36,7 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithInventory("inventory", "inv", "i")
     .WithTake("take", "get", "pick")
     .WithDrop("drop")
-    .WithUse("use")
+    .WithUse("use", "drink", "sip")
     .WithGo("go", "move")
     .WithIgnoreItemTokens("on", "off")
     .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
@@ -48,7 +48,8 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
 var parser = new KeywordParser(parserConfig);
 
 Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
-Console.WriteLine("Commands: Look, Take <Item>, Drop <Item>, Use <Item>, Inventory, Go In/Out, Board, Quit");
+Console.WriteLine("Commands: Look, Take <Item>, Drop <Item>, Use/Drink <Item>, Inventory, Go In/Out, Board, Quit");
+ShowLookResult(state.Look());
 
 void WriteResult(CommandResult result)
 {
@@ -89,6 +90,19 @@ while (true)
 
         state.Move(Direction.In);
         Console.WriteLine("You board the train. The city fades behind you.");
+        continue;
+    }
+
+    if (input.Equals("sit", StringComparison.OrdinalIgnoreCase))
+    {
+        if (state.CurrentLocation.Id.TextCompare("carriage"))
+        {
+            Console.WriteLine("You take a seat and look out the window, watching the rain against the glass.");
+        }
+        else
+        {
+            Console.WriteLine("You sit for a moment, listening to the rain.");
+        }
         continue;
     }
 

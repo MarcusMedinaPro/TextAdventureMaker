@@ -1872,6 +1872,7 @@ World.Add(Archetypes.WanderingMerchant()
 | 42 | Story-LINQ (Narrative Query Language) | LINQ, Builder, State | ⬜ |
 | 43 | Map Generator | - | ⬜ |
 | 44 | String Case Utilities | - | ✅ |
+| 45 | Generic Fixes | - | ⬜ |
 
 ---
 
@@ -4479,3 +4480,19 @@ Story
 - `string.ToCrazyCaps()` — Slumpad versal/gemen per bokstav.
 
 **Notis:** Använder `Random.Shared`.
+
+---
+
+## Slice 45: Generic Fixes
+
+**Mål:** Samla upp generella förbättringar som dyker upp under verifiering.
+
+### Förslag på funktioner
+- `IItem.Amount` (nullable int) + `Item.SetAmount(int amount)`
+- `IItem.DecreaseAmount(int amount = 1)` → bool (om det finns kvar)
+- Optional: `Item.OnAmountEmpty` reaction/hook
+- `Use()` minskar amount om den finns (och tar bort item när 0)
+
+### Krav
+- Backwards compatible: items utan amount fungerar som tidigare.
+- Inventory/Look visar amount när den finns (t.ex. “Tea Thermos (4)”).

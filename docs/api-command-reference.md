@@ -38,3 +38,21 @@ This document lists public functions, types, and helpers by slice, with tiny usa
 | `string.ToProperCase()` | `var title = "the long road".ToProperCase();` | Convert to title case using invariant culture. |
 | `string.ToSentenceCase()` | `var sentence = "hELLO there".ToSentenceCase();` | Capitalise the first letter and lower-case the rest. |
 | `string.ToCrazyCaps()` | `var chaos = "quiet night".ToCrazyCaps();` | Randomise casing per letter using `Random.Shared`. |
+
+## Slice 3 — Command Pattern + Parser
+
+| Function / Type | Usage | Explanation |
+| --- | --- | --- |
+| `ICommand` | `ICommand cmd = new LookCommand();` | Command interface for all actions. |
+| `CommandResult` | `var result = state.Execute(cmd);` | Result of executing a command (message, reactions, quit flag). |
+| `ICommandParser` | `ICommandParser parser = new KeywordParser(config);` | Parse text input into commands. |
+| `KeywordParser(config)` | `var parser = new KeywordParser(KeywordParserConfig.Default);` | Built-in parser with keyword mapping. |
+| `KeywordParserConfig.Default` | `KeywordParserConfig.Default` | Default synonyms and direction aliases. |
+| `CommandExtensions.Execute(state, command)` | `var result = state.Execute(command);` | Execute a command with a `GameState`. |
+| `GoCommand` | `go down` | Moves by direction (via parser). |
+| `LookCommand` | `look` / `look door` | Look at room, item, or door (via parser). |
+| `TakeCommand` | `take key` | Take an item into inventory (via parser). |
+| `OpenCommand` | `open door` | Open the first door in the room (via parser). |
+| `UnlockCommand` | `unlock door` | Unlock the first door in the room (via parser). |
+| `UseCommand` | `use flashlight` | Use an item from inventory (via parser). |
+| `QuitCommand` | `quit` | End the session (via parser). |

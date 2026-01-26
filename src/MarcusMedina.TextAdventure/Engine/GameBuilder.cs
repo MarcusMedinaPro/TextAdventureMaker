@@ -17,6 +17,7 @@ public sealed class GameBuilder
     private string _prompt = "> ";
     private readonly List<ILocation> _locations = new();
     private ILocation? _startLocation;
+    private ITimeSystem? _timeSystem;
     private readonly List<Action<Game>> _turnStartHandlers = new();
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = new();
 
@@ -55,6 +56,12 @@ public sealed class GameBuilder
     public GameBuilder UseStartLocation(ILocation startLocation)
     {
         _startLocation = startLocation ?? throw new ArgumentNullException(nameof(startLocation));
+        return this;
+    }
+
+    public GameBuilder UseTimeSystem(ITimeSystem timeSystem)
+    {
+        _timeSystem = timeSystem ?? throw new ArgumentNullException(nameof(timeSystem));
         return this;
     }
 
@@ -105,6 +112,10 @@ public sealed class GameBuilder
         {
             state.RegisterLocations(_locations);
         }
+        if (_timeSystem != null)
+        {
+            state.SetTimeSystem(_timeSystem);
+        }
 
         var game = new Game(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
@@ -132,6 +143,6 @@ public sealed class GameBuilder
         var allLocations = new HashSet<ILocation>(_locations);
         allLocations.Add(start);
 
-        return new GameState(start, worldLocations: allLocations);
+        return new GameState(start, timeSystem: _timeSystem, worldLocations: allLocations);
     }
 }

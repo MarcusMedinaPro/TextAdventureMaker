@@ -16,12 +16,14 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-Location lobby = (id: "bank_lobby", description: "A quiet bank lobby with a ticket machine.");
-Location counter = (id: "bank_counter", description: "A teller waits behind the counter.");
+var lobby = new Location("bank_lobby", "A quiet bank lobby with a ticket machine.");
+var counter = new Location("bank_counter", "A teller waits behind the counter.");
 
-lobby.AddExit(Direction.North, counter);
+var counterDoor = new Door("counter_door", "counter door", "A half-door with a brass latch.", DoorState.Open);
+lobby.AddExit(Direction.North, counter, counterDoor);
 
-Item ticket = (id: "ticket", name: "number ticket", description: "Your place in line.");
+var ticket = new Item("ticket", "number ticket", "Your place in line.")
+    .SetHint("Take it to be called.");
 lobby.AddItem(ticket);
 
 var teller = new Npc("teller", "teller")
@@ -33,6 +35,35 @@ var teller = new Npc("teller", "teller")
 counter.AddNpc(teller);
 
 var state = new GameState(lobby, worldLocations: new[] { lobby, counter });
+
+var time = new TimeSystem()
+    .Enable()
+    .SetStartTime(TimeOfDay.Day)
+    .SetTicksPerDay(8)
+    .SetMaxMoves(12)
+    .OnPhase(TimeOfDay.Night, s =>
+    {
+        counterDoor.Close();
+        s.WorldState.SetFlag("bank_closed", true);
+    })
+    .OnPhase(TimeOfDay.Day, s =>
+    {
+        counterDoor.Open();
+        s.WorldState.SetFlag("bank_closed", false);
+    })
+    .OnMovesRemaining(3, s => s.WorldState.SetFlag("closing_warning", true))
+    .OnMovesExhausted(s => s.WorldState.SetFlag("time_up", true));
+
+state.SetTimeSystem(time);
+
+state.Events.Subscribe(GameEventType.PickupItem, e =>
+{
+    if (e.Item?.Id == "ticket")
+    {
+        state.WorldState.SetFlag("has_ticket", true);
+    }
+});
+
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
 var game = GameBuilder.Create()
@@ -41,13 +72,21 @@ var game = GameBuilder.Create()
     .AddTurnStart(g =>
     {
         var look = g.State.Look();
-        g.Output.WriteLine($"\n{look.Message}");
+        g.Output.WriteLine($"
+{look.Message}");
     })
     .AddTurnEnd((g, command, result) =>
     {
-        if (g.State.Inventory.Items.Any(i => i.Id == "ticket"))
+        if (g.State.WorldState.GetFlag("closing_warning"))
         {
-            g.State.WorldState.SetFlag("has_ticket", true);
+            g.Output.WriteLine("The guard taps his watch. Closing soon.");
+            g.State.WorldState.SetFlag("closing_warning", false);
+        }
+
+        if (g.State.WorldState.GetFlag("time_up"))
+        {
+            g.Output.WriteLine("The bank closes. You will have to return tomorrow.");
+            g.RequestStop();
         }
     })
     .Build();

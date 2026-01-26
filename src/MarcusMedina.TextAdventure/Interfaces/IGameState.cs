@@ -18,6 +18,10 @@ public interface IGameState
     IStats Stats { get; }
     IEventSystem Events { get; }
     ICombatSystem CombatSystem { get; }
+    ITimeSystem TimeSystem { get; }
+    IFactionSystem Factions { get; }
+    IRandomEventPool RandomEvents { get; }
+    ILocationDiscoverySystem LocationDiscovery { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }
     IReadOnlyCollection<ILocation> Locations { get; }

@@ -10,30 +10,29 @@ _Slice tag: Slice 24 — Path choice + alternate routes. Demo focuses on choosin
 
 ## Example (route choice)
 ```csharp
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-Location cafe = (id: "cafe", description: "A warm cafe near the station.");
-Location stationHall = (id: "station_hall", description: "A quiet station hall with a flickering board.");
-Location platform = (id: "platform", description: "The last train's lights disappear.");
-Location sideStreet = (id: "side_street", description: "A side street with rain-slick pavement.");
-Location busStop = (id: "bus_stop", description: "A lonely bus stop with a torn schedule.");
-Location footbridge = (id: "footbridge", description: "A narrow footbridge over the tracks.");
+var hall = new Location("station_hall", "A quiet station hall with a flickering departure board.");
+var platform = new Location("platform", "The last train's lights disappear into the night.");
+var sideStreet = new Location("side_street", "A side street with rain-slick pavement.");
+var footbridge = new Location("footbridge", "A narrow footbridge over the tracks.");
 
-cafe.AddExit(Direction.South, stationHall);
-stationHall.AddExit(Direction.East, platform);
-stationHall.AddExit(Direction.West, sideStreet);
-sideStreet.AddExit(Direction.South, busStop);
-platform.AddExit(Direction.North, footbridge);
-footbridge.AddExit(Direction.East, busStop); // alternate path back around
+hall.AddExit(Direction.North, platform);
+hall.AddExit(Direction.East, sideStreet);
+sideStreet.AddExit(Direction.North, footbridge);
 
-stationHall.AddItem(new Item("board", "departure board", "The next train is marked CANCELLED.")
-    .SetTakeable(false));
+var map = new Item("map", "folded map", "A map of nearby streets with pencil marks.")
+    .SetReadText("The footbridge leads to a shortcut.")
+    .RequireTakeToRead();
 
-var state = new GameState(cafe, worldLocations: new[] { cafe, stationHall, platform, sideStreet, busStop, footbridge });
+hall.AddItem(map);
+
+var state = new GameState(hall, worldLocations: new[] { hall, platform, sideStreet, footbridge });
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
 var game = GameBuilder.Create()
@@ -42,7 +41,16 @@ var game = GameBuilder.Create()
     .AddTurnStart(g =>
     {
         var look = g.State.Look();
-        g.Output.WriteLine($"\n{look.Message}");
+        g.Output.WriteLine($"
+{look.Message}");
+    })
+    .AddTurnEnd((g, command, result) =>
+    {
+        if (command is LookCommand && g.State.Inventory.FindItem("map") != null)
+        {
+            var discovered = string.Join(", ", g.State.LocationDiscovery.DiscoveredLocations.OrderBy(x => x));
+            g.Output.WriteLine($"Map notes: {discovered}");
+        }
     })
     .Build();
 

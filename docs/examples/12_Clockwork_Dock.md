@@ -24,9 +24,27 @@ location: ferry | The ferry creaks as it powers up.
 
 ## Example (load DSL)
 ```csharp
+using System.IO;
+using System.Text;
 using MarcusMedina.TextAdventure.Dsl;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Parsing;
+
+// this should be in a file
+var sb = new StringBuilder();
+sb.AppendLine("world: Clockwork Dock");
+sb.AppendLine("goal: Board the ferry");
+sb.AppendLine("start: dock");
+sb.AppendLine();
+sb.AppendLine("location: dock | The dock hums with gears and steam.");
+sb.AppendLine("item: token | brass token | Warm from the clockwork heat. | aliases=coin");
+sb.AppendLine("door: gate | iron gate | A heavy gate of iron. | key=token");
+sb.AppendLine("exit: in -> ferry | door=gate");
+sb.AppendLine();
+sb.AppendLine("location: ferry | The ferry creaks as it powers up.");
+var dsl = sb.ToString();
+
+File.WriteAllText("clockwork.adventure", dsl);
 
 var parser = new AdventureDslParser();
 var adventure = parser.ParseFile("clockwork.adventure");

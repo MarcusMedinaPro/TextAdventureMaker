@@ -22,6 +22,10 @@ public class GameState : IGameState
     public RecipeBook RecipeBook { get; }
     public IEventSystem Events { get; }
     public ICombatSystem CombatSystem { get; }
+    public ITimeSystem TimeSystem { get; private set; }
+    public IFactionSystem Factions { get; private set; }
+    public IRandomEventPool RandomEvents { get; private set; }
+    public ILocationDiscoverySystem LocationDiscovery { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IReadOnlyCollection<ILocation> Locations => _locations.Values;
@@ -33,6 +37,10 @@ public class GameState : IGameState
         RecipeBook? recipeBook = null,
         IEventSystem? eventSystem = null,
         ICombatSystem? combatSystem = null,
+        ITimeSystem? timeSystem = null,
+        IFactionSystem? factionSystem = null,
+        IRandomEventPool? randomEventPool = null,
+        ILocationDiscoverySystem? locationDiscovery = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
         IEnumerable<ILocation>? worldLocations = null)
@@ -44,10 +52,18 @@ public class GameState : IGameState
         RecipeBook = recipeBook ?? new RecipeBook();
         Events = eventSystem ?? new EventSystem();
         CombatSystem = combatSystem ?? new TurnBasedCombat();
+        TimeSystem = timeSystem ?? new TimeSystem();
+        Factions = factionSystem ?? new FactionSystem();
+        RandomEvents = randomEventPool ?? new RandomEventPool();
+        LocationDiscovery = locationDiscovery ?? new LocationDiscoverySystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
 
         RegisterLocations(worldLocations ?? new[] { startLocation });
+        if (LocationDiscovery is LocationDiscoverySystem discovery)
+        {
+            discovery.Attach(this, Events);
+        }
     }
 
     public void RegisterLocations(IEnumerable<ILocation> locations)
@@ -57,6 +73,34 @@ public class GameState : IGameState
         {
             if (location == null) continue;
             _locations[location.Id] = location;
+        }
+    }
+
+    public void SetTimeSystem(ITimeSystem timeSystem)
+    {
+        if (timeSystem == null) return;
+        TimeSystem = timeSystem;
+    }
+
+    public void SetFactionSystem(IFactionSystem factionSystem)
+    {
+        if (factionSystem == null) return;
+        Factions = factionSystem;
+    }
+
+    public void SetRandomEventPool(IRandomEventPool randomEventPool)
+    {
+        if (randomEventPool == null) return;
+        RandomEvents = randomEventPool;
+    }
+
+    public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)
+    {
+        if (locationDiscovery == null) return;
+        LocationDiscovery = locationDiscovery;
+        if (locationDiscovery is LocationDiscoverySystem discovery)
+        {
+            discovery.Attach(this, Events);
         }
     }
 

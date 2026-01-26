@@ -15,7 +15,13 @@ public static class CommandExtensions
     /// </summary>
     public static CommandResult Execute(this GameState state, ICommand command)
     {
-        return command.Execute(new CommandContext(state));
+        var result = command.Execute(new CommandContext(state));
+        if (!result.ShouldQuit)
+        {
+            state.TimeSystem.Tick(state);
+            state.RandomEvents.Tick(state);
+        }
+        return result;
     }
 
     /// <summary>

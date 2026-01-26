@@ -6,7 +6,7 @@ _Slice tag: Slice 36 — Trust/choice with consequence._
 1) Hear a knock.
 2) Find a package on the doorstep.
 3) Decide whether to accept it.
-4) Ask a neighbor for context.
+4) Ask a neighbour for context.
 
 ## Example (package choice)
 ```csharp
@@ -20,13 +20,13 @@ Location doorstep = (id: "doorstep", description: "A doorstep with a damp welcom
 
 doorstep.AddItem(new Item("package", "package", "A small package with a smudged label."));
 
-var neighbor = new Npc("neighbor", "neighbor")
-    .Description("A neighbor peers from a cracked door.")
+var neighbour = new Npc("neighbour", "neighbour")
+    .Description("A neighbour peers from a cracked door.")
     .SetDialog(new DialogNode("Was this package left for you?")
         .AddOption("Accept the package")
         .AddOption("Ask who dropped it off"));
 
-doorstep.AddNpc(neighbor);
+doorstep.AddNpc(neighbour);
 
 var state = new GameState(doorstep, worldLocations: new[] { doorstep });
 var parser = new KeywordParser(KeywordParserConfig.Default);

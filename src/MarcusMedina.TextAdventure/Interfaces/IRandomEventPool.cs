@@ -1,0 +1,18 @@
+// <copyright file="IRandomEventPool.cs" company="Marcus Ackre Medina">
+// Copyright (c) Marcus Ackre Medina. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+namespace MarcusMedina.TextAdventure.Interfaces;
+
+public interface IRandomEventPool
+{
+    bool Enabled { get; }
+    double TriggerChance { get; }
+
+    IRandomEventPool Enable();
+    IRandomEventPool SetTriggerChance(double chance);
+    IRandomEventPool AddEvent(string id, int weight, Action<IGameState> handler, Func<IGameState, bool>? condition = null);
+    IRandomEventPool SetCooldown(string id, int cooldownTicks);
+
+    void Tick(IGameState state);
+}

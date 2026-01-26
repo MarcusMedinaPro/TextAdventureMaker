@@ -1,0 +1,16 @@
+// <copyright file="IFaction.cs" company="Marcus Ackre Medina">
+// Copyright (c) Marcus Ackre Medina. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+namespace MarcusMedina.TextAdventure.Interfaces;
+
+public interface IFaction
+{
+    string Id { get; }
+    int Reputation { get; }
+    IReadOnlyCollection<string> NpcIds { get; }
+
+    IFaction WithNpcs(params string[] npcIds);
+    IFaction OnReputationThreshold(int threshold, Action<IGameState> handler);
+    bool HasNpc(string npcId);
+}

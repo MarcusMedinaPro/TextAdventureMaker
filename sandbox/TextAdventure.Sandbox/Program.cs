@@ -3,53 +3,51 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 using System;
-using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
-using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 1 + 2 + 3 + 4 + 5: Locations, Doors/Keys, Parser, Items/Inventory, NPCs/Dialog/Movement
+// Slice 5: NPCs + Dialog + Movement (dialog loop)
 
-var concourse = new Location("concourse", "A draughty concourse with a flickering board.");
-var platform = new Location("platform", "The platform is quiet. The last train waits.");
+var classroom = new Location("classroom", "Empty desks, a chalkboard, and a heavy silence.");
+var chalkboardDrawings = new[]
+{
+    "You drew a cat.",
+    "You drew a smilie.",
+    "You wrote 1337! on the chalkboard.",
+    "You drew a heart."
+};
+var chalkboardLook = new[]
+{
+    "There's a cat drawn on it.",
+    "There's a smilie drawn on it.",
+    "Leet! is written on it.",
+    "There's a heart drawn on it."
+};
+string? chalkboardDrawing = null;
+string? chalkboardLookText = null;
 
-var ticket = new Key("ticket", "ticket", "A paper ticket stamped with today's date.")
-    .SetWeight(0.01f)
-    .AddAliases("pass", "paper");
+var student = new Npc("student", "student")
+    .Description("A student sits in the back, staring at the floor.")
+    .SetDialog(new DialogNode("We heard something in the hallway...")
+        .AddOption("Ask what they heard.", new DialogNode("Footsteps. Slow, heavy. Then a door."))
+        .AddOption("Ask where everyone went.", new DialogNode("They left in a hurry. No one looked back.")));
 
-var board = new Item("board", "board", "A flickering departures board. The last train is waiting.")
-    .AddAliases("board", "departures", "schedule")
+classroom.AddNpc(student);
+
+var chalkboard = new Item("chalkboard", "chalkboard", "A dusty chalkboard waits at the front.")
+    .AddAliases("board", "chalk", "blackboard")
     .SetTakeable(false);
+classroom.AddItem(chalkboard);
 
-var gate = new Door("gate", "ticket gate", "A narrow gate with a tired turnstile.")
-    .RequiresKey(ticket)
-    .SetReaction(DoorAction.Unlock, "The gate clicks open.")
-    .SetReaction(DoorAction.Open, "You push through the gate.")
-    .SetReaction(DoorAction.OpenFailed, "The gate refuses to budge.");
-
-concourse.AddItem(ticket);
-concourse.AddItem(board);
-concourse.AddExit(Direction.East, platform, gate);
-
-var guard = new Npc("guard", "guard")
-    .Description("A station guard in a dark coat watches the concourse.")
-    .SetMovement(new NoNpcMovement())
-    .SetDialog(
-        new DialogNode("Evening. Need a ticket or directions?")
-            .AddOption("Ticket.", new DialogNode("Check the bench by the board."))
-            .AddOption("Platform?", new DialogNode("Through the gate to the east.")));
-
-concourse.AddNpc(guard);
-
-var state = new GameState(concourse, worldLocations: new[] { concourse, platform });
+var state = new GameState(classroom, worldLocations: new[] { classroom });
 var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
 
-Console.WriteLine("=== THE LATE PLATFORM (Slice 5) ===");
-Console.WriteLine("Commands: Look, Talk <Npc>, Take <Item>, Unlock/Open Gate, Go East/West, Inventory, Quit");
+Console.WriteLine("=== THE SILENT CLASSROOM (Slice 5) ===");
+Console.WriteLine("Commands: Look, Talk <Npc>, Inventory, Quit");
 
 void WriteResult(CommandResult result)
 {
@@ -70,106 +68,15 @@ void WriteResult(CommandResult result)
 void ShowLookResult(CommandResult result)
 {
     Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
-    var lines = result.Message?
-        .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-        .Where(line => !line.StartsWith("Health:", StringComparison.OrdinalIgnoreCase))
-        .ToList()
-        ?? new List<string>();
+    WriteResult(result);
 
-    if (lines.Count > 0)
+    if (state.CurrentLocation.FindNpc("student") != null)
     {
-        Console.WriteLine(lines[0]);
-    }
-
-    if (state.CurrentLocation.FindNpc("guard") != null)
-    {
-        var guardLines = new[]
-        {
-            "The guard is here, he watches the concourse.",
-            "The guard is here, he watches his watch.",
-            "The guard is here, he takes a sip of his pocket flask.",
-            "The guard is here, he scratches his head and looks at the concourse."
-        };
-
-        Console.WriteLine(guardLines[Random.Shared.Next(guardLines.Length)]);
-    }
-
-    foreach (var line in lines.Skip(1))
-    {
-        Console.WriteLine(line);
-    }
-
-    if (state.CurrentLocation.Id.TextCompare("concourse"))
-    {
-        Console.WriteLine("Try: talk guard, take ticket, unlock gate, open gate, go east.");
-    }
-    else if (state.CurrentLocation.Id.TextCompare("platform"))
-    {
-        Console.WriteLine("Try: look board, go west, board, sit.");
+        Console.WriteLine("The student is here, sitting quietly.");
     }
 }
 
-var lastNpcLocations = state.Locations
-    .SelectMany(location => location.Npcs.Select(npc => (npc, location)))
-    .ToDictionary(entry => entry.npc.Id, entry => entry.location);
-
-var guardStepsUntilMove = Random.Shared.Next(3, 5);
-var isInDialog = false;
-
-ILocation? FindGuardLocation()
-{
-    return state.Locations.FirstOrDefault(location => location.Npcs.Contains(guard));
-}
-
-void TickNpcMovement(ICommand command)
-{
-    if (isInDialog) return;
-
-    if (command is TalkCommand talk && talk.Target != null && talk.Target.TextCompare("guard"))
-    {
-        guardStepsUntilMove = Random.Shared.Next(3, 5);
-    }
-    else
-    {
-        guardStepsUntilMove--;
-    }
-
-    if (guardStepsUntilMove <= 0)
-    {
-        var current = FindGuardLocation();
-        if (current != null)
-        {
-            var target = ReferenceEquals(current, concourse) ? platform : concourse;
-            current.RemoveNpc(guard);
-            target.AddNpc(guard);
-        }
-
-        guardStepsUntilMove = Random.Shared.Next(3, 5);
-    }
-
-    foreach (var location in state.Locations)
-    {
-        foreach (var npc in location.Npcs)
-        {
-            lastNpcLocations.TryGetValue(npc.Id, out var previous);
-            if (previous != null && !ReferenceEquals(previous, location))
-            {
-                if (ReferenceEquals(location, state.CurrentLocation))
-                {
-                    Console.WriteLine($"{npc.Name.ToProperCase()} arrives.");
-                }
-                else if (ReferenceEquals(previous, state.CurrentLocation))
-                {
-                    Console.WriteLine($"{npc.Name.ToProperCase()} heads out.");
-                }
-            }
-
-            lastNpcLocations[npc.Id] = location;
-        }
-    }
-}
-
-void RunDialog(INpc npc)
+void RunDialog(MarcusMedina.TextAdventure.Interfaces.INpc npc)
 {
     var root = npc.DialogRoot;
     if (root == null)
@@ -178,12 +85,14 @@ void RunDialog(INpc npc)
         return;
     }
 
-    isInDialog = true;
-    guardStepsUntilMove = Random.Shared.Next(3, 5);
-
+    var showIntro = true;
     while (true)
     {
-        Console.WriteLine(root.Text);
+        if (showIntro)
+        {
+            Console.WriteLine(root.Text);
+            showIntro = false;
+        }
         for (var i = 0; i < root.Options.Count; i++)
         {
             Console.WriteLine($"{i + 1}) {root.Options[i].Text}");
@@ -200,7 +109,7 @@ void RunDialog(INpc npc)
 
         if (choice == root.Options.Count + 1)
         {
-            Console.WriteLine("Bye, have a nice travel.");
+            Console.WriteLine("You leave the student alone.");
             break;
         }
 
@@ -210,21 +119,9 @@ void RunDialog(INpc npc)
             continue;
         }
 
-        var selected = root.Options[choice - 1].Text;
-        if (selected.Contains("ticket", StringComparison.OrdinalIgnoreCase))
-        {
-            var hasTicket = state.Inventory.FindItem("ticket") != null;
-            Console.WriteLine(hasTicket
-                ? "Use it on the gate."
-                : "Check the bench by the board.");
-        }
-        else if (selected.Contains("platform", StringComparison.OrdinalIgnoreCase))
-        {
-            Console.WriteLine("Through the gate to the east.");
-        }
+        var reply = root.Options[choice - 1].Next;
+        Console.WriteLine(reply?.Text ?? "They say nothing more.");
     }
-
-    isInDialog = false;
 }
 
 ShowLookResult(state.Look());
@@ -235,45 +132,77 @@ while (true)
     var input = Console.ReadLine()?.Trim();
     if (string.IsNullOrWhiteSpace(input)) continue;
 
-    if (input.StartsWith("use ", StringComparison.OrdinalIgnoreCase) &&
-        input.Contains("ticket", StringComparison.OrdinalIgnoreCase) &&
-        (input.Contains("gate", StringComparison.OrdinalIgnoreCase) || input.Contains("east", StringComparison.OrdinalIgnoreCase)))
+    if (input.Equals("sit", StringComparison.OrdinalIgnoreCase) ||
+        input.StartsWith("sit ", StringComparison.OrdinalIgnoreCase))
     {
-        var door = state.CurrentLocation.Exits.Values.FirstOrDefault(exit => exit.Door != null)?.Door;
-        if (door == null)
+        Console.WriteLine("You sit by the desk and let the silence settle.");
+        continue;
+    }
+
+    if (input.Equals("listen", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("You hear the old radiator tick and the faint hum of lights.");
+        continue;
+    }
+
+    if (input.Equals("draw on chalkboard", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("draw on board", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("draw on blackboard", StringComparison.OrdinalIgnoreCase))
+    {
+        if (chalkboardDrawing != null)
         {
-            Console.WriteLine("There is no gate here.");
-            continue;
+            Console.WriteLine("You erase the chalkboard first.");
         }
 
-        if (door.State == DoorState.Locked)
-        {
-            var unlockResult = state.Execute(new UnlockCommand());
-            WriteResult(unlockResult);
-            if (!unlockResult.Success || unlockResult.ShouldQuit)
-            {
-                if (!unlockResult.ShouldQuit)
-                {
-                    TickNpcMovement(new UnlockCommand());
-                }
-                continue;
-            }
-        }
+        var index = Random.Shared.Next(chalkboardDrawings.Length);
+        chalkboardDrawing = chalkboardDrawings[index];
+        chalkboardLookText = chalkboardLook[index];
+        Console.WriteLine(chalkboardDrawing);
+        continue;
+    }
 
-        if (door.State == DoorState.Closed)
+    if (input.Equals("clear chalkboard", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("clear board", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("clear blackboard", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("erase chalkboard", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("erase board", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("erase blackboard", StringComparison.OrdinalIgnoreCase))
+    {
+        if (chalkboardDrawing == null)
         {
-            var openResult = state.Execute(new OpenCommand());
-            WriteResult(openResult);
+            Console.WriteLine("It's already clean.");
         }
+        else
+        {
+            chalkboardDrawing = null;
+            chalkboardLookText = null;
+            Console.WriteLine("You erase the chalkboard.");
+        }
+        continue;
+    }
 
-        TickNpcMovement(new UnlockCommand());
+    if (input.Equals("look at chalkboard", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("look at board", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("look at blackboard", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("look chalkboard", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("look board", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("look blackboard", StringComparison.OrdinalIgnoreCase))
+    {
+        if (chalkboardLookText == null)
+        {
+            Console.WriteLine("The chalkboard is clean.");
+        }
+        else
+        {
+            Console.WriteLine(chalkboardLookText);
+        }
         continue;
     }
 
     var command = parser.Parse(input);
-    if (command is TalkCommand talk && talk.Target != null && talk.Target.TextCompare("guard"))
+    if (command is TalkCommand talk && talk.Target != null && talk.Target.TextCompare("student"))
     {
-        RunDialog(guard);
+        RunDialog(student);
         continue;
     }
 
@@ -289,6 +218,4 @@ while (true)
     }
 
     if (result.ShouldQuit) break;
-
-    TickNpcMovement(command);
 }

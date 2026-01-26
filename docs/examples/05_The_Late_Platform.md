@@ -1,18 +1,69 @@
-// <copyright file="Program.cs" company="Marcus Ackre Medina">
-// Copyright (c) Marcus Ackre Medina. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
+# The Late Platform
+
+_Slice tag: Slice 5 — NPCs + Dialog + Movement. Demo focuses on an NPC with dialogue, patrol timing, and room-specific hints._
+
+A quiet station at night. A guard paces between the concourse and platform.
+
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│ Concourse  │─────│  Platform  │
+│   Guard    │     │            │
+└────────────┘     └────────────┘
+```
+
+## Story beats (max ~10 steps)
+1) You arrive in the concourse.
+2) The guard offers directions.
+3) Find the ticket.
+4) Unlock the gate and head to the platform.
+5) The guard patrols between rooms.
+
+## Slice 1 + 2 + 3 + 4 + 5 functions tested
+- `Location(id, description)`
+- `Location.AddExit(direction, target, oneWay: false)`
+- `Location.AddExit(direction, target, door, oneWay: false)`
+- `Location.AddNpc(npc)`
+- `Npc(id, name, state)`
+- `Npc.Description(text)`
+- `Npc.SetDialog(dialogNode)`
+- `Npc.SetMovement(movement)`
+- `DialogNode(text).AddOption(text, next)`
+- `PatrolNpcMovement(route)`
+- `Game(state, parser)` + manual loop
+- `Door(id, name, description, initialState)`
+- `Door.RequiresKey(key)`
+- `Door.SetReaction(action, text)`
+- `Key(id, name, description)`
+- `ICommandParser` + `KeywordParser(config)`
+- `KeywordParserConfigBuilder.BritishDefaults().Build()`
+- `CommandExtensions.Execute(state, command)`
+- `Direction` enum
+
+## Demo commands (parser)
+- `look` / `l`
+- `talk guard`
+- `take ticket`
+- `unlock gate`
+- `open gate`
+- `go east` / `e`
+- `inventory` / `i`
+- `quit` / `exit`
+
+## Example (NPCs + dialog + movement)
+```csharp
 using System;
 using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
-
-// Slice 1 + 2 + 3 + 4 + 5: Locations, Doors/Keys, Parser, Items/Inventory, NPCs/Dialog/Movement
 
 var concourse = new Location("concourse", "A draughty concourse with a flickering board.");
 var platform = new Location("platform", "The platform is quiet. The last train waits.");
@@ -292,3 +343,4 @@ while (true)
 
     TickNpcMovement(command);
 }
+```

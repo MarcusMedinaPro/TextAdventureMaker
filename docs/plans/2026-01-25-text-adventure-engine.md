@@ -13,12 +13,15 @@
 ## Core Design Decisions
 
 ### TDD Approach: Green/Blue
+
 Skip red phase. Write test → write code → test passes → refactor.
 
 ### Slice Workflow Rule (mandatory)
+
 test → kod → test → refactor → test → commit → update sandbox → låt Marcus testa sandbox → fixa vid behov, korrigera tester, commit igen.
 
 ### Fluent Consistency Rule
+
 Om ett objekt får en property/metod/extension, ge motsvarande funktionalitet till närliggande objekt (t.ex. Item/Key/Door) så API:t förblir konsekvent och lättläst.
 
 ### Language Generic
@@ -29,21 +32,25 @@ Finns det bättre sätt att göra detta?
 Kom med förslag.
 
 ### Language System
+
 - Single language loaded at runtime via file (e.g., `gamelang.en.txt`, `gamelang.sv.txt`)
 - Default: English
 - All game text comes from loaded language file
 
 ### Bi-directional Exits
+
 Creating `hall.AddExit(Direction.North, bedroom)` automatically creates `bedroom.AddExit(Direction.South, hall)`.
 Can be disabled per-exit for one-way passages.
 
 ### Doors
+
 - Exits can have doors (IDoor)
 - Doors can be: Open, Closed, Locked, Destroyed
 - Locked doors require IKey
 - Doors trigger events: OnOpen, OnClose, OnLock, OnUnlock, OnDestroy
 
 ### Items/Objects
+
 - `Takeable: bool` — can player pick it up?
 - `Weight: float` — optional, for inventory limits
 - Containers: items can contain other items (Composite)
@@ -52,9 +59,11 @@ Can be disabled per-exit for one-way passages.
 - Events: OnTake, OnDrop, OnUse, OnOpen, OnClose, OnDestroy
 
 ### Inventory Limits
+
 Configurable: by weight, by count, or unlimited.
 
 ### NPCs
+
 - State: Friendly, Hostile, Dead, etc.
 - Movement: None, Random, Patrol (pattern), Follow
 - NPCs move between locations on game ticks
@@ -118,6 +127,7 @@ git init && git add . && git commit -m "chore: initial project structure"
 ### Task 1.2: ILocation + Location (bi-directional exits)
 
 **Files:**
+
 - Create: `src/MarcusMedina.TextAdventure/Interfaces/ILocation.cs`
 - Create: `src/MarcusMedina.TextAdventure/Models/Location.cs`
 - Create: `src/MarcusMedina.TextAdventure/Enums/Direction.cs`
@@ -294,6 +304,7 @@ git add . && git commit -m "feat: add Location with bi-directional exits"
 ### Task 1.3: IGameState + Navigation
 
 **Files:**
+
 - Create: `src/MarcusMedina.TextAdventure/Interfaces/IGameState.cs`
 - Create: `src/MarcusMedina.TextAdventure/Engine/GameState.cs`
 - Test: `tests/MarcusMedina.TextAdventure.Tests/NavigationTests.cs`
@@ -377,6 +388,7 @@ public class GameState : IGameState
 ### Task 1.4: Sandbox - Enkel navigation
 
 **Files:**
+
 - Modify: `sandbox/TextAdventure.Sandbox/Program.cs`
 
 ```csharp
@@ -429,9 +441,13 @@ while (true)
 **Mål:** Dörrar som blockerar utgångar, kräver nycklar.
 
 ### Task 2.1: IDoor + Door (State: Open, Closed, Locked, Destroyed) ✅
+
 ### Task 2.2: IKey + Key ✅
+
 ### Task 2.3: Door events: OnOpen, OnClose, OnLock, OnUnlock, OnDestroy
+
 ### Task 2.4: Location.AddExit with door ✅
+
 ### Task 2.5: Sandbox — låst dörr till skattkammaren, hitta nyckel ✅
 
 ---
@@ -441,8 +457,11 @@ while (true)
 **Mål:** Kommandon som objekt. Keyword-parser. "go north", "look", "quit".
 
 ### Task 3.1: ICommand + CommandResult ✅
+
 ### Task 3.2: ICommandParser + KeywordParser ✅
+
 ### Task 3.3: Inbyggda kommandon (GoCommand, LookCommand, QuitCommand, OpenCommand, UnlockCommand) ✅
+
 ### Task 3.4: Sandbox uppdatering — parser istället för raw input ✅
 
 ---
@@ -455,21 +474,25 @@ while (true)
 **Notis:** När nya item-subklasser (t.ex. Weapon/Potion) införs, ge dem fluent overrides för SetWeight/SetTakeable/AddAliases så chaining behåller typen.
 
 ### Task 4.1: IItem + Item (Factory + Prototype) ✅
+
 - `Takeable: bool`
 - `Weight: float` (optional)
 - Events: OnTake, OnDrop, OnUse, OnDestroy
 
 ### Task 4.2: IInventory + Inventory ✅
+
 - Configurable limits: ByWeight, ByCount, Unlimited
 - `TakeAll()` method
 
 ### Task 4.3: Item Decorators (RustyModifier, EnchantedModifier) ✅
 
 ### Task 4.4: IContainer<T> — items that hold other items ✅
+
 - `Glass : IContainer<IFluid>`
 - `Chest : IContainer<IItem>`
 
 ### Task 4.5: Item Combinations ✅
+
 - `ice + fire → destroy both, create water`
 - Recipe system for crafting
 
@@ -507,6 +530,7 @@ var letter = new Item("letter", "Sealed Letter")
 ```
 
 **ReadCommand:**
+
 ```csharp
 // "read sign" → visar text direkt
 // "read newspaper" → "You need to pick it up first."
@@ -524,14 +548,18 @@ var letter = new Item("letter", "Sealed Letter")
 **Mål:** NPCs i rum, prata med dem, dialog-träd. NPCs rör sig.
 
 ### Task 5.1: INpc + Npc (State pattern — Friendly/Hostile/Dead) ✅
+
 ### Task 5.2: Dialog system (Composite — konversationsträd) ✅
+
 ### Task 5.3: NPC Movement (Strategy — None, Random, Patrol, Follow) ✅
+
 ### Task 5.4: TalkCommand ✅
+
 ### Task 5.5: Sandbox — prata med räven, drake patrullerar mellan grottor ✅
 
 ### Task 5.6: Rule-Based Dialog System (from Procedural Storytelling)
 
-*Ersätter/kompletterar dialog-träd med flexibla regler.*
+_Ersätter/kompletterar dialog-träd med flexibla regler._
 
 **Koncept:** Dialog väljs baserat på världstillstånd, inte fördefinierad träd.
 
@@ -571,6 +599,7 @@ npc.AddDialogRule("bird_joke_exhausted")
 ```
 
 **Automatiska triggers:**
+
 ```csharp
 npc.OnSee("player")
     .After(seconds: 2)
@@ -582,7 +611,7 @@ npc.OnHear("combat")
 
 ### Task 5.7: Synonym System (from Write Your Own Adventure Programs)
 
-*Tillåt flera ord för samma handling.*
+_Tillåt flera ord för samma handling._
 
 ```csharp
 // I parser-konfiguration
@@ -600,6 +629,7 @@ item.AddAliases("sword", "blade", "weapon");
 ```
 
 **"Did you mean?" suggestions:**
+
 ```csharp
 parser.EnableSuggestions(true);
 // Input: "tke sword"
@@ -613,8 +643,11 @@ parser.EnableSuggestions(true);
 **Mål:** Triggers när saker händer.
 
 ### Task 6.1: IEventSystem + EventSystem (Observer) ✅
+
 ### Task 6.2: Inbyggda events (OnEnter, OnExit, OnPickup, OnDrop, OnTalk, OnCombatStart) ✅
+
 ### Task 6.3: Item/Door events kopplas till EventSystem ✅
+
 ### Task 6.4: Sandbox — drake vaknar när man går in i grottan ✅
 
 ---
@@ -624,8 +657,11 @@ parser.EnableSuggestions(true);
 **Mål:** Utbytbart stridssystem.
 
 ### Task 7.1: ICombatSystem + TurnBasedCombat (Strategy) ✅
+
 ### Task 7.2: AttackCommand, FleeCommand ✅
+
 ### Task 7.3: Health/Damage system ✅
+
 ### Task 7.4: Sandbox — slåss mot draken ✅
 
 ---
@@ -635,7 +671,9 @@ parser.EnableSuggestions(true);
 **Mål:** Objectives och progress.
 
 ### Task 8.1: IQuest + Quest (State pattern)
+
 ### Task 8.2: Quest conditions (Visitor)
+
 ### Task 8.3: Sandbox — "Hitta svärdet och döda draken"
 
 ---
@@ -645,12 +683,14 @@ parser.EnableSuggestions(true);
 **Mål:** Centralt state för att spåra global världsstatus. Foundation för quests, events, stories.
 
 ### Task 9.1: IWorldState interface
+
 - Flags: `bool` (isDragonDead, isKingdomAtWar)
 - Counters: `int` (villagersSaved, daysElapsed)
 - Relationships: NPC-attityd (-100 till +100)
 - Timeline: kronologiska händelser
 
 ### Task 9.2: WorldState implementation
+
 ```csharp
 worldState.SetFlag("dragon_defeated", true);
 worldState.Increment("reputation", 50);
@@ -658,6 +698,7 @@ worldState.SetRelationship("blacksmith", 75);
 ```
 
 ### Task 9.3: Quest/Event conditions mot WorldState
+
 ### Task 9.4: Sandbox — villagers räknar, reputation påverkar NPC-dialog
 
 ---
@@ -667,8 +708,11 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Spara och ladda spelstatus.
 
 ### Task 10.1: IMemento + GameMemento
+
 ### Task 10.2: ISaveSystem + JsonSaveSystem
+
 ### Task 10.3: SaveCommand, LoadCommand
+
 ### Task 10.4: Sandbox — save, quit, load, continue
 
 ---
@@ -678,8 +722,11 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Ladda språkfil för all speltext. Default engelska.
 
 ### Task 11.1: ILanguageProvider + FileLanguageProvider
+
 ### Task 11.2: Language file format (gamelang.en.txt, gamelang.sv.txt)
+
 ### Task 11.3: System messages (You pick up the {item}, You can't go that way, etc.)
+
 ### Task 11.4: Sandbox — ladda svenskt språk
 
 ---
@@ -689,8 +736,11 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Ladda spel från .adventure-filer.
 
 ### Task 12.1: DSL-syntax definition
+
 ### Task 12.2: IDslParser + AdventureDslParser (Template method)
+
 ### Task 12.3: Registrera egna keywords
+
 ### Task 12.4: Sandbox — ladda spel från .adventure-fil
 
 ---
@@ -700,7 +750,9 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Bygga spel helt i C# med fluent syntax.
 
 ### Task 13.1: GameBuilder med alla .Use/.Add-metoder
+
 ### Task 13.2: IGame + Game (huvudloop, game ticks för NPC movement)
+
 ### Task 13.3: Sandbox — hela spelet via GameBuilder
 
 ---
@@ -710,7 +762,9 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Story logger + dev logger.
 
 ### Task 14.1: IStoryLogger — loggar äventyret som en saga
+
 ### Task 14.2: IDevLogger — debug/position/state
+
 ### Task 14.3: Sandbox — saga.txt genereras medan man spelar
 
 ---
@@ -720,7 +774,9 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Guida spelaren genom kartan.
 
 ### Task 15.1: IPathfinder + AStarPathfinder (Strategy)
+
 ### Task 15.2: HintCommand — "How do I get to the cave?"
+
 ### Task 15.3: Sandbox — pathfinder visar vägen
 
 ---
@@ -730,7 +786,9 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Ollama-integration som ICommandParser.
 
 ### Task 16.1: OllamaCommandParser (Facade)
+
 ### Task 16.2: AI-konfiguration via fluent API
+
 ### Task 16.3: Sandbox — "go somewhere dark" → Cave
 
 ---
@@ -740,7 +798,9 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Publicera båda paketen.
 
 ### Task 17.1: .nuspec / csproj-metadata
+
 ### Task 17.2: Pack + publish till NuGet
+
 ### Task 17.3: README + dokumentation
 
 ---
@@ -750,14 +810,18 @@ worldState.SetRelationship("blacksmith", 75);
 **Mål:** Hantera storylines baserat på spelarval.
 
 ### Task 18.1: IStoryBranch + IConsequence interfaces
+
 ### Task 18.2: StoryState — aktiva/avslutade grenar
+
 ### Task 18.3: Branching conditions
+
 ```csharp
 game.AddStoryBranch("dragon_path")
     .Condition(q => q.IsQuestComplete("slay_dragon"))
     .Consequence(w => w.UnlockLocation("dragon_lair_treasure"))
     .Consequence(w => w.SetNpcState("king", NpcState.Grateful));
 ```
+
 ### Task 18.4: Sandbox — två endings baserat på val
 
 ---
@@ -767,9 +831,13 @@ game.AddStoryBranch("dragon_path")
 **Mål:** Quests med stages, optional objectives, failure paths.
 
 ### Task 19.1: IQuestStage — delmål
+
 ### Task 19.2: Optional vs Required objectives
+
 ### Task 19.3: Alternative completion paths
+
 ### Task 19.4: Failure consequences, hidden objectives
+
 ```csharp
 quest.AddStage("find_sword")
      .RequireObjective("search_armory")
@@ -778,6 +846,7 @@ quest.AddStage("find_sword")
      .OnFailure(w => w.SpawnHostileGuards())
      .OnComplete(w => w.UnlockStage("confront_dragon"));
 ```
+
 ### Task 19.5: Sandbox — quest med 3 stages, optional hints
 
 ---
@@ -788,7 +857,9 @@ quest.AddStage("find_sword")
 **Notis:** Kodbasen använder för närvarande Slice 20 för Hints & Properties (se `docs/examples/20_Hints_and_Properties.md`).
 
 ### Task 20.1: IEventChain + ICondition interfaces
+
 ### Task 20.2: Time/location/state triggers
+
 ```csharp
 game.AddEventChain("village_rescue")
     .Step1(e => e.OnEnterLocation("village").ShowDialog("burning_houses"))
@@ -797,6 +868,7 @@ game.AddEventChain("village_rescue")
     .Step4(e => e.AfterTicks(20).If(q => !q.IsComplete("save_village"))
                  .Then(w => w.DestroyLocation("village")));
 ```
+
 ### Task 20.3: Sandbox — village rescue med tidslimit
 
 ---
@@ -806,17 +878,22 @@ game.AddEventChain("village_rescue")
 **Mål:** Dag/natt cycles, tidbaserade events.
 
 ### Task 21.1: ITimeSystem — ticks, dagar, faser
+
 ### Task 21.2: TimeOfDay: Dawn, Day, Dusk, Night
+
 ### Task 21.3: Dag/natt påverkar:
+
 - NPC-platser (shopkeeper hem på natten)
 - Events (varulvar spawnar i fullmåne)
 - Lighting (fackla behövs i mörka grottor)
+
 ```csharp
 game.UseTimeSystem()
     .SetStartTime(TimeOfDay.Dawn)
     .TicksPerDay(100)
     .OnPhase(TimePhase.Night, ctx => ctx.SetVisibility(0.3f));
 ```
+
 ### Task 21.4: Move/Turn Limits
 
 ```csharp
@@ -844,6 +921,7 @@ if (bombPuzzle.IsActive && bombPuzzle.MovesRemaining < 5) { ... }
 ```
 
 **Features:**
+
 - Globalt: `game.MaxMoves(400)` - hela spelet
 - Lokalt: `CreateTimedChallenge()` - specifik puzzle
 - Warnings vid trösklar
@@ -858,7 +936,9 @@ if (bombPuzzle.IsActive && bombPuzzle.MovesRemaining < 5) { ... }
 **Mål:** NPC-grupper med gemensam reputation.
 
 ### Task 22.1: IFaction — grupper av NPCs
+
 ### Task 22.2: Reputation thresholds → unlock/consequences
+
 ```csharp
 game.AddFaction("thieves_guild")
     .WithNpcs("shadow", "pickpocket", "fence")
@@ -867,7 +947,9 @@ game.AddFaction("thieves_guild")
 
 player.ModifyReputation("thieves_guild", +20);
 ```
+
 ### Task 22.3: Faction påverkar priser, locations, encounters
+
 ### Task 22.4: Sandbox — två factions, val påverkar ending
 
 ---
@@ -877,7 +959,9 @@ player.ModifyReputation("thieves_guild", +20);
 **Mål:** Dynamiska slumpmässiga events.
 
 ### Task 23.1: IRandomEventPool
+
 ### Task 23.2: Viktning, cooldowns, context-awareness
+
 ```csharp
 game.AddRandomEventPool("forest_encounters")
     .AddEvent("wolf_attack", weight: 3, cooldown: 10)
@@ -885,6 +969,7 @@ game.AddRandomEventPool("forest_encounters")
     .AddEvent("hidden_treasure", weight: 1)
     .RequireTimePhase(TimePhase.Night);
 ```
+
 ### Task 23.3: Sandbox — random encounters i skogen
 
 ---
@@ -894,14 +979,18 @@ game.AddRandomEventPool("forest_encounters")
 **Mål:** Hidden locations som upptäcks genom exploration.
 
 ### Task 24.1: Hidden exits med discover conditions
+
 ```csharp
 location.AddHiddenExit(Direction.East, secretCave)
     .DiscoverCondition(c => c.HasItem("ancient_map"))
     .Or(c => c.TalkedToNpc("old_hermit"))
     .OnDiscovery(e => e.ShowMessage("You notice a hidden passage!"));
 ```
+
 ### Task 24.2: Perception checks för discovery
+
 ### Task 24.3: Fog of war för stora kartor
+
 ### Task 24.4: Sandbox — hemlig grotta kräver karta eller NPC-hint
 
 ---
@@ -911,12 +1000,16 @@ location.AddHiddenExit(Direction.East, secretCave)
 **Mål:** Grafiskt verktyg för content creation.
 
 ### Task 25.1: Web-based eller desktop app
+
 ### Task 25.2: Features:
+
 - Dra boxes för scenes/locations
 - Koppla ihop med pilar för transitions
 - Sätt conditions på arrows
 - Visa quest flows och NPC-relationer
+
 ### Task 25.3: Export till .adventure DSL
+
 ### Task 25.4: Import befintlig DSL för visualisering
 
 ---
@@ -926,20 +1019,27 @@ location.AddHiddenExit(Direction.East, secretCave)
 **Mål:** Stämning som påverkar spelarupplevelsen.
 
 ### Task 26.1: IMoodSystem — atmospheric state
+
 ### Task 26.2: Mood enum: Peaceful, Tense, Foreboding, Terrifying, Hopeful
+
 ### Task 26.3: Environmental cues: sound, smell, temperature, wind
+
 ```csharp
 location.SetMood(Mood.Foreboding)
     .WithLighting(LightLevel.Dim)
     .WithAmbientSound("distant_dripping")
     .WithSmell("damp earth and decay");
 ```
+
 ### Task 26.4: Mood-modifiers på beskrivningar
+
 ```csharp
 // Normal: "A cave entrance"
 // Foreboding: "A yawning cave entrance, shadows writhing within"
 ```
+
 ### Task 26.5: Mood propagation (angränsande rum påverkar varandra)
+
 ### Task 26.6: Sandbox — grotta med ökande skräck ju djupare man går
 
 ---
@@ -949,6 +1049,7 @@ location.SetMood(Mood.Foreboding)
 **Mål:** Beskrivningar som ändras baserat på context.
 
 ### Task 27.1: Context-aware descriptions
+
 ```csharp
 location.Description()
     .Default("A quiet forest glade")
@@ -957,8 +1058,11 @@ location.Description()
     .When(p => p.HasTrait(Trait.Observant), "You notice fresh tracks leading north")
     .FirstVisit("You've never seen trees this old");
 ```
+
 ### Task 27.2: Variable substitution: `{player_name}`, `{npc_emotion}`, `{item_found}`
+
 ### Task 27.3: Dialog templates med parametrar
+
 ### Task 27.4: Sandbox — rum beskrivs olika beroende på tid, quest, traits
 
 ---
@@ -968,7 +1072,9 @@ location.Description()
 **Mål:** NPCs utvecklas över tid.
 
 ### Task 28.1: ICharacterArc — definierar utveckling
+
 ### Task 28.2: Milestones som unlocks traits
+
 ```csharp
 npc.DefineArc("CowardToHero")
     .StartState(Trait.Fearful)
@@ -977,7 +1083,9 @@ npc.DefineArc("CowardToHero")
     .EndState(Trait.Heroic)
     .OnComplete(ctx => ctx.UnlockQuest("lead_rebellion"));
 ```
+
 ### Task 28.3: Dialog ändras automatiskt baserat på arc-progress
+
 ### Task 28.4: Sandbox — NPC växer från feg till hjälte
 
 ---
@@ -987,19 +1095,26 @@ npc.DefineArc("CowardToHero")
 **Mål:** Balans mellan action och lugn.
 
 ### Task 29.1: ITensionMeter — current tension (0.0 - 1.0)
+
 ### Task 29.2: Tension modifiers från events
+
 ```csharp
 story.DefineTension()
     .BuildUp("dragon_approach", rate: 2.0f)
     .Peak("dragon_fight")
     .Release("dragon_dead", cooldown: 50);
 ```
+
 ### Task 29.3: Tension påverkar:
+
 - Random encounter frequency
 - Music/sound intensity
 - Available actions
+
 ### Task 29.4: Rest periods (safe zones)
+
 ### Task 29.5: Pacing rules: "no major events within X ticks"
+
 ### Task 29.6: Sandbox — tension bygger mot dragon fight
 
 ---
@@ -1009,7 +1124,9 @@ story.DefineTension()
 **Mål:** Chekov's Gun — plantera och betala av.
 
 ### Task 30.1: IForeshadowingSystem — spårar planted seeds
+
 ### Task 30.2: Tags/connections mellan seemingly unrelated things
+
 ```csharp
 // Act 1: Plant
 location.AddDetail("ancient_runes")
@@ -1026,8 +1143,11 @@ boss.OnDefeat(ctx => {
         ctx.ShowEpilogue("The runes now glow—a warning you understood too late.");
 });
 ```
+
 ### Task 30.3: Payoff detection (varning om planted gun aldrig fires)
+
 ### Task 30.4: Optional callbacks (om spelaren missade hint)
+
 ### Task 30.5: Sandbox — mystiska runer som får mening senare
 
 ---
@@ -1037,7 +1157,9 @@ boss.OnDefeat(ctx => {
 **Mål:** Stories flödar mellan scenes, inte bara locations.
 
 ### Task 31.1: IScene — orkestrerar events
+
 ### Task 31.2: Scene beats (dialog/action i ordning)
+
 ```csharp
 story.DefineScene("Betrayal")
     .Location("throne_room")
@@ -1052,7 +1174,9 @@ story.DefineScene("Betrayal")
 
 scene.Play();  // All dialog/events körs automatiskt
 ```
+
 ### Task 31.3: Scene transitions baserat på player actions
+
 ### Task 31.4: Sandbox — betrayal scene med två utgångar
 
 ---
@@ -1062,7 +1186,9 @@ scene.Play();  // All dialog/events körs automatiskt
 **Mål:** Spelaren bryr sig om saker de investerat i.
 
 ### Task 32.1: IBond — emotionell koppling till NPCs
+
 ### Task 32.2: Investment moments som bygger bond
+
 ```csharp
 npc.CreateBond("childhood_friend")
     .InvestmentMoments(
@@ -1075,7 +1201,9 @@ npc.CreateBond("childhood_friend")
             ctx.ImpactWeight = BondStrength * 10;
     });
 ```
+
 ### Task 32.3: Varning om NPC dör utan established bond
+
 ### Task 32.4: Sandbox — vän som dör efter vi byggt relation
 
 ---
@@ -1085,7 +1213,9 @@ npc.CreateBond("childhood_friend")
 **Mål:** Flexibel berättarröst.
 
 ### Task 33.1: Voice enum: FirstPerson, SecondPerson, ThirdPerson
+
 ### Task 33.2: Tense enum: Past, Present
+
 ```csharp
 game.SetNarrativeVoice(Voice.SecondPerson)
     .Tense(Tense.Present);
@@ -1095,7 +1225,9 @@ game.SetNarrativeVoice(Voice.SecondPerson)
 // 2nd: "You enter the cave"
 // 3rd: "The hero enters the cave"
 ```
+
 ### Task 33.3: Flashbacks i past tense
+
 ### Task 33.4: Sandbox — byt perspektiv under spelet
 
 ---
@@ -1105,18 +1237,22 @@ game.SetNarrativeVoice(Voice.SecondPerson)
 **Mål:** Anpassa story till spelarstil.
 
 ### Task 34.1: IAgencyTracker — spårar meningsfulla val
+
 ```csharp
 choice.Register("SaveVillage", weight: 10);
 choice.Register("HelpOldMan", weight: 3);
 choice.Register("StealBread", weight: -5);
 ```
+
 ### Task 34.2: AgencyScore påverkar story paths
+
 ```csharp
 if (player.AgencyScore > 50)
     story.Unlock("player_shapes_kingdom");
 else
     story.Unlock("player_follows_fate");
 ```
+
 ### Task 34.3: Sandbox — aktiv vs passiv protagonist
 
 ---
@@ -1126,6 +1262,7 @@ else
 **Mål:** Spänning när spelaren vet mer än karaktären.
 
 ### Task 35.1: IDramaticIronySystem — spårar kunskapsskillnader
+
 ```csharp
 // Player learns:
 player.LearnSecret("advisor_is_traitor");
@@ -1141,7 +1278,9 @@ if (dramaticIrony.Exists())
 if (!player.WarnedKing())
     story.Consequence(Tragedy.KingBetrayed);
 ```
+
 ### Task 35.2: Ge spelaren chans att agera på kunskap
+
 ### Task 35.3: Sandbox — förrädarscenario
 
 ---
@@ -1151,9 +1290,11 @@ if (!player.WarnedKing())
 **Mål:** Inbyggda dramaturgiska strukturer som guide för story design.
 
 ### Task 36.1: IHeroJourney + JourneyStage enum
+
 Campbell's 12-17 stages med 3 faser (Departure, Initiation, Return)
 
 ### Task 36.2: HeroJourneyBuilder — fluent API
+
 ```csharp
 game.UseHeroJourneyTemplate()
     .OrdinaryWorld("village")
@@ -1172,11 +1313,13 @@ game.UseHeroJourneyTemplate()
 ```
 
 ### Task 36.3: JourneyValidator
+
 - Varnar om saknade stages
 - Kontrollerar ordning (Reward före Ordeal = fel)
 - "Mentor saknas före Threshold"
 
 ### Task 36.4: Character Archetypes
+
 ```csharp
 public enum CharacterArchetype
 {
@@ -1190,6 +1333,7 @@ npc.SetArchetype(CharacterArchetype.Mentor)
 ### Task 36.5: Alternative Narrative Templates
 
 **The Tragic Arc (Aristoteles)**
+
 ```csharp
 game.UseTragicArc()
     .Hybris("hero_overconfident")
@@ -1200,6 +1344,7 @@ game.UseTragicArc()
 ```
 
 **The Transformation Arc (inre resa)**
+
 ```csharp
 game.UseTransformationArc()
     .FragmentedIdentity()
@@ -1209,6 +1354,7 @@ game.UseTransformationArc()
 ```
 
 **The Ensemble Journey (kollektiv)**
+
 ```csharp
 game.UseEnsembleJourney()
     .Protagonists("luke", "leia", "han")
@@ -1218,6 +1364,7 @@ game.UseEnsembleJourney()
 ```
 
 **The Descent / Katabasis**
+
 ```csharp
 game.UseDescentArc()
     .DescentIntoChaos()
@@ -1227,6 +1374,7 @@ game.UseDescentArc()
 ```
 
 **The Spiral Narrative**
+
 ```csharp
 game.UseSpiralNarrative()
     .RepeatEvents()
@@ -1236,6 +1384,7 @@ game.UseSpiralNarrative()
 ```
 
 **The Moral Labyrinth**
+
 ```csharp
 game.UseMoralLabyrinth()
     .NoCorrectEnding()
@@ -1244,6 +1393,7 @@ game.UseMoralLabyrinth()
 ```
 
 **The Caretaker Arc**
+
 ```csharp
 game.UseCaretakerArc()
     .RepairNotConquer()
@@ -1252,6 +1402,7 @@ game.UseCaretakerArc()
 ```
 
 **The Witness Arc**
+
 ```csharp
 game.UseWitnessArc()
     .ObserveMoreThanAct()
@@ -1261,6 +1412,7 @@ game.UseWitnessArc()
 ```
 
 **The World-Shift Arc**
+
 ```csharp
 game.UseWorldShiftArc()
     .GradualWorldChange()
@@ -1270,6 +1422,7 @@ game.UseWorldShiftArc()
 ```
 
 ### Task 36.6: DSL för journey templates
+
 ```
 journey "DragonSlayer" type: hero {
     phase departure {
@@ -1293,6 +1446,7 @@ journey "DragonSlayer" type: hero {
 ### Task 36.7: Additional Story Structures (from book research)
 
 **Prescriptive/Fill-in-the-blank (UX Storytelling)**
+
 ```csharp
 game.UsePrescriptiveStructure()
     .Given("context")
@@ -1301,6 +1455,7 @@ game.UsePrescriptiveStructure()
 ```
 
 **Familiar to Foreign (Alice in Wonderland)**
+
 ```csharp
 game.UseFamiliarToForeign()
     .FamiliarWorld("home")
@@ -1310,6 +1465,7 @@ game.UseFamiliarToForeign()
 ```
 
 **Framed Stories**
+
 ```csharp
 // Now-Then-Now (flashback)
 game.UseFramedNarrative()
@@ -1331,6 +1487,7 @@ game.UseFramedNarrative()
 ```
 
 **Layered Stories**
+
 ```csharp
 game.UseLayeredNarrative()
     .AddLayer(1, "surface_impression")
@@ -1341,7 +1498,7 @@ game.UseLayeredNarrative()
 
 ### Task 36.8: Propp's Folktale Functions (Procedural Narrative)
 
-*Från Procedural Storytelling in Game Design*
+_Från Procedural Storytelling in Game Design_
 
 ```csharp
 public enum ProppFunction
@@ -1395,7 +1552,7 @@ game.UseProppianStructure()
 
 ### Task 36.9: Flashback System
 
-*Från UX Storytelling: Now-Then-Now structure*
+_Från UX Storytelling: Now-Then-Now structure_
 
 ```csharp
 // Definiera minnen
@@ -1413,7 +1570,7 @@ location.TriggerFlashback("memory_id")
 
 ### Task 36.10: Layer-based Descriptions
 
-*Från UX Storytelling: Layered stories*
+_Från UX Storytelling: Layered stories_
 
 ```csharp
 location.SetLayeredDescription()
@@ -1424,6 +1581,7 @@ location.SetLayeredDescription()
 ```
 
 ### Task 36.7: Journey Progress Tracker
+
 ```
 === YOUR JOURNEY ===
 Phase: Initiation
@@ -1444,6 +1602,7 @@ Next: Approach Inmost Cave
 **Mål:** Flexibel kapitelstruktur utan låst template. Bygg din egen arc.
 
 ### Task 37.1: IChapter + ChapterState
+
 ```csharp
 public interface IChapter
 {
@@ -1456,6 +1615,7 @@ public interface IChapter
 ```
 
 ### Task 37.2: ChapterBuilder — define custom arcs
+
 ```csharp
 game.DefineChapters()
     .Chapter("prologue", "The Beginning")
@@ -1490,6 +1650,7 @@ game.DefineChapters()
 ```
 
 ### Task 37.3: Chapter transitions och branching
+
 ```csharp
 // Auto-advance
 game.OnObjectiveComplete("find_map", ctx =>
@@ -1501,6 +1662,7 @@ game.ActivateChapter("chapter2a");
 ```
 
 ### Task 37.4: Chapter progress UI
+
 ```
 ╔══════════════════════════════════════╗
 ║  CHAPTER 2: Into the Unknown         ║
@@ -1512,6 +1674,7 @@ game.ActivateChapter("chapter2a");
 ```
 
 ### Task 37.5: DSL för chapters
+
 ```
 chapters {
     chapter "prologue" title: "The Beginning" {
@@ -1551,6 +1714,7 @@ chapters {
 **Mål:** Objekt och dörrar som spawnar/öppnas baserat på tid eller actions.
 
 ### Task 38.1: ITimedSpawn — objekt som dyker upp
+
 ```csharp
 location.AddTimedSpawn("treasure_chest")
     .AppearsAt(tick: 100)
@@ -1565,6 +1729,7 @@ location.AddTimedSpawn("ghost")
 ```
 
 ### Task 38.2: ITimedDoor — dörrar som öppnas/stängs
+
 ```csharp
 location.AddExit(Direction.North, secretRoom)
     .WithTimedDoor("magic_portal")
@@ -1582,6 +1747,7 @@ location.AddExit(Direction.East, vault)
 ```
 
 ### Task 38.3: Action-triggered spawns
+
 ```csharp
 // Object appears after player action
 game.OnAction("pull_lever", ctx => {
@@ -1605,6 +1771,7 @@ game.OnItemPickup("crystal", ctx => {
 ```
 
 ### Task 38.4: Conditional permanent changes
+
 ```csharp
 // Door permanently opens after condition
 door.PermanentlyOpensWhen(w =>
@@ -1617,6 +1784,7 @@ location.TransformsInto("ruined_village")
 ```
 
 ### Task 38.5: Scheduled events queue
+
 ```csharp
 game.Schedule()
     .At(tick: 0, ctx => ctx.Message("Your journey begins..."))
@@ -1627,6 +1795,7 @@ game.Schedule()
 ```
 
 ### Task 38.6: DSL för timed objects
+
 ```
 location "ancient_temple" {
     timed_spawn "ghost_guardian" {
@@ -1664,12 +1833,14 @@ schedule {
 ### Världssimulation
 
 **Time System**
+
 - Dag/natt-cykler, `TicksPerDay`
 - Delayed events: `After(ticks: 50, ctx => ctx.TriggerEvent("cave_collapse"))`
 - Saker förändras över tid (blod torkar, eld slocknar, NPC blir trött)
 - TimePhase: Dawn, Day, Dusk, Night
 
 **Perception System**
+
 - LightLevel per location (mörker kräver fackla)
 - Synfält, dimma, blindhet
 - Hörsel: ljud från angränsande rum
@@ -1677,30 +1848,35 @@ schedule {
 - Rykten och osäker information
 
 **Semantic Objects**
+
 - Traits: `Flammable, Brittle, Sharp, Heavy, Holy, Cursed, Frozen, Hot`
 - Affordances: vad kan man rimligen göra med objektet
 - Emergent interactions: `ice + fire → water` utan hårdkodade recept
 - Fysikaliska relationer: vätskor, gaser, temperatur
 
 **Social System**
+
 - Relationer: Trust, Fear, Loyalty, Guilt
 - Rykte som sprids mellan NPCs
 - Minnesbaserade reaktioner ("du svek mig förut")
 - Gruppdynamik (NPC påverkar varandra)
 
 **Intention System**
+
 - Målbaserade handlingar: `player.Intent("escape the cave")`
 - Delplaner: om låst → hitta nyckel → gå tillbaka
 - Avbrutna handlingar (börjar klättra, blir attackerad)
 - Kräver AI-integration
 
 **Narrative Logic**
+
 - Teman och motiv (rädsla, skuld, hopp)
 - Foreshadowing-hooks
 - Dramaturgiska tillstånd (uppbyggnad, kris, klimax)
 - "Författarmedvetenhet" i ramverket
 
 **Meta Perspective**
+
 - Undo / spola tillbaka (tidslinjer)
 - What-if scenarier
 - Debug-visning av orsak–verkan
@@ -1710,6 +1886,7 @@ schedule {
 ### Developer Experience
 
 **Prose-like Fluent API**
+
 ```csharp
 World.Room("Cave")
     .Description("A dark, wet cave")
@@ -1720,6 +1897,7 @@ World.Room("Cave")
 ```
 
 **DSL för författare**
+
 ```
 room "Cave" {
     description "A dark cave"
@@ -1732,6 +1910,7 @@ room "Cave" {
 ```
 
 **Extension Hooks överallt**
+
 ```csharp
 game.OnEnter("Cave", state => {
     state.Spawn("Bat");
@@ -1744,6 +1923,7 @@ game.OnEmotionChange("Hermit", Emotion.Angry, ctx => ctx.Attack());
 ```
 
 **Archetypes / Prefabs**
+
 ```csharp
 World.Add(Archetypes.DragonBoss()
     .WithName("Vermithrax")
@@ -1761,12 +1941,14 @@ World.Add(Archetypes.WanderingMerchant()
 ```
 
 **Visual World Inspector**
+
 - Graf av rum och kopplingar
 - NPC-rörelser i realtid
 - Quest states
 - "Varför misslyckades kommandot?" → orsakskedja
 
 **Story-First Tooling**
+
 - Story beats editor
 - Quest-flödesgraf
 - Relationsgraf
@@ -1813,6 +1995,7 @@ World.Add(Archetypes.WanderingMerchant()
 ## Sammanfattning av slices
 
 ### Core Engine (v1)
+
 **Status legend:** ✅ implemented in code · 🟨 demo/docs only · ⬜ planned
 | # | Slice | Patterns | Status |
 |---|-------|----------|--------|
@@ -1835,44 +2018,47 @@ World.Add(Archetypes.WanderingMerchant()
 | 17 | NuGet-paketering | - | 🟨 |
 
 ### Advanced Systems (v1.5)
-| # | Slice | Patterns | Status |
-|---|-------|----------|--------|
-| 18 | Story Branches & Consequences | State | 🟨 |
-| 19 | Multi-Stage Quests | State, Strategy | 🟨 |
-| 20 | Hints & Properties (current impl) | - | ✅ |
-| 21 | Time System | Observer, Strategy | ✅ |
-| 22 | Faction & Reputation | Observer | ✅ |
-| 23 | Random Event Pool | Strategy | ✅ |
-| 24 | Location Discovery | - | ✅ |
-| 25 | Story Mapper Tool | - | 🟨 |
+
+| #   | Slice                             | Patterns           | Status |
+| --- | --------------------------------- | ------------------ | ------ |
+| 18  | Story Branches & Consequences     | State              | 🟨     |
+| 19  | Multi-Stage Quests                | State, Strategy    | 🟨     |
+| 20  | Hints & Properties (current impl) | -                  | ✅     |
+| 21  | Time System                       | Observer, Strategy | ✅     |
+| 22  | Faction & Reputation              | Observer           | ✅     |
+| 23  | Random Event Pool                 | Strategy           | ✅     |
+| 24  | Location Discovery                | -                  | ✅     |
+| 25  | Story Mapper Tool                 | -                  | 🟨     |
 
 ### Storytelling Systems (v2)
-| # | Slice | Patterns | Status |
-|---|-------|----------|--------|
-| 26 | Mood & Atmosphere | State, Observer | 🟨 |
-| 27 | Dynamic Descriptions | Strategy, Template | 🟨 |
-| 28 | Character Arc Tracking | State | 🟨 |
-| 29 | Pacing & Tension | Observer, State | 🟨 |
-| 30 | Foreshadowing & Callbacks | Observer | 🟨 |
-| 31 | Scene Transitions & Beats | State, Command | 🟨 |
-| 32 | Emotional Stakes | Observer | 🟨 |
-| 33 | Narrative Voice | Strategy | 🟨 |
-| 34 | Player Agency Tracking | Observer | 🟨 |
-| 35 | Dramatic Irony Tracker | Observer | 🟨 |
-| 36 | Hero's Journey & Narrative Templates | Template, Strategy, Builder | 🟨 |
-| 37 | Generic Chapter System | State, Builder | 🟨 |
-| 38 | Time/Action Triggered Objects | Observer, Scheduler | 🟨 |
+
+| #   | Slice                                | Patterns                    | Status |
+| --- | ------------------------------------ | --------------------------- | ------ |
+| 26  | Mood & Atmosphere                    | State, Observer             | 🟨     |
+| 27  | Dynamic Descriptions                 | Strategy, Template          | 🟨     |
+| 28  | Character Arc Tracking               | State                       | 🟨     |
+| 29  | Pacing & Tension                     | Observer, State             | 🟨     |
+| 30  | Foreshadowing & Callbacks            | Observer                    | 🟨     |
+| 31  | Scene Transitions & Beats            | State, Command              | 🟨     |
+| 32  | Emotional Stakes                     | Observer                    | 🟨     |
+| 33  | Narrative Voice                      | Strategy                    | 🟨     |
+| 34  | Player Agency Tracking               | Observer                    | 🟨     |
+| 35  | Dramatic Irony Tracker               | Observer                    | 🟨     |
+| 36  | Hero's Journey & Narrative Templates | Template, Strategy, Builder | 🟨     |
+| 37  | Generic Chapter System               | State, Builder              | 🟨     |
+| 38  | Time/Action Triggered Objects        | Observer, Scheduler         | 🟨     |
 
 ### Polish & Documentation (v2+)
-| # | Slice | Patterns | Status |
-|---|-------|----------|--------|
-| 39 | Fluent API & Språksnygghet | Builder, Factory | 🟨 |
-| 40 | GitHub Wiki (TextAdventure.wiki) | - | 🟨 |
-| 41 | Testing & Validation Tools | Visitor, Strategy | ⬜ |
-| 42 | Story-LINQ (Narrative Query Language) | LINQ, Builder, State | ⬜ |
-| 43 | Map Generator | - | ⬜ |
-| 44 | String Case Utilities | - | ✅ |
-| 45 | Generic Fixes | - | ⬜ |
+
+| #   | Slice                                 | Patterns             | Status |
+| --- | ------------------------------------- | -------------------- | ------ |
+| 39  | Fluent API & Språksnygghet            | Builder, Factory     | 🟨     |
+| 40  | GitHub Wiki (TextAdventure.wiki)      | -                    | 🟨     |
+| 41  | Testing & Validation Tools            | Visitor, Strategy    | ⬜     |
+| 42  | Story-LINQ (Narrative Query Language) | LINQ, Builder, State | ⬜     |
+| 43  | Map Generator                         | -                    | ⬜     |
+| 44  | String Case Utilities                 | -                    | ✅     |
+| 45  | Generic Fixes                         | -                    | ⬜     |
 
 ---
 
@@ -1881,11 +2067,13 @@ World.Add(Archetypes.WanderingMerchant()
 **Mål:** All syntaktisk socker för snygg, läsbar kod.
 
 ### Item Description
+
 - `Models/Item.cs` - lägg till `Description` property
 - `Interfaces/IItem.cs` - lägg till `string? Description { get; }`
 - Fluent method: `SetDescription(string description)`
 
 ### Bulk creation - Items.CreateMany
+
 ```csharp
 public static class Items
 {
@@ -1900,6 +2088,7 @@ public static class Items
 ```
 
 ### Inline DSL - Location.AddDSLItems
+
 ```csharp
 // Syntax: "Name(weight, takeable|fixed)? | description?"
 location.AddDSLItems(
@@ -1915,6 +2104,7 @@ location.AddDSLItems(
 Parser regex: `^(?<name>[\w\s]+)(\((?<props>[^)]+)\))?(\s*\|\s*(?<desc>.+))?$`
 
 ### Snabb-add för enkla items
+
 ```csharp
 // Implicit conversion gör detta möjligt
 location.AddItems("Sword", "Shield", "Torch");
@@ -1950,6 +2140,7 @@ public static class RandomExtensions
 ```
 
 **Användning:**
+
 ```csharp
 var damage = 6.Dice();           // 1d6 → 1-6
 var attack = 20.Dice();          // 1d20 → 1-20
@@ -2095,6 +2286,7 @@ public class ConditionalResult<T>
 ```
 
 **Användning:**
+
 ```csharp
 // Villkorlig text
 var desc = isDark.Then("Pitch black.").Else("Sunlight streams in.");
@@ -2137,6 +2329,7 @@ public static class GrammarExtensions
 **OBS:** Byt `GrammarExtensions.Provider = new SwedishGrammar()` för svenska.
 
 ### Tester
+
 - `FluentApiTests.cs` - test för CreateMany, AddDSLItems
 - `RandomExtensionsTests.cs` - test för Random, Dice
 - `ProbabilityExtensionsTests.cs` - test för PercentChance, Chance
@@ -2147,9 +2340,11 @@ public static class GrammarExtensions
 ---
 
 ## Slice 40: GitHub Wiki (../TextAdventure.wiki)
+
 **Mål:** Komplett dokumentation för användare på engelska
 
 ### Wiki-sidor
+
 - **Home** - Projektöversikt och vision
 - **Getting Started** - Installation och första spelet
 - **API Reference** - Fluent API dokumentation
@@ -2169,6 +2364,7 @@ public static class GrammarExtensions
 ### Wiki: Reference & Theory (Nörd-sektionen 🤓)
 
 #### 📜 History of Interactive Fiction
+
 - **1976**: Colossal Cave Adventure (Will Crowther) — den första
 - **1977-1979**: Zork (MIT) — definierade genren
 - **1979-1989**: Infocom-eran — kommersiell höjdpunkt
@@ -2177,12 +2373,15 @@ public static class GrammarExtensions
 - **Idag**: Narrative games, walking simulators, vårt framework
 
 #### 🔬 Parser Theory
+
 **Tokenization:**
+
 ```
 "take the rusty sword" → ["take", "the", "rusty", "sword"]
 ```
 
 **Disambiguation:**
+
 ```
 > take key
 Which key do you mean?
@@ -2191,6 +2390,7 @@ Which key do you mean?
 ```
 
 **Parse tree:**
+
 ```
 Command
 ├── Verb: "take"
@@ -2203,31 +2403,31 @@ Command
 
 #### 🎓 Design Patterns (varför vi använder dem)
 
-| Pattern | Varför | Exempel i vårt framework |
-|---------|--------|--------------------------|
-| **State** | Objekt byter beteende utan if-else | Door (Open/Closed/Locked), NPC (Friendly/Hostile) |
-| **Command** | Undo, logging, queuing | GoCommand, TakeCommand |
-| **Observer** | Löskopplad event-hantering | EventSystem, OnEnter triggers |
-| **Memento** | Save/Load utan att exponera internals | GameMemento |
-| **Strategy** | Utbytbara algoritmer | CombatSystem, MovementPattern |
-| **Composite** | Träd-strukturer | Containers, Dialog trees |
-| **Factory** | Skapa objekt utan att veta konkret typ | Items.Create("sword") |
-| **Builder** | Fluent konstruktion | GameBuilder, LocationBuilder |
-| **Decorator** | Lägg till beteende runtime | RustyModifier, EnchantedModifier |
-| **Facade** | Förenkla komplext subsystem | OllamaFacade, StoryLinq |
+| Pattern       | Varför                                 | Exempel i vårt framework                          |
+| ------------- | -------------------------------------- | ------------------------------------------------- |
+| **State**     | Objekt byter beteende utan if-else     | Door (Open/Closed/Locked), NPC (Friendly/Hostile) |
+| **Command**   | Undo, logging, queuing                 | GoCommand, TakeCommand                            |
+| **Observer**  | Löskopplad event-hantering             | EventSystem, OnEnter triggers                     |
+| **Memento**   | Save/Load utan att exponera internals  | GameMemento                                       |
+| **Strategy**  | Utbytbara algoritmer                   | CombatSystem, MovementPattern                     |
+| **Composite** | Träd-strukturer                        | Containers, Dialog trees                          |
+| **Factory**   | Skapa objekt utan att veta konkret typ | Items.Create("sword")                             |
+| **Builder**   | Fluent konstruktion                    | GameBuilder, LocationBuilder                      |
+| **Decorator** | Lägg till beteende runtime             | RustyModifier, EnchantedModifier                  |
+| **Facade**    | Förenkla komplext subsystem            | OllamaFacade, StoryLinq                           |
 
 #### ⚠️ Common Pitfalls (Anti-patterns)
 
-| Gör INTE | Gör istället |
-|----------|--------------|
-| Hardcoded strings överallt | Language system / constants |
-| Giant switch-statements | Command pattern + registry |
-| "Guess the verb" puzzles | Synonym system, helpful errors |
-| Maze without purpose | Every room should have meaning |
-| Pixel-hunting (text-version) | Clear, fair descriptions |
-| Softlock utan varning | Validator + point-of-no-return warnings |
-| Dålig inventory management | Weight/count limits, "take all" |
-| One-way doors utan hint | Tydliga "no return" meddelanden |
+| Gör INTE                     | Gör istället                            |
+| ---------------------------- | --------------------------------------- |
+| Hardcoded strings överallt   | Language system / constants             |
+| Giant switch-statements      | Command pattern + registry              |
+| "Guess the verb" puzzles     | Synonym system, helpful errors          |
+| Maze without purpose         | Every room should have meaning          |
+| Pixel-hunting (text-version) | Clear, fair descriptions                |
+| Softlock utan varning        | Validator + point-of-no-return warnings |
+| Dålig inventory management   | Weight/count limits, "take all"         |
+| One-way doors utan hint      | Tydliga "no return" meddelanden         |
 
 #### ♿ Accessibility Guide
 
@@ -2241,18 +2441,19 @@ Command
 
 **Puzzle-typer:**
 
-| Typ | Exempel | Framework-stöd |
-|-----|---------|----------------|
-| **Lock & Key** | Dörr + nyckel | Door.RequiresKey() |
-| **Combination** | Blanda items | ItemCombinations |
-| **Sequence** | Gör saker i rätt ordning | EventChain |
-| **Information** | Lär dig något, använd det | WorldState flags |
-| **Environment** | Manipulera rummet | Dynamic descriptions |
-| **Dialog** | Säg rätt sak till NPC | Rule-based dialog |
-| **Time-based** | Gör något innan timer | TimedEvents |
-| **Lateral thinking** | Oväntad användning | UseCommand flexibility |
+| Typ                  | Exempel                   | Framework-stöd         |
+| -------------------- | ------------------------- | ---------------------- |
+| **Lock & Key**       | Dörr + nyckel             | Door.RequiresKey()     |
+| **Combination**      | Blanda items              | ItemCombinations       |
+| **Sequence**         | Gör saker i rätt ordning  | EventChain             |
+| **Information**      | Lär dig något, använd det | WorldState flags       |
+| **Environment**      | Manipulera rummet         | Dynamic descriptions   |
+| **Dialog**           | Säg rätt sak till NPC     | Rule-based dialog      |
+| **Time-based**       | Gör något innan timer     | TimedEvents            |
+| **Lateral thinking** | Oväntad användning        | UseCommand flexibility |
 
 **Difficulty curve:**
+
 ```
 Easy: Lock & Key (1 item, 1 door)
   ↓
@@ -2266,18 +2467,21 @@ Expert: Timed multi-step with consequences
 #### ✍️ Writing Good Descriptions
 
 **Show, don't tell:**
+
 ```
 ❌ "This is a scary room."
 ✅ "Shadows pool in the corners. Something drips in the darkness."
 ```
 
 **Be specific:**
+
 ```
 ❌ "There is a sword here."
 ✅ "A notched longsword leans against the wall, rust creeping up the blade."
 ```
 
 **Vary sentence structure:**
+
 ```
 ❌ "You are in a cave. There is a torch. There is a chest."
 ✅ "Firelight dances across the cave walls. A battered chest sits in the corner,
@@ -2285,6 +2489,7 @@ Expert: Timed multi-step with consequences
 ```
 
 **First visit vs return:**
+
 ```
 First: "You push through the undergrowth into a sun-dappled clearing."
 Return: "The familiar clearing opens before you."
@@ -2293,34 +2498,38 @@ Return: "The familiar clearing opens before you."
 #### 📚 Recommended Reading
 
 **Böcker:**
-- *Twisty Little Passages* (Nick Montfort) — IF-historia
-- *Creating Interactive Fiction with Inform 7* (Aaron Reed)
-- *Procedural Storytelling in Game Design* (Short & Adams)
-- *The Art of Game Design* (Jesse Schell)
+
+- _Twisty Little Passages_ (Nick Montfort) — IF-historia
+- _Creating Interactive Fiction with Inform 7_ (Aaron Reed)
+- _Procedural Storytelling in Game Design_ (Short & Adams)
+- _The Art of Game Design_ (Jesse Schell)
 
 **Online:**
+
 - [IFDB](https://ifdb.org) — Interactive Fiction Database
 - [IFComp](https://ifcomp.org) — Årlig tävling
 - [Emily Short's Blog](https://emshort.blog) — Narrative design
 - [Brass Lantern](http://brasslantern.org) — IF-tutorials
 
 **Spel att studera:**
-- *Zork I* — Klassiker, parser-design
-- *Photopia* — Narrativ innovation
-- *Spider and Web* — Unreliable narrator
-- *Anchorhead* — Atmosfär, Lovecraft
-- *80 Days* — Modern IF, choices matter
-- *Disco Elysium* — Dialog-system, skill checks
-- *Leather Goddesses of Phobos* — Puzzles, world-building, humor
 
+- _Zork I_ — Klassiker, parser-design
+- _Photopia_ — Narrativ innovation
+- _Spider and Web_ — Unreliable narrator
+- _Anchorhead_ — Atmosfär, Lovecraft
+- _80 Days_ — Modern IF, choices matter
+- _Disco Elysium_ — Dialog-system, skill checks
+- _Leather Goddesses of Phobos_ — Puzzles, world-building, humor
 
 #### 🔄 Migration Guide
 
 **Från Inform 7:**
+
 ```inform7
 The Kitchen is a room. "A warm, cluttered space."
 The wooden spoon is in the Kitchen.
 ```
+
 ```csharp
 var kitchen = new Location("kitchen", "Kitchen")
     .Description("A warm, cluttered space.");
@@ -2329,22 +2538,26 @@ kitchen.AddItem(spoon);
 ```
 
 **Från TADS:**
+
 ```tads
 kitchen: Room 'Kitchen'
     "A warm, cluttered space."
 ;
 ```
+
 ```csharp
 // Samma som ovan — vårt API är medvetet Inform/TADS-inspirerat
 ```
 
 **Från Twine/Ink:**
+
 ```ink
 === kitchen ===
 A warm, cluttered space.
 + [Take the spoon] -> has_spoon
 + [Leave] -> hallway
 ```
+
 ```csharp
 // Story-LINQ för samma effekt:
 story.When(s => s.Location == kitchen)
@@ -2354,35 +2567,35 @@ story.When(s => s.Location == kitchen)
 
 #### 📊 Comparison with Other Systems
 
-| Feature | Inform 7 | TADS | Twine | Ink | **Vårt** |
-|---------|----------|------|-------|-----|----------|
-| Language | Natural English | C-like | HTML/CSS | Markdown-ish | **C#** |
-| Parser | Built-in | Built-in | None | None | **KeywordParser** |
-| State mgmt | World model | World model | Variables | Variables | **WorldState + Story-LINQ** |
-| Extensible | Limited | Yes | JS | C# | **Full .NET** |
-| IDE support | Inform IDE | TADS WB | Web | Unity/Inky | **VS/Rider** |
-| Testing | Skein | - | - | - | **Validator** |
-| Narrative tools | Basic | Basic | Basic | Weave/Knots | **Story-LINQ, Arcs, Themes** |
-| NuGet/Package | No | No | No | Yes | **Yes** |
+| Feature         | Inform 7        | TADS        | Twine     | Ink          | **Vårt**                     |
+| --------------- | --------------- | ----------- | --------- | ------------ | ---------------------------- |
+| Language        | Natural English | C-like      | HTML/CSS  | Markdown-ish | **C#**                       |
+| Parser          | Built-in        | Built-in    | None      | None         | **KeywordParser**            |
+| State mgmt      | World model     | World model | Variables | Variables    | **WorldState + Story-LINQ**  |
+| Extensible      | Limited         | Yes         | JS        | C#           | **Full .NET**                |
+| IDE support     | Inform IDE      | TADS WB     | Web       | Unity/Inky   | **VS/Rider**                 |
+| Testing         | Skein           | -           | -         | -            | **Validator**                |
+| Narrative tools | Basic           | Basic       | Basic     | Weave/Knots  | **Story-LINQ, Arcs, Themes** |
+| NuGet/Package   | No              | No          | No        | Yes          | **Yes**                      |
 
 #### 📖 Glossary
 
-| Term | Definition |
-|------|------------|
-| **IF** | Interactive Fiction |
-| **Parser** | System som tolkar spelarens input |
-| **CYOA** | Choose Your Own Adventure (inget parsing) |
-| **Softlock** | Spelet kan inte vinnas men fortsätter |
-| **Hardlock** | Spelet kraschar/fastnar |
-| **Feelie** | Fysiskt objekt som medföljer spel |
-| **Implementor** | Person som skapar IF |
-| **Transcript** | Logg av spelarsession |
-| **Walkthrough** | Steg-för-steg lösning |
-| **Hint system** | Gradvis avslöjande av hjälp |
-| **Compass rose** | N/S/E/W navigation |
-| **Inventory puzzle** | Lösning kräver rätt items |
-| **Conversation tree** | Förgrenad dialog |
-| **World model** | Internrepresentation av spelvärlden |
+| Term                  | Definition                                |
+| --------------------- | ----------------------------------------- |
+| **IF**                | Interactive Fiction                       |
+| **Parser**            | System som tolkar spelarens input         |
+| **CYOA**              | Choose Your Own Adventure (inget parsing) |
+| **Softlock**          | Spelet kan inte vinnas men fortsätter     |
+| **Hardlock**          | Spelet kraschar/fastnar                   |
+| **Feelie**            | Fysiskt objekt som medföljer spel         |
+| **Implementor**       | Person som skapar IF                      |
+| **Transcript**        | Logg av spelarsession                     |
+| **Walkthrough**       | Steg-för-steg lösning                     |
+| **Hint system**       | Gradvis avslöjande av hjälp               |
+| **Compass rose**      | N/S/E/W navigation                        |
+| **Inventory puzzle**  | Lösning kräver rätt items                 |
+| **Conversation tree** | Förgrenad dialog                          |
+| **World model**       | Internrepresentation av spelvärlden       |
 
 ---
 
@@ -2391,6 +2604,7 @@ story.When(s => s.Location == kitchen)
 #### 🗝️ Item Design Principles
 
 **Single Responsibility:**
+
 ```csharp
 // ❌ God-item
 class MagicSword : Item, IWeapon, IKey, ILightSource, IContainer { }
@@ -2404,19 +2618,20 @@ var sword = new Item("sword")
 
 **Item Categories:**
 
-| Type | Properties | Use Case |
-|------|------------|----------|
-| **Basic** | id, name, description | Background items |
-| **Takeable** | + weight, takeable=true | Inventory items |
-| **Key** | + unlocks(door_id) | Access control |
-| **Container** | + contents[], capacity | Storage, puzzles |
-| **Readable** | + text, requiresLight | Documents, signs |
-| **Consumable** | + uses, onUse effect | Potions, food |
-| **Weapon** | + damage, durability | Combat |
-| **Light Source** | + brightness, fuel | Dark rooms |
-| **Tool** | + canUseOn(targets) | Specific interactions |
+| Type             | Properties              | Use Case              |
+| ---------------- | ----------------------- | --------------------- |
+| **Basic**        | id, name, description   | Background items      |
+| **Takeable**     | + weight, takeable=true | Inventory items       |
+| **Key**          | + unlocks(door_id)      | Access control        |
+| **Container**    | + contents[], capacity  | Storage, puzzles      |
+| **Readable**     | + text, requiresLight   | Documents, signs      |
+| **Consumable**   | + uses, onUse effect    | Potions, food         |
+| **Weapon**       | + damage, durability    | Combat                |
+| **Light Source** | + brightness, fuel      | Dark rooms            |
+| **Tool**         | + canUseOn(targets)     | Specific interactions |
 
 **Naming Conventions:**
+
 ```csharp
 // ID: snake_case, unik
 // Name: Human readable, kan ha prefix
@@ -2472,16 +2687,16 @@ var flask = new Container<Liquid>("flask").MaxVolume(500);
 
 #### 👥 NPC Archetypes
 
-| Archetype | Behavior | Example |
-|-----------|----------|---------|
-| **Shopkeeper** | Stationary, trade dialog, inventory | Blacksmith, Innkeeper |
-| **Quest Giver** | Stationary, quest dialog, tracks progress | Village Elder, King |
-| **Guide** | Follows, gives hints, comments on locations | Companion, Fairy |
-| **Guard** | Patrols, blocks access, can be bribed/distracted | Castle Guard |
-| **Enemy** | Hostile, combat AI, drops loot | Goblin, Dragon |
-| **Informant** | Stationary, reveals info based on conditions | Bartender, Spy |
-| **Victim** | Needs rescue, follows after saved | Prisoner, Child |
-| **Merchant** | Wanders, random inventory, haggling | Traveling Trader |
+| Archetype       | Behavior                                         | Example               |
+| --------------- | ------------------------------------------------ | --------------------- |
+| **Shopkeeper**  | Stationary, trade dialog, inventory              | Blacksmith, Innkeeper |
+| **Quest Giver** | Stationary, quest dialog, tracks progress        | Village Elder, King   |
+| **Guide**       | Follows, gives hints, comments on locations      | Companion, Fairy      |
+| **Guard**       | Patrols, blocks access, can be bribed/distracted | Castle Guard          |
+| **Enemy**       | Hostile, combat AI, drops loot                   | Goblin, Dragon        |
+| **Informant**   | Stationary, reveals info based on conditions     | Bartender, Spy        |
+| **Victim**      | Needs rescue, follows after saved                | Prisoner, Child       |
+| **Merchant**    | Wanders, random inventory, haggling              | Traveling Trader      |
 
 ```csharp
 // Quick archetype setup
@@ -2500,6 +2715,7 @@ var guard = Npc.Guard("guard", "Castle Guard")
 #### 💬 Dialog Design Patterns
 
 **Branching (traditional tree):**
+
 ```csharp
 npc.Dialog()
     .Say("Greetings, traveler.")
@@ -2513,6 +2729,7 @@ npc.Dialog()
 ```
 
 **Conditional (rule-based):**
+
 ```csharp
 npc.AddDialogRule("knows_player")
     .When(ctx => ctx.Relationship(npc) > 50)
@@ -2524,6 +2741,7 @@ npc.AddDialogRule("default_greeting")
 ```
 
 **Mood-affected:**
+
 ```csharp
 npc.AddDialogRule("angry_greeting")
     .When(ctx => npc.Mood == Mood.Angry)
@@ -2535,6 +2753,7 @@ npc.AddDialogRule("happy_greeting")
 ```
 
 **Random variety:**
+
 ```csharp
 npc.AddDialogRule("idle_chatter")
     .When(ctx => ctx.IsIdleConversation)
@@ -2666,6 +2885,7 @@ npc.AddDialogRule("after_dragon_death")
     .Say("I heard you killed the dragon! Amazing!")
     .Then(ctx => ctx.ShiftRelationship(+20));
 ```
+
 ---
 
 ### Wiki: Language & Localization
@@ -2673,6 +2893,7 @@ npc.AddDialogRule("after_dragon_death")
 #### 🗣️ Object Grammar
 
 **Articles (a/an/the):**
+
 ```csharp
 // English
 item.Grammar(en => en
@@ -2686,6 +2907,7 @@ item.Grammar(sv => sv
 ```
 
 **Plurals:**
+
 ```csharp
 item.Grammar(en => en
     .Singular("key")
@@ -2700,6 +2922,7 @@ item.Grammar(en => en.AutoPlural()); // sword → swords
 ```
 
 **Natural lists:**
+
 ```csharp
 // "a sword, a shield, and a torch"
 var text = items.ToNaturalList(culture: "en-US");
@@ -2776,6 +2999,7 @@ game.Time.At(TimePhase.Midnight)
 #### 👁️ Perception System
 
 **Light levels:**
+
 ```csharp
 public enum LightLevel { Pitch, Dark, Dim, Normal, Bright, Blinding }
 
@@ -2794,6 +3018,7 @@ item.VisibleAt(LightLevel.Normal, "A rusty sword lies on the ground.");
 ```
 
 **Sound:**
+
 ```csharp
 // Sound propagates through locations
 combat.EmitsSound("combat", loudness: 3, radius: 2);
@@ -2810,6 +3035,7 @@ location.OnSound("footsteps")
 ```
 
 **Memory:**
+
 ```csharp
 // Player remembers visited locations
 player.Memory.HasVisited("cave");
@@ -2825,6 +3051,7 @@ npc.Memory.DecayRate = 0.01f; // Per tick
 #### 🤝 Social System
 
 **Relationships:**
+
 ```csharp
 // Player-NPC relationship (-100 to +100)
 player.SetRelationship("blacksmith", 50);  // Friendly
@@ -2842,6 +3069,7 @@ player.OnAction("steal_from", npc)
 ```
 
 **Reputation:**
+
 ```csharp
 // Faction-wide reputation
 player.Reputation.With("village").Set(75);
@@ -2881,6 +3109,7 @@ npc.OnConflict("survive", "protect_child")
 #### 🎭 Narrative Logic
 
 **Theme tracking:**
+
 ```csharp
 // Themes are tracked across the game
 game.Themes.Track(Theme.Redemption);
@@ -2895,6 +3124,7 @@ var redemptionProgress = game.Themes.Progress(Theme.Redemption);
 ```
 
 **Foreshadowing system:**
+
 ```csharp
 // Plant a seed
 game.Foreshadow("dragon_attack")
@@ -2913,6 +3143,7 @@ player.Memory.Foreshadowing.Contains("dragon_attack");
 #### 🔄 Meta Perspective
 
 **Undo system:**
+
 ```csharp
 // Every action creates a checkpoint
 game.EnableUndo(maxHistory: 50);
@@ -2926,6 +3157,7 @@ action.CannotUndo("This action is permanent.");
 ```
 
 **What-if scenarios:**
+
 ```csharp
 // Branching exploration (debugging/design tool)
 var scenario = game.WhatIf(ctx => {
@@ -2952,6 +3184,7 @@ Dessa sidor hjälper spelskapare att planera innan de kodar.
 #### 📝 Planning Your Adventure
 
 **Innehåll:**
+
 1. **Börja med slutet** — Vad är målet? Vad är "vinst"?
 2. **Grid-metoden** (Usborne) — Rita kartan på rutat papper först
 3. **The Rule of Three** — 3 puzzles, 3 areas, 3 keys
@@ -2959,6 +3192,7 @@ Dessa sidor hjälper spelskapare att planera innan de kodar.
 5. **Playtest loop** — Skriv → Testa → Fixa → Upprepa
 
 **Checklista innan kodning:**
+
 ```
 □ Karta ritad (rum + kopplingar)
 □ Alla rum numrerade/namngivna
@@ -2972,84 +3206,84 @@ Dessa sidor hjälper spelskapare att planera innan de kodar.
 
 **Från berättelse till spelmekanik:**
 
-| Story Element | Adventure Mechanic |
-|---------------|-------------------|
-| Karaktärens mål | Win condition |
-| Hinder | Locked doors, puzzles |
-| Viktiga föremål | Key items |
-| Bikaraktärer | NPCs med dialog |
-| Plats | Location + description |
-| Tid/press | Turn limits, timed events |
-| Hemligheter | Hidden rooms, conditional text |
-| Karaktärsutveckling | Theme tracking, InnerState |
-| Spänning | Mood shifts, pacing |
+| Story Element       | Adventure Mechanic             |
+| ------------------- | ------------------------------ |
+| Karaktärens mål     | Win condition                  |
+| Hinder              | Locked doors, puzzles          |
+| Viktiga föremål     | Key items                      |
+| Bikaraktärer        | NPCs med dialog                |
+| Plats               | Location + description         |
+| Tid/press           | Turn limits, timed events      |
+| Hemligheter         | Hidden rooms, conditional text |
+| Karaktärsutveckling | Theme tracking, InnerState     |
+| Spänning            | Mood shifts, pacing            |
 
 **Exempel: Rödluvan → Adventure**
 
-| Story | Mechanic |
-|-------|----------|
-| "Gå till mormors hus" | Goal: reach `grandmas_house` |
-| "Genom skogen" | Locations: `home → forest → crossroads → grandmas_house` |
-| "Vargen lurar" | NPC `wolf` med dialog, blocks path |
-| "Ta inte genvägen" | Two paths: safe (long) vs dangerous (short) |
-| "Korg med mat" | Item `basket` required for win |
-| "Mormor är konstig" | Conditional description based on `wolf_arrived_first` |
+| Story                 | Mechanic                                                 |
+| --------------------- | -------------------------------------------------------- |
+| "Gå till mormors hus" | Goal: reach `grandmas_house`                             |
+| "Genom skogen"        | Locations: `home → forest → crossroads → grandmas_house` |
+| "Vargen lurar"        | NPC `wolf` med dialog, blocks path                       |
+| "Ta inte genvägen"    | Two paths: safe (long) vs dangerous (short)              |
+| "Korg med mat"        | Item `basket` required for win                           |
+| "Mormor är konstig"   | Conditional description based on `wolf_arrived_first`    |
 
 #### 🔤 Common Verbs & Nouns
 
 **Standard verbs (alla spel bör stödja):**
 
-| Verb | Aliases | Användning |
-|------|---------|------------|
-| `go` | walk, move, head, travel | Navigation |
-| `look` | examine, inspect, check, view, l | Describe room/item |
-| `take` | get, grab, pick, pickup | Add to inventory |
-| `drop` | put, leave, discard | Remove from inventory |
-| `open` | - | Doors, containers |
-| `close` | shut | Doors, containers |
-| `use` | - | Generic item interaction |
-| `talk` | speak, ask, say | NPC dialog |
-| `read` | - | Signs, books, letters |
-| `inventory` | i, inv, items | Show carried items |
-| `help` | ? | Show commands |
-| `save` | - | Save game |
-| `load` | restore | Load game |
-| `quit` | exit, q | End game |
+| Verb        | Aliases                          | Användning               |
+| ----------- | -------------------------------- | ------------------------ |
+| `go`        | walk, move, head, travel         | Navigation               |
+| `look`      | examine, inspect, check, view, l | Describe room/item       |
+| `take`      | get, grab, pick, pickup          | Add to inventory         |
+| `drop`      | put, leave, discard              | Remove from inventory    |
+| `open`      | -                                | Doors, containers        |
+| `close`     | shut                             | Doors, containers        |
+| `use`       | -                                | Generic item interaction |
+| `talk`      | speak, ask, say                  | NPC dialog               |
+| `read`      | -                                | Signs, books, letters    |
+| `inventory` | i, inv, items                    | Show carried items       |
+| `help`      | ?                                | Show commands            |
+| `save`      | -                                | Save game                |
+| `load`      | restore                          | Load game                |
+| `quit`      | exit, q                          | End game                 |
 
 **Genre-specifika verbs:**
 
-| Genre | Extra Verbs |
-|-------|-------------|
-| Combat | attack, fight, kill, flee, defend |
-| Mystery | search, investigate, accuse |
-| Magic | cast, enchant, dispel |
-| Social | bribe, threaten, persuade, charm |
-| Stealth | hide, sneak, steal, lockpick |
+| Genre   | Extra Verbs                       |
+| ------- | --------------------------------- |
+| Combat  | attack, fight, kill, flee, defend |
+| Mystery | search, investigate, accuse       |
+| Magic   | cast, enchant, dispel             |
+| Social  | bribe, threaten, persuade, charm  |
+| Stealth | hide, sneak, steal, lockpick      |
 
 **Common nouns (items):**
 
-| Category | Examples |
-|----------|----------|
-| Keys | key, keycard, password, code |
-| Light | torch, lantern, lamp, candle, flashlight |
-| Containers | bag, chest, box, drawer, safe |
-| Tools | rope, crowbar, hammer, lockpick |
-| Weapons | sword, knife, gun, staff |
-| Documents | letter, book, map, note, diary |
-| Valuables | gold, gem, coin, treasure, artifact |
+| Category   | Examples                                 |
+| ---------- | ---------------------------------------- |
+| Keys       | key, keycard, password, code             |
+| Light      | torch, lantern, lamp, candle, flashlight |
+| Containers | bag, chest, box, drawer, safe            |
+| Tools      | rope, crowbar, hammer, lockpick          |
+| Weapons    | sword, knife, gun, staff                 |
+| Documents  | letter, book, map, note, diary           |
+| Valuables  | gold, gem, coin, treasure, artifact      |
 
 #### 🎯 Framework Simplification
 
 **Hur vårt framework förenklar planeringen:**
 
-| Traditionellt | Med vårt framework |
-|---------------|-------------------|
-| Skriv parser från scratch | `KeywordParser` + synonymer inbyggt |
-| Manuell state-hantering | `WorldState` + flags/counters |
-| If-else-helvete för dialog | Rule-based dialog system |
-| Svårt att testa | `Validator.FindUnreachableLocations()` |
-| Hårdkodade beskrivningar | Dynamic descriptions + layers |
-| Ingen struktur för story | Story-LINQ + Narrative Arcs |
+| Traditionellt              | Med vårt framework                     |
+| -------------------------- | -------------------------------------- |
+| Skriv parser från scratch  | `KeywordParser` + synonymer inbyggt    |
+| Manuell state-hantering    | `WorldState` + flags/counters          |
+| If-else-helvete för dialog | Rule-based dialog system               |
+| Svårt att testa            | `Validator.FindUnreachableLocations()` |
+| Hårdkodade beskrivningar   | Dynamic descriptions + layers          |
+| Ingen struktur för story   | Story-LINQ + Narrative Arcs            |
 
 **Från plan till kod — 1:1 mapping:**
 
@@ -3078,6 +3312,7 @@ PLAN                              STORY-LINQ
 #### 📐 Planning Templates
 
 **Minimal Adventure (5 rum):**
+
 ```
 START ──→ HUB ──→ GOAL
            │
@@ -3087,6 +3322,7 @@ START ──→ HUB ──→ GOAL
 ```
 
 **Three-Act Adventure:**
+
 ```
 ACT 1: Setup (3 rum)
   START → VILLAGE → CROSSROADS
@@ -3099,6 +3335,7 @@ ACT 3: Resolution (2 rum)
 ```
 
 **Mystery Template:**
+
 ```
 CRIME_SCENE (clue 1)
      │
@@ -3115,74 +3352,79 @@ CRIME_SCENE (clue 1)
 
 Alla inbyggda narrativa mallar med beskrivning och användningsområden.
 
-| Arc | Struktur | Bra för |
-|-----|----------|---------|
-| **Hero's Journey** | Call → Trials → Transformation → Return | Klassiska äventyr, fantasy |
-| **Tragic Arc** | Hybris → Felsteg → Konsekvens → Sen insikt | Mörka berättelser, moraliska val |
-| **Transformation Arc** | Fragmenterad → Skuggkonfrontation → Integration → Ny självbild | Psykologisk mognad, trauma, sorg |
-| **Ensemble Journey** | Flera hjältar → Växlande perspektiv → Gruppkonflikter → Kollektiv seger | Politik, motstånd, "Jedi Council" |
-| **The Descent** | Nedstigning → Kontrollförlust → Möte med tomhet → Förändrad återkomst | Psykologisk skräck, Silent Hill |
-| **Spiral Narrative** | Upprepning → Små variationer → Djupare förståelse | Tidsloopar, minnesglitchar |
-| **Moral Labyrinth** | Inget rätt slut → Alla val kostar → Situationsbunden sanning | Etik, ledarskap, ansvar |
-| **World-Shift Arc** | Gradvis världsförändring → Spelaren som katalysator → Ny jämvikt | Dune-stil, ekologi, politik |
-| **Caretaker Arc** | Reparera → Hela → Skydda → Kamp mot entropi | Mogna, lågmälda spel |
-| **Witness Arc** | Observera → Samla berättelser → Sanning genom förståelse | Textmysterier, detektiv |
+| Arc                    | Struktur                                                                | Bra för                           |
+| ---------------------- | ----------------------------------------------------------------------- | --------------------------------- |
+| **Hero's Journey**     | Call → Trials → Transformation → Return                                 | Klassiska äventyr, fantasy        |
+| **Tragic Arc**         | Hybris → Felsteg → Konsekvens → Sen insikt                              | Mörka berättelser, moraliska val  |
+| **Transformation Arc** | Fragmenterad → Skuggkonfrontation → Integration → Ny självbild          | Psykologisk mognad, trauma, sorg  |
+| **Ensemble Journey**   | Flera hjältar → Växlande perspektiv → Gruppkonflikter → Kollektiv seger | Politik, motstånd, "Jedi Council" |
+| **The Descent**        | Nedstigning → Kontrollförlust → Möte med tomhet → Förändrad återkomst   | Psykologisk skräck, Silent Hill   |
+| **Spiral Narrative**   | Upprepning → Små variationer → Djupare förståelse                       | Tidsloopar, minnesglitchar        |
+| **Moral Labyrinth**    | Inget rätt slut → Alla val kostar → Situationsbunden sanning            | Etik, ledarskap, ansvar           |
+| **World-Shift Arc**    | Gradvis världsförändring → Spelaren som katalysator → Ny jämvikt        | Dune-stil, ekologi, politik       |
+| **Caretaker Arc**      | Reparera → Hela → Skydda → Kamp mot entropi                             | Mogna, lågmälda spel              |
+| **Witness Arc**        | Observera → Samla berättelser → Sanning genom förståelse                | Textmysterier, detektiv           |
 
 ### Exempelspel - Creation Styles (ett per stil)
 
-| Stil | Spel | Beskrivning |
-|------|------|-------------|
-| **Fluent Builder** | The Haunted Manor | Klassisk spökhistoria, visar method chaining |
-| **Implicit Conversion** | Quick Escape | Minimalistiskt rum-escape, snabbaste sättet |
-| **Factory/Tuple** | Dungeon Loot | Massa items, visar JSON-tänk bulk creation |
-| **DSL** | Forest Adventure | Config-fil driven, visar `.adventure` format |
-| **Mixed** | The Complete Quest | Kombinerar alla stilar, best practices |
+| Stil                    | Spel               | Beskrivning                                  |
+| ----------------------- | ------------------ | -------------------------------------------- |
+| **Fluent Builder**      | The Haunted Manor  | Klassisk spökhistoria, visar method chaining |
+| **Implicit Conversion** | Quick Escape       | Minimalistiskt rum-escape, snabbaste sättet  |
+| **Factory/Tuple**       | Dungeon Loot       | Massa items, visar JSON-tänk bulk creation   |
+| **DSL**                 | Forest Adventure   | Config-fil driven, visar `.adventure` format |
+| **Mixed**               | The Complete Quest | Kombinerar alla stilar, best practices       |
 
 ### Exempelspel - Storytelling Features
 
 Dessa ska vara så fluent som möjligt och visa varje storytelling-funktion.
 
 #### 🎭 Narrativ Struktur & Arcs
-| Feature | Spel | Visar |
-|---------|------|-------|
-| **Hero's Journey** | The Chosen One | Full 12-stegs resa |
-| **Tragic Arc** | The King's Folly | Hybris → fall → sen insikt |
-| **Transformation Arc** | Shattered Mirror | Inre resa, trauma, integration |
-| **Ensemble Journey** | The Resistance | Flera hjältar, växlande perspektiv |
-| **The Descent** | Into the Abyss | Katabasis, psykologisk skräck |
-| **Spiral Narrative** | Groundhog Dungeon | Tidsloop med variationer |
-| **Moral Labyrinth** | The Tribunal | Inga rätta svar, etiska val |
-| **World-Shift Arc** | Seeds of Change | Spelaren som katalysator |
-| **Caretaker Arc** | The Lighthouse Keeper | Reparera, hela, skydda |
-| **Witness Arc** | The Collector | Observera, samla sanningen |
-| **Chapters** | The Saga | Akter, kapitelövergångar |
-| **Scene Beats** | The Interview | Dialog-driven, dramatiska pauser |
+
+| Feature                | Spel                  | Visar                              |
+| ---------------------- | --------------------- | ---------------------------------- |
+| **Hero's Journey**     | The Chosen One        | Full 12-stegs resa                 |
+| **Tragic Arc**         | The King's Folly      | Hybris → fall → sen insikt         |
+| **Transformation Arc** | Shattered Mirror      | Inre resa, trauma, integration     |
+| **Ensemble Journey**   | The Resistance        | Flera hjältar, växlande perspektiv |
+| **The Descent**        | Into the Abyss        | Katabasis, psykologisk skräck      |
+| **Spiral Narrative**   | Groundhog Dungeon     | Tidsloop med variationer           |
+| **Moral Labyrinth**    | The Tribunal          | Inga rätta svar, etiska val        |
+| **World-Shift Arc**    | Seeds of Change       | Spelaren som katalysator           |
+| **Caretaker Arc**      | The Lighthouse Keeper | Reparera, hela, skydda             |
+| **Witness Arc**        | The Collector         | Observera, samla sanningen         |
+| **Chapters**           | The Saga              | Akter, kapitelövergångar           |
+| **Scene Beats**        | The Interview         | Dialog-driven, dramatiska pauser   |
 
 #### 👥 Karaktärer & Relationer
-| Feature | Spel | Visar |
-|---------|------|-------|
-| **Character Arcs** | The Reluctant Hero | NPC utvecklas genom spelarens val |
-| **Emotional Stakes** | The Last Goodbye | Relationer, förlust, val med konsekvenser |
+
+| Feature              | Spel               | Visar                                     |
+| -------------------- | ------------------ | ----------------------------------------- |
+| **Character Arcs**   | The Reluctant Hero | NPC utvecklas genom spelarens val         |
+| **Emotional Stakes** | The Last Goodbye   | Relationer, förlust, val med konsekvenser |
 
 #### 🌙 Atmosfär & Beskrivningar
-| Feature | Spel | Visar |
-|---------|------|-------|
-| **Mood & Atmosphere** | The Lighthouse | Väder, ljus, ljud påverkar beskrivningar |
-| **Dynamic Descriptions** | The Living Castle | Rum ändras baserat på tid/händelser |
-| **Narrative Voice** | Noir Detective | Berättarröst, stiliserad text |
+
+| Feature                  | Spel              | Visar                                    |
+| ------------------------ | ----------------- | ---------------------------------------- |
+| **Mood & Atmosphere**    | The Lighthouse    | Väder, ljus, ljud påverkar beskrivningar |
+| **Dynamic Descriptions** | The Living Castle | Rum ändras baserat på tid/händelser      |
+| **Narrative Voice**      | Noir Detective    | Berättarröst, stiliserad text            |
 
 #### ⏱️ Spänning & Tempo
-| Feature | Spel | Visar |
-|---------|------|-------|
-| **Pacing & Tension** | Countdown | Ökande press, timer-baserad spänning |
-| **Foreshadowing** | Murder Mystery | Ledtrådar som kopplas ihop senare |
-| **Time Triggers** | The Bomb | Objekt aktiveras efter tid/händelser |
+
+| Feature              | Spel           | Visar                                |
+| -------------------- | -------------- | ------------------------------------ |
+| **Pacing & Tension** | Countdown      | Ökande press, timer-baserad spänning |
+| **Foreshadowing**    | Murder Mystery | Ledtrådar som kopplas ihop senare    |
+| **Time Triggers**    | The Bomb       | Objekt aktiveras efter tid/händelser |
 
 #### 🎮 Spelarupplevelse
-| Feature | Spel | Visar |
-|---------|------|-------|
-| **Player Agency** | Branching Paths | Val som faktiskt spelar roll |
-| **Dramatic Irony** | The Traitor | Spelaren vet mer än karaktären |
+
+| Feature            | Spel            | Visar                          |
+| ------------------ | --------------- | ------------------------------ |
+| **Player Agency**  | Branching Paths | Val som faktiskt spelar roll   |
+| **Dramatic Irony** | The Traitor     | Spelaren vet mer än karaktären |
 
 ### Sandbox kommentarer
 
@@ -3219,13 +3461,14 @@ cave.AddDSLItems(
 hall.AddItems("Sword", "Shield", "Torch");
 ```
 
-----
+---
 
 ## Slice 41: Testing & Validation Tools
 
 **Mål:** Verktyg för att testa och validera textäventyr.
 
-*Från Write Your Own Adventure Programs (Usborne):*
+_Från Write Your Own Adventure Programs (Usborne):_
+
 - "Try every possible command in every situation"
 - "Ask other people to play - they try things you didn't think of"
 - "Testing is for improving puzzles and making sure the game is enjoyable"
@@ -3339,7 +3582,8 @@ var circles = graph.FindCircularDependencies();
 
 ### Task 41.7: Story Snippet Validation
 
-*Från Procedural Storytelling:*
+_Från Procedural Storytelling:_
+
 > "Skriv exempel på berättelser spelaren skulle berätta, fråga: vad är minsta jag kan göra för att generera fler?"
 
 ```csharp
@@ -3367,7 +3611,7 @@ var achievable = validator.ValidateTargetStories();
 
 **Mål:** LINQ-inspirerad fluent syntax för narrativ state management. Svaret på livet, universum och allting.
 
-*"Berättelse är inte text. Berättelse är tillståndsförändring med mening."*
+_"Berättelse är inte text. Berättelse är tillståndsförändring med mening."_
 
 ### Kärnkoncept
 
@@ -3768,13 +4012,13 @@ morningGame.DefineBeat("peaceful_reading")
 
 En tanke på hur det ska fungera
 
-*storytelling som kodstruktur*, inte som löpande text.
+_storytelling som kodstruktur_, inte som löpande text.
 
 Om vi tänker rent arkitektoniskt kan du se berättelsen som tre lager som samverkar:
 
-1. **Tillstånd (State)** – hur världen *är*
-2. **Händelser (Events)** – vad som *händer*
-3. **Mening (Narrative Logic)** – varför det *betyder något*
+1. **Tillstånd (State)** – hur världen _är_
+2. **Händelser (Events)** – vad som _händer_
+3. **Mening (Narrative Logic)** – varför det _betyder något_
 
 I kod kan det bli ungefär så här.
 
@@ -3792,7 +4036,7 @@ StoryState {
 }
 ```
 
-Alltså: inte “kapitel 1, kapitel 2”, utan *existentiella lägen*.
+Alltså: inte “kapitel 1, kapitel 2”, utan _existentiella lägen_.
 
 ---
 
@@ -3837,7 +4081,7 @@ AffectsTheme("Trust", +0.2)
 
 ### 4. Karaktärer som narrativa processer
 
-NPC är inte bara state machines, utan *pågående berättelser*:
+NPC är inte bara state machines, utan _pågående berättelser_:
 
 ```csharp
 CharacterArc "Hermit" {
@@ -3900,7 +4144,7 @@ Du bygger:
 
 ## Exempel
 
-OK vi säger exempelvis ett spel där spelaren  ligger i sin säng och ska gå till köket göra kaffe, ta kaffe, gå till vardagsrum, hämta en bok, sätta sig i soffan dricka kaffe och läsa boken hur skulle det beskrivas i detta fluent state
+OK vi säger exempelvis ett spel där spelaren ligger i sin säng och ska gå till köket göra kaffe, ta kaffe, gå till vardagsrum, hämta en bok, sätta sig i soffan dricka kaffe och läsa boken hur skulle det beskrivas i detta fluent state
 
 Bra, det här är ett perfekt mikroscenario att visa hur “story som tillstånd” fungerar.
 
@@ -3918,7 +4162,7 @@ StoryState {
 }
 ```
 
-Nu definierar vi *beats* som inte bara är handlingar, utan förändrar tillstånd och mening.
+Nu definierar vi _beats_ som inte bara är handlingar, utan förändrar tillstånd och mening.
 
 ### Beat 1 – Stiga upp
 
@@ -3978,7 +4222,7 @@ StoryBeat "FindBook" {
 
 ### Beat 4 – Sätta sig, dricka kaffe, läsa
 
-Det här är kul: det är egentligen *ett nytt existentiellt tillstånd*.
+Det här är kul: det är egentligen _ett nytt existentiellt tillstånd_.
 
 ```csharp
 StoryBeat "SettleWithBook" {
@@ -4053,7 +4297,7 @@ Need = WakeUp
 **Spelaren skriver:**
 `get up`
 
-Motorn matchar beat: *LeaveBed*
+Motorn matchar beat: _LeaveBed_
 
 > You swing your legs over the edge of the bed and stand up.
 > The day has begun, whether you like it or not.
@@ -4077,7 +4321,7 @@ Location = Kitchen
 **Spelaren:**
 `brew coffee`
 
-Beat: *BrewCoffee*
+Beat: _BrewCoffee_
 
 > You fill the mug and start the machine.
 > The smell of coffee slowly pushes the fog out of your mind.
@@ -4101,7 +4345,7 @@ Theme(Comfort) +
 **Spelaren:**
 `take book`
 
-Beat: *FindBook*
+Beat: _FindBook_
 
 > You pick up the book. Its weight feels familiar.
 
@@ -4114,7 +4358,7 @@ Theme(Contemplation) +
 `sit down`
 
 Motorn ser: Location = LivingRoom, HasCoffee, HasBook, Posture = Standing
-Beat: *SettleWithBook*
+Beat: _SettleWithBook_
 
 > You sit down on the sofa, the warm cup in your hands.
 > You open the book.
@@ -4163,6 +4407,7 @@ Det är bara tillstånd, behov, teman och övergångar.
 ## Kodjämförelse
 
 **CSharp**
+
 ```cs
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Engine;
@@ -4377,7 +4622,8 @@ while (true)
 Console.WriteLine("\nThanks for playing!");
 ```
 
-**DSL (.adventure)*
+\*_DSL (.adventure)_
+
 ```cs
 Story
     .World("Dark Forest")
@@ -4461,10 +4707,12 @@ Story
 **Mål:** Skapa en enkel map generator som kan rendera en ASCII-karta baserat på location-grafen och exits.
 
 ### Förslag på funktioner
+
 - `MapGenerator.Render(GameState state)` → `string`
 - Valfritt: `MapGenerator.Render(ILocation start, int maxDepth)` → `string`
 
 ### Krav
+
 - Fungerar med Slice 1 (Location + Exits) utan extra beroenden.
 - Möjlig att använda i sandbox för att visa en karta vid `look`.
 
@@ -4475,6 +4723,7 @@ Story
 **Mål:** Enkla stränghelpers för casing i UI/texter.
 
 ### Funktioner
+
 - `string.ToProperCase()` — Title Case.
 - `string.ToSentenceCase()` — Första bokstaven versal, resten gemener.
 - `string.ToCrazyCaps()` — Slumpad versal/gemen per bokstav.
@@ -4488,11 +4737,13 @@ Story
 **Mål:** Samla upp generella förbättringar som dyker upp under verifiering.
 
 ### Förslag på funktioner
+
 - `IItem.Amount` (nullable int) + `Item.SetAmount(int amount)`
 - `IItem.DecreaseAmount(int amount = 1)` → bool (om det finns kvar)
 - Optional: `Item.OnAmountEmpty` reaction/hook
 - `Use()` minskar amount om den finns (och tar bort item när 0)
 
 ### Krav
+
 - Backwards compatible: items utan amount fungerar som tidigare.
 - Inventory/Look visar amount när den finns (t.ex. “Tea Thermos (4)”).

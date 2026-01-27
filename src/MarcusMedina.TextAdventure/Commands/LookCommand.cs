@@ -24,7 +24,7 @@ public class LookCommand : ICommand
         var location = context.State.CurrentLocation;
         if (!string.IsNullOrWhiteSpace(Target))
         {
-            return LookAtTarget(context, Target);
+            return new ExamineCommand(Target).Execute(context);
         }
 
         var description = location.GetDescription();

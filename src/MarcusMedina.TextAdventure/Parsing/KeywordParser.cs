@@ -42,7 +42,9 @@ public class KeywordParser : ICommandParser
         if (_config.Look.Contains(keyword))
         {
             var target = ParseItemName(tokens, 1);
-            return new LookCommand(target);
+            return keyword == "examine"
+                ? new ExamineCommand(target)
+                : new LookCommand(target);
         }
 
         if (_config.Inventory.Contains(keyword))

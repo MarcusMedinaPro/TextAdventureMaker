@@ -37,7 +37,7 @@ public sealed class KeywordParserConfigBuilder
     private KeywordParserConfigBuilder()
     {
         _quit = CommandHelper.NewCommands("quit", "exit", "q");
-        _look = CommandHelper.NewCommands("look", "l");
+        _look = CommandHelper.NewCommands("look", "l", "examine");
         _inventory = CommandHelper.NewCommands("inventory", "inv", "i");
         _stats = CommandHelper.NewCommands("stats", "stat", "hp", "health");
         _open = CommandHelper.NewCommands("open");

@@ -11,7 +11,7 @@ public sealed class KeywordParserConfig
 {
     public static KeywordParserConfig Default { get; } = new(
         quit: CommandHelper.NewCommands("quit", "exit", "q"),
-        look: CommandHelper.NewCommands("look", "l"),
+        look: CommandHelper.NewCommands("look", "l", "examine"),
         inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
         stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
         open: CommandHelper.NewCommands("open"),

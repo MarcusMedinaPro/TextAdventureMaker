@@ -33,6 +33,7 @@ public static class Language
     public static string NoSuchItemHere => _provider.Get("NoSuchItemHere");
     public static string NoSuchItemInventory => _provider.Get("NoSuchItemInventory");
     public static string NothingToLookAt => _provider.Get("NothingToLookAt");
+    public static string ExamineWhat => _provider.Get("ExamineWhat");
     public static string CannotTakeItem => _provider.Get("CannotTakeItem");
     public static string TooHeavy => _provider.Get("TooHeavy");
     public static string NothingToTake => _provider.Get("NothingToTake");
@@ -166,6 +167,7 @@ public static class Language
             ["NoSuchItemHere"] = "You don't see that here.",
             ["NoSuchItemInventory"] = "You don't have that.",
             ["NothingToLookAt"] = "You don't see that here.",
+            ["ExamineWhat"] = "Examine what?",
             ["CannotTakeItem"] = "You can't take that.",
             ["TooHeavy"] = "You're carrying too much.",
             ["NothingToTake"] = "There's nothing to take.",

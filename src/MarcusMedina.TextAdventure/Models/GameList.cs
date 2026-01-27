@@ -115,6 +115,11 @@ public sealed class GameList<T> where T : IGameEntity
             return itemWithAliases.Matches(token);
         }
 
+        if (item is IDoor doorWithAliases)
+        {
+            return doorWithAliases.Matches(token);
+        }
+
         return item.Id.TextCompare(token) || item.Name.TextCompare(token);
     }
 }

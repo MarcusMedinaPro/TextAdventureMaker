@@ -28,7 +28,12 @@ public class LookCommand : ICommand
         }
 
         var description = location.GetDescription();
-        var exits = location.Exits
+        var exitsSource = location.Exits
+            .Where(e => !context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly ||
+                        e.Value.Door == null ||
+                        e.Value.Door.State != DoorState.Locked);
+
+        var exits = exitsSource
             .Select(e => e.Value.Door != null
                 ? $"{e.Key} ({e.Value.Door.Name}: {e.Value.Door.State})"
                 : e.Key.ToString());
@@ -42,12 +47,23 @@ public class LookCommand : ICommand
         builder.Append(builder.Length > 0 ? "\n" : string.Empty);
         builder.Append(Language.HealthStatus(context.State.Stats.Health, context.State.Stats.MaxHealth));
         builder.Append("\n");
-        var items = location.Items.Select(i => Language.ItemWithWeight(i.Name, i.Weight));
-        builder.Append(Language.ItemsHereLabel);
-        builder.Append(items.Any() ? items.CommaJoin() : Language.None);
-        builder.Append("\n");
-        builder.Append(Language.ExitsLabel);
-        builder.Append(exits.Any() ? exits.CommaJoin() : Language.None);
+        var items = location.Items
+            .Where(i => !i.HiddenFromItemList)
+            .Select(i => Language.ItemWithWeight(i.Name, i.Weight))
+            .ToList();
+        if (!context.State.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith || items.Count > 0)
+        {
+            builder.Append(Language.ItemsHereLabel);
+            builder.Append(items.Count > 0 ? items.CommaJoin() : Language.None);
+            builder.Append("\n");
+        }
+
+        var exitsList = exits.ToList();
+        if (!context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly || exitsList.Count > 0)
+        {
+            builder.Append(Language.ExitsLabel);
+            builder.Append(exitsList.Count > 0 ? exitsList.CommaJoin() : Language.None);
+        }
 
         return CommandResult.Ok(builder.ToString());
     }
@@ -66,7 +82,7 @@ public class LookCommand : ICommand
 
         var door = location.Exits.Values
             .Select(e => e.Door)
-            .FirstOrDefault(d => d != null && (target.TextCompare("door") || d.Name.TextCompare(target)));
+            .FirstOrDefault(d => d != null && (target.TextCompare("door") || d.Matches(target)));
 
         if (door != null)
         {

@@ -13,9 +13,11 @@ public class Door : IDoor
     private string _description = "";
     private readonly Dictionary<DoorAction, string> _reactions = new();
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<string> _aliases = new();
     public string Id { get; }
     public string Name { get; }
     public IDictionary<string, string> Properties => _properties;
+    public IReadOnlyList<string> Aliases => _aliases;
     public string GetDescription() => _description;
     public DoorState State { get; private set; }
     public IKey? RequiredKey { get; private set; }
@@ -46,6 +48,28 @@ public class Door : IDoor
     public string? GetReaction(DoorAction action)
     {
         return _reactions.TryGetValue(action, out var reaction) ? reaction : null;
+    }
+
+    public Door AddAliases(params string[] aliases)
+    {
+        foreach (var alias in aliases)
+        {
+            if (!string.IsNullOrWhiteSpace(alias))
+            {
+                _aliases.Add(alias.Trim());
+            }
+        }
+
+        return this;
+    }
+
+    public bool Matches(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        var token = name.Trim();
+
+        if (Name.TextCompare(token)) return true;
+        return _aliases.Any(a => a.TextCompare(token));
     }
 
     public Door SetReaction(DoorAction action, string text)
@@ -104,6 +128,8 @@ public class Door : IDoor
     public static implicit operator Door(string name) => new(name.ToId(), name);
 
     IDoor IDoor.Description(string text) => Description(text);
+    IDoor IDoor.AddAliases(params string[] aliases) => AddAliases(aliases);
+    bool IDoor.Matches(string name) => Matches(name);
     IDoor IDoor.SetReaction(DoorAction action, string text) => SetReaction(action, text);
 
     public static implicit operator Door((string id, string name, string description) data) =>

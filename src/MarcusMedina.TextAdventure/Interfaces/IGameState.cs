@@ -24,5 +24,7 @@ public interface IGameState
     ILocationDiscoverySystem LocationDiscovery { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }
+    bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
+    bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     IReadOnlyCollection<ILocation> Locations { get; }
 }

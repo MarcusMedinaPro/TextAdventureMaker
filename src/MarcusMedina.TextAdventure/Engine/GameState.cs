@@ -28,6 +28,8 @@ public class GameState : IGameState
     public ILocationDiscoverySystem LocationDiscovery { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
+    public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
+    public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     public IReadOnlyCollection<ILocation> Locations => _locations.Values;
 
     public GameState(

@@ -95,7 +95,9 @@ public static class Language
         _provider.Format("TakeAllSkippedTemplate", itemList);
 
     public static string ItemWithWeight(string itemName, float weight) =>
-        _provider.Format("ItemWithWeightTemplate", itemName, weight.ToString("0.##", CultureInfo.InvariantCulture));
+        weight > 0
+            ? _provider.Format("ItemWithWeightTemplate", itemName, weight.ToString("0.##", CultureInfo.InvariantCulture))
+            : itemName;
 
     public static string DropAll(string itemList) =>
         _provider.Format("DropAllTemplate", itemList);

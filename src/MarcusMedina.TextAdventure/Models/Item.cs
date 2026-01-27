@@ -18,6 +18,7 @@ public class Item : IItem
     private bool _requiresTakeToRead;
     private int _readingCost;
     private Func<IGameState, bool>? _readCondition;
+    private bool _hiddenFromItemList;
     private string _description = "";
 
     public string Id { get; }
@@ -30,6 +31,7 @@ public class Item : IItem
     public bool Readable => _readable;
     public bool RequiresTakeToRead => _requiresTakeToRead;
     public int ReadingCost => _readingCost;
+    public bool HiddenFromItemList => _hiddenFromItemList;
 
     public event Action<IItem>? OnTake;
     public event Action<IItem>? OnDrop;
@@ -131,6 +133,12 @@ public class Item : IItem
     public IItem SetReadingCost(int turns)
     {
         _readingCost = Math.Max(0, turns);
+        return this;
+    }
+
+    public IItem HideFromItemList(bool hidden = true)
+    {
+        _hiddenFromItemList = hidden;
         return this;
     }
 

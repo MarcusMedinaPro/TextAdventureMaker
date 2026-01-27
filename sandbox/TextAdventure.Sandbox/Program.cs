@@ -3,51 +3,111 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using MarcusMedina.TextAdventure.Builders;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 5: NPCs + Dialog + Movement (dialog loop)
+// Slice 6: Event System (Observer) using all previous slices
 
-var classroom = new Location("classroom", "Empty desks, a chalkboard, and a heavy silence.");
-var chalkboardDrawings = new[]
+var garden = new Location(
+    "garden",
+    "A secluded English garden, hushed and proper, where the air smells faintly of rain and roses. A broad stone rests by a tall wrought-iron gate, as if guarding a small secret.");
+
+var lane = new Location(
+    "lane",
+    "A narrow lane of damp brick and clinging ivy, intimate and shadowed, like a passage meant for quiet footsteps and lingering glances.");
+
+var ivy = new Item(
+        "ivy",
+        "ivy",
+        "Dark, glossy leaves trail along the wall, elegant but faintly dangerous to the touch.")
+    .AddAliases("ivy", "vines")
+    .HideFromItemList();
+
+var brick = new Item(
+        "brick",
+        "brick",
+        "A solid pink brick, cool and reassuringly heavy, smelling of old rain and time.")
+    .AddAliases("brick", "bricks")
+    .HideFromItemList();
+
+var stone = new Item(
+        "stone",
+        "stone",
+        "A wide, flat stone, properly weighty, as though it enjoys being leaned upon.")
+    .AddAliases("rock", "slab")
+    .SetTakeable(false)
+    .Description("The surface is smooth from years of weather and hands resting there, perhaps pausing longer than strictly necessary.");
+
+var key = KeyBuilder.Create(
+        "gate_key",
+        "iron key",
+        "A discreet iron key hidden away beneath the stone, waiting patiently to be discovered.")
+    .AddAliases("key", "iron")
+    .Description("An old-fashioned iron key with a graceful bow and worn teeth, the sort that promises secrets behind a gate.")
+    .Build();
+
+garden.AddItem(stone);
+
+var gate = DoorBuilder.Create(
+        "gate",
+        "gate",
+        "A tall wrought-iron gate, elegant and firmly locked, its bars cold and unyielding.")
+    .AddAliases("door")
+    .RequiresKey(key)
+    .Description("The gate stands between you and the lane beyond, proper and unbudging until persuaded by the right key.")
+    .SetReaction(DoorAction.Unlock, "The lock answers with a soft, intimate click, as if acknowledging a familiar touch.")
+    .SetReaction(DoorAction.Open, "The gate swings open with a slow, graceful creak, like an old lady clearing her throat.")
+    .Build();
+
+garden.AddExit(Direction.North, lane, gate);
+lane.AddItem(ivy);
+lane.AddItem(brick);
+
+var state = new GameState(garden, worldLocations: new[] { garden, lane });
+state.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith = true;
+state.ShowDirectionsWhenThereAreDirectionsVisibleOnly = true;
+var isKeyRevealed = false;
+
+state.Events.Subscribe(GameEventType.PickupItem, e =>
 {
-    "You drew a cat.",
-    "You drew a smilie.",
-    "You wrote 1337! on the chalkboard.",
-    "You drew a heart."
-};
-var chalkboardLook = new[]
-{
-    "There's a cat drawn on it.",
-    "There's a smilie drawn on it.",
-    "Leet! is written on it.",
-    "There's a heart drawn on it."
-};
-string? chalkboardDrawing = null;
-string? chalkboardLookText = null;
+    if (e.Item != null && e.Item.Id == "stone")
+    {
+        if (!isKeyRevealed)
+        {
+            isKeyRevealed = true;
+            garden.AddItem(key);
+            Console.WriteLine("With a quiet effort, you lift the stone. Something cool and metallic waits beneath: an iron key.");
+        }
+    }
+});
 
-var student = new Npc("student", "student")
-    .Description("A student sits in the back, staring at the floor.")
-    .SetDialog(new DialogNode("We heard something in the hallway...")
-        .AddOption("Ask what they heard.", new DialogNode("Footsteps. Slow, heavy. Then a door."))
-        .AddOption("Ask where everyone went.", new DialogNode("They left in a hurry. No one looked back.")));
+var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
+    .WithLook("look", "l")
+    .WithInventory("inventory", "inv", "i")
+    .WithTake("take", "get")
+    .WithDrop("drop")
+    .WithUse("use")
+    .WithGo("go", "move")
+    .WithUnlock("unlock")
+    .WithOpen("open")
+    .WithIgnoreItemTokens("on", "off")
+    .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["n"] = Direction.North,
+        ["north"] = Direction.North
+    })
+    .Build();
+var parser = new KeywordParser(parserConfig);
 
-classroom.AddNpc(student);
-
-var chalkboard = new Item("chalkboard", "chalkboard", "A dusty chalkboard waits at the front.")
-    .AddAliases("board", "chalk", "blackboard")
-    .SetTakeable(false);
-classroom.AddItem(chalkboard);
-
-var state = new GameState(classroom, worldLocations: new[] { classroom });
-var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
-
-Console.WriteLine("=== THE SILENT CLASSROOM (Slice 5) ===");
-Console.WriteLine("Commands: Look, Talk <Npc>, Inventory, Quit");
+Console.WriteLine("=== THE KEY UNDER THE STONE ===");
+Console.WriteLine("Type 'help' to see commands.");
 
 void WriteResult(CommandResult result)
 {
@@ -67,61 +127,44 @@ void WriteResult(CommandResult result)
 
 void ShowLookResult(CommandResult result)
 {
-    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
-    WriteResult(result);
+    Console.WriteLine();
+    Console.WriteLine(new string('-', 60));
+    Console.WriteLine($"You are in the {state.CurrentLocation.Id.ToProperCase()}");
+    Console.WriteLine();
 
-    if (state.CurrentLocation.FindNpc("student") != null)
+    var lines = result.Message?
+        .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .ToList()
+        ?? new List<string>();
+
+    var description = lines.FirstOrDefault() ?? state.CurrentLocation.GetDescription();
+    if (!string.IsNullOrWhiteSpace(description))
     {
-        Console.WriteLine("The student is here, sitting quietly.");
+        Console.WriteLine(description);
+        Console.WriteLine();
     }
-}
 
-void RunDialog(MarcusMedina.TextAdventure.Interfaces.INpc npc)
-{
-    var root = npc.DialogRoot;
-    if (root == null)
+    var itemsLine = lines.FirstOrDefault(line => line.StartsWith("Items here:", StringComparison.OrdinalIgnoreCase));
+    if (!string.IsNullOrWhiteSpace(itemsLine))
     {
-        Console.WriteLine("They have nothing to say.");
-        return;
+        var items = itemsLine.Replace("Items here:", "").Trim();
+        Console.WriteLine(items.Length > 0 ? $"You notice {items}" : "You notice nothing in particular.");
+        Console.WriteLine();
     }
 
-    var showIntro = true;
-    while (true)
+    var exitsLine = lines.FirstOrDefault(line => line.StartsWith("Exits:", StringComparison.OrdinalIgnoreCase));
+    if (!string.IsNullOrWhiteSpace(exitsLine))
     {
-        if (showIntro)
-        {
-            Console.WriteLine(root.Text);
-            showIntro = false;
-        }
-        for (var i = 0; i < root.Options.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}) {root.Options[i].Text}");
-        }
-
-        Console.WriteLine($"{root.Options.Count + 1}) OK thanks, bye.");
-        Console.Write("> ");
-        var input = Console.ReadLine()?.Trim();
-        if (!int.TryParse(input, out var choice))
-        {
-            Console.WriteLine("Pick a number.");
-            continue;
-        }
-
-        if (choice == root.Options.Count + 1)
-        {
-            Console.WriteLine("You leave the student alone.");
-            break;
-        }
-
-        if (choice < 1 || choice > root.Options.Count)
-        {
-            Console.WriteLine("Pick a valid option.");
-            continue;
-        }
-
-        var reply = root.Options[choice - 1].Next;
-        Console.WriteLine(reply?.Text ?? "They say nothing more.");
+        Console.WriteLine(exitsLine.Replace("Exits:", "Exits:"));
+        Console.WriteLine();
     }
+
+    Console.WriteLine("Hints");
+    Console.WriteLine("- move stone / take stone");
+    Console.WriteLine("- unlock gate / open gate");
+    Console.WriteLine("- go north");
+    Console.WriteLine("- inventory");
+    Console.WriteLine(new string('-', 60));
 }
 
 ShowLookResult(state.Look());
@@ -132,83 +175,41 @@ while (true)
     var input = Console.ReadLine()?.Trim();
     if (string.IsNullOrWhiteSpace(input)) continue;
 
-    if (input.Equals("sit", StringComparison.OrdinalIgnoreCase) ||
-        input.StartsWith("sit ", StringComparison.OrdinalIgnoreCase))
+    if (input.Equals("help", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("halp", StringComparison.OrdinalIgnoreCase) ||
+        input == "?")
     {
-        Console.WriteLine("You sit by the desk and let the silence settle.");
+        Console.WriteLine("Commands: look, move/take stone, unlock/open gate, go north, inventory, quit");
         continue;
     }
 
-    if (input.Equals("listen", StringComparison.OrdinalIgnoreCase))
+    if (input.Contains("stone", StringComparison.OrdinalIgnoreCase) &&
+        (input.StartsWith("move ", StringComparison.OrdinalIgnoreCase) ||
+         input.StartsWith("push ", StringComparison.OrdinalIgnoreCase) ||
+         input.StartsWith("shift ", StringComparison.OrdinalIgnoreCase) ||
+         input.StartsWith("lift ", StringComparison.OrdinalIgnoreCase)))
     {
-        Console.WriteLine("You hear the old radiator tick and the faint hum of lights.");
-        continue;
-    }
-
-    if (input.Equals("draw on chalkboard", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("draw on board", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("draw on blackboard", StringComparison.OrdinalIgnoreCase))
-    {
-        if (chalkboardDrawing != null)
+        if (!isKeyRevealed)
         {
-            Console.WriteLine("You erase the chalkboard first.");
-        }
-
-        var index = Random.Shared.Next(chalkboardDrawings.Length);
-        chalkboardDrawing = chalkboardDrawings[index];
-        chalkboardLookText = chalkboardLook[index];
-        Console.WriteLine(chalkboardDrawing);
-        continue;
-    }
-
-    if (input.Equals("clear chalkboard", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("clear board", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("clear blackboard", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("erase chalkboard", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("erase board", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("erase blackboard", StringComparison.OrdinalIgnoreCase))
-    {
-        if (chalkboardDrawing == null)
-        {
-            Console.WriteLine("It's already clean.");
+            isKeyRevealed = true;
+            garden.AddItem(key);
+            Console.WriteLine("You shift the stone aside with a soft scrape. Beneath it lies a small iron key, cool and promising.");
         }
         else
         {
-            chalkboardDrawing = null;
-            chalkboardLookText = null;
-            Console.WriteLine("You erase the chalkboard.");
-        }
-        continue;
-    }
-
-    if (input.Equals("look at chalkboard", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("look at board", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("look at blackboard", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("look chalkboard", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("look board", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("look blackboard", StringComparison.OrdinalIgnoreCase))
-    {
-        if (chalkboardLookText == null)
-        {
-            Console.WriteLine("The chalkboard is clean.");
-        }
-        else
-        {
-            Console.WriteLine(chalkboardLookText);
+            Console.WriteLine("The stone has already been moved; it has no more secrets to offer.");
         }
         continue;
     }
 
     var command = parser.Parse(input);
-    if (command is TalkCommand talk && talk.Target != null && talk.Target.TextCompare("student"))
-    {
-        RunDialog(student);
-        continue;
-    }
-
     var result = state.Execute(command);
 
-    if (command is LookCommand)
+    if (command is LookCommand look && !string.IsNullOrWhiteSpace(look.Target))
+    {
+        WriteResult(result);
+    }
+    else if (command is LookCommand)
     {
         ShowLookResult(result);
     }

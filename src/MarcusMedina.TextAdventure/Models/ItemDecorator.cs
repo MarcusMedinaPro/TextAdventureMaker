@@ -25,6 +25,7 @@ public abstract class ItemDecorator : IItem
     public virtual bool Readable => Inner.Readable;
     public virtual bool RequiresTakeToRead => Inner.RequiresTakeToRead;
     public virtual int ReadingCost => Inner.ReadingCost;
+    public virtual bool HiddenFromItemList => Inner.HiddenFromItemList;
 
     public virtual string GetDescription() => Inner.GetDescription();
     public virtual IItem Description(string text) => Inner.Description(text);
@@ -62,6 +63,7 @@ public abstract class ItemDecorator : IItem
     public virtual IItem SetReadText(string text) => Inner.SetReadText(text);
     public virtual IItem RequireTakeToRead() => Inner.RequireTakeToRead();
     public virtual IItem SetReadingCost(int turns) => Inner.SetReadingCost(turns);
+    public virtual IItem HideFromItemList(bool hidden = true) => Inner.HideFromItemList(hidden);
     public virtual IItem RequiresToRead(Func<IGameState, bool> predicate) => Inner.RequiresToRead(predicate);
     public virtual void Take() => Inner.Take();
     public virtual void Drop() => Inner.Drop();

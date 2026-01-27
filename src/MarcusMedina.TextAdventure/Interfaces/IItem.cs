@@ -34,6 +34,8 @@ public interface IItem : IGameEntity
     IItem RequireTakeToRead();
     IItem SetReadingCost(int turns);
     IItem RequiresToRead(Func<IGameState, bool> predicate);
+    bool HiddenFromItemList { get; }
+    IItem HideFromItemList(bool hidden = true);
     void Take();
     void Drop();
     void Use();

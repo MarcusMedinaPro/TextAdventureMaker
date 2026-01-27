@@ -22,7 +22,7 @@ public class GoToCommand : ICommand
     {
         var exits = context.State.CurrentLocation.Exits;
         var matches = exits
-            .Where(e => e.Value.Door != null && (Target.TextCompare("door") || e.Value.Door.Name.TextCompare(Target)))
+            .Where(e => e.Value.Door != null && (Target.TextCompare("door") || e.Value.Door.Matches(Target)))
             .ToList();
 
         if (matches.Count != 1)

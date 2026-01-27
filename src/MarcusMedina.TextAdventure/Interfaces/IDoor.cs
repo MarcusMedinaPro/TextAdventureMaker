@@ -13,9 +13,12 @@ public interface IDoor : IGameEntity
     string GetDescription();
     DoorState State { get; }
     IKey? RequiredKey { get; }
+    IReadOnlyList<string> Aliases { get; }
 
     bool IsPassable { get; }
     IDoor Description(string text);
+    bool Matches(string name);
+    IDoor AddAliases(params string[] aliases);
     string? GetReaction(DoorAction action);
     IDoor SetReaction(DoorAction action, string text);
     bool Open();

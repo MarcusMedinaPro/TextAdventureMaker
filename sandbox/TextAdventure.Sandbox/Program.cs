@@ -2,10 +2,6 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using MarcusMedina.TextAdventure.Builders;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -13,119 +9,131 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 6: Event System (Observer) using all previous slices
+// Slice 7: Combat (Strategy) using all previous slices
 
-var garden = new Location(
-    "garden",
-    "A secluded English garden, hushed and proper, where the air smells faintly of rain and roses. A broad stone rests by a tall wrought-iron gate, as if guarding a small secret.");
+Location attic = new(
+    "attic",
+    "Rain caresses the roof with silver fingers. A persistent little leak taps a scandalously intimate rhythm upon the floorboards. \nYou need to do something about the leak.");
 
-var lane = new Location(
-    "lane",
-    "A narrow lane of damp brick and clinging ivy, intimate and shadowed, like a passage meant for quiet footsteps and lingering glances.");
-
-var ivy = new Item(
-        "ivy",
-        "ivy",
-        "Dark, glossy leaves trail along the wall, elegant but faintly dangerous to the touch.")
-    .AddAliases("ivy", "vines")
-    .HideFromItemList();
-
-var brick = new Item(
-        "brick",
-        "brick",
-        "A solid pink brick, cool and reassuringly heavy, smelling of old rain and time.")
-    .AddAliases("brick", "bricks")
-    .HideFromItemList();
-
-var stone = new Item(
-        "stone",
-        "stone",
-        "A wide, flat stone, properly weighty, as though it enjoys being leaned upon.")
-    .AddAliases("rock", "slab")
+var rain = new Item(
+        "rain",
+        "rain",
+        "Cold raindrops strike your eyes. They sting, your vision blurs, and for a breathless moment you are left blind, lashes heavy with tears.")
     .SetTakeable(false)
-    .Description("The surface is smooth from years of weather and hands resting there, perhaps pausing longer than strictly necessary.")
-    .SetReaction(ItemAction.Move, "You shift the stone aside with a soft scrape. Beneath it lies a small iron key, cool and promising.");
+    .HideFromItemList();
 
-var key = KeyBuilder.Create(
-        "gate_key",
-        "iron key",
-        "A discreet iron key hidden away beneath the stone, waiting patiently to be discovered.")
-    .AddAliases("key", "iron")
-    .Description("An old-fashioned iron key with a graceful bow and worn teeth, the sort that promises secrets behind a gate.")
-    .Build();
+var roof = new Item("roof", "roof", "Moist with the night's insistence, the roof glistens as though varnished by the storm itself.")
+    .SetTakeable(false)
+    .HideFromItemList();
 
-garden.AddItem(stone);
+var floor = new Item("floor", "floor", "It's wet... and now your feet are too.")
+    .AddAliases("floorboards", "boards")
+    .SetTakeable(false)
+    .HideFromItemList();
 
-var gate = DoorBuilder.Create(
-        "gate",
-        "gate",
-        "A tall wrought-iron gate, elegant and firmly locked, its bars cold and unyielding.")
-    .AddAliases("door")
-    .RequiresKey(key)
-    .Description("The gate stands between you and the lane beyond, proper and unbudging until persuaded by the right key.")
-    .SetReaction(DoorAction.Unlock, "The lock answers with a soft, intimate click, as if acknowledging a familiar touch.")
-    .SetReaction(DoorAction.Open, "The gate swings open with a slow, graceful creak, like an old lady clearing her throat.")
-    .Build();
+var puddle = new Item("puddle", "puddle", "It's wet.")
+    .SetTakeable(false)
+    .HideFromItemList();
 
-garden.AddExit(Direction.North, lane, gate);
-lane.AddItem(ivy);
-lane.AddItem(brick);
+var leak = new Item("leak", "leak", "It's wet and flowing.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.TakeFailed, "You take a quick run to the toilet to pee.")
+    .HideFromItemList();
 
-var state = new GameState(garden, worldLocations: new[] { garden, lane });
-state.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith = true;
-state.ShowDirectionsWhenThereAreDirectionsVisibleOnly = true;
-state.EnableFuzzyMatching = true;
-state.FuzzyMaxDistance = 1;
-var isKeyRevealed = false;
+var rhythm = new Item("rhythm", "rhythm", "It's soothing and harmonious.")
+    .AddAliases("rythm", "beat", "rain rhythm")
+    .SetTakeable(false)
+    .HideFromItemList();
 
-stone.OnMove += _ =>
+var feet = new Item("feet", "feet", "Five toes each... amazing!")
+    .AddAliases("foot", "toes", "toe")
+    .SetTakeable(false)
+    .HideFromItemList();
+
+var fingers = new Item("fingers", "fingers", "5 of each! Yay!")
+    .AddAliases("finger")
+    .SetTakeable(false)
+    .HideFromItemList();
+
+var silverFingers = new Item("silver_fingers", "silver fingers", "Looks like the hand that Peter Pettigrew got from Voldemort.")
+    .AddAliases("silver", "silver finger", "silvery fingers")
+    .SetTakeable(false)
+    .HideFromItemList();
+
+var bucket = new Item(
+        "bucket",
+        "bucket",
+        "A dented metal bucket with a certain weary dignity - too heavy to lift, but perfectly suited to be coaxed into position.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.TakeFailed, "It is far too substantial to be carried, but you could certainly persuade it to slide into place.")
+    .SetReaction(ItemAction.Move, "You draw the bucket beneath the leak with deliberate grace. At last, the dripping finds its willing accomplice.");
+
+attic.AddItem(rain);
+attic.AddItem(roof);
+attic.AddItem(floor);
+attic.AddItem(puddle);
+attic.AddItem(leak);
+attic.AddItem(rhythm);
+attic.AddItem(feet);
+attic.AddItem(fingers);
+attic.AddItem(silverFingers);
+attic.AddItem(bucket);
+
+var storm = new Npc("storm", "storm", NpcState.Hostile, stats: new Stats(18))
+    .Description("A relentless, sensual downpour that demands endurance rather than defiance.");
+
+var dummy = new Npc("dummy", "spooky training dummy", NpcState.Neutral, stats: new Stats(12))
+    .Description("A crash test dummy slumped in the corner, patient and uncomplaining.");
+
+var brokenDummy = new Item("broken_dummy", "broken dummy", "You sure showed it who's the boss.")
+    .AddAliases("dummy", "training dummy")
+    .SetTakeable(false);
+
+attic.AddNpc(storm);
+attic.AddNpc(dummy);
+
+GameState state = new(attic, worldLocations: new[] { attic })
 {
-    if (!isKeyRevealed)
+    EnableFuzzyMatching = true,
+    FuzzyMaxDistance = 1
+};
+
+var bucketPlaced = false;
+var brokenDummyPlaced = false;
+
+bucket.OnMove += _ =>
+{
+    if (!bucketPlaced)
     {
-        isKeyRevealed = true;
-        garden.AddItem(key);
+        bucketPlaced = true;
+        storm.Stats.Damage(storm.Stats.Health);
+        storm.SetState(NpcState.Dead);
         return;
     }
 
-    stone.SetReaction(ItemAction.Move, "The stone has already been moved; it has no more secrets to offer.");
+    bucket.SetReaction(ItemAction.Move, "The bucket is already stationed beneath the leak, performing its quiet, devoted duty.");
 };
-
-state.Events.Subscribe(GameEventType.PickupItem, e =>
-{
-    if (e.Item != null && e.Item.Id == "stone")
-    {
-        if (!isKeyRevealed)
-        {
-            isKeyRevealed = true;
-            garden.AddItem(key);
-            Console.WriteLine("With a quiet effort, you lift the stone. Something cool and metallic waits beneath: an iron key.");
-        }
-    }
-});
 
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "exam", "x")
+    .WithMove("move", "push", "shift", "lift", "slide")
     .WithInventory("inventory", "inv", "i")
     .WithTake("take", "get")
-    .WithMove("move", "push", "shift", "lift", "slide")
     .WithDrop("drop")
     .WithUse("use")
+    .WithAttack("attack", "fight", "strike", "kick", "hit")
+    .WithFlee("flee", "run")
     .WithGo("go", "move")
-    .WithUnlock("unlock")
-    .WithOpen("open")
     .WithFuzzyMatching(true, 1)
-    .WithIgnoreItemTokens("on", "off", "at", "the")
-    .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
-    {
-        ["n"] = Direction.North,
-        ["north"] = Direction.North
-    })
+    .WithIgnoreItemTokens("on", "off", "at", "the", "a")
     .Build();
-var parser = new KeywordParser(parserConfig);
 
-Console.WriteLine("=== THE KEY UNDER THE STONE ===");
-Console.WriteLine("Type 'help' to see commands.");
+KeywordParser parser = new(parserConfig);
+
+Console.WriteLine("=== RAIN UPON THE ROOF (Slice 7) ===");
+Console.WriteLine("Type 'help' if you require a gentlemanly reminder of your options.");
+ShowLookResult(state.Look());
 
 void WriteResult(CommandResult result)
 {
@@ -153,7 +161,7 @@ void ShowLookResult(CommandResult result)
     var lines = result.Message?
         .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .ToList()
-        ?? new List<string>();
+        ?? [];
 
     if (lines.Count > 0 && lines[0].StartsWith("I think you mean", StringComparison.OrdinalIgnoreCase))
     {
@@ -169,11 +177,17 @@ void ShowLookResult(CommandResult result)
         Console.WriteLine();
     }
 
+    if (dummy.IsAlive)
+    {
+        Console.WriteLine("The training dummy is here, patient and uncomplaining.");
+        Console.WriteLine();
+    }
+
     var itemsLine = lines.FirstOrDefault(line => line.StartsWith("Items here:", StringComparison.OrdinalIgnoreCase));
     if (!string.IsNullOrWhiteSpace(itemsLine))
     {
         var items = itemsLine.Replace("Items here:", "").Trim();
-        Console.WriteLine(items.Length > 0 ? $"You notice {items}" : "You notice nothing in particular.");
+        Console.WriteLine(items.Length > 0 ? $"You notice {items}" : "You notice nothing of particular allure.");
         Console.WriteLine();
     }
 
@@ -185,26 +199,100 @@ void ShowLookResult(CommandResult result)
     }
 
     Console.WriteLine("Hints");
-    Console.WriteLine("- move stone / take stone");
-    Console.WriteLine("- unlock gate / open gate");
-    Console.WriteLine("- go north");
+    Console.WriteLine("- move bucket");
+    Console.WriteLine("- attack dummy / flee");
+    Console.WriteLine("- look / examine bucket");
     Console.WriteLine("- inventory");
     Console.WriteLine(new string('-', 60));
 }
 
-ShowLookResult(state.Look());
+Random rnd = new();
 
 while (true)
 {
+    if (dummy.IsAlive)
+    {
+        var dummyRandom = rnd.Next(100);
+
+        if (dummyRandom > 70)
+        {
+            switch (rnd.Next(4))
+            {
+                case 0:
+                    Console.WriteLine("For a fleeting instant, you are quite certain the dummy is watching you.");
+                    break;
+
+                case 1:
+                    Console.WriteLine("You could swear the dummy has shifted its weight, though you cannot say how or when.");
+                    break;
+
+                case 2:
+                    Console.WriteLine("The light catches the dummy's glassy eye, and it seems to glimmer with a dreadful awareness.");
+                    break;
+
+                case 3:
+                    Console.WriteLine("A faint creak comes from the corner, as though cloth and porcelain have subtly rearranged themselves.");
+                    break;
+            }
+        }
+    }
+
     Console.Write("> ");
     var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input)) continue;
+    if (string.IsNullOrWhiteSpace(input))
+    {
+        continue;
+    }
 
     if (input.Equals("help", StringComparison.OrdinalIgnoreCase) ||
         input.Equals("halp", StringComparison.OrdinalIgnoreCase) ||
         input == "?")
     {
-        Console.WriteLine("Commands: look, examine, move stone, take key, unlock/open gate, go north, inventory, quit");
+        Console.WriteLine("Commands: look, examine, move <item>, take <item>, attack <npc>, flee, inventory, quit");
+        continue;
+    }
+
+    if (input.Equals("kick the bucket", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("kick bucket", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("You promptly expire, in the purely figurative and linguistically traditional sense.");
+        continue;
+    }
+
+    if (input.Equals("kill dummy", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("kill the dummy", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("You try to strangle the dummy but realise it doesn't breathe.");
+        continue;
+    }
+
+    if (input.Equals("kiss dummy", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("kiss the dummy", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("Eeew! No!");
+        continue;
+    }
+
+    if (input.Equals("hug dummy", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("hug the dummy", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("The dummy pushes you away and shakes its head.\nA dark voice in the distance says, \"Eeew no! I am a married spooky dummy.\"");
+        continue;
+    }
+
+    if (input.Equals("take a leak", StringComparison.OrdinalIgnoreCase) ||
+        input.Equals("take leak", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine("You take a quick run to the toilet to pee.");
+        continue;
+    }
+
+    if (input.StartsWith("listen", StringComparison.OrdinalIgnoreCase) &&
+        (input.Contains("rain", StringComparison.OrdinalIgnoreCase) ||
+         input.Contains("rhythm", StringComparison.OrdinalIgnoreCase) ||
+         input.Contains("rythm", StringComparison.OrdinalIgnoreCase)))
+    {
+        Console.WriteLine("It's soothing and harmonious.");
         continue;
     }
 
@@ -224,5 +312,21 @@ while (true)
         WriteResult(result);
     }
 
-    if (result.ShouldQuit) break;
+    if (!dummy.IsAlive && !brokenDummyPlaced)
+    {
+        attic.RemoveNpc(dummy);
+        attic.AddItem(brokenDummy);
+        brokenDummyPlaced = true;
+    }
+
+    if (!storm.IsAlive)
+    {
+        Console.WriteLine("The bucket receives the final, obedient drops. The storm, at last, withdraws.");
+        break;
+    }
+
+    if (result.ShouldQuit)
+    {
+        break;
+    }
 }

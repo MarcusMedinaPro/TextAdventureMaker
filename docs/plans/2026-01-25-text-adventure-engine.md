@@ -3727,20 +3727,150 @@ MarcusMedina.TextAdventure
 
 ---
 
-### 🔄 Mappning mellan stilar
+### 🔄 Komplett LINQ → Story Mappning
 
-| Operation | LINQ-stil | Story-stil |
-|-----------|-----------|------------|
-| Filtrera på tag | `Where(i => i.HasTag("x"))` | `ThatAre("x")` |
-| Filtrera på tillstånd | `Where(i => i.Condition > 50)` | `InGoodCondition()` |
-| Finns något? | `Any(i => i.Id == "key")` | `Has("key")` |
-| Alla matchar? | `All(i => i.IsTakeable)` | `EverythingCanBeTaken()` |
-| Första | `First()` | `TheFirst()` |
-| Sortera | `OrderBy(i => i.Name)` | `Alphabetically()` |
-| Sortera fallande | `OrderByDescending(i => i.Value)` | `MostValuableFirst()` |
-| Transformera | `Select(i => i.Name)` | `TheirNames()` |
-| Räkna | `Count()` | `HowMany()` |
-| Ta N | `Take(3)` | `TheFirstFew(3)` |
+#### Filtrering & Sökning
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Filter | `Where(i => i.HasTag("x"))` | `ThatAre("x")` | `items.ThatAre("weapon")` |
+| Filter | `Where(i => predicate)` | `ThatMatch(predicate)` | `npcs.ThatMatch(n => n.IsHostile)` |
+| Finns? | `Any()` | `ThereAreAny()` | `if (room.Items.ThereAreAny())` |
+| Finns med villkor? | `Any(i => ...)` | `ThereExists(...)` | `ThereExists(i => i.IsKey)` |
+| Alla matchar? | `All(i => ...)` | `AllAre(...)` / `Everyone(...)` | `Everyone(n => n.IsFriendly)` |
+| Innehåller? | `Contains(item)` | `Includes(item)` | `inventory.Includes(sword)` |
+
+#### Välja element
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Första | `First()` | `TheFirst()` | `enemies.TheFirst()` |
+| Första eller null | `FirstOrDefault()` | `TheFirstOrNone()` | `keys.TheFirstOrNone()` |
+| Sista | `Last()` | `TheLast()` | `breadcrumbs.TheLast()` |
+| Sista eller null | `LastOrDefault()` | `TheLastOrNone()` | `clues.TheLastOrNone()` |
+| Enda | `Single()` | `TheOnly()` / `TheOne()` | `TheOnly(k => k.FitsLock(door))` |
+| Enda eller null | `SingleOrDefault()` | `TheOnlyOrNone()` | `bosses.TheOnlyOrNone()` |
+| På index | `ElementAt(n)` | `TheNth(n)` | `rooms.TheNth(3)` |
+| På index eller null | `ElementAtOrDefault(n)` | `TheNthOrNone(n)` | `clues.TheNthOrNone(5)` |
+
+#### Transformation
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Transformera | `Select(i => i.Name)` | `TheirNames()` | `npcs.TheirNames()` |
+| Transformera | `Select(i => i.X)` | `Their(i => i.X)` | `items.Their(i => i.Weight)` |
+| Platta ut | `SelectMany(i => i.Items)` | `AndTheirContents()` | `containers.AndTheirContents()` |
+| Typfilter | `OfType<Weapon>()` | `OnlyWeapons()` | `inventory.OnlyWeapons()` |
+| Typfilter | `OfType<Key>()` | `OnlyKeys()` | `items.OnlyKeys()` |
+| Typfilter | `OfType<Npc>()` | `OnlyCharacters()` | `entities.OnlyCharacters()` |
+
+#### Sortering
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Sortera stigande | `OrderBy(i => i.Name)` | `Alphabetically()` | `items.Alphabetically()` |
+| Sortera stigande | `OrderBy(i => i.X)` | `ByAscending(i => i.X)` | `ByAscending(i => i.Weight)` |
+| Sortera fallande | `OrderByDescending(i => i.Value)` | `MostValuableFirst()` | `treasures.MostValuableFirst()` |
+| Sortera fallande | `OrderByDescending(i => i.X)` | `ByDescending(i => i.X)` | `ByDescending(i => i.Damage)` |
+| Sedan sortera | `ThenBy(i => i.X)` | `ThenBy(i => i.X)` | `.ThenBy(i => i.Name)` |
+| Omvänd ordning | `Reverse()` | `InReverseOrder()` | `path.InReverseOrder()` |
+
+#### Aggregering
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Räkna | `Count()` | `HowMany()` | `enemies.HowMany()` |
+| Räkna med villkor | `Count(i => ...)` | `HowManyAre(...)` | `HowManyAre(n => n.IsAlive)` |
+| Summa | `Sum(i => i.Weight)` | `TotalWeight()` | `inventory.TotalWeight()` |
+| Summa | `Sum(i => i.Value)` | `TotalValue()` | `treasures.TotalValue()` |
+| Summa | `Sum(i => i.X)` | `TotalOf(i => i.X)` | `TotalOf(i => i.Damage)` |
+| Min | `Min(i => i.Weight)` | `TheLightest()` | `items.TheLightest()` |
+| Min | `MinBy(i => i.X)` | `WithLowest(i => i.X)` | `WithLowest(i => i.Price)` |
+| Max | `Max(i => i.Damage)` | `TheStrongest()` | `weapons.TheStrongest()` |
+| Max | `MaxBy(i => i.X)` | `WithHighest(i => i.X)` | `WithHighest(i => i.Value)` |
+| Medel | `Average(i => i.X)` | `AverageOf(i => i.X)` | `AverageOf(i => i.Level)` |
+
+#### Begränsning & Partitionering
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Ta N | `Take(3)` | `TheFirstFew(3)` | `clues.TheFirstFew(3)` |
+| Hoppa N | `Skip(2)` | `ExceptTheFirst(2)` | `pages.ExceptTheFirst(2)` |
+| Ta medan | `TakeWhile(i => ...)` | `UntilYouFind(...)` | `UntilYouFind(i => i.IsGoal)` |
+| Hoppa medan | `SkipWhile(i => ...)` | `AfterYouFind(...)` | `AfterYouFind(i => i.IsMarker)` |
+| Chunk | `Chunk(5)` | `InGroupsOf(5)` | `pages.InGroupsOf(5)` |
+
+#### Mängdoperationer
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Unika | `Distinct()` | `WithoutDuplicates()` | `visited.WithoutDuplicates()` |
+| Unika på prop | `DistinctBy(i => i.Type)` | `UniqueByType()` | `items.UniqueByType()` |
+| Union | `Union(other)` | `CombinedWith(other)` | `myItems.CombinedWith(foundItems)` |
+| Snitt | `Intersect(other)` | `InCommonWith(other)` | `needs.InCommonWith(available)` |
+| Differens | `Except(other)` | `ExcludingThoseIn(other)` | `all.ExcludingThoseIn(taken)` |
+| Konkatenera | `Concat(other)` | `FollowedBy(other)` | `path.FollowedBy(returnPath)` |
+
+#### Materialisering
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Till lista | `ToList()` | `Gathered()` | `treasures.Gathered()` |
+| Till array | `ToArray()` | `AsArray()` | `clues.AsArray()` |
+| Till dictionary | `ToDictionary(i => i.Id)` | `IndexedById()` | `items.IndexedById()` |
+| Till lookup | `ToLookup(i => i.Type)` | `GroupedByType()` | `inventory.GroupedByType()` |
+
+#### Villkor & Default
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Default om tom | `DefaultIfEmpty(x)` | `OrIfNone(x)` | `weapons.OrIfNone(fists)` |
+| Append | `Append(item)` | `AndAlso(item)` | `inventory.AndAlso(newItem)` |
+| Prepend | `Prepend(item)` | `StartingWith(item)` | `queue.StartingWith(urgent)` |
+
+#### Jämförelse & Join
+
+| Kategori | LINQ-stil | Story-stil | Äventyrsexempel |
+|----------|-----------|------------|-----------------|
+| Lika sekvens? | `SequenceEqual(other)` | `MatchesExactly(other)` | `code.MatchesExactly(solution)` |
+| Zip | `Zip(other, (a,b) => ...)` | `PairedWith(other)` | `keys.PairedWith(locks)` |
+| Group | `GroupBy(i => i.Type)` | `GroupedBy(i => i.Type)` | `GroupedBy(i => i.Category)` |
+
+---
+
+### 🎮 Äventyrsspecifika Extensions (utöver LINQ)
+
+Story-namespacet har även extensions som inte har LINQ-motsvarighet:
+
+```csharp
+// Rumsrelaterade
+items.InCurrentRoom()           // Filtrerar till nuvarande rum
+items.InLocation(room)          // Filtrerar till specifikt rum
+items.NearThePlayer()           // Inom räckhåll
+items.VisibleToPlayer()         // Synliga (ej dolda)
+
+// Tillståndsrelaterade
+items.ThatCanBeTaken()          // Takeable items
+items.ThatAreUsable()           // Har use-action
+items.ThatAreLocked()           // Låsta
+items.ThatAreOpen()             // Öppna
+
+// NPC-relaterade
+npcs.WhoAreHostile()            // Fientliga
+npcs.WhoAreFriendly()           // Vänliga
+npcs.WhoCanSpeak()              // Har dialog
+npcs.WhoAreAlive()              // Levande
+
+// Container-relaterade
+containers.ThatContain("key")   // Har specifikt item
+containers.ThatAreEmpty()       // Tomma
+containers.WithItems()          // Har något i sig
+
+// Narrativa
+items.MentionedInStory()        // Refererade i text
+items.ImportantToPlot()         // Har quest-koppling
+items.SeenBefore()              // Spelaren har sett dem
+```
 
 ---
 

@@ -2055,7 +2055,7 @@ World.Add(Archetypes.WanderingMerchant()
 | 39  | Fluent API & Språksnygghet            | Builder, Factory     | 🟨     |
 | 40  | GitHub Wiki (TextAdventure.wiki)      | -                    | 🟨     |
 | 41  | Testing & Validation Tools            | Visitor, Strategy    | ⬜     |
-| 42  | Story-LINQ (Narrative Query Language) | LINQ, Builder, State | ⬜     |
+| 42  | API Design: "LINQ for Adventures"     | Fluent API, Builder  | ⬜     |
 | 43  | Map Generator                         | -                    | ⬜     |
 | 44  | String Case Utilities                 | -                    | ✅     |
 | 45  | Generic Fixes                         | -                    | ⬜     |
@@ -2359,7 +2359,7 @@ public static class GrammarExtensions
 - **Propp's Functions** - Procedural narrative byggstenar
 - **Rule-Based Dialog** - Left 4 Dead-stil dynamisk dialog
 - **Testing Your Adventure** - (från Usborne: test allt, låt andra spela)
-- **Story-LINQ Guide** - Narrativ state management med LINQ-syntax
+- **Fluent API Guide** - LINQ-liknande syntax för äventyrsskapande
 
 ### Wiki: Reference & Theory (Nörd-sektionen 🤓)
 
@@ -2414,7 +2414,7 @@ Command
 | **Factory**   | Skapa objekt utan att veta konkret typ | Items.Create("sword")                             |
 | **Builder**   | Fluent konstruktion                    | GameBuilder, LocationBuilder                      |
 | **Decorator** | Lägg till beteende runtime             | RustyModifier, EnchantedModifier                  |
-| **Facade**    | Förenkla komplext subsystem            | OllamaFacade, StoryLinq                           |
+| **Facade**    | Förenkla komplext subsystem            | OllamaFacade, GameEngine                          |
 
 #### ⚠️ Common Pitfalls (Anti-patterns)
 
@@ -2559,7 +2559,7 @@ A warm, cluttered space.
 ```
 
 ```csharp
-// Story-LINQ för samma effekt:
+// Fluent API (LINQ-liknande) för samma effekt:
 story.When(s => s.Location == kitchen)
     .Choice("Take the spoon", () => player.Take(spoon))
     .Choice("Leave", () => player.GoTo(hallway));
@@ -2571,11 +2571,11 @@ story.When(s => s.Location == kitchen)
 | --------------- | --------------- | ----------- | --------- | ------------ | ---------------------------- |
 | Language        | Natural English | C-like      | HTML/CSS  | Markdown-ish | **C#**                       |
 | Parser          | Built-in        | Built-in    | None      | None         | **KeywordParser**            |
-| State mgmt      | World model     | World model | Variables | Variables    | **WorldState + Story-LINQ**  |
+| State mgmt      | World model     | World model | Variables | Variables    | **WorldState + Fluent API**  |
 | Extensible      | Limited         | Yes         | JS        | C#           | **Full .NET**                |
 | IDE support     | Inform IDE      | TADS WB     | Web       | Unity/Inky   | **VS/Rider**                 |
 | Testing         | Skein           | -           | -         | -            | **Validator**                |
-| Narrative tools | Basic           | Basic       | Basic     | Weave/Knots  | **Story-LINQ, Arcs, Themes** |
+| Narrative tools | Basic           | Basic       | Basic     | Weave/Knots  | **Fluent API, Arcs, Themes** |
 | NuGet/Package   | No              | No          | No        | Yes          | **Yes**                      |
 
 #### 📖 Glossary
@@ -3283,7 +3283,7 @@ Dessa sidor hjälper spelskapare att planera innan de kodar.
 | If-else-helvete för dialog | Rule-based dialog system               |
 | Svårt att testa            | `Validator.FindUnreachableLocations()` |
 | Hårdkodade beskrivningar   | Dynamic descriptions + layers          |
-| Ingen struktur för story   | Story-LINQ + Narrative Arcs            |
+| Ingen struktur för story   | Fluent API + Narrative Arcs            |
 
 **Från plan till kod — 1:1 mapping:**
 
@@ -3298,10 +3298,10 @@ PLAN                          CODE
 "Mål: hitta receptet"     →   quest.Goal(player.Has("recipe"))
 ```
 
-**Story-LINQ mapping:**
+**Fluent API för narrativ (LINQ-liknande mönster):**
 
 ```
-PLAN                              STORY-LINQ
+PLAN                              FLUENT API
 ────                              ──────────
 "Spelaren vaknar trött"       →   .DefineNeed(Need.WakeUp)
 "Kaffe gör en pigg"           →   .When(has("coffee")).Satisfy(Need.WakeUp)
@@ -3607,11 +3607,25 @@ var achievable = validator.ValidateTargetStories();
 
 ---
 
-## Slice 42: Story-LINQ (Narrative Query Language)
+## Slice 42: API Design Philosophy — "LINQ for Adventures"
 
-**Mål:** LINQ-inspirerad fluent syntax för narrativ state management. Svaret på livet, universum och allting.
+**Mål:** Säkerställa att hela bibliotekets API följer samma fluent, kedjebara mönster som C#-utvecklare älskar från LINQ. Svaret på livet, universum och allting.
+
+> **OBS:** "LINQ for Adventures" är inte en funktion eller klass — det är bibliotekets designfilosofi.
+> Precis som LINQ ger en enhetlig, läsbar syntax för datamanipulation, ska TextAdventure ge
+> samma upplevelse för äventyrsskapande. Kedjade metoder, lambda-uttryck, fluent API.
 
 _"Berättelse är inte text. Berättelse är tillståndsförändring med mening."_
+
+### Designprinciper
+
+| LINQ | TextAdventure | Koncept |
+|------|---------------|---------|
+| `Where(x => ...)` | `When(s => ...)` | Villkor/Filter |
+| `Select(x => ...)` | `Shift(s => ...)` | Transformation |
+| `ToList()` | `Execute()` | Materialisering |
+| Extension methods | Extension methods | Kedjebar syntax |
+| `IEnumerable<T>` | `IStoryState` | Genomgående interface |
 
 ### Kärnkoncept
 
@@ -3667,14 +3681,19 @@ public enum Theme
 }
 ```
 
-### Task 42.2: Story-LINQ Operators
+### Task 42.2: LINQ-liknande Extension Methods
 
 ```csharp
-public static class StoryLinq
-{
-    // === QUERY OPERATORS ===
+// Dessa extension methods följer LINQ-mönstret:
+// - Kedjebara (returnerar samma/liknande typ)
+// - Använder lambda-uttryck för flexibilitet
+// - Läsbara som naturligt språk
 
-    // When - precondition (som Where i LINQ)
+public static class StoryExtensions
+{
+    // === QUERY OPERATORS (som Where/Any i LINQ) ===
+
+    // When - precondition (motsvarar Where)
     public static IStoryQuery When(this IStory story,
         Func<IStoryState, bool> condition);
 
@@ -3886,7 +3905,7 @@ story.OnThemeReaches(Theme.Trust, 0.5f, ctx => {
 });
 ```
 
-### Task 42.9: Story-LINQ DSL
+### Task 42.9: DSL för Narrative Beats
 
 ```dsl
 # Deklarativ syntax för icke-programmerare
@@ -3931,7 +3950,7 @@ theme_arc "trust" {
 ### Task 42.10: Integration med existerande slices
 
 ```csharp
-// Story-LINQ integrerar med Event System (Slice 6)
+// Fluent narrative API integrerar med Event System (Slice 6)
 story.OnEvent("player_enters_location")
     .When(s => s.Location.HasTag("childhood_home"))
     .And(s => s.State.Memories.Contains("happy_childhood"))
@@ -3960,7 +3979,7 @@ quest.OnComplete()
 // Komplett implementation av kaffe-och-bok-scenariot
 
 var morningGame = new GameBuilder()
-    .WithStoryLinq()  // Aktivera Story-LINQ
+    .WithNarrativeBeats()  // Aktivera narrative beat system
     .Build();
 
 // Definiera tillstånd

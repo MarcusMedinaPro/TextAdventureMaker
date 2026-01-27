@@ -2055,7 +2055,7 @@ World.Add(Archetypes.WanderingMerchant()
 | 39  | Fluent API & Språksnygghet            | Builder, Factory     | 🟨     |
 | 40  | GitHub Wiki (TextAdventure.wiki)      | -                    | 🟨     |
 | 41  | Testing & Validation Tools            | Visitor, Strategy    | ⬜     |
-| 42  | API Design: "LINQ for Adventures"     | Fluent API, Builder  | ⬜     |
+| 42  | API Design: Fluent Query Extensions   | Fluent API, Builder  | ⬜     |
 | 43  | Map Generator                         | -                    | ⬜     |
 | 44  | String Case Utilities                 | -                    | ✅     |
 | 45  | Generic Fixes                         | -                    | ⬜     |
@@ -3607,9 +3607,46 @@ var achievable = validator.ValidateTargetStories();
 
 ---
 
-## Slice 42: API Design Philosophy — "LINQ for Adventures"
+## Slice 42: API Design Philosophy — Fluent Query Extensions
 
-**Mål:** Säkerställa att hela bibliotekets API följer samma fluent, kedjebara mönster som C#-utvecklare älskar från LINQ. Svaret på livet, universum och allting.
+**Mål:** Säkerställa att hela bibliotekets API följer samma fluent, kedjebara mönster som C#-utvecklare känner igen. Svaret på livet, universum och allting.
+
+---
+
+### 🏗️ Arkitektur: Fyra Lager
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  .adventure DSL                                         │  ← Deklarativt
+│  "Skriv äventyr utan C#-kunskap"                        │    (location: kitchen | A kitchen.)
+├─────────────────────────────────────────────────────────┤
+│  MarcusMedina.TextAdventure.Story                       │  ← Berättarstil
+│  "Narrative Query Extensions"                           │    (ThatAre, Has, Takes)
+├─────────────────────────────────────────────────────────┤
+│  MarcusMedina.TextAdventure.Linq                        │  ← LINQ-kompatibel
+│  "LINQ-compatible Query Extensions"                     │    (Where, Select, Any)
+├─────────────────────────────────────────────────────────┤
+│  MarcusMedina.TextAdventure.Core                        │  ← Kärna
+│  Item, Location, GameState, etc.                        │    (Vanlig C#)
+└─────────────────────────────────────────────────────────┘
+
+      ↑ Högre = Enklare syntax, mindre kontroll
+      ↓ Lägre = Mer kod, full kontroll
+```
+
+**Välj ditt lager efter behov:**
+
+| Lager | Målgrupp | Exempel |
+|-------|----------|---------|
+| **DSL** | Designers, författare, nybörjare | `location: cave \| A dark cave.` |
+| **Story** | C#-utvecklare som vill ha läsbar kod | `hero.Takes("sword").AndGoesTo(dungeon)` |
+| **Linq** | C#-utvecklare som vill ha bekant syntax | `items.Where(i => i.IsTakeable).First()` |
+| **Core** | Avancerade användare, biblioteksbyggare | `new Item("sword", "sword", "A sword.")` |
+
+> **OBS om namngivning:** `.Linq`-namespacet innehåller *LINQ-kompatibla query extensions* för
+> TextAdventure-objekt. Detta är **inte** en Microsoft-produkt och är inte affilierat med Microsoft.
+> Vi använder samma mönster och metodnamn (Where, Select, etc.) för att ge en bekant upplevelse,
+> men all kod är vår egen implementation.
 
 ---
 
@@ -3618,20 +3655,22 @@ var achievable = validator.ValidateTargetStories();
 TextAdventure erbjuder **två parallella API-stilar** i separata namespaces:
 
 ```csharp
-using MarcusMedina.TextAdventure.Linq;   // För den tekniske utvecklaren
-using MarcusMedina.TextAdventure.Story;  // För den kreative berättaren
+using MarcusMedina.TextAdventure.Linq;   // LINQ-compatible query extensions
+using MarcusMedina.TextAdventure.Story;  // Narrative query extensions
 ```
 
 **Varför två stilar?**
 
-1. **LINQ-stil** — För utvecklare som tänker i data och transformationer
-   - Bekant syntax från dagligt C#-arbete
+1. **LINQ-kompatibel stil** (`TextAdventure.Linq`)
+   - Bekant syntax för C#-utvecklare
+   - Samma metodnamn som System.Linq (Where, Select, Any, All, First...)
    - Exakt, teknisk, förutsägbar
    - Perfekt för komplexa queries och villkor
 
-2. **Story-stil** — För utvecklare som tänker i berättelser
+2. **Berättarstil** (`TextAdventure.Story`)
    - Kod som läses som prosa
-   - Uttrycksfull, narrativ, poetisk
+   - Uttrycksfulla metodnamn (ThatAre, Has, Takes, GoesTo...)
+   - Narrativ och poetisk
    - Perfekt för att se spelets logik som en historia
 
 **Samma operation, två uttryck:**

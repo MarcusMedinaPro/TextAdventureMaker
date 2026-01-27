@@ -30,6 +30,10 @@ public class GameState : IGameState
     public ISaveSystem SaveSystem { get; }
     public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
+    /// <summary>Enable fuzzy matching for commands and targets.</summary>
+    public bool EnableFuzzyMatching { get; set; }
+    /// <summary>Maximum edit distance for fuzzy matching.</summary>
+    public int FuzzyMaxDistance { get; set; } = 1;
     public IReadOnlyCollection<ILocation> Locations => _locations.Values;
 
     public GameState(

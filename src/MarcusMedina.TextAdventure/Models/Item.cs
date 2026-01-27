@@ -36,6 +36,7 @@ public class Item : IItem
     public event Action<IItem>? OnTake;
     public event Action<IItem>? OnDrop;
     public event Action<IItem>? OnUse;
+    public event Action<IItem>? OnMove;
     public event Action<IItem>? OnDestroy;
 
     public Item(string id, string name)
@@ -161,6 +162,11 @@ public class Item : IItem
     public void Use()
     {
         OnUse?.Invoke(this);
+    }
+
+    public void Move()
+    {
+        OnMove?.Invoke(this);
     }
 
     public void Destroy()

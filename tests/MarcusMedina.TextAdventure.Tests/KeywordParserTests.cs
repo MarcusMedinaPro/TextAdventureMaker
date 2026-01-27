@@ -16,6 +16,7 @@ public class KeywordParserTests
         return new KeywordParserConfig(
             quit: CommandHelper.NewCommands("quit", "exit", "q"),
             look: CommandHelper.NewCommands("look", "l", "ls"),
+            examine: CommandHelper.NewCommands("examine", "x"),
             inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
             stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
             open: CommandHelper.NewCommands("open"),
@@ -25,6 +26,7 @@ public class KeywordParserTests
             use: CommandHelper.NewCommands("use", "eat", "bite"),
             combine: CommandHelper.NewCommands("combine", "mix"),
             pour: CommandHelper.NewCommands("pour"),
+            move: CommandHelper.NewCommands("move", "push", "shift"),
             go: CommandHelper.NewCommands("go", "move", "cd"),
             read: CommandHelper.NewCommands("read"),
             talk: CommandHelper.NewCommands("talk", "speak"),
@@ -81,6 +83,52 @@ public class KeywordParserTests
         var command = parser.Parse(input);
 
         Assert.IsType<LookCommand>(command);
+    }
+
+    [Theory]
+    [InlineData("move stone")]
+    [InlineData("push stone")]
+    public void Parse_Move_ReturnsMoveCommand(string input)
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse(input);
+
+        Assert.IsType<MoveCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_MoveWithDirection_ReturnsGoCommand()
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse("move north");
+
+        var go = Assert.IsType<GoCommand>(command);
+        Assert.Equal(Direction.North, go.Direction);
+    }
+
+    [Theory]
+    [InlineData("examine")]
+    [InlineData("x")]
+    public void Parse_Examine_ReturnsExamineCommand(string input)
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse(input);
+
+        Assert.IsType<ExamineCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_ExamineAt_ReturnsExamineCommandWithTarget()
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse("examine key");
+
+        var examine = Assert.IsType<ExamineCommand>(command);
+        Assert.Equal("key", examine.Target);
     }
 
     [Fact]

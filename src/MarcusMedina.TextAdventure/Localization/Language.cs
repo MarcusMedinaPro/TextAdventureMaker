@@ -34,6 +34,8 @@ public static class Language
     public static string NoSuchItemInventory => _provider.Get("NoSuchItemInventory");
     public static string NothingToLookAt => _provider.Get("NothingToLookAt");
     public static string ExamineWhat => _provider.Get("ExamineWhat");
+    public static string DidYouMean(string suggestion) =>
+        _provider.Format("DidYouMeanTemplate", suggestion);
     public static string CannotTakeItem => _provider.Get("CannotTakeItem");
     public static string TooHeavy => _provider.Get("TooHeavy");
     public static string NothingToTake => _provider.Get("NothingToTake");
@@ -44,6 +46,8 @@ public static class Language
     public static string CannotReadThat => _provider.Get("CannotReadThat");
     public static string MustTakeToRead => _provider.Get("MustTakeToRead");
     public static string TooDarkToRead => _provider.Get("TooDarkToRead");
+    public static string NothingToMove => _provider.Get("NothingToMove");
+    public static string CannotMoveItem => _provider.Get("CannotMoveItem");
     public static string NoOneToTalkTo => _provider.Get("NoOneToTalkTo");
     public static string NoSuchNpcHere => _provider.Get("NoSuchNpcHere");
     public static string NpcHasNothingToSay => _provider.Get("NpcHasNothingToSay");
@@ -105,6 +109,12 @@ public static class Language
 
     public static string ItemDescription(string itemName) =>
         _provider.Format("ItemDescriptionTemplate", itemName);
+
+    public static string MoveItem(string itemName) =>
+        _provider.Format("MoveItemTemplate", itemName);
+
+    public static string CanTakeInstead(string itemName) =>
+        _provider.Format("CanTakeInsteadTemplate", itemName);
 
     public static string DoorAlreadyOpenMessage(string doorName) =>
         _provider.Format("DoorAlreadyOpen", doorName);
@@ -168,6 +178,7 @@ public static class Language
             ["NoSuchItemInventory"] = "You don't have that.",
             ["NothingToLookAt"] = "You don't see that here.",
             ["ExamineWhat"] = "Examine what?",
+            ["DidYouMeanTemplate"] = "I think you mean \"{0}\".",
             ["CannotTakeItem"] = "You can't take that.",
             ["TooHeavy"] = "You're carrying too much.",
             ["NothingToTake"] = "There's nothing to take.",
@@ -178,6 +189,10 @@ public static class Language
             ["CannotReadThat"] = "You can't read that.",
             ["MustTakeToRead"] = "You need to pick it up first.",
             ["TooDarkToRead"] = "It's too dark to read.",
+            ["NothingToMove"] = "Move what?",
+            ["CannotMoveItem"] = "You can't move that.",
+            ["MoveItemTemplate"] = "You move the {0}.",
+            ["CanTakeInsteadTemplate"] = "You can just take the {0}.",
             ["NoOneToTalkTo"] = "There's no one here to talk to.",
             ["NoSuchNpcHere"] = "You don't see anyone like that.",
             ["NpcHasNothingToSay"] = "They have nothing to say.",

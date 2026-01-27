@@ -36,14 +36,19 @@ platform.AddItem(tea);
 platform.AddExit(Direction.In, carriage, oneWay: true);
 
 var state = new GameState(platform, worldLocations: new[] { platform, carriage });
+state.EnableFuzzyMatching = true;
+state.FuzzyMaxDistance = 1;
 
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
+    .WithExamine("examine", "x")
+    .WithMove("move", "push", "shift", "lift", "slide")
     .WithInventory("inventory", "inv", "i")
     .WithTake("take", "get", "pick")
     .WithDrop("drop")
     .WithUse("use", "drink", "sip")
     .WithGo("go", "move")
+    .WithFuzzyMatching(true, 1)
     .WithIgnoreItemTokens("on", "off")
     .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
@@ -54,7 +59,7 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
 var parser = new KeywordParser(parserConfig);
 
 Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
-Console.WriteLine("Commands: Look, Take <Item>, Drop <Item>, Use/Drink <Item>, Inventory, Go In/Out, Board, Quit");
+Console.WriteLine("Commands: Look, Examine <Item>, Move <Item>, Take <Item>, Drop <Item>, Use/Drink <Item>, Inventory, Go In/Out, Board, Quit");
 ShowLookResult(state.Look());
 
 void WriteResult(CommandResult result)

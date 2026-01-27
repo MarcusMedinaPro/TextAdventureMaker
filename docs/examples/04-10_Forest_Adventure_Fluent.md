@@ -235,6 +235,7 @@ state.Events.Subscribe(GameEventType.TalkToNpc, e =>
 var parserConfig = new KeywordParserConfig(
     quit: CommandHelper.NewCommands("quit", "exit", "q"),
     look: CommandHelper.NewCommands("look", "l", "ls"),
+    examine: CommandHelper.NewCommands("examine", "x"),
     inventory: CommandHelper.NewCommands("inventory", "inv", "i"),
     stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
     open: CommandHelper.NewCommands("open"),
@@ -244,6 +245,7 @@ var parserConfig = new KeywordParserConfig(
     use: CommandHelper.NewCommands("use", "eat", "bite"),
     combine: CommandHelper.NewCommands("combine", "mix"),
     pour: CommandHelper.NewCommands("pour"),
+    move: CommandHelper.NewCommands("move", "push", "shift", "lift", "slide"),
     go: CommandHelper.NewCommands("go", "move", "cd"),
     read: CommandHelper.NewCommands("read"),
     talk: CommandHelper.NewCommands("talk", "speak"),
@@ -270,7 +272,9 @@ var parserConfig = new KeywordParserConfig(
         ["in"] = Direction.In,
         ["out"] = Direction.Out
     },
-    allowDirectionEnumNames: true);
+    allowDirectionEnumNames: true,
+    enableFuzzyMatching: true,
+    fuzzyMaxDistance: 1);
 
 var parser = new KeywordParser(parserConfig);
 

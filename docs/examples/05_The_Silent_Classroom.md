@@ -37,10 +37,15 @@ var student = new Npc("student", "student")
 classroom.AddNpc(student);
 
 var state = new GameState(classroom, worldLocations: new[] { classroom });
-var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
+state.EnableFuzzyMatching = true;
+state.FuzzyMaxDistance = 1;
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
+    .WithMove("move", "push", "shift", "lift", "slide")
+    .WithFuzzyMatching(true, 1)
+    .Build());
 
 Console.WriteLine("=== THE SILENT CLASSROOM (Slice 5) ===");
-Console.WriteLine("Commands: Look, Talk <Npc>, Inventory, Quit");
+Console.WriteLine("Commands: Look, Examine <Item>, Move <Item>, Talk <Npc>, Inventory, Quit");
 
 void WriteResult(CommandResult result)
 {

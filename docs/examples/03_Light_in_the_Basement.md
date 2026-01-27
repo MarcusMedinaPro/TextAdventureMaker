@@ -65,13 +65,20 @@ F = Flashlight (in inventory)
 ## Demo commands (parser)
 
 - `look` / `l`
+- `examine <item>` / `x <item>`
 - `take <item>`
+- `move <item>`
 - `unlock door`
 - `open door`
 - `go down` / `down` / `d`
 - `use flashlight` / `turn on flashlight` / `turn off flashlight`
 - `inventory` / `i`
 - `quit` / `exit`
+
+## Optional helpers
+
+- `\"Steven\".SoundsLike(\"Stephen\")` → `true`
+- `\"look\".SimilarTo(\"lokk\")` → `1`
 
 ## Example (parser + built-in commands)
 
@@ -108,10 +115,15 @@ hallway.AddExit(Direction.Down, basement, basementDoor);
 
 var state = new GameState(hallway, worldLocations: new[] { hallway, basement });
 state.Inventory.Add(flashlight);
+state.EnableFuzzyMatching = true;
+state.FuzzyMaxDistance = 1;
 var isKeyRevealed = false;
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithStats("stats")
+    .WithFuzzyMatching(true, 1)
+    .WithExamine("examine", "x")
     .WithTake("take", "get")
+    .WithMove("move", "push", "shift", "lift", "slide")
     .WithUse("use", "turn", "switch", "light", "torch")
     .WithGo("go")
     .WithIgnoreItemTokens("on", "off")
@@ -126,7 +138,7 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
 var parser = new KeywordParser(parserConfig);
 
 Console.WriteLine("=== LIGHT IN THE BASEMENT (Slice 3) ===");
-Console.WriteLine("Commands: Look, Take <Item>, Unlock/Open Door, Go Down, Use/Turn On/Off Flashlight, Inventory, Quit");
+Console.WriteLine("Commands: Look, Examine <Item>, Take <Item>, Move <Item>, Unlock/Open Door, Go Down, Use/Turn On/Off Flashlight, Inventory, Quit");
 Console.WriteLine("It's dark. You can't see anything.");
 
 bool IsFlashlightCommand(ICommand command)

@@ -22,6 +22,8 @@ public interface IItem : IGameEntity
     event Action<IItem>? OnTake;
     event Action<IItem>? OnDrop;
     event Action<IItem>? OnUse;
+    /// <summary>Raised when the item is moved.</summary>
+    event Action<IItem>? OnMove;
     event Action<IItem>? OnDestroy;
 
     bool Matches(string name);
@@ -39,5 +41,7 @@ public interface IItem : IGameEntity
     void Take();
     void Drop();
     void Use();
+    /// <summary>Trigger the move event for this item.</summary>
+    void Move();
     void Destroy();
 }

@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
@@ -24,11 +25,24 @@ public class FleeCommand : ICommand
             ? location.FindNpc(Target)
             : location.Npcs.FirstOrDefault();
 
+        string? suggestion = null;
+        if (npc == null && !string.IsNullOrWhiteSpace(Target) &&
+            context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
+        {
+            var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
+            if (best != null)
+            {
+                npc = best;
+                suggestion = best.Name;
+            }
+        }
+
         if (npc == null)
         {
             return CommandResult.Fail(Language.NoOneToFlee, GameError.TargetNotFound);
         }
 
-        return context.State.CombatSystem.Flee(context.State, npc);
+        var result = context.State.CombatSystem.Flee(context.State, npc);
+        return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }
 }

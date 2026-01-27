@@ -4,6 +4,7 @@
 // </copyright>
 using System.Text;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
@@ -28,6 +29,16 @@ public class TalkCommand : ICommand
 
         var location = context.State.CurrentLocation;
         var npc = location.FindNpc(Target);
+        string? suggestion = null;
+        if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
+        {
+            var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
+            if (best != null)
+            {
+                npc = best;
+                suggestion = best.Name;
+            }
+        }
         if (npc == null)
         {
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
@@ -59,6 +70,7 @@ public class TalkCommand : ICommand
             }
         }
 
-        return CommandResult.Ok(builder.ToString());
+        var result = CommandResult.Ok(builder.ToString());
+        return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }
 }

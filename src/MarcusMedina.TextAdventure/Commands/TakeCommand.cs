@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
@@ -22,6 +23,16 @@ public class TakeCommand : ICommand
     {
         var location = context.State.CurrentLocation;
         var item = location.FindItem(ItemName);
+        string? suggestion = null;
+        if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
+        {
+            var best = FuzzyMatcher.FindBestItem(location.Items, ItemName, context.State.FuzzyMaxDistance);
+            if (best != null)
+            {
+                item = best;
+                suggestion = best.Name;
+            }
+        }
         if (item == null)
         {
             return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
@@ -51,8 +62,10 @@ public class TakeCommand : ICommand
         context.State.Events.Publish(new GameEvent(GameEventType.PickupItem, context.State, location, item));
 
         var onTake = item.GetReaction(ItemAction.Take);
-        return onTake != null
+        var result = onTake != null
             ? CommandResult.Ok(Language.TakeItem(item.Name), onTake)
             : CommandResult.Ok(Language.TakeItem(item.Name));
+
+        return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }
 }

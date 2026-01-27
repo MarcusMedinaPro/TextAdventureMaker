@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
@@ -27,6 +28,16 @@ public class AttackCommand : ICommand
 
         var location = context.State.CurrentLocation;
         var npc = location.FindNpc(Target);
+        string? suggestion = null;
+        if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
+        {
+            var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
+            if (best != null)
+            {
+                npc = best;
+                suggestion = best.Name;
+            }
+        }
         if (npc == null)
         {
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
@@ -43,6 +54,7 @@ public class AttackCommand : ICommand
         }
 
         context.State.Events.Publish(new GameEvent(GameEventType.CombatStart, context.State, location, npc: npc));
-        return context.State.CombatSystem.Attack(context.State, npc);
+        var result = context.State.CombatSystem.Attack(context.State, npc);
+        return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }
 }

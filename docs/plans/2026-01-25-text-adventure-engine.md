@@ -4744,7 +4744,10 @@ Story
 - `Use()` minskar amount om den finns (och tar bort item när 0)
 - `IItem.PresenceDescription` + `Item.SetPresenceDescription(string text)`
 - Look visar `PresenceDescription` mellan rumsbeskrivning och items/exits
-
+- KeywordParserConfigBuilder.WithWord("xyz") för att lägga till egna kommandon/ord med standard beteende
+- `IItem.IsStackable` + `Item.SetStackable(bool isStackable)`
+- 
+-
 ### Krav
 
 - Backwards compatible: items utan amount fungerar som tidigare.

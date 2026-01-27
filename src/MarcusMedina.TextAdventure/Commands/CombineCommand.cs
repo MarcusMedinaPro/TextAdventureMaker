@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
@@ -24,6 +25,30 @@ public class CombineCommand : ICommand
         var inventory = context.State.Inventory;
         var leftItem = inventory.FindItem(Left);
         var rightItem = inventory.FindItem(Right);
+        string? suggestion = null;
+
+        if (context.State.EnableFuzzyMatching)
+        {
+            if (leftItem == null && !FuzzyMatcher.IsLikelyCommandToken(Left))
+            {
+                var bestLeft = FuzzyMatcher.FindBestItem(inventory.Items, Left, context.State.FuzzyMaxDistance);
+                if (bestLeft != null)
+                {
+                    leftItem = bestLeft;
+                    suggestion ??= bestLeft.Name;
+                }
+            }
+
+            if (rightItem == null && !FuzzyMatcher.IsLikelyCommandToken(Right))
+            {
+                var bestRight = FuzzyMatcher.FindBestItem(inventory.Items, Right, context.State.FuzzyMaxDistance);
+                if (bestRight != null)
+                {
+                    rightItem = bestRight;
+                    suggestion ??= bestRight.Name;
+                }
+            }
+        }
 
         if (leftItem == null || rightItem == null)
         {
@@ -44,6 +69,7 @@ public class CombineCommand : ICommand
             inventory.Add(created);
         }
 
-        return CommandResult.Ok(Language.CombineResult(leftItem.Name, rightItem.Name));
+        var ok = CommandResult.Ok(Language.CombineResult(leftItem.Name, rightItem.Name));
+        return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

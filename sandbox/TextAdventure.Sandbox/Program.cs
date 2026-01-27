@@ -43,7 +43,8 @@ var stone = new Item(
         "A wide, flat stone, properly weighty, as though it enjoys being leaned upon.")
     .AddAliases("rock", "slab")
     .SetTakeable(false)
-    .Description("The surface is smooth from years of weather and hands resting there, perhaps pausing longer than strictly necessary.");
+    .Description("The surface is smooth from years of weather and hands resting there, perhaps pausing longer than strictly necessary.")
+    .SetReaction(ItemAction.Move, "You shift the stone aside with a soft scrape. Beneath it lies a small iron key, cool and promising.");
 
 var key = KeyBuilder.Create(
         "gate_key",
@@ -73,7 +74,21 @@ lane.AddItem(brick);
 var state = new GameState(garden, worldLocations: new[] { garden, lane });
 state.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith = true;
 state.ShowDirectionsWhenThereAreDirectionsVisibleOnly = true;
+state.EnableFuzzyMatching = true;
+state.FuzzyMaxDistance = 1;
 var isKeyRevealed = false;
+
+stone.OnMove += _ =>
+{
+    if (!isKeyRevealed)
+    {
+        isKeyRevealed = true;
+        garden.AddItem(key);
+        return;
+    }
+
+    stone.SetReaction(ItemAction.Move, "The stone has already been moved; it has no more secrets to offer.");
+};
 
 state.Events.Subscribe(GameEventType.PickupItem, e =>
 {
@@ -90,14 +105,17 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
 
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
+    .WithExamine("examine", "exam", "x")
     .WithInventory("inventory", "inv", "i")
     .WithTake("take", "get")
+    .WithMove("move", "push", "shift", "lift", "slide")
     .WithDrop("drop")
     .WithUse("use")
     .WithGo("go", "move")
     .WithUnlock("unlock")
     .WithOpen("open")
-    .WithIgnoreItemTokens("on", "off")
+    .WithFuzzyMatching(true, 1)
+    .WithIgnoreItemTokens("on", "off", "at", "the")
     .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
         ["n"] = Direction.North,
@@ -136,6 +154,13 @@ void ShowLookResult(CommandResult result)
         .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .ToList()
         ?? new List<string>();
+
+    if (lines.Count > 0 && lines[0].StartsWith("I think you mean", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine(lines[0]);
+        Console.WriteLine();
+        lines.RemoveAt(0);
+    }
 
     var description = lines.FirstOrDefault() ?? state.CurrentLocation.GetDescription();
     if (!string.IsNullOrWhiteSpace(description))
@@ -179,26 +204,7 @@ while (true)
         input.Equals("halp", StringComparison.OrdinalIgnoreCase) ||
         input == "?")
     {
-        Console.WriteLine("Commands: look, move/take stone, unlock/open gate, go north, inventory, quit");
-        continue;
-    }
-
-    if (input.Contains("stone", StringComparison.OrdinalIgnoreCase) &&
-        (input.StartsWith("move ", StringComparison.OrdinalIgnoreCase) ||
-         input.StartsWith("push ", StringComparison.OrdinalIgnoreCase) ||
-         input.StartsWith("shift ", StringComparison.OrdinalIgnoreCase) ||
-         input.StartsWith("lift ", StringComparison.OrdinalIgnoreCase)))
-    {
-        if (!isKeyRevealed)
-        {
-            isKeyRevealed = true;
-            garden.AddItem(key);
-            Console.WriteLine("You shift the stone aside with a soft scrape. Beneath it lies a small iron key, cool and promising.");
-        }
-        else
-        {
-            Console.WriteLine("The stone has already been moved; it has no more secrets to offer.");
-        }
+        Console.WriteLine("Commands: look, examine, move stone, take key, unlock/open gate, go north, inventory, quit");
         continue;
     }
 

@@ -26,5 +26,9 @@ public interface IGameState
     ISaveSystem SaveSystem { get; }
     bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
+    /// <summary>Enable fuzzy matching for commands and targets.</summary>
+    bool EnableFuzzyMatching { get; set; }
+    /// <summary>Maximum edit distance for fuzzy matching.</summary>
+    int FuzzyMaxDistance { get; set; }
     IReadOnlyCollection<ILocation> Locations { get; }
 }

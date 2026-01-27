@@ -4,6 +4,7 @@
 // </copyright>
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
 namespace MarcusMedina.TextAdventure.Commands;
@@ -30,7 +31,7 @@ public sealed class ExamineCommand : ICommand
             return new LookCommand().Execute(context);
         }
 
-        return new LookCommand(Target).Execute(context);
+        return LookCommand.ExecuteTarget(context, Target);
     }
 
     private static bool IsRoomReference(string locationId, string target)

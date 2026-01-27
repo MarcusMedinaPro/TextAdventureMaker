@@ -38,6 +38,13 @@ This document lists public functions, types, and helpers by slice, with tiny usa
 | `string.ToProperCase()` | `var title = "the long road".ToProperCase();` | Convert to title case using invariant culture. |
 | `string.ToSentenceCase()` | `var sentence = "hELLO there".ToSentenceCase();` | Capitalise the first letter and lower-case the rest. |
 | `string.ToCrazyCaps()` | `var chaos = "quiet night".ToCrazyCaps();` | Randomise casing per letter using `Random.Shared`. |
+| `string.LevenshteinDistanceTo()` | `"look".LevenshteinDistanceTo("lokk")` | Get the edit distance between two strings. |
+| `string.SimilarTo()` | `"look".SimilarTo("lokk")` | Friendly wrapper for Levenshtein distance. |
+| `string.FuzzyDistanceTo()` | `"look".FuzzyDistanceTo("loook", 1)` | Edit distance with collapsed repeats. |
+| `string.FuzzyMatch()` | `"look".FuzzyMatch("lokk", 1)` | True when fuzzy distance is within the max. |
+| `string.CollapseRepeats()` | `"loooook".CollapseRepeats()` | Collapse repeated characters. |
+| `string.SoundexKey()` | `"Steven".SoundexKey()` | Return the Soundex phonetic key. |
+| `string.SoundsLike()` | `"Steven".SoundsLike("Stephen")` | True when Soundex keys match. |
 
 ## Slice 3 — Command Pattern + Parser
 
@@ -49,9 +56,16 @@ This document lists public functions, types, and helpers by slice, with tiny usa
 | `KeywordParser(config)` | `var parser = new KeywordParser(KeywordParserConfig.Default);` | Built-in parser with keyword mapping. |
 | `KeywordParserConfig.Default` | `KeywordParserConfig.Default` | Default synonyms and direction aliases. |
 | `KeywordParserConfigBuilder.BritishDefaults()` | `KeywordParserConfigBuilder.BritishDefaults().Build();` | Builder for British English defaults. |
+| `KeywordParserConfigBuilder.WithExamine(...)` | `.WithExamine("examine", "x")` | Configure examine synonyms (separate from look). |
+| `KeywordParserConfigBuilder.WithMove(...)` | `.WithMove("move", "push")` | Configure move synonyms for objects. |
+| `KeywordParserConfigBuilder.WithFuzzyMatching(...)` | `.WithFuzzyMatching(true, 1)` | Enable fuzzy matching for command keywords and directions. |
+| `KeywordParserConfig.EnableFuzzyMatching` | `config.EnableFuzzyMatching` | Whether fuzzy matching is enabled for parsing. |
+| `KeywordParserConfig.FuzzyMaxDistance` | `config.FuzzyMaxDistance` | Maximum edit distance for fuzzy matching. |
 | `CommandExtensions.Execute(state, command)` | `var result = state.Execute(command);` | Execute a command with a `GameState`. |
 | `GoCommand` | `go down` | Moves by direction (via parser). |
 | `LookCommand` | `look` / `look door` | Look at room, item, or door (via parser). |
+| `ExamineCommand` | `examine door` | Examine a specific target (via parser). |
+| `MoveCommand` | `move stone` | Move or push an object in the room (via parser). |
 | `TakeCommand` | `take key` | Take an item into inventory (via parser). |
 | `OpenCommand` | `open door` | Open the first door in the room (via parser). |
 | `UnlockCommand` | `unlock door` | Unlock the first door in the room (via parser). |
@@ -66,6 +80,7 @@ This document lists public functions, types, and helpers by slice, with tiny usa
 | `Item.SetWeight(weight)` | `item.SetWeight(0.01f);` | Set item weight for inventory totals. |
 | `Item.AddAliases(...)` | `item.AddAliases("ticket", "pass");` | Add alternative names. |
 | `Item.SetReaction(action, text)` | `item.SetReaction(ItemAction.Use, "…");` | Set reactions for use/take/drop/etc. |
+| `ItemAction.Move` | `item.SetReaction(ItemAction.Move, "You shift it.");` | Reaction for moving/pushing an object. |
 | `IInventory` | `state.Inventory.Add(item);` | Player inventory (items + weight). |
 | `InventoryCommand` | `inventory` | List inventory items with total weight. |
 | `TakeCommand` | `take ticket` | Take an item from the room. |

@@ -108,6 +108,7 @@ state.Events.Subscribe(GameEventType.EnterLocation, e =>
 var parserConfig = new KeywordParserConfig(
     quit: CommandHelper.NewCommands("quit"),
     look: CommandHelper.NewCommands("look"),
+    examine: CommandHelper.NewCommands("examine"),
     inventory: CommandHelper.NewCommands("inventory"),
     stats: CommandHelper.NewCommands("stats"),
     open: CommandHelper.NewCommands("open"),
@@ -117,6 +118,7 @@ var parserConfig = new KeywordParserConfig(
     use: CommandHelper.NewCommands("use"),
     combine: CommandHelper.NewCommands("combine"),
     pour: CommandHelper.NewCommands("pour"),
+    move: CommandHelper.NewCommands("move", "push", "shift", "lift", "slide"),
     go: CommandHelper.NewCommands("go"),
     read: CommandHelper.NewCommands("read"),
     talk: CommandHelper.NewCommands("talk"),
@@ -133,7 +135,9 @@ var parserConfig = new KeywordParserConfig(
         ["e"] = Direction.East,
         ["w"] = Direction.West
     },
-    allowDirectionEnumNames: true);
+    allowDirectionEnumNames: true,
+    enableFuzzyMatching: true,
+    fuzzyMaxDistance: 1);
 
 var parser = new KeywordParser(parserConfig);
 

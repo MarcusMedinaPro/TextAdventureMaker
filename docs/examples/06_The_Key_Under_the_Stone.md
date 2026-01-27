@@ -37,6 +37,8 @@ garden.AddExit(Direction.North, garden, gate);
 
 // Game state
 var state = new GameState(garden, worldLocations: new[] { garden });
+state.EnableFuzzyMatching = true;
+state.FuzzyMaxDistance = 1;
 
 // Event: when stone is taken, reveal the key
 state.Events.Subscribe(GameEventType.PickupItem, e =>
@@ -52,6 +54,7 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
 var parserConfig = new KeywordParserConfig(
     quit: CommandHelper.NewCommands("quit"),
     look: CommandHelper.NewCommands("look"),
+    examine: CommandHelper.NewCommands("examine"),
     inventory: CommandHelper.NewCommands("inventory"),
     stats: CommandHelper.NewCommands("stats"),
     open: CommandHelper.NewCommands("open"),
@@ -61,6 +64,7 @@ var parserConfig = new KeywordParserConfig(
     use: CommandHelper.NewCommands("use"),
     combine: CommandHelper.NewCommands("combine"),
     pour: CommandHelper.NewCommands("pour"),
+    move: CommandHelper.NewCommands("move", "push", "shift", "lift", "slide"),
     go: CommandHelper.NewCommands("go"),
     read: CommandHelper.NewCommands("read"),
     talk: CommandHelper.NewCommands("talk"),
@@ -76,7 +80,9 @@ var parserConfig = new KeywordParserConfig(
     {
         ["n"] = Direction.North
     },
-    allowDirectionEnumNames: true);
+    allowDirectionEnumNames: true,
+    enableFuzzyMatching: true,
+    fuzzyMaxDistance: 1);
 
 var parser = new KeywordParser(parserConfig);
 

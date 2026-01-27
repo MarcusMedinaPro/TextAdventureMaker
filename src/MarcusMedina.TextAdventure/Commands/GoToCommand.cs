@@ -4,6 +4,7 @@
 // </copyright>
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
@@ -21,9 +22,23 @@ public class GoToCommand : ICommand
     public CommandResult Execute(CommandContext context)
     {
         var exits = context.State.CurrentLocation.Exits;
+        string? suggestion = null;
         var matches = exits
             .Where(e => e.Value.Door != null && (Target.TextCompare("door") || e.Value.Door.Matches(Target)))
             .ToList();
+
+        if (matches.Count == 0 && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
+        {
+            var doors = exits.Values.Select(e => e.Door).Where(d => d != null).Cast<IDoor>();
+            var best = FuzzyMatcher.FindBestDoor(doors, Target, context.State.FuzzyMaxDistance);
+            if (best != null)
+            {
+                suggestion = best.Name;
+                matches = exits
+                    .Where(e => e.Value.Door != null && ReferenceEquals(e.Value.Door, best))
+                    .ToList();
+            }
+        }
 
         if (matches.Count != 1)
         {
@@ -33,7 +48,8 @@ public class GoToCommand : ICommand
         var direction = matches[0].Key;
         if (context.State.Move(direction))
         {
-            return CommandResult.Ok(Language.GoDirection(direction.ToString().Lower()));
+            var result = CommandResult.Ok(Language.GoDirection(direction.ToString().Lower()));
+            return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
 
         var error = context.State.LastMoveErrorCode != GameError.None

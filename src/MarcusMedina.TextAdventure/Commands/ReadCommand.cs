@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
@@ -27,6 +28,27 @@ public class ReadCommand : ICommand
         var location = context.State.CurrentLocation;
         var itemInRoom = location.FindItem(Target);
         var itemInInventory = context.State.Inventory.FindItem(Target);
+        string? suggestion = null;
+        if (itemInRoom == null && itemInInventory == null &&
+            context.State.EnableFuzzyMatching &&
+            !FuzzyMatcher.IsLikelyCommandToken(Target))
+        {
+            var bestRoom = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
+            var bestInventory = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, Target, context.State.FuzzyMaxDistance);
+            var best = bestInventory ?? bestRoom;
+            if (best != null)
+            {
+                suggestion = best.Name;
+                if (bestInventory != null)
+                {
+                    itemInInventory = bestInventory;
+                }
+                else
+                {
+                    itemInRoom = bestRoom;
+                }
+            }
+        }
         var item = itemInInventory ?? itemInRoom;
 
         if (item == null)
@@ -58,8 +80,10 @@ public class ReadCommand : ICommand
             : text;
 
         var onRead = item.GetReaction(ItemAction.Read);
-        return onRead != null
+        var result = onRead != null
             ? CommandResult.Ok(message, onRead)
             : CommandResult.Ok(message);
+
+        return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }
 }

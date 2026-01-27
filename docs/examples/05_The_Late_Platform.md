@@ -46,6 +46,8 @@ A quiet station at night. A guard paces between the concourse and platform.
 
 ## Demo commands (parser)
 - `look` / `l`
+- `examine <item>` / `x <item>`
+- `move <item>`
 - `talk guard`
 - `take ticket`
 - `unlock gate`
@@ -97,10 +99,15 @@ var guard = new Npc("guard", "guard")
 concourse.AddNpc(guard);
 
 var state = new GameState(concourse, worldLocations: new[] { concourse, platform });
-var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
+state.EnableFuzzyMatching = true;
+state.FuzzyMaxDistance = 1;
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
+    .WithMove("move", "push", "shift", "lift", "slide")
+    .WithFuzzyMatching(true, 1)
+    .Build());
 
 Console.WriteLine("=== THE LATE PLATFORM (Slice 5) ===");
-Console.WriteLine("Commands: Look, Talk <Npc>, Take <Item>, Unlock/Open Gate, Go East/West, Inventory, Quit");
+Console.WriteLine("Commands: Look, Examine <Item>, Move <Item>, Talk <Npc>, Take <Item>, Unlock/Open Gate, Go East/West, Inventory, Quit");
 
 void WriteResult(CommandResult result)
 {

@@ -49,6 +49,12 @@ public abstract class ItemDecorator : IItem
         remove => Inner.OnUse -= value;
     }
 
+    public event Action<IItem>? OnMove
+    {
+        add => Inner.OnMove += value;
+        remove => Inner.OnMove -= value;
+    }
+
     public event Action<IItem>? OnDestroy
     {
         add => Inner.OnDestroy += value;
@@ -68,5 +74,6 @@ public abstract class ItemDecorator : IItem
     public virtual void Take() => Inner.Take();
     public virtual void Drop() => Inner.Drop();
     public virtual void Use() => Inner.Use();
+    public virtual void Move() => Inner.Move();
     public virtual void Destroy() => Inner.Destroy();
 }

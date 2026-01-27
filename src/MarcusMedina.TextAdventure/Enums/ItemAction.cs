@@ -14,5 +14,7 @@ public enum ItemAction
     ReadFailed,
     TakeFailed,
     DropFailed,
-    UseFailed
+    UseFailed,
+    Move,
+    MoveFailed
 }

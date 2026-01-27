@@ -4742,6 +4742,8 @@ Story
 - `IItem.DecreaseAmount(int amount = 1)` → bool (om det finns kvar)
 - Optional: `Item.OnAmountEmpty` reaction/hook
 - `Use()` minskar amount om den finns (och tar bort item när 0)
+- `IItem.PresenceDescription` + `Item.SetPresenceDescription(string text)`
+- Look visar `PresenceDescription` mellan rumsbeskrivning och items/exits
 
 ### Krav
 

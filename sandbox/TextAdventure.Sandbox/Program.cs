@@ -2,138 +2,195 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 7: Combat (Strategy) using all previous slices
+// Slice 8: Quest System using all previous slices
 
-Location attic = new(
-    "attic",
-    "Rain caresses the roof with silver fingers. A persistent little leak taps a scandalously intimate rhythm upon the floorboards. \nYou need to do something about the leak.");
+var office = new Location(
+    "office",
+    "A quiet office, lit by the pale glow of a humming monitor. A stubborn desk chair sits in front of it. To the east, a secured door leads to the server room.");
 
-var rain = new Item(
-        "rain",
-        "rain",
-        "Cold raindrops strike your eyes. They sting, your vision blurs, and for a breathless moment you are left blind, lashes heavy with tears.")
+var breakRoom = new Location(
+    "break room",
+    "A cramped break room with a kettle that appears to have long since lost the will to function.");
+
+var serverRoom = new Location(
+    "server room",
+    "A low, cool room of blinking lights. The terminal waits, asking only for the correct password.");
+
+var chair = new Item(
+        "chair",
+        "desk chair",
+        "A wheeled office chair with a slightly loose castor: faithful in service, though inclined to complain.")
+    .AddAliases("chair")
     .SetTakeable(false)
-    .HideFromItemList();
+    .SetReaction(ItemAction.Move, "The chair rolls back with a restrained but unmistakable squeak.");
 
-var roof = new Item("roof", "roof", "Moist with the night's insistence, the roof glistens as though varnished by the storm itself.")
+var note = new Item(
+        "note",
+        "post-it note",
+        "A small yellow note with a hurried scrawl.")
+    .AddAliases("note", "post-it", "sticky note", "post it")
+    .SetWeight(0.01f)
+    .SetReadText("PASSWORD: HAWTHORN")
+    .RequireTakeToRead()
+    .SetReaction(ItemAction.Read, "You commit the password to memory.");
+
+var serverKey = new Key("server_key", "server key", "A small brass key labelled 'Server Room'.")
+    .AddAliases("key", "brass key")
+    .SetWeight(0.02f);
+
+var terminal = new Item(
+        "terminal",
+        "terminal",
+        "A squat terminal with a blinking cursor that seems faintly judgemental in its patience.")
+    .AddAliases("computer", "console", "screen")
     .SetTakeable(false)
-    .HideFromItemList();
+    .SetReaction(ItemAction.TakeFailed, "It is firmly secured to the desk and refuses to be moved.");
 
-var floor = new Item("floor", "floor", "It's wet... and now your feet are too.")
-    .AddAliases("floorboards", "boards")
-    .SetTakeable(false)
-    .HideFromItemList();
+var serverDoor = new Door("server_door", "server door", "A slim security door fitted with a key reader.", DoorState.Locked)
+    .AddAliases("door", "server", "security door")
+    .SetReaction(DoorAction.Unlock, "The reader flashes green.")
+    .SetReaction(DoorAction.Open, "The door slides open with a subdued hiss.")
+    .RequiresKey(serverKey);
 
-var puddle = new Item("puddle", "puddle", "It's wet.")
-    .SetTakeable(false)
-    .HideFromItemList();
+office.AddItem(chair);
 
-var leak = new Item("leak", "leak", "It's wet and flowing.")
-    .SetTakeable(false)
-    .SetReaction(ItemAction.TakeFailed, "You take a quick run to the toilet to pee.")
-    .HideFromItemList();
+breakRoom.AddItem(serverKey);
 
-var rhythm = new Item("rhythm", "rhythm", "It's soothing and harmonious.")
-    .AddAliases("rythm", "beat", "rain rhythm")
-    .SetTakeable(false)
-    .HideFromItemList();
+serverRoom.AddItem(terminal);
 
-var feet = new Item("feet", "feet", "Five toes each... amazing!")
-    .AddAliases("foot", "toes", "toe")
-    .SetTakeable(false)
-    .HideFromItemList();
+office.AddExit(Direction.North, breakRoom);
+breakRoom.AddExit(Direction.South, office);
 
-var fingers = new Item("fingers", "fingers", "5 of each! Yay!")
-    .AddAliases("finger")
-    .SetTakeable(false)
-    .HideFromItemList();
+office.AddExit(Direction.East, serverRoom, serverDoor);
+serverRoom.AddExit(Direction.West, office, serverDoor);
 
-var silverFingers = new Item("silver_fingers", "silver fingers", "Looks like the hand that Peter Pettigrew got from Voldemort.")
-    .AddAliases("silver", "silver finger", "silvery fingers")
-    .SetTakeable(false)
-    .HideFromItemList();
-
-var bucket = new Item(
-        "bucket",
-        "bucket",
-        "A dented metal bucket with a certain weary dignity - too heavy to lift, but perfectly suited to be coaxed into position.")
-    .SetTakeable(false)
-    .SetReaction(ItemAction.TakeFailed, "It is far too substantial to be carried, but you could certainly persuade it to slide into place.")
-    .SetReaction(ItemAction.Move, "You draw the bucket beneath the leak with deliberate grace. At last, the dripping finds its willing accomplice.");
-
-attic.AddItem(rain);
-attic.AddItem(roof);
-attic.AddItem(floor);
-attic.AddItem(puddle);
-attic.AddItem(leak);
-attic.AddItem(rhythm);
-attic.AddItem(feet);
-attic.AddItem(fingers);
-attic.AddItem(silverFingers);
-attic.AddItem(bucket);
-
-var storm = new Npc("storm", "storm", NpcState.Hostile, stats: new Stats(18))
-    .Description("A relentless, sensual downpour that demands endurance rather than defiance.");
-
-var dummy = new Npc("dummy", "spooky training dummy", NpcState.Neutral, stats: new Stats(12))
-    .Description("A crash test dummy slumped in the corner, patient and uncomplaining.");
-
-var brokenDummy = new Item("broken_dummy", "broken dummy", "You sure showed it who's the boss.")
-    .AddAliases("dummy", "training dummy")
-    .SetTakeable(false);
-
-attic.AddNpc(storm);
-attic.AddNpc(dummy);
-
-GameState state = new(attic, worldLocations: new[] { attic })
+var state = new GameState(office, worldLocations: new[] { office, breakRoom, serverRoom })
 {
     EnableFuzzyMatching = true,
-    FuzzyMaxDistance = 1
+    FuzzyMaxDistance = 1,
+    ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith = true,
+    ShowDirectionsWhenThereAreDirectionsVisibleOnly = true
 };
 
-var bucketPlaced = false;
-var brokenDummyPlaced = false;
+var questFindNote = new Quest("find_note", "Find the note", "Locate the password hint.")
+    .AddCondition(new HasItemCondition("note"))
+    .Start();
 
-bucket.OnMove += _ =>
-{
-    if (!bucketPlaced)
+var questLogIn = new Quest("log_in", "Log in to the terminal", "Enter the password and gain access to the system.")
+    .AddCondition(new AllOfCondition(new IQuestCondition[]
     {
-        bucketPlaced = true;
-        storm.Stats.Damage(storm.Stats.Health);
-        storm.SetState(NpcState.Dead);
+        new WorldFlagCondition("knows_password"),
+        new WorldFlagCondition("logged_in")
+    }))
+    .Start();
+
+state.Quests.AddRange(new[] { questFindNote, questLogIn });
+
+var questStates = state.Quests.Quests
+    .ToDictionary(quest => quest.Id, quest => quest.State, StringComparer.OrdinalIgnoreCase);
+
+var noteRevealed = false;
+
+chair.OnMove += _ =>
+{
+    if (noteRevealed)
+    {
+        chair.SetReaction(ItemAction.Move, "The chair has already been moved aside.");
         return;
     }
 
-    bucket.SetReaction(ItemAction.Move, "The bucket is already stationed beneath the leak, performing its quiet, devoted duty.");
+    noteRevealed = true;
+    office.AddItem(note);
+    Console.WriteLine("> You spot a post-it note tucked beneath the desk.");
 };
 
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "exam", "x")
-    .WithMove("move", "push", "shift", "lift", "slide")
+    .WithMove("move", "push", "shift", "slide")
     .WithInventory("inventory", "inv", "i")
     .WithTake("take", "get")
     .WithDrop("drop")
     .WithUse("use")
-    .WithAttack("attack", "fight", "strike", "kick", "hit")
-    .WithFlee("flee", "run")
+    .WithRead("read")
+    .WithQuest("quest", "quests", "journal")
+    .WithUnlock("unlock")
+    .WithOpen("open")
     .WithGo("go", "move")
     .WithFuzzyMatching(true, 1)
     .WithIgnoreItemTokens("on", "off", "at", "the", "a")
     .Build();
 
-KeywordParser parser = new(parserConfig);
+var parser = new KeywordParser(parserConfig);
 
-Console.WriteLine("=== RAIN UPON THE ROOF (Slice 7) ===");
-Console.WriteLine("Type 'help' if you require a gentlemanly reminder of your options.");
+Console.WriteLine("=== THE FORGOTTEN PASSWORD (Slice 8) ===");
+Console.WriteLine("Type 'help' for a brief reminder of commands.");
 ShowLookResult(state.Look());
+
+while (true)
+{
+    Console.Write("> ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrWhiteSpace(input))
+    {
+        continue;
+    }
+
+    if (IsHelp(input))
+    {
+        Console.WriteLine("Commands: look, examine, move <item>, take <item>, read <item>, unlock/open door, go <direction>, inventory, quest, quit");
+        continue;
+    }
+
+    if (TryHandleLogin(input, state))
+    {
+        UpdateQuestProgress();
+        if (state.WorldState.GetFlag("logged_in"))
+        {
+            Console.WriteLine("Access granted. The terminal hums to life.");
+        }
+        continue;
+    }
+
+    var command = parser.Parse(input);
+    var result = state.Execute(command);
+
+    if (command is LookCommand look && !string.IsNullOrWhiteSpace(look.Target))
+    {
+        WriteResult(result);
+    }
+    else if (command is LookCommand)
+    {
+        ShowLookResult(result);
+    }
+    else
+    {
+        WriteResult(result);
+    }
+
+    if (command is ReadCommand read && note.Matches(read.Target))
+    {
+        state.WorldState.SetFlag("knows_password", true);
+    }
+
+    UpdateQuestProgress();
+
+    if (result.ShouldQuit)
+    {
+        break;
+    }
+}
 
 void WriteResult(CommandResult result)
 {
@@ -161,7 +218,7 @@ void ShowLookResult(CommandResult result)
     var lines = result.Message?
         .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         .ToList()
-        ?? [];
+        ?? new List<string>();
 
     if (lines.Count > 0 && lines[0].StartsWith("I think you mean", StringComparison.OrdinalIgnoreCase))
     {
@@ -177,156 +234,98 @@ void ShowLookResult(CommandResult result)
         Console.WriteLine();
     }
 
-    if (dummy.IsAlive)
-    {
-        Console.WriteLine("The training dummy is here, patient and uncomplaining.");
-        Console.WriteLine();
-    }
-
     var itemsLine = lines.FirstOrDefault(line => line.StartsWith("Items here:", StringComparison.OrdinalIgnoreCase));
     if (!string.IsNullOrWhiteSpace(itemsLine))
     {
         var items = itemsLine.Replace("Items here:", "").Trim();
-        Console.WriteLine(items.Length > 0 ? $"You notice {items}" : "You notice nothing of particular allure.");
+        Console.WriteLine(items.Length > 0 ? $"You notice {items}" : "You notice nothing of interest.");
         Console.WriteLine();
     }
 
     var exitsLine = lines.FirstOrDefault(line => line.StartsWith("Exits:", StringComparison.OrdinalIgnoreCase));
     if (!string.IsNullOrWhiteSpace(exitsLine))
     {
-        Console.WriteLine(exitsLine.Replace("Exits:", "Exits:"));
+        Console.WriteLine(exitsLine);
         Console.WriteLine();
     }
 
     Console.WriteLine("Hints");
-    Console.WriteLine("- move bucket");
-    Console.WriteLine("- attack dummy / flee");
-    Console.WriteLine("- look / examine bucket");
-    Console.WriteLine("- inventory");
+    Console.WriteLine("- move chair");
+    Console.WriteLine("- read note");
+    Console.WriteLine("- quest");
+    Console.WriteLine("- log in");
     Console.WriteLine(new string('-', 60));
 }
 
-Random rnd = new();
-
-while (true)
+void UpdateQuestProgress()
 {
-    if (dummy.IsAlive)
+    var updated = state.Quests.CheckAll(state);
+    if (!updated)
     {
-        var dummyRandom = rnd.Next(100);
+        return;
+    }
 
-        if (dummyRandom > 70)
+    foreach (var quest in state.Quests.Quests)
+    {
+        if (!questStates.TryGetValue(quest.Id, out var previous) || previous != quest.State)
         {
-            switch (rnd.Next(4))
+            questStates[quest.Id] = quest.State;
+            if (quest.State == QuestState.Completed)
             {
-                case 0:
-                    Console.WriteLine("For a fleeting instant, you are quite certain the dummy is watching you.");
-                    break;
-
-                case 1:
-                    Console.WriteLine("You could swear the dummy has shifted its weight, though you cannot say how or when.");
-                    break;
-
-                case 2:
-                    Console.WriteLine("The light catches the dummy's glassy eye, and it seems to glimmer with a dreadful awareness.");
-                    break;
-
-                case 3:
-                    Console.WriteLine("A faint creak comes from the corner, as though cloth and porcelain have subtly rearranged themselves.");
-                    break;
+                Console.WriteLine($"Quest complete: {quest.Title}");
+                if (quest.Id.Equals("log_in", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("You have done it. The terminal yields, and the system is yours.");
+                    Environment.Exit(0);
+                }
             }
         }
     }
+}
 
-    Console.Write("> ");
-    var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input))
-    {
-        continue;
-    }
+bool IsHelp(string input)
+{
+    return input.Equals("help", StringComparison.OrdinalIgnoreCase) ||
+           input.Equals("halp", StringComparison.OrdinalIgnoreCase) ||
+           input == "?";
+}
 
-    if (input.Equals("help", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("halp", StringComparison.OrdinalIgnoreCase) ||
-        input == "?")
+bool TryHandleLogin(string input, GameState gameState)
+{
+    if (!IsLoginInput(input))
     {
-        Console.WriteLine("Commands: look, examine, move <item>, take <item>, attack <npc>, flee, inventory, quit");
-        continue;
-    }
-
-    if (input.Equals("kick the bucket", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("kick bucket", StringComparison.OrdinalIgnoreCase))
-    {
-        Console.WriteLine("You promptly expire, in the purely figurative and linguistically traditional sense.");
-        continue;
+        return false;
     }
 
-    if (input.Equals("kill dummy", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("kill the dummy", StringComparison.OrdinalIgnoreCase))
+    if (!gameState.IsCurrentRoomId(serverRoom.Id))
     {
-        Console.WriteLine("You try to strangle the dummy but realise it doesn't breathe.");
-        continue;
+        Console.WriteLine("The terminal is not within reach from here.");
+        return true;
     }
 
-    if (input.Equals("kiss dummy", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("kiss the dummy", StringComparison.OrdinalIgnoreCase))
+    if (gameState.WorldState.GetFlag("logged_in"))
     {
-        Console.WriteLine("Eeew! No!");
-        continue;
+        Console.WriteLine("You are already logged in.");
+        return true;
     }
 
-    if (input.Equals("hug dummy", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("hug the dummy", StringComparison.OrdinalIgnoreCase))
+    if (!gameState.WorldState.GetFlag("knows_password"))
     {
-        Console.WriteLine("The dummy pushes you away and shakes its head.\nA dark voice in the distance says, \"Eeew no! I am a married spooky dummy.\"");
-        continue;
+        Console.WriteLine("The terminal prompts for a password you do not yet have.");
+        return true;
     }
 
-    if (input.Equals("take a leak", StringComparison.OrdinalIgnoreCase) ||
-        input.Equals("take leak", StringComparison.OrdinalIgnoreCase))
-    {
-        Console.WriteLine("You take a quick run to the toilet to pee.");
-        continue;
-    }
+    gameState.WorldState.SetFlag("logged_in", true);
+    return true;
+}
 
-    if (input.StartsWith("listen", StringComparison.OrdinalIgnoreCase) &&
-        (input.Contains("rain", StringComparison.OrdinalIgnoreCase) ||
-         input.Contains("rhythm", StringComparison.OrdinalIgnoreCase) ||
-         input.Contains("rythm", StringComparison.OrdinalIgnoreCase)))
-    {
-        Console.WriteLine("It's soothing and harmonious.");
-        continue;
-    }
-
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
-
-    if (command is LookCommand look && !string.IsNullOrWhiteSpace(look.Target))
-    {
-        WriteResult(result);
-    }
-    else if (command is LookCommand)
-    {
-        ShowLookResult(result);
-    }
-    else
-    {
-        WriteResult(result);
-    }
-
-    if (!dummy.IsAlive && !brokenDummyPlaced)
-    {
-        attic.RemoveNpc(dummy);
-        attic.AddItem(brokenDummy);
-        brokenDummyPlaced = true;
-    }
-
-    if (!storm.IsAlive)
-    {
-        Console.WriteLine("The bucket receives the final, obedient drops. The storm, at last, withdraws.");
-        break;
-    }
-
-    if (result.ShouldQuit)
-    {
-        break;
-    }
+bool IsLoginInput(string input)
+{
+    return input.Equals("login", StringComparison.OrdinalIgnoreCase) ||
+           input.Equals("log in", StringComparison.OrdinalIgnoreCase) ||
+           input.Equals("log-in", StringComparison.OrdinalIgnoreCase) ||
+           input.Equals("use terminal", StringComparison.OrdinalIgnoreCase) ||
+           input.Equals("use computer", StringComparison.OrdinalIgnoreCase) ||
+           input.Equals("enter password", StringComparison.OrdinalIgnoreCase) ||
+           input.Equals("type password", StringComparison.OrdinalIgnoreCase);
 }

@@ -72,6 +72,7 @@ var parserConfig = new KeywordParserConfig(
     flee: CommandHelper.NewCommands("flee"),
     save: CommandHelper.NewCommands("save"),
     load: CommandHelper.NewCommands("load"),
+    quest: CommandHelper.NewCommands("quest"),
     all: CommandHelper.NewCommands("all"),
     ignoreItemTokens: CommandHelper.NewCommands(),
     combineSeparators: CommandHelper.NewCommands(),

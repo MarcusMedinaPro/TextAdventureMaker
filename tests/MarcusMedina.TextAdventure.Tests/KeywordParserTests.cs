@@ -34,6 +34,7 @@ public class KeywordParserTests
             flee: CommandHelper.NewCommands("flee", "run"),
             save: CommandHelper.NewCommands("save"),
             load: CommandHelper.NewCommands("load"),
+            quest: CommandHelper.NewCommands("quest", "quests", "journal"),
             all: CommandHelper.NewCommands("all"),
             ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
             combineSeparators: CommandHelper.NewCommands("and", "+"),
@@ -273,6 +274,19 @@ public class KeywordParserTests
         var command = parser.Parse("load savegame.json");
 
         Assert.IsType<LoadCommand>(command);
+    }
+
+    [Theory]
+    [InlineData("quest")]
+    [InlineData("quests")]
+    [InlineData("journal")]
+    public void Parse_Quest_ReturnsQuestCommand(string input)
+    {
+        var parser = new KeywordParser(CreateEnglishConfig());
+
+        var command = parser.Parse(input);
+
+        Assert.IsType<QuestCommand>(command);
     }
 
     [Theory]

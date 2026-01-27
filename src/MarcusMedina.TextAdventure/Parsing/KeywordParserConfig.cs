@@ -32,8 +32,9 @@ public sealed class KeywordParserConfig
         flee: CommandHelper.NewCommands("flee", "run"),
         save: CommandHelper.NewCommands("save"),
         load: CommandHelper.NewCommands("load"),
+        quest: CommandHelper.NewCommands("quests", "quest", "journal"),
         all: CommandHelper.NewCommands("all"),
-        ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the"),
+        ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a"),
         combineSeparators: CommandHelper.NewCommands("and", "+"),
         pourPrepositions: CommandHelper.NewCommands("into", "in"),
         directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
@@ -92,6 +93,8 @@ public sealed class KeywordParserConfig
     public ISet<string> Save { get; }
     /// <summary>Keywords used to load the game.</summary>
     public ISet<string> Load { get; }
+    /// <summary>Keywords used to show quest log.</summary>
+    public ISet<string> Quest { get; }
 
     /// <summary>Keywords that indicate "all" in take/drop commands.</summary>
     public ISet<string> All { get; }
@@ -132,6 +135,7 @@ public sealed class KeywordParserConfig
         ISet<string> flee,
         ISet<string> save,
         ISet<string> load,
+        ISet<string> quest,
         ISet<string> all,
         ISet<string> ignoreItemTokens,
         ISet<string> combineSeparators,
@@ -161,6 +165,7 @@ public sealed class KeywordParserConfig
         Flee = flee ?? throw new ArgumentNullException(nameof(flee));
         Save = save ?? throw new ArgumentNullException(nameof(save));
         Load = load ?? throw new ArgumentNullException(nameof(load));
+        Quest = quest ?? throw new ArgumentNullException(nameof(quest));
         All = all ?? throw new ArgumentNullException(nameof(all));
         IgnoreItemTokens = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
         CombineSeparators = combineSeparators ?? throw new ArgumentNullException(nameof(combineSeparators));

@@ -103,3 +103,25 @@ This document lists public functions, types, and helpers by slice, with tiny usa
 | `TalkCommand` | `talk guard` | Trigger dialogue for an NPC. |
 | `Game(state, parser)` | `var game = new Game(state, parser);` | Game loop with NPC ticking. |
 | `Game.AddTurnEndHandler(handler)` | `game.AddTurnEndHandler((g, c, r) => { … });` | Hook per-turn logic. |
+
+## Slice 8 — Quest System
+
+| Function / Type | Usage | Explanation |
+| --- | --- | --- |
+| `Quest(id, title, description)` | `var quest = new Quest("login", "Log In", "Find the password.");` | Create a quest with title and description. |
+| `Quest.Start()` | `quest.Start();` | Move a quest to Active. |
+| `Quest.Complete()` | `quest.Complete();` | Mark a quest as Completed. |
+| `Quest.Fail()` | `quest.Fail();` | Mark a quest as Failed. |
+| `Quest.AddCondition(condition)` | `quest.AddCondition(new HasItemCondition("note"));` | Add a completion condition. |
+| `Quest.CheckProgress(state)` | `quest.CheckProgress(state);` | Evaluate conditions and complete if satisfied. |
+| `QuestState` enum | `QuestState.Active` | Quest lifecycle state. |
+| `QuestLog` | `state.Quests.Add(quest);` | Store quests on `GameState`. |
+| `QuestLog.CheckAll(state)` | `state.Quests.CheckAll(state);` | Evaluate all quests in the log. |
+| `HasItemCondition(itemId)` | `new HasItemCondition("note")` | Condition: player has an item. |
+| `WorldFlagCondition(key)` | `new WorldFlagCondition("knows_password")` | Condition: world flag set. |
+| `WorldCounterCondition(key, min)` | `new WorldCounterCondition("tries", 3)` | Condition: counter at least a value. |
+| `NpcStateCondition(npc, state)` | `new NpcStateCondition(guard, NpcState.Friendly)` | Condition: NPC state matches. |
+| `AllOfCondition(conditions)` | `new AllOfCondition(new[] { a, b })` | Condition: all child conditions pass. |
+| `AnyOfCondition(conditions)` | `new AnyOfCondition(new[] { a, b })` | Condition: any child condition passes. |
+| `QuestCommand` | `quest` / `quests` | Show active and completed quests via the parser. |
+| `KeywordParserConfigBuilder.WithQuest(...)` | `.WithQuest("quest", "journal")` | Configure quest command keywords. |

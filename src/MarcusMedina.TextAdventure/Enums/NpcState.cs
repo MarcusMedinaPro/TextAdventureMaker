@@ -8,5 +8,6 @@ public enum NpcState
 {
     Friendly,
     Hostile,
+    Neutral,
     Dead
 }

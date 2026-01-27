@@ -28,6 +28,7 @@ public class GameState : IGameState
     public ILocationDiscoverySystem LocationDiscovery { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
+    public IQuestLog Quests { get; }
     public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     /// <summary>Enable fuzzy matching for commands and targets.</summary>
@@ -64,6 +65,7 @@ public class GameState : IGameState
         LocationDiscovery = locationDiscovery ?? new LocationDiscoverySystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
+        Quests = new QuestLog();
 
         RegisterLocations(worldLocations ?? new[] { startLocation });
         if (LocationDiscovery is LocationDiscoverySystem discovery)

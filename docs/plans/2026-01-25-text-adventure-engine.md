@@ -4746,8 +4746,23 @@ Story
 - Look visar `PresenceDescription` mellan rumsbeskrivning och items/exits
 - KeywordParserConfigBuilder.WithWord("xyz") för att lägga till egna kommandon/ord med standard beteende
 - `IItem.IsStackable` + `Item.SetStackable(bool isStackable)`
-- 
 -
+
+### Förslag på ännu mer coola funktion
+- Inventory kombinerar stackable items med samma id till en rad med amount
+- Combine command kan kombinera stackable items (t.ex. “combine all ice and fire”)
+- Pour command kan hälla från stackable containers (t.ex. “pour all water into glass”)
+- Pee command kan hälla från spelaren (t.ex. “pee all into glass”) - just kidding don't do this! :D
+- Poo command can also be added for comedic effect (e.g., "poo all into the bushes") - just kidding again! :D
+- Text generering för amount (t.ex. “You have 3 apples.” / “You have an apple.” / “You have no apples.”)
+- Text colours för amount (t.ex. rött när låg mängd)
+- Text warnings när mängd är låg (t.ex. “Only 1 left!”)
+- Colours used for specific words or amounts in item descriptions (e.g., highlight "poison" in red if the item is poisonous)
+  - Textoutput.Colorizer.HighlightWords(string text, Dictionary<string, ConsoleColor> wordColors)
+  - We can add more functions to textoutput or we add the colours to an already existing class
+-
+-
+
 ### Krav
 
 - Backwards compatible: items utan amount fungerar som tidigare.

@@ -115,7 +115,6 @@ public static class StringExtensions
         var best = left.LevenshteinDistanceTo(right, maxDistance);
         best = Math.Min(best, leftCollapsed.LevenshteinDistanceTo(right, maxDistance));
         best = Math.Min(best, left.LevenshteinDistanceTo(rightCollapsed, maxDistance));
-        best = Math.Min(best, leftCollapsed.LevenshteinDistanceTo(rightCollapsed, maxDistance));
 
         return best;
     }

@@ -59,6 +59,12 @@ public static class Language
     public static string NoTargetToAttack => _provider.Get("NoTargetToAttack");
     public static string NoOneToFight => _provider.Get("NoOneToFight");
     public static string NoOneToFlee => _provider.Get("NoOneToFlee");
+    public static string NoQuests => _provider.Get("NoQuests");
+    public static string QuestsLabel => _provider.Get("QuestsLabel");
+    public static string ActiveQuestsLabel => _provider.Get("ActiveQuestsLabel");
+    public static string CompletedQuestsLabel => _provider.Get("CompletedQuestsLabel");
+    public static string QuestEntry(string title) =>
+        _provider.Format("QuestEntryTemplate", title);
 
     public static string DoorLocked(string doorName) =>
         _provider.Format("DoorLockedTemplate", doorName);
@@ -204,6 +210,11 @@ public static class Language
             ["NoTargetToAttack"] = "Attack what?",
             ["NoOneToFight"] = "There's no one here to fight.",
             ["NoOneToFlee"] = "There's no one here to flee from.",
+            ["NoQuests"] = "You have no quests.",
+            ["QuestsLabel"] = "Quest log",
+            ["ActiveQuestsLabel"] = "Active",
+            ["CompletedQuestsLabel"] = "Completed",
+            ["QuestEntryTemplate"] = "- {0}",
             ["SaveSuccessTemplate"] = "Game saved to {0}.",
             ["SaveFailedTemplate"] = "Failed to save game to {0}.",
             ["LoadSuccessTemplate"] = "Game loaded from {0}.",

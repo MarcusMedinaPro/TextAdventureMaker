@@ -158,6 +158,11 @@ public class KeywordParser : ICommandParser
             return new LoadCommand(target);
         }
 
+        if (_config.Quest.Contains(keyword))
+        {
+            return new QuestCommand();
+        }
+
         if (_config.Go.Contains(keyword))
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
@@ -263,6 +268,7 @@ public class KeywordParser : ICommandParser
         if (_config.Flee.Contains(keyword)) return new FleeCommand(ParseItemName(tokens, 1));
         if (_config.Save.Contains(keyword)) return new SaveCommand(ParseItemName(tokens, 1));
         if (_config.Load.Contains(keyword)) return new LoadCommand(ParseItemName(tokens, 1));
+        if (_config.Quest.Contains(keyword)) return new QuestCommand();
         if (_config.Go.Contains(keyword))
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
@@ -295,6 +301,7 @@ public class KeywordParser : ICommandParser
             .Concat(_config.Flee)
             .Concat(_config.Save)
             .Concat(_config.Load)
+            .Concat(_config.Quest)
             .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 

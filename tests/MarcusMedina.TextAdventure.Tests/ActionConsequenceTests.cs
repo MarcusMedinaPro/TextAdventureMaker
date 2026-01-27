@@ -16,7 +16,7 @@ public class ActionConsequenceTests
         var glass = new Item("glass", "wine glass", "A delicate wine glass.");
         var brokenGlass = new Item("broken_glass", "broken glass", "Sharp glass shards.");
 
-        glass.OnDrop(ActionConsequence.Break("The glass shatters!", brokenGlass));
+        glass.SetDropConsequence(ActionConsequence.Break("The glass shatters!", brokenGlass));
 
         Assert.True(glass.HasConsequence(ItemAction.Drop));
         var consequence = glass.GetConsequence(ItemAction.Drop);
@@ -31,7 +31,7 @@ public class ActionConsequenceTests
     {
         var potion = new Item("potion", "health potion", "A red potion.");
 
-        potion.OnUse(ActionConsequence.Destroy("You drink the potion. It tastes like cherries."));
+        potion.SetUseConsequence(ActionConsequence.Destroy("You drink the potion. It tastes like cherries."));
 
         Assert.True(potion.HasConsequence(ItemAction.Use));
         var consequence = potion.GetConsequence(ItemAction.Use);
@@ -44,7 +44,7 @@ public class ActionConsequenceTests
     {
         var trap = new Item("trap", "bear trap", "A rusty bear trap.");
 
-        trap.OnTake(new ActionConsequence
+        trap.SetTakeConsequence(new ActionConsequence
         {
             Message = "SNAP! The trap springs shut!",
             SetFlag = "injured"

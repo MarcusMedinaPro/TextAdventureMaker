@@ -92,7 +92,7 @@ public static class ItemConsequenceExtensions
     /// <summary>
     /// Sets a consequence for when this item is dropped.
     /// </summary>
-    public static Item OnDrop(this Item item, ActionConsequence consequence)
+    public static Item SetDropConsequence(this Item item, ActionConsequence consequence)
     {
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(consequence);
@@ -103,7 +103,7 @@ public static class ItemConsequenceExtensions
     /// <summary>
     /// Sets a consequence for when this item is used.
     /// </summary>
-    public static Item OnUse(this Item item, ActionConsequence consequence)
+    public static Item SetUseConsequence(this Item item, ActionConsequence consequence)
     {
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(consequence);
@@ -114,7 +114,7 @@ public static class ItemConsequenceExtensions
     /// <summary>
     /// Sets a consequence for when this item is taken.
     /// </summary>
-    public static Item OnTake(this Item item, ActionConsequence consequence)
+    public static Item SetTakeConsequence(this Item item, ActionConsequence consequence)
     {
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(consequence);

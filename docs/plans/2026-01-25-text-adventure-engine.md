@@ -3611,21 +3611,193 @@ var achievable = validator.ValidateTargetStories();
 
 **Mål:** Säkerställa att hela bibliotekets API följer samma fluent, kedjebara mönster som C#-utvecklare älskar från LINQ. Svaret på livet, universum och allting.
 
-> **OBS:** "LINQ for Adventures" är inte en funktion eller klass — det är bibliotekets designfilosofi.
-> Precis som LINQ ger en enhetlig, läsbar syntax för datamanipulation, ska TextAdventure ge
-> samma upplevelse för äventyrsskapande. Kedjade metoder, lambda-uttryck, fluent API.
+---
 
-_"Berättelse är inte text. Berättelse är tillståndsförändring med mening."_
+### 🎭 Filosofin: Två Stilar, Samma Kraft
 
-### Designprinciper
+TextAdventure erbjuder **två parallella API-stilar** i separata namespaces:
 
-| LINQ | TextAdventure | Koncept |
-|------|---------------|---------|
-| `Where(x => ...)` | `When(s => ...)` | Villkor/Filter |
-| `Select(x => ...)` | `Shift(s => ...)` | Transformation |
-| `ToList()` | `Execute()` | Materialisering |
-| Extension methods | Extension methods | Kedjebar syntax |
-| `IEnumerable<T>` | `IStoryState` | Genomgående interface |
+```csharp
+using MarcusMedina.TextAdventure.Linq;   // För den tekniske utvecklaren
+using MarcusMedina.TextAdventure.Story;  // För den kreative berättaren
+```
+
+**Varför två stilar?**
+
+1. **LINQ-stil** — För utvecklare som tänker i data och transformationer
+   - Bekant syntax från dagligt C#-arbete
+   - Exakt, teknisk, förutsägbar
+   - Perfekt för komplexa queries och villkor
+
+2. **Story-stil** — För utvecklare som tänker i berättelser
+   - Kod som läses som prosa
+   - Uttrycksfull, narrativ, poetisk
+   - Perfekt för att se spelets logik som en historia
+
+**Samma operation, två uttryck:**
+
+```csharp
+// === LINQ-STIL ===
+// Tekniskt korrekt, bekant för C#-utvecklare
+var weapons = player.Inventory
+    .Where(item => item.HasTag("weapon"))
+    .Where(item => item.Condition > 50)
+    .OrderByDescending(item => item.Damage)
+    .ToList();
+
+if (player.Inventory.Any(i => i.Id == "healing_potion"))
+    player.Health += 50;
+
+// === STORY-STIL ===
+// Läses som en berättelse
+var weapons = player.Inventory
+    .ThatAre("weapon")
+    .InGoodCondition()
+    .StrongestFirst();
+
+if (player.Has("healing_potion"))
+    player.Heals(50);
+```
+
+**Det är samma resultat.** Välj den stil som passar din hjärna, ditt team, eller din dag.
+
+---
+
+### 📦 Namespace-struktur
+
+```
+MarcusMedina.TextAdventure
+├── Linq/                          # LINQ-kompatibla extensions
+│   ├── ItemQueryExtensions.cs     # Where, Select, First, Any, All
+│   ├── LocationQueryExtensions.cs # Where, Select, First, Any, All
+│   ├── NpcQueryExtensions.cs      # Where, Select, First, Any, All
+│   └── StateQueryExtensions.cs    # Queries på GameState
+│
+├── Story/                         # Berättelse-stil extensions
+│   ├── ItemStoryExtensions.cs     # ThatAre, ThatCanBeTaken, TheirNames
+│   ├── LocationStoryExtensions.cs # ThatHave, WherePlayerCanGo
+│   ├── NpcStoryExtensions.cs      # WhoAre, WhoCanSpeak, TheirNames
+│   ├── PlayerStoryExtensions.cs   # Has, Takes, Drops, GoesTo
+│   └── NarrativeExtensions.cs     # When, Then, Meanwhile, Finally
+│
+└── Core/                          # Bas-klasser (används av båda)
+    ├── Item.cs
+    ├── Location.cs
+    └── ...
+```
+
+---
+
+### 🔄 Mappning mellan stilar
+
+| Operation | LINQ-stil | Story-stil |
+|-----------|-----------|------------|
+| Filtrera på tag | `Where(i => i.HasTag("x"))` | `ThatAre("x")` |
+| Filtrera på tillstånd | `Where(i => i.Condition > 50)` | `InGoodCondition()` |
+| Finns något? | `Any(i => i.Id == "key")` | `Has("key")` |
+| Alla matchar? | `All(i => i.IsTakeable)` | `EverythingCanBeTaken()` |
+| Första | `First()` | `TheFirst()` |
+| Sortera | `OrderBy(i => i.Name)` | `Alphabetically()` |
+| Sortera fallande | `OrderByDescending(i => i.Value)` | `MostValuableFirst()` |
+| Transformera | `Select(i => i.Name)` | `TheirNames()` |
+| Räkna | `Count()` | `HowMany()` |
+| Ta N | `Take(3)` | `TheFirstFew(3)` |
+
+---
+
+### 💡 Kombinera stilar
+
+Du kan mixa! Båda returnerar samma typer:
+
+```csharp
+using MarcusMedina.TextAdventure.Linq;
+using MarcusMedina.TextAdventure.Story;
+
+// Börja med LINQ, avsluta med Story
+var result = player.Inventory
+    .Where(i => i.Weight < 5)      // LINQ: precis filtrering
+    .ThatAre("valuable")            // Story: läsbar tag-check
+    .OrderByDescending(i => i.Value) // LINQ: exakt sortering
+    .TheFirstFew(3);                // Story: läsbar limit
+
+// Eller tvärtom
+if (room.Items.ThatAre("weapon").Any(w => w.Damage > 50))
+    hero.Says("Now we're talking!");
+```
+
+---
+
+### 🎬 Berättelse-stil i praktiken
+
+Kod som läses som en historia:
+
+```csharp
+// Kapitel 1: Hjälten vaknar
+When(hero.IsInLocation("bedroom"))
+    .And(timeOfDay.IsMorning())
+    .Then(hero.WakesUp())
+    .AndSays("Another day, another adventure.");
+
+// Kapitel 2: Faran lurar
+if (hero.IsWounded)
+{
+    doctor.ArrivesAt(hero.Location);
+    doctor.Says("Hold still, this might sting.");
+    hero.Heals(30);
+}
+
+// Kapitel 3: Skatten hittas
+var treasures = dungeon.Items
+    .ThatAre("valuable")
+    .ThatCanBeTaken()
+    .NotGuardedByMonsters();
+
+foreach (var treasure in treasures)
+{
+    hero.Takes(treasure);
+    narrator.Says($"The {treasure.Name} glimmers in the torchlight.");
+}
+
+// Kapitel 4: Draken
+When(dragon.IsSleeping)
+    .TheHero.CanSneak().PastIt()
+    .Otherwise()
+    .TheHero.MustFight().OrFlee();
+```
+
+---
+
+### 🔧 Teknisk implementation
+
+Båda stilarna är tunna wrappers runt samma logik:
+
+```csharp
+// I Linq-namespace
+public static class ItemQueryExtensions
+{
+    public static IEnumerable<Item> Where(
+        this IEnumerable<Item> items,
+        Func<Item, bool> predicate)
+        => System.Linq.Enumerable.Where(items, predicate);
+}
+
+// I Story-namespace
+public static class ItemStoryExtensions
+{
+    public static IEnumerable<Item> ThatAre(
+        this IEnumerable<Item> items,
+        string tag)
+        => items.Where(i => i.HasTag(tag));  // Använder LINQ internt
+
+    public static IEnumerable<Item> ThatCanBeTaken(
+        this IEnumerable<Item> items)
+        => items.Where(i => i.IsTakeable);
+}
+```
+
+**Inga prestandaskillnader** — Story-stil kompileras till samma IL som LINQ-stil.
+
+---
 
 ### Kärnkoncept
 

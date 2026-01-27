@@ -3874,6 +3874,436 @@ items.SeenBefore()              // Spelaren har sett dem
 
 ---
 
+### 📋 Universella Extensions per Objekttyp
+
+#### Matris: Vilka extensions gäller var?
+
+| Extension | Player | Item | NPC | Door | Key | Location |
+|-----------|:------:|:----:|:---:|:----:|:---:|:--------:|
+| **Plats** |
+| `.IsIn(location)` | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `.IsInRoom(id)` | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| `.IsHere()` | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `.IsNearby()` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `.IsInInventory()` | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `.IsCarriedBy(who)` | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **Inventory** |
+| `.Has(item)` | ✅ | ✅* | ✅ | ❌ | ❌ | ✅ |
+| `.HasItem(id)` | ✅ | ✅* | ✅ | ❌ | ❌ | ✅ |
+| `.IsCarrying(item)` | ✅ | ✅* | ✅ | ❌ | ❌ | ❌ |
+| `.HasAny(tag)` | ✅ | ✅* | ✅ | ❌ | ❌ | ✅ |
+| `.IsEmpty()` | ❌ | ✅* | ✅ | ❌ | ❌ | ✅ |
+| `.IsFull()` | ✅ | ✅* | ✅ | ❌ | ❌ | ❌ |
+| **Hälsa & Status** |
+| `.IsAlive()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.IsDead()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.IsWounded()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.IsHealthy()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.IsSleeping()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.IsAwake()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.IsConscious()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Tillstånd** |
+| `.IsOpen()` | ❌ | ✅* | ❌ | ✅ | ❌ | ❌ |
+| `.IsClosed()` | ❌ | ✅* | ❌ | ✅ | ❌ | ❌ |
+| `.IsLocked()` | ❌ | ✅* | ❌ | ✅ | ❌ | ❌ |
+| `.IsUnlocked()` | ❌ | ✅* | ❌ | ✅ | ❌ | ❌ |
+| `.IsBroken()` | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| `.IsWorking()` | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| `.IsUsed()` | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `.IsNew()` | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **Synlighet** |
+| `.IsVisible()` | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `.IsHidden()` | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `.IsDiscovered()` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `.IsExamined()` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Förmågor** |
+| `.CanTake()` | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `.CanUse()` | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `.CanOpen()` | ❌ | ✅* | ❌ | ✅ | ❌ | ❌ |
+| `.CanUnlock()` | ❌ | ✅* | ❌ | ✅ | ❌ | ❌ |
+| `.CanSpeak()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.CanMove()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.CanSee()` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `.CanReach(target)` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+
+*\* = Endast för containers/lockable items*
+
+---
+
+#### 🧑 Player Extensions
+
+```csharp
+// === HÄLSA ===
+player.IsAlive()                    // health > 0
+player.IsDead()                     // health <= 0
+player.IsWounded()                  // health < maxHealth
+player.IsHealthy()                  // health == maxHealth
+player.IsNearDeath()                // health < 10%
+player.HealthPercentage()           // 0-100
+
+// === TILLSTÅND ===
+player.IsSleeping()
+player.IsAwake()
+player.IsConscious()
+player.IsPoisoned()
+player.IsBlinded()
+player.IsConfused()
+player.IsFighting()
+player.IsResting()
+player.IsMoving()
+player.IsTalking()
+
+// === INVENTORY ===
+player.Has("sword")                 // Har item med id
+player.Has(sword)                   // Har item-objekt
+player.HasItem("sword")             // Alias
+player.HasAny("weapon")             // Har något med tag
+player.HasAll("key", "map")         // Har alla
+player.IsCarrying(item)             // Samma som Has
+player.IsHolding(item)              // I aktiv hand
+player.IsWearing(item)              // Har på sig
+player.IsEquipped(item)             // Utrustad med
+player.InventoryCount()             // Antal items
+player.InventoryWeight()            // Total vikt
+player.IsFull()                     // Kan inte bära mer
+player.CanCarry(item)               // Har plats för
+player.FreeSpace()                  // Återstående kapacitet
+
+// === PLATS ===
+player.IsIn(location)               // I specifikt rum
+player.IsInRoom("kitchen")          // I rum med id
+player.IsAt(location)               // Alias
+player.CurrentLocation              // Nuvarande rum
+player.WasIn(location)              // Har varit där
+player.HasVisited(location)         // Har besökt
+player.VisitedRooms()               // Lista på besökta
+
+// === FÖRMÅGOR ===
+player.CanSee()                     // Inte blind, har ljus
+player.CanMove()                    // Inte paralyserad
+player.CanSpeak()                   // Inte tystad
+player.CanTake(item)                // Kan ta upp
+player.CanReach(target)             // Inom räckhåll
+player.CanAttack(target)            // Kan attackera
+player.CanOpen(door)                // Har rätt nyckel
+player.CanUnlock(door)              // Har rätt nyckel
+
+// === RELATIONER ===
+player.Knows(npc)                   // Har pratat med
+player.IsFriendsWith(npc)           // Relation > 50
+player.IsEnemyOf(npc)               // Relation < 0
+player.RelationshipWith(npc)        // Numeriskt värde
+player.HasMet(npc)                  // Har träffat
+
+// === QUEST/PROGRESS ===
+player.HasFlag("found_treasure")    // Flag är satt
+player.FlagValue("attempts")        // Räknarvärde
+player.HasCompleted("quest1")       // Quest klar
+player.IsOnQuest("quest1")          // Aktiv quest
+player.Score()                      // Poäng
+```
+
+---
+
+#### 📦 Item Extensions
+
+```csharp
+// === PLATS ===
+item.IsIn(location)                 // I specifikt rum
+item.IsInRoom("kitchen")            // I rum med id
+item.IsHere()                       // I spelarens rum
+item.IsNearby()                     // I angränsande rum
+item.IsInInventory()                // Spelaren har den
+item.IsCarriedBy(player)            // Bärs av specifik
+item.IsCarriedBy(npc)               // NPC har den
+item.IsInContainer(container)       // I behållare
+item.IsOnGround()                   // Ligger i rum
+item.WhereIs()                      // Returnerar location
+
+// === TILLSTÅND ===
+item.IsBroken()                     // Trasig
+item.IsWorking()                    // Fungerar
+item.IsNew()                        // Oanvänd
+item.IsUsed()                       // Har använts
+item.IsDamaged()                    // Delvis skadad
+item.ConditionPercentage()          // 0-100%
+
+// === SYNLIGHET ===
+item.IsVisible()                    // Synlig
+item.IsHidden()                     // Gömd
+item.IsDiscovered()                 // Har hittats
+item.IsExamined()                   // Har undersökts
+item.IsRevealed()                   // Avslöjad (var gömd)
+
+// === FÖRMÅGOR ===
+item.CanTake()                      // Kan tas upp (takeable)
+item.CanUse()                       // Har use-action
+item.CanDrop()                      // Kan släppas
+item.CanThrow()                     // Kan kastas
+item.CanEquip()                     // Kan utrustas
+item.CanEat()                       // Ätbar
+item.CanDrink()                     // Drickbar
+item.CanRead()                      // Läsbar
+item.CanOpen()                      // Kan öppnas (container)
+item.CanClose()                     // Kan stängas
+item.CanLock()                      // Kan låsas
+item.CanUnlock()                    // Kan låsas upp
+
+// === EGENSKAPER ===
+item.IsHeavy()                      // Vikt > threshold
+item.IsLight()                      // Vikt < threshold
+item.IsValuable()                   // Värde > threshold
+item.IsWorthless()                  // Värde == 0
+item.IsWeapon()                     // HasTag("weapon")
+item.IsArmor()                      // HasTag("armor")
+item.IsFood()                       // HasTag("food")
+item.IsContainer()                  // Kan innehålla saker
+item.IsKey()                        // Är en nyckel
+item.IsTool()                       // HasTag("tool")
+item.IsLight()                      // Ger ljus
+
+// === CONTAINER (om item är container) ===
+item.IsOpen()                       // Container är öppen
+item.IsClosed()                     // Container är stängd
+item.IsLocked()                     // Container är låst
+item.IsUnlocked()                   // Container är olåst
+item.IsEmpty()                      // Inga items i
+item.IsFull()                       // Kan inte ta mer
+item.Contains("key")                // Har specifikt item
+item.ContainsAny("weapon")          // Har item med tag
+item.ItemCount()                    // Antal items i
+item.Contents()                     // Lista på innehåll
+
+// === KOMBINATION ===
+item.CanCombineWith(other)          // Kan kombineras
+item.CombinesWith()                 // Lista på möjliga
+item.ResultOfCombining(other)       // Vad blir det?
+```
+
+---
+
+#### 🧙 NPC Extensions
+
+```csharp
+// === HÄLSA ===
+npc.IsAlive()
+npc.IsDead()
+npc.IsWounded()
+npc.IsHealthy()
+npc.IsDying()
+npc.IsUnconscious()
+
+// === TILLSTÅND ===
+npc.IsSleeping()
+npc.IsAwake()
+npc.IsAlert()
+npc.IsDistracted()
+npc.IsBusy()
+npc.IsIdle()
+npc.IsFighting()
+npc.IsFleeing()
+npc.IsFollowing(player)
+npc.IsGuarding(location)
+npc.IsPatrolling()
+
+// === PLATS ===
+npc.IsIn(location)
+npc.IsInRoom("tavern")
+npc.IsHere()                        // I spelarens rum
+npc.IsNearby()                      // I angränsande rum
+npc.IsVisible()                     // Synlig för spelaren
+npc.IsHidden()                      // Gömd
+
+// === RELATION ===
+npc.IsHostile()                     // Fientlig
+npc.IsFriendly()                    // Vänlig
+npc.IsNeutral()                     // Neutral
+npc.IsScared()                      // Rädd
+npc.IsAngry()                       // Arg
+npc.IsHappy()                       // Glad
+npc.Knows(player)                   // Känner spelaren
+npc.Trusts(player)                  // Litar på spelaren
+npc.Fears(player)                   // Är rädd för spelaren
+npc.RelationshipWith(player)        // Numeriskt
+
+// === FÖRMÅGOR ===
+npc.CanSpeak()                      // Har dialog
+npc.CanTrade()                      // Kan handla
+npc.CanFight()                      // Kan slåss
+npc.CanFollow()                     // Kan följa
+npc.CanTeach()                      // Kan lära ut
+npc.CanHeal()                       // Kan hela
+npc.CanGive(item)                   // Kan ge item
+npc.WillTalk()                      // Villig att prata nu
+npc.WillTrade()                     // Villig att handla nu
+npc.WillHelp()                      // Villig att hjälpa
+
+// === INVENTORY ===
+npc.Has(item)
+npc.HasItem("sword")
+npc.HasAny("weapon")
+npc.IsCarrying(item)
+npc.IsEquipped(item)
+npc.IsWearing(item)
+npc.WillSell(item)                  // Vill sälja
+npc.WillBuy(item)                   // Vill köpa
+npc.PriceFor(item)                  // Pris
+
+// === DIALOG ===
+npc.HasSaidTo(player, "topic")      // Har nämnt
+npc.KnowsAbout("treasure")          // Vet om
+npc.WillTellAbout("secret")         // Villig berätta
+npc.HasQuest()                      // Har uppdrag
+npc.QuestIsAvailable()              // Uppdrag tillgängligt
+npc.QuestIsComplete()               // Uppdrag klart
+```
+
+---
+
+#### 🚪 Door Extensions
+
+```csharp
+// === TILLSTÅND ===
+door.IsOpen()
+door.IsClosed()
+door.IsLocked()
+door.IsUnlocked()
+door.IsBroken()                     // Kan inte öppnas/låsas
+door.IsBlocked()                    // Blockerad av något
+door.IsJammed()                     // Kärvar
+
+// === EGENSKAPER ===
+door.RequiresKey()                  // Behöver nyckel
+door.RequiresKey(key)               // Behöver specifik nyckel
+door.CanBePickedLocked()            // Kan dyrkas
+door.CanBeBrokenDown()              // Kan slås in
+door.CanBePeekedThrough()           // Kan kika genom
+
+// === KOPPLINGAR ===
+door.Connects(room1, room2)         // Kopplar rum
+door.LeadsTo()                      // Vart leder den?
+door.LeadsFrom()                    // Varifrån?
+door.IsExitFrom(location)           // Är utgång från
+door.IsEntranceTo(location)         // Är ingång till
+
+// === SYNLIGHET ===
+door.IsVisible()
+door.IsHidden()                     // Hemlig dörr
+door.IsDiscovered()
+door.IsObvious()                    // Uppenbar
+door.IsSecret()                     // Hemlig
+
+// === INTERAKTION ===
+door.CanOpen()                      // Kan öppnas nu
+door.CanClose()                     // Kan stängas nu
+door.CanLock()                      // Kan låsas nu
+door.CanUnlock()                    // Kan låsas upp nu
+door.CanPass()                      // Kan passera nu
+door.WasUsed()                      // Har använts
+door.TimesUsed()                    // Antal gånger
+```
+
+---
+
+#### 🔑 Key Extensions
+
+```csharp
+// === PLATS ===
+key.IsIn(location)
+key.IsInRoom("bedroom")
+key.IsHere()
+key.IsInInventory()
+key.IsCarriedBy(player)
+key.IsCarriedBy(npc)
+key.IsHidden()
+key.IsVisible()
+key.IsDiscovered()
+
+// === TILLSTÅND ===
+key.IsUsed()                        // Har använts
+key.IsNew()                         // Aldrig använts
+key.IsBroken()                      // Trasig
+key.IsWorking()                     // Fungerar
+
+// === KOPPLINGAR ===
+key.Opens(door)                     // Öppnar specifik dörr
+key.OpensAny()                      // Lista på vad den öppnar
+key.FitsLock(door)                  // Passar i låset
+key.IsMasterKey()                   // Öppnar flera
+key.IsOneTimeUse()                  // Förbrukas vid användning
+
+// === EGENSKAPER ===
+key.CanTake()
+key.CanUse()
+key.CanCopy()                       // Kan kopieras
+```
+
+---
+
+#### 🏠 Location Extensions
+
+```csharp
+// === INNEHÅLL ===
+location.HasItem(item)              // Har specifikt item
+location.HasItem("sword")           // Har item med id
+location.HasAny("weapon")           // Har item med tag
+location.HasNpc(npc)                // Har specifik NPC
+location.HasNpc("guard")            // Har NPC med id
+location.HasPlayer()                // Spelaren är här
+location.IsEmpty()                  // Inga items
+location.IsDeserted()               // Inga NPCs
+location.IsOccupied()               // Har NPCs
+location.ItemCount()                // Antal items
+location.NpcCount()                 // Antal NPCs
+
+// === TILLSTÅND ===
+location.IsLit()                    // Har ljus
+location.IsDark()                   // Mörkt
+location.IsVisited()                // Har besökts
+location.IsUnvisited()              // Aldrig besökt
+location.IsExplored()               // Fullt utforskat
+location.IsSafe()                   // Inga fiender
+location.IsDangerous()              // Har fiender
+location.IsLocked()                 // Inlåst (kan ej lämna)
+location.IsAccessible()             // Går att nå
+
+// === UTGÅNGAR ===
+location.HasExit(direction)         // Har utgång
+location.HasExitTo(other)           // Har utgång till
+location.ExitCount()                // Antal utgångar
+location.Exits()                    // Lista på utgångar
+location.ExitDirections()           // Lista på riktningar
+location.IsDeadEnd()                // Endast en utgång
+location.IsHub()                    // Många utgångar (>3)
+
+// === DÖRRAR ===
+location.HasDoor(direction)         // Har dörr i riktning
+location.HasLockedDoor()            // Har låst dörr
+location.HasOpenDoor()              // Har öppen dörr
+location.DoorsCount()               // Antal dörrar
+location.Doors()                    // Lista på dörrar
+
+// === EGENSKAPER ===
+location.IsIndoors()
+location.IsOutdoors()
+location.IsUnderground()
+location.IsUnderwater()
+location.IsHighUp()                 // Högt upp
+location.HasWater()
+location.HasFire()
+location.Temperature()              // Temperatur
+
+// === NARRATIV ===
+location.IsStartLocation()          // Startplats
+location.IsGoalLocation()           // Målplats
+location.IsCheckpoint()             // Checkpoint
+location.IsBossRoom()               // Bossrum
+location.IsShop()                   // Butik
+location.IsSavePoint()              // Sparplats
+```
+
+---
+
 ### 💡 Kombinera stilar
 
 Du kan mixa! Båda returnerar samma typer:

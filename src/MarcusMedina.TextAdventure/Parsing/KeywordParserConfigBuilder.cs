@@ -36,6 +36,7 @@ public sealed class KeywordParserConfigBuilder
     private ISet<string> _combineSeparators;
     private ISet<string> _pourPrepositions;
     private IReadOnlyDictionary<string, Direction> _directionAliases;
+    private readonly Dictionary<string, string> _synonyms;
     private bool _allowDirectionEnumNames;
     private bool _enableFuzzyMatching;
     private int _fuzzyMaxDistance;
@@ -82,6 +83,7 @@ public sealed class KeywordParserConfigBuilder
             ["in"] = Direction.In,
             ["out"] = Direction.Out
         };
+        _synonyms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         _allowDirectionEnumNames = true;
         _enableFuzzyMatching = false;
         _fuzzyMaxDistance = 1;
@@ -237,6 +239,22 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
+    /// <summary>Add synonyms that map to a canonical command keyword.</summary>
+    public KeywordParserConfigBuilder AddSynonyms(string canonical, params string[] synonyms)
+    {
+        if (string.IsNullOrWhiteSpace(canonical)) return this;
+        var canonicalToken = canonical.Trim().ToLowerInvariant();
+        _synonyms[canonicalToken] = canonicalToken;
+
+        foreach (var synonym in synonyms)
+        {
+            if (string.IsNullOrWhiteSpace(synonym)) continue;
+            _synonyms[synonym.Trim().ToLowerInvariant()] = canonicalToken;
+        }
+
+        return this;
+    }
+
     /// <summary>Set keywords for "all".</summary>
     public KeywordParserConfigBuilder WithAll(params string[] commands)
     {
@@ -317,6 +335,7 @@ public sealed class KeywordParserConfigBuilder
             combineSeparators: _combineSeparators,
             pourPrepositions: _pourPrepositions,
             directionAliases: _directionAliases,
+            synonyms: _synonyms,
             allowDirectionEnumNames: _allowDirectionEnumNames,
             enableFuzzyMatching: _enableFuzzyMatching,
             fuzzyMaxDistance: _fuzzyMaxDistance);

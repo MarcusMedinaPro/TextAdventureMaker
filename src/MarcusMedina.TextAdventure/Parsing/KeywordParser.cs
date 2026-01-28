@@ -34,7 +34,7 @@ public class KeywordParser : ICommandParser
             return new UnknownCommand();
         }
 
-        var keyword = tokens[0].Lower();
+        var keyword = NormalizeKeyword(tokens[0]);
 
         if (_config.Quit.Contains(keyword))
         {
@@ -226,6 +226,7 @@ public class KeywordParser : ICommandParser
 
     private ICommand? BuildCommandForKeyword(string keyword, string[] tokens)
     {
+        keyword = NormalizeKeyword(keyword);
         if (_config.Quit.Contains(keyword)) return new QuitCommand();
         if (_config.Examine.Contains(keyword)) return new ExamineCommand(ParseItemName(tokens, 1));
         if (_config.Look.Contains(keyword)) return new LookCommand(ParseItemName(tokens, 1));
@@ -277,6 +278,13 @@ public class KeywordParser : ICommandParser
         }
 
         return null;
+    }
+
+    private string NormalizeKeyword(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return string.Empty;
+        var keyword = token.ToLowerInvariant();
+        return _config.Synonyms.TryGetValue(keyword, out var canonical) ? canonical : keyword;
     }
 
     private IEnumerable<string> GetAllCommandKeywords()

@@ -217,6 +217,21 @@ public class KeywordParserTests
     }
 
     [Fact]
+    public void Parse_Synonym_ReturnsCanonicalCommand()
+    {
+        var config = KeywordParserConfigBuilder.BritishDefaults()
+            .WithTake("take")
+            .AddSynonyms("take", "grab", "pickup")
+            .Build();
+
+        var parser = new KeywordParser(config);
+
+        var command = parser.Parse("grab coin");
+
+        Assert.IsType<TakeCommand>(command);
+    }
+
+    [Fact]
     public void Parse_Read_ReturnsReadCommand()
     {
         var parser = new KeywordParser(CreateEnglishConfig());

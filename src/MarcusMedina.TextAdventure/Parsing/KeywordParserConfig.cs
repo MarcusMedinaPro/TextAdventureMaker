@@ -52,6 +52,7 @@ public sealed class KeywordParserConfig
             ["in"] = Direction.In,
             ["out"] = Direction.Out
         },
+        synonyms: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         allowDirectionEnumNames: true);
     /// <summary>Keywords used to quit the game.</summary>
     public ISet<string> Quit { get; }
@@ -95,6 +96,8 @@ public sealed class KeywordParserConfig
     public ISet<string> Load { get; }
     /// <summary>Keywords used to show quest log.</summary>
     public ISet<string> Quest { get; }
+    /// <summary>Synonym map for command keywords.</summary>
+    public IReadOnlyDictionary<string, string> Synonyms { get; }
 
     /// <summary>Keywords that indicate "all" in take/drop commands.</summary>
     public ISet<string> All { get; }
@@ -141,6 +144,7 @@ public sealed class KeywordParserConfig
         ISet<string> combineSeparators,
         ISet<string> pourPrepositions,
         IReadOnlyDictionary<string, Direction> directionAliases,
+        IReadOnlyDictionary<string, string>? synonyms = null,
         bool allowDirectionEnumNames = false,
         bool enableFuzzyMatching = false,
         int fuzzyMaxDistance = 1)
@@ -166,6 +170,7 @@ public sealed class KeywordParserConfig
         Save = save ?? throw new ArgumentNullException(nameof(save));
         Load = load ?? throw new ArgumentNullException(nameof(load));
         Quest = quest ?? throw new ArgumentNullException(nameof(quest));
+        Synonyms = synonyms ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         All = all ?? throw new ArgumentNullException(nameof(all));
         IgnoreItemTokens = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
         CombineSeparators = combineSeparators ?? throw new ArgumentNullException(nameof(combineSeparators));

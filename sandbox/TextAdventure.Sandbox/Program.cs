@@ -120,7 +120,7 @@ void ShowRoom()
         .ToList();
 
     Console.WriteLine(location.Npcs.Count > 0
-        ? $"People present: {location.Npcs.Count}"
+        ? $"People present: {location.Npcs.Count} ({location.Npcs.Select(npc => npc.Name).CommaJoin()})"
         : "People present: None");
     Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }

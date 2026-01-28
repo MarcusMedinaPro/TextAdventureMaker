@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -8,53 +7,45 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 4: The Last Train Home
-// Tests: items, inventory, parser commands, boarding, auto-look after movement.
+// Slice 5: The Silent Classroom
+// Tests: NPC dialog, movement, auto-look after go, talk command.
 
-var platform = new Location("platform", "A quiet platform. The last train waits in the rain.");
-var carriage = new Location("carriage", "Warm light, tired faces, a seat by the window.");
+var hallway = new Location("hallway", "A narrow corridor lined with lockers and a closed classroom door.");
+var classroom = new Location("classroom", "A quiet classroom with polished desks and a chalkboard half-erased.");
 
-var ticket = new Item("ticket", "train ticket", "A single-ride ticket with a faded stamp.")
-    .SetWeight(0.01f)
-    .AddAliases("ticket", "pass");
+var curiosityNode = new DialogNode("The student nods once and whispers about footsteps in the corridor.")
+    .AddOption("Ask what they heard.", new DialogNode("Slow footsteps, then a door sighing open, then silence again."))
+    .AddOption("Ask why they stare at the floor.", new DialogNode("They say the floor is where promises are made and forgotten."));
+var offerComfortNode = new DialogNode("They crack a small smile and say the silence feels like a warm drink.")
+    .AddOption("Offer to share a joke.", new DialogNode("The smile lingers, and they murmur, 'Keep the jokes coming.'"));
 
-var thermos = new Item("thermos", "tea thermos", "A dented thermos smelling of black tea.")
-    .SetWeight(0.6f)
-    .AddAliases("thermos", "tea")
-    .SetReaction(ItemAction.Use, "You take a careful sip. It warms your hands and sends a curl of steam into the rain.");
+var student = new Npc("student", "silent student")
+    .Description("A student sits in the back, voice barely above a breath.")
+    .SetDialog(new DialogNode("They raise their eyes when you enter and gesture for you to speak.")
+        .AddOption("Ask what keeps them here.", curiosityNode)
+        .AddOption("Offer some company.", offerComfortNode));
 
-platform.AddItem(ticket);
-platform.AddItem(thermos);
-platform.AddExit(Direction.In, carriage, oneWay: true);
-carriage.AddExit(Direction.Out, platform);
+classroom.AddNpc(student);
+hallway.AddExit(Direction.East, classroom);
+classroom.AddExit(Direction.West, hallway);
 
-var state = new GameState(platform, worldLocations: new[] { platform, carriage })
+var state = new GameState(hallway, worldLocations: new[] { hallway, classroom })
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
 };
 
-var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "x")
-    .WithMove("move", "push", "shift", "lift", "slide")
-    .WithInventory("inventory", "inv", "i")
-    .WithTake("take", "get", "pick")
-    .WithUse("use", "drink", "sip")
     .WithGo("go", "move")
+    .WithTalk("talk", "speak")
     .WithFuzzyMatching(true, 1)
-    .WithIgnoreItemTokens("on", "off")
-    .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
-    {
-        ["in"] = Direction.In,
-        ["out"] = Direction.Out
-    })
-    .Build();
-var parser = new KeywordParser(parserConfig);
+    .Build());
 
-Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
-Console.WriteLine("Goal: find the ticket, board the train, or stay on the platform.");
-Console.WriteLine("Commands: look, examine <item>, take <item>, inventory, move <item>, use/drink/sip <item>, go in/out, board, sit, stay, quit.");
+Console.WriteLine("=== THE SILENT CLASSROOM (Slice 5) ===");
+Console.WriteLine("Goal: reach the classroom, speak with the student, and return with fresh whispers.");
+Console.WriteLine("Commands: look, examine, talk student, 1-3 in dialog, go east/west, leave, quit.");
 ShowRoom();
 
 while (true)
@@ -63,47 +54,20 @@ while (true)
     var input = Console.ReadLine()?.Trim();
     if (string.IsNullOrWhiteSpace(input)) continue;
 
-    if (input.Is("stay"))
+    if (input.Is("leave"))
     {
-        Console.WriteLine("You let the train go. You stay behind and watch the vapour trail.");
+        Console.WriteLine("You leave the whispers for another day.");
         break;
     }
 
-    if (input.Is("sit"))
-    {
-        Console.WriteLine(state.IsCurrentRoomId("carriage")
-            ? "You take a seat and watch rain smear the window into silver."
-            : "You sit for a moment, listening to the rain against the platform tiles.");
-        continue;
-    }
-
-    if (input.Is("board"))
-    {
-        if (!state.IsCurrentRoomId("platform"))
-        {
-            Console.WriteLine("You are already on board the train.");
-            continue;
-        }
-
-        if (state.Inventory.FindItem("ticket") is null)
-        {
-            Console.WriteLine("You need a ticket to board.");
-            continue;
-        }
-
-        if (state.Move(Direction.In))
-        {
-            Console.WriteLine("You board the train. The city blurs into neon.");
-            ShowRoom();
-        }
-        else
-        {
-            Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
-        }
-        continue;
-    }
-
     var command = parser.Parse(input);
+
+    if (command is TalkCommand talk && TryFindNpc(talk.Target, out var npc))
+    {
+        RunDialog(npc!);
+        continue;
+    }
+
     var result = state.Execute(command);
 
     switch (command)
@@ -121,7 +85,10 @@ while (true)
         ShowRoom();
     }
 
-    if (result.ShouldQuit) break;
+    if (result.ShouldQuit)
+    {
+        break;
+    }
 }
 
 void WriteResult(CommandResult result)
@@ -147,19 +114,13 @@ void ShowRoom()
     Console.WriteLine($"Room: {location.Id.ToProperCase()}");
     Console.WriteLine(location.GetDescription());
 
-    var items = location.Items.CommaJoinNames(properCase: true);
-    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
-
     var exits = location.Exits
-        .Select(exit =>
-        {
-            var direction = exit.Key.ToString().ToLowerInvariant().ToProperCase();
-            return exit.Value.Door == null
-                ? direction
-                : $"{direction} ({exit.Value.Door.Name.ToProperCase()}, {exit.Value.Door.State.ToString().ToProperCase()})";
-        })
+        .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())
         .ToList();
 
+    Console.WriteLine(location.Npcs.Count > 0
+        ? $"People present: {location.Npcs.Count}"
+        : "People present: None");
     Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 
@@ -167,4 +128,67 @@ void ShowLookResult(CommandResult result)
 {
     Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
     WriteResult(result);
+}
+
+bool TryFindNpc(string? target, out INpc? npc)
+{
+    npc = null;
+    if (string.IsNullOrWhiteSpace(target)) return false;
+    npc = state.CurrentLocation.FindNpc(target);
+    return npc != null;
+}
+
+void RunDialog(INpc npc)
+{
+    var node = npc.DialogRoot;
+    if (node == null)
+    {
+        Console.WriteLine("They have nothing to say.");
+        return;
+    }
+
+    while (true)
+    {
+        Console.WriteLine();
+        Console.WriteLine(node.Text);
+
+        if (node.Options.Count == 0)
+        {
+            Console.WriteLine("There is nothing more to ask.");
+            break;
+        }
+
+        for (var i = 0; i < node.Options.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}) {node.Options[i].Text}");
+        }
+
+        Console.WriteLine($"{node.Options.Count + 1}) Politely step away.");
+        Console.Write("> ");
+        var choice = Console.ReadLine()?.Trim();
+        if (!int.TryParse(choice, out var selection))
+        {
+            Console.WriteLine("Pick one of the numbers.");
+            continue;
+        }
+
+        if (selection == node.Options.Count + 1)
+        {
+            Console.WriteLine("You step back and let the silence settle.");
+            break;
+        }
+
+        if (selection < 1 || selection > node.Options.Count)
+        {
+            Console.WriteLine("That is not a valid option.");
+            continue;
+        }
+
+        node = node.Options[selection - 1].Next;
+        if (node == null)
+        {
+            Console.WriteLine("They do not answer further.");
+            break;
+        }
+    }
 }

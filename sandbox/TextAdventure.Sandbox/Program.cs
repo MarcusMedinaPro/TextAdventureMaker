@@ -40,7 +40,7 @@ var door = new Door("study_door", "study door", "A sturdy door with a stubborn l
 
 hallway.AddExit(Direction.East, study, door);
 
-var state = new GameState(hallway, worldLocations: new[] { hallway, study })
+var state = new GameState(hallway, worldLocations: [hallway, study])
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
@@ -160,17 +160,13 @@ while (true)
     Console.WriteLine("Try: look, take key, unlock/open/close/lock/destroy door, east/west, inventory, quit.");
 }
 
-Exit? ResolveDoorExit(string token)
-{
-    if (token is "east" or "e")
-        return state.CurrentLocation.GetExit(Direction.East);
-    if (token is "west" or "w")
-        return state.CurrentLocation.GetExit(Direction.West);
-
-    return token is "door"
+Exit? ResolveDoorExit(string token) => token is "east" or "e"
+        ? state.CurrentLocation.GetExit(Direction.East)
+        : token is "west" or "w"
+        ? state.CurrentLocation.GetExit(Direction.West)
+        : token is "door"
         ? state.CurrentLocation.Exits.Values.FirstOrDefault(exit => exit.Door != null)
         : state.CurrentLocation.Exits.Values.FirstOrDefault(exit => exit.Door != null);
-}
 
 bool Move(Direction direction)
 {

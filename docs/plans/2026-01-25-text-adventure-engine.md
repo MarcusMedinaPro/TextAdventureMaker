@@ -20,6 +20,16 @@ Skip red phase. Write test → write code → test passes → refactor.
 
 test → kod → test → refactor → test → commit → update sandbox → låt Marcus testa sandbox → fixa vid behov, korrigera tester, commit igen.
 
+### Slice Workflow Rule (tooling + examples)
+
+1 - test  
+2 - implementera  
+3 - kopiera över koden från docs/examples för slicen till sandbox Program.cs  
+4 - Marcus testar  
+5 - anpassa om något inte är ok  
+6 - kopiera koden från sandbox Program.cs till docs/examples  
+7 - commit
+
 ### Fluent Consistency Rule
 
 Om ett objekt får en property/metod/extension, ge motsvarande funktionalitet till närliggande objekt (t.ex. Item/Key/Door) så API:t förblir konsekvent och lättläst.

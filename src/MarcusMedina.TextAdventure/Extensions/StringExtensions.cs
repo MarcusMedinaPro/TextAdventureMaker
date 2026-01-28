@@ -23,6 +23,12 @@ public static class StringExtensions
         return string.Equals(text.Trim(), other.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>Fluent alias for case-insensitive comparison.</summary>
+    public static bool Is(this string? text, string? other)
+    {
+        return text.TextCompare(other);
+    }
+
     /// <summary>Convert a string to a stable identifier (lowercase, underscores).</summary>
     public static string ToId(this string? text)
     {

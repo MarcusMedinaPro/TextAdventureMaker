@@ -46,9 +46,17 @@ public class TalkCommand : ICommand
 
         context.State.Events.Publish(new GameEvent(GameEventType.TalkToNpc, context.State, location, npc: npc));
 
+        var ruleBased = npc.GetRuleBasedDialog(context.State);
+        if (!string.IsNullOrWhiteSpace(ruleBased))
+        {
+            var ruleResult = CommandResult.Ok(ruleBased);
+            return suggestion != null ? ruleResult.WithSuggestion(suggestion) : ruleResult;
+        }
+
         var dialog = npc.DialogRoot;
         if (dialog == null)
         {
+            npc.Memory.MarkMet();
             return CommandResult.Ok(Language.NpcHasNothingToSay);
         }
 
@@ -70,6 +78,7 @@ public class TalkCommand : ICommand
             }
         }
 
+        npc.Memory.MarkMet();
         var result = CommandResult.Ok(builder.ToString());
         return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }

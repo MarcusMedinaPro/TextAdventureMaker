@@ -187,4 +187,80 @@ public class DoorTests
         Assert.False(door.Unlock(key));
         Assert.Equal(DoorState.Closed, door.State);
     }
+
+    [Fact]
+    public void Door_Open_RaisesEvent()
+    {
+        var door = new Door("door1", "wooden door");
+        var raised = 0;
+        door.OnOpen += _ => raised++;
+
+        door.Open();
+
+        Assert.Equal(1, raised);
+    }
+
+    [Fact]
+    public void Door_Open_DoesNotRaiseEventWhenLocked()
+    {
+        var key = new Key("key1", "rusty key");
+        var door = new Door("door1", "iron door").RequiresKey(key);
+        var raised = 0;
+        door.OnOpen += _ => raised++;
+
+        door.Open();
+
+        Assert.Equal(0, raised);
+    }
+
+    [Fact]
+    public void Door_Close_RaisesEvent()
+    {
+        var door = new Door("door1", "iron door");
+        door.Open();
+        var raised = 0;
+        door.OnClose += _ => raised++;
+
+        door.Close();
+
+        Assert.Equal(1, raised);
+    }
+
+    [Fact]
+    public void Door_Lock_RaisesEvent()
+    {
+        var key = new Key("key1", "rusty key");
+        var door = new Door("door1", "iron door");
+        var raised = 0;
+        door.OnLock += _ => raised++;
+
+        door.Lock(key);
+
+        Assert.Equal(1, raised);
+    }
+
+    [Fact]
+    public void Door_Unlock_RaisesEvent()
+    {
+        var key = new Key("key1", "rusty key");
+        var door = new Door("door1", "iron door").RequiresKey(key);
+        var raised = 0;
+        door.OnUnlock += _ => raised++;
+
+        door.Unlock(key);
+
+        Assert.Equal(1, raised);
+    }
+
+    [Fact]
+    public void Door_Destroy_RaisesEvent()
+    {
+        var door = new Door("door1", "iron door");
+        var raised = 0;
+        door.OnDestroy += _ => raised++;
+
+        door.Destroy();
+
+        Assert.Equal(1, raised);
+    }
 }

@@ -2,7 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+using System.Collections.Generic;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Interfaces;
 
@@ -16,6 +18,8 @@ public interface INpc : IGameEntity
     INpcMovement Movement { get; }
     IDialogNode? DialogRoot { get; }
     IStats Stats { get; }
+    NpcMemory Memory { get; }
+    IReadOnlyList<DialogRule> DialogRules { get; }
 
     INpc Description(string text);
     INpc SetState(NpcState state);
@@ -24,4 +28,6 @@ public interface INpc : IGameEntity
     INpc Dialog(string text);
     INpc SetDialog(IDialogNode? dialog);
     INpc SetStats(IStats stats);
+    DialogRule AddDialogRule(string id);
+    string? GetRuleBasedDialog(IGameState state);
 }

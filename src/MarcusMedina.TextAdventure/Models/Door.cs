@@ -2,6 +2,7 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+using System;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
@@ -21,6 +22,12 @@ public class Door : IDoor
     public string GetDescription() => _description;
     public DoorState State { get; private set; }
     public IKey? RequiredKey { get; private set; }
+
+    public event Action<IDoor>? OnOpen;
+    public event Action<IDoor>? OnClose;
+    public event Action<IDoor>? OnLock;
+    public event Action<IDoor>? OnUnlock;
+    public event Action<IDoor>? OnDestroy;
 
     public bool IsPassable => State == DoorState.Open || State == DoorState.Destroyed;
 
@@ -89,7 +96,9 @@ public class Door : IDoor
     {
         if (State == DoorState.Locked) return false;
         if (State == DoorState.Destroyed) return true;
+        if (State == DoorState.Open) return true;
         State = DoorState.Open;
+        OnOpen?.Invoke(this);
         return true;
     }
 
@@ -97,7 +106,9 @@ public class Door : IDoor
     {
         if (State == DoorState.Destroyed) return false;
         if (State == DoorState.Locked) return false;
+        if (State == DoorState.Closed) return true;
         State = DoorState.Closed;
+        OnClose?.Invoke(this);
         return true;
     }
 
@@ -106,8 +117,10 @@ public class Door : IDoor
         if (State == DoorState.Destroyed) return false;
         if (State == DoorState.Open) return false;
         if (RequiredKey != null && RequiredKey.Id != key.Id) return false;
+        if (State == DoorState.Locked && RequiredKey != null && RequiredKey.Id == key.Id) return true;
         RequiredKey = key;
         State = DoorState.Locked;
+        OnLock?.Invoke(this);
         return true;
     }
 
@@ -116,12 +129,15 @@ public class Door : IDoor
         if (State != DoorState.Locked) return false;
         if (RequiredKey == null || RequiredKey.Id != key.Id) return false;
         State = DoorState.Closed;
+        OnUnlock?.Invoke(this);
         return true;
     }
 
     public bool Destroy()
     {
+        if (State == DoorState.Destroyed) return true;
         State = DoorState.Destroyed;
+        OnDestroy?.Invoke(this);
         return true;
     }
 

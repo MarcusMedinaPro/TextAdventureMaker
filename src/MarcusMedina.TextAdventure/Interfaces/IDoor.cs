@@ -2,6 +2,7 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+using System;
 using MarcusMedina.TextAdventure.Enums;
 
 namespace MarcusMedina.TextAdventure.Interfaces;
@@ -14,6 +15,12 @@ public interface IDoor : IGameEntity
     DoorState State { get; }
     IKey? RequiredKey { get; }
     IReadOnlyList<string> Aliases { get; }
+
+    event Action<IDoor>? OnOpen;
+    event Action<IDoor>? OnClose;
+    event Action<IDoor>? OnLock;
+    event Action<IDoor>? OnUnlock;
+    event Action<IDoor>? OnDestroy;
 
     bool IsPassable { get; }
     IDoor Description(string text);

@@ -56,7 +56,22 @@
   - Phrases.GetRandomPhrase()
   - Phrases.GetNextPhrase() (start over when done)
 - vehicles (cars, bikes, boats, planes, horse) with basic commands (enter, exit, drive, sail, fly) funkar som portaler
-- 
+- teleporters (magical or technological) that can be used to instantly move between locations
+- weather system that affects gameplay (rain makes surfaces slippery, fog reduces visibility)
+- hostile npcs that can attack the player or other npcs
+- basic combat system with health, damage, and simple tactics (attack, defend, flee)
+- food --> healing system (eat food to regain health, drink water to stay hydrated)
+  - Item.IsFood + Item.IsPoisoned + Item.HealAmount
+  - Player.Eat(Item item) + Player.Drink(Item item)
+  - Eating poisoned food causes damage over time
+- basic crafting system (combine items to create new items)
+- basic economy system (buy/sell items with currency)
+  - Haggle
+  - "kompispris" (if they like you more, they give you a better price)
+  - Barter system (trade items instead of currency)
+- crawl or sneak pass npcs without being detected
+- Electrical Machines (lamps, computers, vehicles) that can be interacted with using specific commands (turn on/off, use, repair, smash)
+- Fuel machines that require fuel items to operate (e.g., car needs gasoline)
 
 ### Krav
 

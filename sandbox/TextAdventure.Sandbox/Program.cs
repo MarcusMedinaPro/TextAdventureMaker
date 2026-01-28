@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -139,7 +142,12 @@ bool TryFindNpc(string? target, out INpc npc)
         return false;
     }
 
-    var found = state.CurrentLocation.FindNpc(target);
+    var trimmed = target.Trim();
+    var found = state.CurrentLocation.Npcs.FirstOrDefault(candidate =>
+        candidate.Name.TextCompare(trimmed) ||
+        candidate.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Any(part => part.TextCompare(trimmed)));
+
     if (found == null)
     {
         return false;

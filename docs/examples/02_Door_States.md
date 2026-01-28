@@ -1,3 +1,34 @@
+# The Door States
+
+_Slice tag: Slice 2.1 — Door States. Demo focuses on door state transitions (open/close/lock/unlock/destroy)._ 
+
+## Story beats (max ~10 steps)
+1) You stand in the hallway.
+2) A locked door leads east.
+3) Find the key.
+4) Unlock, open, and enter the study.
+5) Try closing or locking the door.
+6) Optionally destroy the door.
+
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│            │     │            │
+│  Hallway   │─────│   Study    │
+│            │     │            │
+│     K      │     │     P      │
+└────────────┘     └────────────┘
+
+K = Brass key
+P = Photo
+```
+
+## Example (door state transitions)
+```csharp
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -431,3 +462,4 @@ void HandleGo(string token)
 
     Console.WriteLine("Go where? Try: go east.");
 }
+```

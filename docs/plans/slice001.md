@@ -17,10 +17,10 @@ dotnet new classlib -n MarcusMedina.TextAdventure -o src/MarcusMedina.TextAdvent
 dotnet new classlib -n MarcusMedina.TextAdventure.AI -o src/MarcusMedina.TextAdventure.AI
 dotnet new xunit -n MarcusMedina.TextAdventure.Tests -o tests/MarcusMedina.TextAdventure.Tests
 dotnet new console -n TextAdventure.Sandbox -o sandbox/TextAdventure.Sandbox
-dotnet sln add src/MarcusMedina.TextAdventure
-dotnet sln add src/MarcusMedina.TextAdventure.AI
-dotnet sln add tests/MarcusMedina.TextAdventure.Tests
-dotnet sln add sandbox/TextAdventure.Sandbox
+dotnet sln add TextAdventure.slnx src/MarcusMedina.TextAdventure
+dotnet sln add TextAdventure.slnx src/MarcusMedina.TextAdventure.AI
+dotnet sln add TextAdventure.slnx tests/MarcusMedina.TextAdventure.Tests
+dotnet sln add TextAdventure.slnx sandbox/TextAdventure.Sandbox
 dotnet add tests/MarcusMedina.TextAdventure.Tests reference src/MarcusMedina.TextAdventure
 dotnet add sandbox/TextAdventure.Sandbox reference src/MarcusMedina.TextAdventure
 dotnet add src/MarcusMedina.TextAdventure.AI reference src/MarcusMedina.TextAdventure

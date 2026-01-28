@@ -41,6 +41,7 @@ public interface IItem : IGameEntity
     IItem RequiresToRead(Func<IGameState, bool> predicate);
     bool HiddenFromItemList { get; }
     IItem HideFromItemList(bool hidden = true);
+    IItem Clone();
     void Take();
     void Drop();
     void Use();

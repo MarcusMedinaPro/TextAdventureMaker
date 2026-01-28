@@ -149,6 +149,48 @@ public class Item : IItem
         return this;
     }
 
+    public virtual IItem Clone()
+    {
+        var copy = new Item(Id, Name, _description)
+            .SetTakeable(Takeable)
+            .SetWeight(Weight)
+            .SetReadable(_readable)
+            .SetReadingCost(_readingCost)
+            .HideFromItemList(_hiddenFromItemList);
+
+        if (_aliases.Count > 0)
+        {
+            copy.AddAliases(_aliases.ToArray());
+        }
+
+        if (_readText != null)
+        {
+            copy.SetReadText(_readText);
+        }
+
+        if (_requiresTakeToRead)
+        {
+            copy.RequireTakeToRead();
+        }
+
+        if (_readCondition != null)
+        {
+            copy.RequiresToRead(_readCondition);
+        }
+
+        foreach (var reaction in _reactions)
+        {
+            copy.SetReaction(reaction.Key, reaction.Value);
+        }
+
+        foreach (var entry in _properties)
+        {
+            copy.Properties[entry.Key] = entry.Value;
+        }
+
+        return copy;
+    }
+
     IItem IItem.SetTakeable(bool takeable) => SetTakeable(takeable);
     IItem IItem.SetWeight(float weight) => SetWeight(weight);
     IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);

@@ -74,6 +74,7 @@ public abstract class ItemDecorator : IItem
     public virtual IItem SetReadingCost(int turns) => Inner.SetReadingCost(turns);
     public virtual IItem HideFromItemList(bool hidden = true) => Inner.HideFromItemList(hidden);
     public virtual IItem RequiresToRead(Func<IGameState, bool> predicate) => Inner.RequiresToRead(predicate);
+    public virtual IItem Clone() => Inner.Clone();
     public virtual void Take() => Inner.Take();
     public virtual void Drop() => Inner.Drop();
     public virtual void Use() => Inner.Use();

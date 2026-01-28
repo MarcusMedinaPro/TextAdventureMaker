@@ -90,4 +90,31 @@ public class ItemTests
 
         Assert.Equal("Gold Coin, Old Torch", joined);
     }
+
+    [Fact]
+    public void Item_Clone_CopiesConfig()
+    {
+        var original = new Item("note", "Note")
+            .AddAliases("paper")
+            .SetTakeable(false)
+            .SetWeight(0.5f)
+            .SetReadable(true)
+            .SetReadText("Hello")
+            .SetReaction(ItemAction.Use, "Used.");
+
+        original.SetProperty("mood", "quiet");
+
+        var clone = original.Clone();
+
+        Assert.NotSame(original, clone);
+        Assert.Equal(original.Id, clone.Id);
+        Assert.Equal(original.Name, clone.Name);
+        Assert.Equal(original.GetDescription(), clone.GetDescription());
+        Assert.Equal(original.Takeable, clone.Takeable);
+        Assert.Equal(original.Weight, clone.Weight);
+        Assert.Equal(original.Readable, clone.Readable);
+        Assert.Equal(original.GetReadText(), clone.GetReadText());
+        Assert.Equal(original.GetReaction(ItemAction.Use), clone.GetReaction(ItemAction.Use));
+        Assert.Equal(original.GetProperty("mood"), clone.GetProperty("mood"));
+    }
 }

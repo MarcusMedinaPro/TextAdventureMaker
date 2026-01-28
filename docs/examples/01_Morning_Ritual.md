@@ -77,55 +77,71 @@ kitchen.AddExit(Direction.South, livingRoom);
 // Game state
 var state = new GameState(bedroom, worldLocations: new[] { bedroom, hallway, kitchen, livingRoom });
 
-void ShowRoom()
-{
-    var location = state.CurrentLocation;
-    Console.WriteLine($"\nRoom: {location.Id.ToProperCase()}");
-    Console.WriteLine(location.GetDescription());
-    var exits = location.Exits.Keys
-        .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase());
-    Console.WriteLine($"Exits: {string.Join(", ", exits)}");
-}
-
-// Run loop (manual commands, no parser)
+Console.WriteLine("=== MORNING RITUAL (Slice 1) ===");
+Console.WriteLine("Goal: make your way to the living room for a quiet start.");
+Console.WriteLine("Type 'look' to recheck your surroundings.");
 ShowRoom();
+
 while (true)
 {
     Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim().ToLowerInvariant();
+    var input = Console.ReadLine()?.Trim();
     if (string.IsNullOrWhiteSpace(input)) continue;
 
-    if (input == "quit")
-    {
-        break;
-    }
+    var normalized = input.Lower();
 
-    if (input == "look")
+    if (normalized is "quit" or "exit") break;
+
+    if (normalized is "look" or "l")
     {
         ShowRoom();
         continue;
     }
 
-    var moved = input switch
+    var moved = normalized switch
     {
-        "north" or "n" => state.Move(Direction.North),
-        "south" or "s" => state.Move(Direction.South),
-        "east" or "e" => state.Move(Direction.East),
-        "west" or "w" => state.Move(Direction.West),
+        "north" or "n" => Move(Direction.North),
+        "south" or "s" => Move(Direction.South),
+        "east" or "e" => Move(Direction.East),
+        "west" or "w" => Move(Direction.West),
         _ => false
     };
 
-    if (moved)
-    {
-        ShowRoom();
-    }
-    else if (input is "north" or "n" or "south" or "s" or "east" or "e" or "west" or "w")
+    if (moved) continue;
+
+    if (normalized is "north" or "n" or "south" or "s" or "east" or "e" or "west" or "w")
     {
         Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
+        continue;
     }
-    else
+
+    Console.WriteLine("Try: look, north/south/east/west, quit.");
+}
+
+bool Move(Direction direction)
+{
+    if (!state.Move(direction))
     {
-        Console.WriteLine("Try: look, north/south/east/west, quit.");
+        return false;
     }
+
+    ShowRoom();
+    return true;
+}
+
+void ShowRoom()
+{
+    var location = state.CurrentLocation;
+    Console.WriteLine();
+    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
+    Console.WriteLine(location.GetDescription());
+
+    var exits = location.Exits.Keys
+        .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase())
+        .ToList();
+
+    Console.WriteLine(exits.Count > 0
+        ? $"Exits: {exits.CommaJoin()}"
+        : "Exits: None");
 }
 ```

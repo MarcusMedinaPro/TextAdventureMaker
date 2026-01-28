@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -30,7 +28,7 @@ classroom.AddNpc(student);
 hallway.AddExit(Direction.East, classroom);
 classroom.AddExit(Direction.West, hallway);
 
-var state = new GameState(hallway, worldLocations: new[] { hallway, classroom })
+var state = new GameState(hallway, worldLocations: [hallway, classroom])
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
@@ -53,7 +51,8 @@ while (true)
 {
     Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input)) continue;
+    if (string.IsNullOrWhiteSpace(input))
+        continue;
 
     if (input.Is("leave"))
     {
@@ -76,6 +75,7 @@ while (true)
         case LookCommand:
             ShowLookResult(result);
             break;
+
         default:
             WriteResult(result);
             break;

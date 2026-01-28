@@ -61,6 +61,7 @@ using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -116,9 +117,9 @@ while (true)
 
     var command = parser.Parse(input);
 
-    if (command is TalkCommand talk && TryFindNpc(talk.Target, out var npc))
+    if (command is TalkCommand { Target: var target } && TryFindNpc(target, out var npc))
     {
-        RunDialog(npc!); // NPC exists when TryFindNpc returns true
+        RunDialog(npc);
         continue;
     }
 
@@ -184,12 +185,22 @@ void ShowLookResult(CommandResult result)
     WriteResult(result);
 }
 
-bool TryFindNpc(string? target, out INpc? npc)
+bool TryFindNpc(string? target, out INpc npc)
 {
-    npc = null;
-    if (string.IsNullOrWhiteSpace(target)) return false;
-    npc = state.CurrentLocation.FindNpc(target);
-    return npc != null;
+    npc = default!;
+    if (string.IsNullOrWhiteSpace(target))
+    {
+        return false;
+    }
+
+    var found = state.CurrentLocation.FindNpc(target);
+    if (found == null)
+    {
+        return false;
+    }
+
+    npc = found;
+    return true;
 }
 
 void RunDialog(INpc npc)

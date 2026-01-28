@@ -99,7 +99,7 @@ See the [docs/examples](docs/examples) folder for complete runnable demos:
 | The Key Under the Stone | Event system |
 | Rain on the Roof | Combat system |
 | The Forgotten Password | Quest system |
-| Predator Pre-Date-Or | World state & flags |
+| Pre-Date | World state & flags |
 | The Warm Library | Save/Load |
 
 ## Installation

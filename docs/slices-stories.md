@@ -59,8 +59,8 @@ This document maps slices to demo stories and explains why each story fits the e
 - **Status:** OK
 
 9) **Slice 9 — World State & Consequence**
-- **Story:** Predator (Pre‑Date‑Or)
-- **Story file:** `docs/examples/09_Predator_Pre-Date-Or.md`
+- **Story:** Pre‑Date
+- **Story file:** `docs/examples/09_Pre-Date.md`
 - **Why it fits:** flags reflect choices and change outcomes
 - **Status:** OK
 

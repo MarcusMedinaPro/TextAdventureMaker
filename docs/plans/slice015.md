@@ -1,0 +1,11 @@
+## Slice 15: Pathfinder
+
+**Mål:** Guida spelaren genom kartan.
+
+### Task 15.1: IPathfinder + AStarPathfinder (Strategy)
+
+### Task 15.2: HintCommand — "How do I get to the cave?"
+
+### Task 15.3: Sandbox — pathfinder visar vägen
+
+---

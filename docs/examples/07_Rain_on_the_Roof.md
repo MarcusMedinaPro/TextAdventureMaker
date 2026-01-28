@@ -9,6 +9,24 @@ _Slice tag: Slice 7 — Combat (Strategy). Demo focuses on a lightweight struggl
 4) Move the bucket to end the storm.
 5) Try a few combat commands on the dummy.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌──────────────────────────┐
+│          Attic           │
+│                          │
+│   B               D      │
+│                          │
+│       (leak above)       │
+└──────────────────────────┘
+
+B = Bucket
+D = Training dummy
+```
+
 ## Example (combat + move)
 ```csharp
 using System;

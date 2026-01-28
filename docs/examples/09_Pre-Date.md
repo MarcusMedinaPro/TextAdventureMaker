@@ -1,3 +1,41 @@
+# Pre‑Date
+
+_Slice tag: Slice 9 — World State System. Demo focuses on flags/relationships driving the outcome._
+
+A tiny, choice-driven demo about getting ready for a date. The player chooses pants, shirt, perfume, shaving, and hair length. The winning combo is:
+**long hair + beard + jeans + t‑shirt + blazer**.
+
+## Story beats (max ~10 steps)
+1) Wake up in your room. Big date tonight (or skip it).
+2) Pick pants (jeans vs chinos).
+3) Pick shirt (t‑shirt vs dress shirt).
+4) Grab a blazer.
+5) Choose perfume (smoky vs fresh).
+6) Choose beard (shave vs keep).
+7) Choose hair (short vs long).
+8) Check the mirror.
+9) If the winning combo is set, confidence boost.
+10) Decide: go on the date or skip it (skip ends the game).
+
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│            │     │            │
+│  Bedroom   │─────│   Mirror   │
+│            │     │   Room     │
+│     C      │     │     M      │
+└────────────┘     └────────────┘
+
+C = Closet / clothing choices
+M = Mirror
+```
+
+## Example (core engine + simple worldstate flags)
+```csharp
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -302,3 +340,4 @@ bool CanGoOnDate()
         && state.WorldState.GetFlag("shirt_tshirt")
         && state.WorldState.GetFlag("wear_blazer");
 }
+```

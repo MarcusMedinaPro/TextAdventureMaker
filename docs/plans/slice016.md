@@ -1,0 +1,11 @@
+## Slice 16: AI-paket (MarcusMedina.TextAdventure.AI)
+
+**Mål:** Ollama-integration som ICommandParser.
+
+### Task 16.1: OllamaCommandParser (Facade)
+
+### Task 16.2: AI-konfiguration via fluent API
+
+### Task 16.3: Sandbox — "go somewhere dark" → Cave
+
+---

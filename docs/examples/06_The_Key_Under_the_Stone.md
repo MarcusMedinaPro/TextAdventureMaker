@@ -9,6 +9,25 @@ _Slice tag: Slice 6 — Event System (Observer). Demo focuses on events revealin
 4) Find the hidden key.
 5) Unlock the gate.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────────────┐
+│                    │
+│       Garden       │
+│                    │
+│        S           │
+│                    │
+└─────────┬──────────┘
+          │
+       [Gate]
+
+S = Stone (key hidden underneath)
+```
+
 ## Example (events + doors)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

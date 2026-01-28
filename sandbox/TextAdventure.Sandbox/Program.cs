@@ -1,161 +1,127 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 3: Light in the Basement
-// Tests: parser commands, door states, hidden key reveal, torch use, auto-look on move.
+// Slice 4: The Last Train Home
+// Tests: items, inventory, parser commands, boarding, auto-look after movement.
 
-var hallway = new Location("hallway", "It is dark. You cannot see a thing.");
-var basement = new Location("basement", "Cold air and old stone. It smells of dust.");
+var platform = new Location("platform", "A quiet platform. The last train waits in the rain.");
+var carriage = new Location("carriage", "Warm light, tired faces, a seat by the window.");
 
-var key = new Key("basement_key", "basement key", "A small key with a stamped B.")
-    .AddAliases("key", "basement")
-    .SetWeight(0.02f);
+var ticket = new Item("ticket", "train ticket", "A single-ride ticket with a faded stamp.")
+    .SetWeight(0.01f)
+    .AddAliases("ticket", "pass");
 
-var torch = new Item("torch", "torch", "A small torch with a stiff switch.")
-    .AddAliases("flashlight", "light")
-    .SetWeight(0.2f)
-    .SetReaction(ItemAction.Use, "Click. A clean circle of light blooms in the dark.");
+var thermos = new Item("thermos", "tea thermos", "A dented thermos smelling of black tea.")
+    .SetWeight(0.6f)
+    .AddAliases("thermos", "tea")
+    .SetReaction(ItemAction.Use, "You take a careful sip. It warms your hands and sends a curl of steam into the rain.");
 
-// The key is hidden until the torch is used.
+platform.AddItem(ticket);
+platform.AddItem(thermos);
+platform.AddExit(Direction.In, carriage, oneWay: true);
+carriage.AddExit(Direction.Out, platform);
 
-var basementDoor = new Door("basement_door", "basement door", "A solid door with a heavy latch.")
-    .RequiresKey(key)
-    .SetReaction(DoorAction.Unlock, "The lock gives way with a dry click.")
-    .SetReaction(DoorAction.Open, "The door creaks open.")
-    .SetReaction(DoorAction.OpenFailed, "It will not move.");
-
-hallway.AddExit(Direction.Down, basement, basementDoor);
-
-var state = new GameState(hallway, worldLocations: [hallway, basement])
+var state = new GameState(platform, worldLocations: new[] { platform, carriage })
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
 };
-state.Inventory.Add(torch);
 
-var isKeyRevealed = false;
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
-    .WithStats("stats")
-    .WithFuzzyMatching(true, 1)
+    .WithLook("look", "l")
     .WithExamine("examine", "x")
-    .WithTake("take", "get")
     .WithMove("move", "push", "shift", "lift", "slide")
-    .WithUse("use", "turn", "switch", "light", "torch")
-    .WithGo("go")
+    .WithInventory("inventory", "inv", "i")
+    .WithTake("take", "get", "pick")
+    .WithUse("use", "drink", "sip")
+    .WithGo("go", "move")
+    .WithFuzzyMatching(true, 1)
     .WithIgnoreItemTokens("on", "off")
     .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
-        ["d"] = Direction.Down,
-        ["down"] = Direction.Down,
-        ["u"] = Direction.Up,
-        ["up"] = Direction.Up
+        ["in"] = Direction.In,
+        ["out"] = Direction.Out
     })
     .Build();
 var parser = new KeywordParser(parserConfig);
 
-Console.WriteLine("=== LIGHT IN THE BASEMENT (Slice 3) ===");
-Console.WriteLine("Goal: find the basement key, unlock the door, and go down.");
-Console.WriteLine("Commands: look, examine <item>, take <item>, move <item>, unlock/open door, go down, use/turn on/off torch, inventory, quit.");
-ShowDark();
+Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
+Console.WriteLine("Goal: find the ticket, board the train, or stay on the platform.");
+Console.WriteLine("Commands: look, examine <item>, take <item>, inventory, move <item>, use/drink/sip <item>, go in/out, board, sit, stay, quit.");
+ShowRoom();
 
 while (true)
 {
     Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input))
-        continue;
+    if (string.IsNullOrWhiteSpace(input)) continue;
 
-    var command = parser.Parse(input);
-    var lightOn = state.WorldState.GetFlag("torch_on");
-    var wantsOff = WantsOff(input);
-    var wantsOn = WantsOn(input);
-    var isTorchCommand = IsTorchCommand(command);
-
-    if (isTorchCommand && wantsOff)
+    if (input.Is("stay"))
     {
-        if (lightOn)
+        Console.WriteLine("You let the train go. You stay behind and watch the vapour trail.");
+        break;
+    }
+
+    if (input.Is("sit"))
+    {
+        Console.WriteLine(state.IsCurrentRoomId("carriage")
+            ? "You take a seat and watch rain smear the window into silver."
+            : "You sit for a moment, listening to the rain against the platform tiles.");
+        continue;
+    }
+
+    if (input.Is("board"))
+    {
+        if (!state.IsCurrentRoomId("platform"))
         {
-            state.WorldState.SetFlag("torch_on", false);
-            Console.WriteLine("The light goes out.");
+            Console.WriteLine("You are already on board the train.");
+            continue;
+        }
+
+        if (state.Inventory.FindItem("ticket") is null)
+        {
+            Console.WriteLine("You need a ticket to board.");
+            continue;
+        }
+
+        if (state.Move(Direction.In))
+        {
+            Console.WriteLine("You board the train. The city blurs into neon.");
+            ShowRoom();
         }
         else
         {
-            Console.WriteLine("It is already off.");
+            Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
         }
-
         continue;
     }
 
-    if (isTorchCommand && lightOn && !wantsOn)
-    {
-        state.WorldState.SetFlag("torch_on", false);
-        Console.WriteLine("The light goes out.");
-        continue;
-    }
-
-    if (command is TakeCommand && !lightOn)
-    {
-        ShowDark();
-        continue;
-    }
-
+    var command = parser.Parse(input);
     var result = state.Execute(command);
 
     switch (command)
     {
-        case LookCommand when !lightOn:
-            ShowDark();
-            break;
-
         case LookCommand:
             ShowLookResult(result);
             break;
-
         default:
             WriteResult(result);
             break;
     }
 
-    if (command is GoCommand && !result.ShouldQuit)
+    if (command is GoCommand && result.Success && !result.ShouldQuit)
     {
-        if (state.WorldState.GetFlag("torch_on"))
-        {
-            ShowLookResult(state.Look());
-        }
-        else
-        {
-            ShowDark();
-        }
+        ShowRoom();
     }
 
-    if (isTorchCommand && !lightOn)
-    {
-        state.WorldState.SetFlag("torch_on", true);
-        RevealKey();
-    }
-
-    if (result.ShouldQuit)
-        break;
-}
-
-bool IsTorchCommand(ICommand command) => command is UseCommand { ItemName: var name }
-        && state.Inventory.FindItem(name)?.Id.Is("torch") == true;
-
-bool WantsOff(string input) => input.Contains("off", StringComparison.OrdinalIgnoreCase);
-bool WantsOn(string input) => input.Contains("on", StringComparison.OrdinalIgnoreCase);
-
-void RevealKey()
-{
-    if (isKeyRevealed)
-        return;
-    isKeyRevealed = true;
-    hallway.AddItem(key);
-    Console.WriteLine("> The brass key glints under the table.");
+    if (result.ShouldQuit) break;
 }
 
 void WriteResult(CommandResult result)
@@ -174,10 +140,27 @@ void WriteResult(CommandResult result)
     }
 }
 
-void ShowDark()
+void ShowRoom()
 {
-    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
-    Console.WriteLine("It is dark. You cannot see a thing.");
+    var location = state.CurrentLocation;
+    Console.WriteLine();
+    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
+    Console.WriteLine(location.GetDescription());
+
+    var items = location.Items.CommaJoinNames(properCase: true);
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
+
+    var exits = location.Exits
+        .Select(exit =>
+        {
+            var direction = exit.Key.ToString().ToLowerInvariant().ToProperCase();
+            return exit.Value.Door == null
+                ? direction
+                : $"{direction} ({exit.Value.Door.Name.ToProperCase()}, {exit.Value.Door.State.ToString().ToProperCase()})";
+        })
+        .ToList();
+
+    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 
 void ShowLookResult(CommandResult result)

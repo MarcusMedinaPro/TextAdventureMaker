@@ -103,21 +103,23 @@ var razor = CreateChoiceItem(
     "You consider shaving. The razor seems eager.",
     "You turn the razor over, feeling its weight.");
 
-var hairShort = CreateChoiceItem(
-    "hair_short",
-    "short hair",
-    "Short and tidy, the reliable civil servant of hairstyles.",
-    "You take the short hair. It feels oddly formal.",
-    "You run a hand through it. Crisp lines, crisp life.",
-    "You fluff it. It returns to order immediately.");
+var hairShort = new Item(
+        "hair_short",
+        "short hair",
+        "Short and tidy, the reliable civil servant of hairstyles.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.Use, "You smooth your hair into a neat, short style. The mirror approves.")
+    .SetReaction(ItemAction.MoveFailed, "Hair is not a movable object, no matter how you petition it.")
+    .SetReaction(ItemAction.TakeFailed, "You cannot take hair; it is already yours by default.");
 
-var hairLong = CreateChoiceItem(
-    "hair_long",
-    "long hair",
-    "Long and flowing, as though it remembers poetry.",
-    "You take the long hair. It resists gravity with flair.",
-    "You sweep it back. It swoops right back.",
-    "You shake it out. It refuses to be ignored.");
+var hairLong = new Item(
+        "hair_long",
+        "long hair",
+        "Long and flowing, as though it remembers poetry.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.Use, "You let your hair fall long and dramatic. It immediately gains an air of legend.")
+    .SetReaction(ItemAction.MoveFailed, "Hair is not a movable object, no matter how you petition it.")
+    .SetReaction(ItemAction.TakeFailed, "You cannot take hair; it is already yours by default.");
 
 var mirror = new Item("mirror", "mirror", "A tall mirror with a faintly smug reflection.");
 mirror.SetTakeable(false);
@@ -155,9 +157,6 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
         case "blazer": state.WorldState.SetFlag("wear_blazer", true); break;
         case "perfume_smoky": state.WorldState.SetFlag("perfume_smoky", true); break;
         case "perfume_fresh": state.WorldState.SetFlag("perfume_fresh", true); break;
-        case "razor": state.WorldState.SetFlag("shaved", true); break;
-        case "hair_short": state.WorldState.SetFlag("hair_short", true); break;
-        case "hair_long": state.WorldState.SetFlag("hair_long", true); break;
     }
 });
 
@@ -165,27 +164,13 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
 state.Events.Subscribe(GameEventType.EnterLocation, e =>
 {
     if (e.Location == null || e.Location.Id != "mirror") return;
-
-    var win = state.WorldState.GetFlag("hair_long")
-        && !state.WorldState.GetFlag("shaved")
-        && state.WorldState.GetFlag("pants_jeans")
-        && state.WorldState.GetFlag("shirt_tshirt")
-        && state.WorldState.GetFlag("wear_blazer");
-
-    if (win)
-    {
-        Console.WriteLine("You look perfect. Confidence unlocked.");
-    }
-    else
-    {
-        Console.WriteLine("Something feels off... perhaps reconsider your choices.");
-    }
+    TryFinishIfReady();
 });
 
 // Parser config (minimal)
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
-    .WithExamine("examine", "exam", "x")
+    .WithExamine("examine", "exam", "x", "check", "inspect")
     .WithInventory("inventory", "inv", "i")
     .WithTake("take", "get", "wear", "put on", "don")
     .WithDrop("drop")
@@ -205,6 +190,8 @@ Console.WriteLine("Type 'skip date' to stay home.");
 Console.WriteLine("Type 'help' for a quick command list.");
 ShowRoom();
 
+var gameOver = false;
+
 // Input loop
 while (true)
 {
@@ -219,6 +206,16 @@ while (true)
     }
 
     var normalized = input.Lower();
+    if (HandleHairChoice(normalized))
+    {
+        continue;
+    }
+
+    if (HandleShave(normalized))
+    {
+        continue;
+    }
+
     if (normalized is "skip date" or "stay home")
     {
         state.WorldState.SetFlag("skip_date", true);
@@ -228,9 +225,8 @@ while (true)
 
     if (IsGoOnDate(normalized))
     {
-        if (CanGoOnDate())
+        if (TryFinishIfReady())
         {
-            Console.WriteLine("You step out for the date, dressed impeccably. The night feels full of promise.");
             break;
         }
 
@@ -253,7 +249,29 @@ while (true)
         }
     }
 
-    if (result.ShouldQuit) break;
+    if (command is UseCommand useCommand)
+    {
+        var target = useCommand.ItemName.Lower();
+        if (target is "razor")
+        {
+            state.WorldState.SetFlag("shaved", true);
+        }
+        else if (target is "mirror" or "glass")
+        {
+            TryFinishIfReady();
+        }
+    }
+
+    if (command is ExamineCommand examineCommand)
+    {
+        var target = examineCommand.Target?.Lower() ?? "";
+        if (target is "mirror" or "glass")
+        {
+            TryFinishIfReady();
+        }
+    }
+
+    if (gameOver || result.ShouldQuit) break;
 }
 
 void ShowRoom()
@@ -280,6 +298,7 @@ void ShowHelp()
 {
     Console.WriteLine("Commands: look, examine <item>, take/wear <item>, use <item>, move <item>, inventory, go <direction>, quit");
     Console.WriteLine("Special: skip date, stay home");
+    Console.WriteLine("Style: shave, choose short hair, choose long hair");
     Console.WriteLine("Story: go on date");
 }
 
@@ -294,6 +313,46 @@ bool IsGoOnDate(string input)
     return input is "go on date" or "go date" or "date" or "leave" or "go out";
 }
 
+bool HandleHairChoice(string input)
+{
+    if (input is "choose short hair" or "short hair" or "cut hair")
+    {
+        state.WorldState.SetFlag("hair_short", true);
+        state.WorldState.SetFlag("hair_long", false);
+        Console.WriteLine("You settle on a short, tidy style. Efficient, if a touch earnest.");
+        return true;
+    }
+
+    if (input is "choose long hair" or "long hair" or "let hair down" or "grow hair")
+    {
+        state.WorldState.SetFlag("hair_long", true);
+        state.WorldState.SetFlag("hair_short", false);
+        Console.WriteLine("You let your hair go long. It immediately becomes an accessory to confidence.");
+        return true;
+    }
+
+    return false;
+}
+
+bool HandleShave(string input)
+{
+    if (input is "shave" or "shave beard" or "shave face")
+    {
+        state.WorldState.SetFlag("shaved", true);
+        Console.WriteLine("You shave with care. The result is smooth, competent, and slightly smug.");
+        return true;
+    }
+
+    if (input is "choose not shaved" or "not shaved" or "keep beard" or "keep stubble")
+    {
+        state.WorldState.SetFlag("shaved", false);
+        Console.WriteLine("You keep your beard. It lends you a faintly dangerous calm.");
+        return true;
+    }
+
+    return false;
+}
+
 bool CanGoOnDate()
 {
     return state.WorldState.GetFlag("hair_long")
@@ -301,4 +360,18 @@ bool CanGoOnDate()
         && state.WorldState.GetFlag("pants_jeans")
         && state.WorldState.GetFlag("shirt_tshirt")
         && state.WorldState.GetFlag("wear_blazer");
+}
+
+bool TryFinishIfReady()
+{
+    if (CanGoOnDate())
+    {
+        Console.WriteLine("You look perfect. Confidence unlocked.");
+        Console.WriteLine("You step out for the date, dressed impeccably. The night feels full of promise.");
+        gameOver = true;
+        return true;
+    }
+
+    Console.WriteLine("Something feels off... perhaps reconsider your choices.");
+    return false;
 }

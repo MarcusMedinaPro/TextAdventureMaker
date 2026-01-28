@@ -65,7 +65,7 @@ while (true)
 
     var command = parser.Parse(input);
 
-    if (command is TalkCommand { Target: var target } && TryFindNpc(target, out var npc))
+    if (command is TalkCommand talk && TryFindNpc(ExtractTalkTarget(talk.Target, input), out var npc))
     {
         RunDialog(npc);
         continue;
@@ -157,6 +157,22 @@ bool TryFindNpc(string? target, out INpc npc)
     return true;
 }
 
+string? ExtractTalkTarget(string? target, string input)
+{
+    if (!string.IsNullOrWhiteSpace(target))
+    {
+        return target;
+    }
+
+    var tokens = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    if (tokens.Length <= 1)
+    {
+        return null;
+    }
+
+    return string.Join(' ', tokens.Skip(1));
+}
+
 void RunDialog(INpc npc)
 {
     var node = npc.DialogRoot;
@@ -182,7 +198,7 @@ void RunDialog(INpc npc)
             Console.WriteLine($"{i + 1}) {node.Options[i].Text}");
         }
 
-        Console.WriteLine($"{node.Options.Count + 1}) Politely step away.");
+        Console.WriteLine($"{node.Options.Count + 1}) OK thanks, bye.");
         Console.Write("> ");
         var choice = Console.ReadLine()?.Trim();
         if (!int.TryParse(choice, out var selection))

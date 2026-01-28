@@ -5,178 +5,68 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 9 — World State System
+// Slice 10 — Save/Load (Memento)
 // New functions tested:
-// - WorldState flags and relationships (SetFlag, GetFlag)
-// - Event hooks driven by WorldState (PickupItem + EnterLocation)
+// - SaveCommand, LoadCommand
+// - JsonSaveSystem persistence via GameMemento
 // - KeywordParserConfigBuilder + KeywordParser
-// - Item reactions for Take/Use/Move
 
 // Locations
-var bedroom = new Location("bedroom", "Your room is a mess, but tonight demands a certain polish.");
-var mirrorRoom = new Location("mirror", "A full-length mirror stands here, prepared to deliver a verdict.");
+var outside = new Location("outside", "Snow falls quietly outside a locked library.");
+var library = new Location("library", "Warm light and quiet pages surround you.");
 
-bedroom.AddExit(Direction.East, mirrorRoom);
-mirrorRoom.AddExit(Direction.West, bedroom);
+outside.AddExit(Direction.In, library);
+library.AddExit(Direction.Out, outside);
 
-// Items (choices)
-Item CreateChoiceItem(string id, string name, string description, string takeText, string useText, string moveText, params string[] aliases)
-{
-    var item = new Item(id, name, description);
-    item.SetReaction(ItemAction.Take, takeText);
-    item.SetReaction(ItemAction.Use, useText);
-    item.SetReaction(ItemAction.Move, moveText);
+// Items
+var key = new Key("library_key", "library key", "Cold metal in your hand.")
+    .AddAliases("key", "brass key")
+    .SetReaction(ItemAction.Take, "You pocket the key. It chills your palm and your resolve.");
 
-    if (aliases.Length > 0)
-    {
-        item.AddAliases(aliases);
-    }
-
-    return item;
-}
-
-var jeans = CreateChoiceItem(
-    "jeans",
-    "jeans",
-    "Dark jeans, the reliable workhorse of self-respect.",
-    "You take the jeans. They seem quietly pleased.",
-    "You hold them up. A casual confidence settles in.",
-    "You fold the jeans with unnecessary ceremony.");
-
-var chinos = CreateChoiceItem(
-    "chinos",
-    "chinos",
-    "Neat chinos with just enough ambition.",
-    "You take the chinos. They practically preen.",
-    "You check the chinos in the light. They approve.",
-    "You smooth the chinos. They repay you with crispness.");
-
-var tshirt = CreateChoiceItem(
-    "tshirt",
-    "t-shirt",
-    "Soft black t-shirt with effortless indifference.",
-    "You take the t-shirt. It promises low maintenance.",
-    "You hold the t-shirt to your chest. It fits the mood.",
-    "You shake out the t-shirt. It refuses to wrinkle.",
-    "tee", "shirt");
-
-var dressShirt = CreateChoiceItem(
-    "shirt",
-    "dress shirt",
-    "Crisp white shirt, all proper buttons and expectations.",
-    "You take the dress shirt. It demands decent posture.",
-    "You inspect the cuffs. They look judgmental.",
-    "You smooth the shirt. It grudgingly approves.",
-    "button-up", "formal shirt");
-
-var blazer = CreateChoiceItem(
-    "blazer",
-    "blazer",
-    "Sharp blazer with a hint of theatre.",
-    "You take the blazer. Confidence levels rise modestly.",
-    "You try the blazer on. The mirror will have opinions.",
-    "You hang the blazer over your arm like you mean it.");
-
-var perfumeSmoky = CreateChoiceItem(
-    "perfume_smoky",
-    "smoky perfume",
-    "Deep, smoky scent with a whisper of bad decisions.",
-    "You take the smoky perfume. Dramatic energy ensues.",
-    "You spritz once. The room pauses to consider you.",
-    "You gently tilt the bottle. The scent lingers.",
-    "smoky", "perfume");
-
-var perfumeFresh = CreateChoiceItem(
-    "perfume_fresh",
-    "fresh perfume",
-    "Light, fresh scent that politely forgives your flaws.",
-    "You take the fresh perfume. It smells like optimism.",
-    "You spritz once. You smell like a good decision.",
-    "You tilt the bottle. It glows with restraint.",
-    "fresh", "perfume");
-
-var razor = CreateChoiceItem(
-    "razor",
-    "razor",
-    "A razor with the quiet authority of routine.",
-    "You take the razor. It threatens smooth consequences.",
-    "You consider shaving. The razor seems eager.",
-    "You turn the razor over, feeling its weight.");
-
-var hairShort = new Item(
-        "hair_short",
-        "short hair",
-        "Short and tidy, the reliable civil servant of hairstyles.")
+var snow = new Item("snow", "snow", "Soft, patient snowflakes that refuse to melt for your convenience.")
     .SetTakeable(false)
-    .SetReaction(ItemAction.Use, "You smooth your hair into a neat, short style. The mirror approves.")
-    .SetReaction(ItemAction.MoveFailed, "Hair is not a movable object, no matter how you petition it.")
-    .SetReaction(ItemAction.TakeFailed, "You cannot take hair; it is already yours by default.");
+    .AddAliases("snowfall", "flakes")
+    .SetReaction(ItemAction.Move, "You brush the snow aside. It drifts back with quiet dignity.")
+    .SetReaction(ItemAction.TakeFailed, "You attempt to gather the snow. It slips away, disinterested.");
 
-var hairLong = new Item(
-        "hair_long",
-        "long hair",
-        "Long and flowing, as though it remembers poetry.")
-    .SetTakeable(false)
-    .SetReaction(ItemAction.Use, "You let your hair fall long and dramatic. It immediately gains an air of legend.")
-    .SetReaction(ItemAction.MoveFailed, "Hair is not a movable object, no matter how you petition it.")
-    .SetReaction(ItemAction.TakeFailed, "You cannot take hair; it is already yours by default.");
+var book = new Item("book", "old book", "An old book, warm from long companionship.")
+    .AddAliases("book", "volume")
+    .SetReaction(ItemAction.Use, "You open it at random and immediately feel better about the world.");
 
-var mirror = new Item("mirror", "mirror", "A tall mirror with a faintly smug reflection.");
-mirror.SetTakeable(false);
-mirror.SetReaction(ItemAction.Use, "You take a long look. The mirror does not blink.");
-mirror.SetReaction(ItemAction.MoveFailed, "You tilt the mirror. It tilts back, unimpressed.");
-mirror.SetReaction(ItemAction.TakeFailed, "You try to lift the mirror. The mirror declines.");
-mirror.AddAliases("glass");
+outside.AddItem(key);
+outside.AddItem(snow);
+library.AddItem(book);
 
-bedroom.AddItem(jeans);
-bedroom.AddItem(chinos);
-bedroom.AddItem(tshirt);
-bedroom.AddItem(dressShirt);
-bedroom.AddItem(blazer);
-bedroom.AddItem(perfumeSmoky);
-bedroom.AddItem(perfumeFresh);
-bedroom.AddItem(razor);
-bedroom.AddItem(hairShort);
-bedroom.AddItem(hairLong);
-mirrorRoom.AddItem(mirror);
+// Door
+var door = new Door("library_door", "library door", "A heavy wooden door with iron fittings.")
+    .RequiresKey(key)
+    .SetReaction(DoorAction.Unlock, "The library door unlocks with a polite click.")
+    .SetReaction(DoorAction.Open, "The door swings inward, warm air rolling out to greet you.")
+    .SetReaction(DoorAction.UnlockFailed, "The lock refuses to concede.");
+
+outside.AddExit(Direction.In, library, door);
 
 // Game state
-var state = new GameState(bedroom, worldLocations: new[] { bedroom, mirrorRoom });
-
-// WorldState hooks (choices)
-state.Events.Subscribe(GameEventType.PickupItem, e =>
+var state = new GameState(outside, worldLocations: new[] { outside, library })
 {
-    if (e.Item == null) return;
+    EnableFuzzyMatching = true,
+    FuzzyMaxDistance = 1
+};
 
-    switch (e.Item.Id)
-    {
-        case "jeans": state.WorldState.SetFlag("pants_jeans", true); break;
-        case "chinos": state.WorldState.SetFlag("pants_chinos", true); break;
-        case "tshirt": state.WorldState.SetFlag("shirt_tshirt", true); break;
-        case "shirt": state.WorldState.SetFlag("shirt_dress", true); break;
-        case "blazer": state.WorldState.SetFlag("wear_blazer", true); break;
-        case "perfume_smoky": state.WorldState.SetFlag("perfume_smoky", true); break;
-        case "perfume_fresh": state.WorldState.SetFlag("perfume_fresh", true); break;
-    }
-});
-
-// Mirror check
-state.Events.Subscribe(GameEventType.EnterLocation, e =>
-{
-    if (e.Location == null || e.Location.Id != "mirror") return;
-    TryFinishIfReady();
-});
-
-// Parser config (minimal)
+// Parser config (save/load enabled)
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "exam", "x", "check", "inspect")
     .WithInventory("inventory", "inv", "i")
-    .WithTake("take", "get", "wear", "put on", "don")
+    .WithTake("take", "get")
     .WithDrop("drop")
     .WithUse("use")
     .WithMove("move", "push", "shift", "slide")
     .WithGo("go")
+    .WithOpen("open")
+    .WithUnlock("unlock")
+    .WithSave("save")
+    .WithLoad("load")
     .WithQuit("quit", "exit")
     .WithIgnoreItemTokens("on", "off", "at", "the", "a")
     .WithFuzzyMatching(true, 1)
@@ -184,15 +74,11 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
 
 var parser = new KeywordParser(parserConfig);
 
-Console.WriteLine("=== PRE-DATE (Slice 9) ===");
-Console.WriteLine("Goal: prepare for the date. Choose wisely, then check the mirror.");
-Console.WriteLine("Type 'skip date' to stay home.");
+Console.WriteLine("=== THE WARM LIBRARY (Slice 10) ===");
+Console.WriteLine("Goal: get inside, save, quit, load, and continue.");
 Console.WriteLine("Type 'help' for a quick command list.");
 ShowRoom();
 
-var gameOver = false;
-
-// Input loop
 while (true)
 {
     Console.Write("\n> ");
@@ -205,37 +91,9 @@ while (true)
         continue;
     }
 
-    var normalized = input.Lower();
-    if (HandleHairChoice(normalized))
-    {
-        continue;
-    }
-
-    if (HandleShave(normalized))
-    {
-        continue;
-    }
-
-    if (normalized is "skip date" or "stay home")
-    {
-        state.WorldState.SetFlag("skip_date", true);
-        Console.WriteLine("You decide to stay in. Game over.");
-        break;
-    }
-
-    if (IsGoOnDate(normalized))
-    {
-        if (TryFinishIfReady())
-        {
-            break;
-        }
-
-        Console.WriteLine("You are not ready. Perhaps check the mirror and reconsider your choices.");
-        continue;
-    }
-
     var command = parser.Parse(input);
     var result = state.Execute(command);
+
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
         Console.WriteLine(result.Message);
@@ -249,29 +107,7 @@ while (true)
         }
     }
 
-    if (command is UseCommand useCommand)
-    {
-        var target = useCommand.ItemName.Lower();
-        if (target is "razor")
-        {
-            state.WorldState.SetFlag("shaved", true);
-        }
-        else if (target is "mirror" or "glass")
-        {
-            TryFinishIfReady();
-        }
-    }
-
-    if (command is ExamineCommand examineCommand)
-    {
-        var target = examineCommand.Target?.Lower() ?? "";
-        if (target is "mirror" or "glass")
-        {
-            TryFinishIfReady();
-        }
-    }
-
-    if (gameOver || result.ShouldQuit) break;
+    if (result.ShouldQuit) break;
 }
 
 void ShowRoom()
@@ -296,82 +132,12 @@ void ShowRoom()
 
 void ShowHelp()
 {
-    Console.WriteLine("Commands: look, examine <item>, take/wear <item>, use <item>, move <item>, inventory, go <direction>, quit");
-    Console.WriteLine("Special: skip date, stay home");
-    Console.WriteLine("Style: shave, choose short hair, choose long hair");
-    Console.WriteLine("Story: go on date");
+    Console.WriteLine("Commands: look, examine/check <item>, take <item>, use <item>, move <item>, unlock/open door, go <direction>, inventory, quit");
+    Console.WriteLine("Save/Load: save, load (defaults to savegame.json)");
 }
 
 bool IsHelp(string input)
 {
     var normalized = input.Lower();
     return normalized is "help" or "halp" or "?";
-}
-
-bool IsGoOnDate(string input)
-{
-    return input is "go on date" or "go date" or "date" or "leave" or "go out";
-}
-
-bool HandleHairChoice(string input)
-{
-    if (input is "choose short hair" or "short hair" or "cut hair")
-    {
-        state.WorldState.SetFlag("hair_short", true);
-        state.WorldState.SetFlag("hair_long", false);
-        Console.WriteLine("You settle on a short, tidy style. Efficient, if a touch earnest.");
-        return true;
-    }
-
-    if (input is "choose long hair" or "long hair" or "let hair down" or "grow hair")
-    {
-        state.WorldState.SetFlag("hair_long", true);
-        state.WorldState.SetFlag("hair_short", false);
-        Console.WriteLine("You let your hair go long. It immediately becomes an accessory to confidence.");
-        return true;
-    }
-
-    return false;
-}
-
-bool HandleShave(string input)
-{
-    if (input is "shave" or "shave beard" or "shave face")
-    {
-        state.WorldState.SetFlag("shaved", true);
-        Console.WriteLine("You shave with care. The result is smooth, competent, and slightly smug.");
-        return true;
-    }
-
-    if (input is "choose not shaved" or "not shaved" or "keep beard" or "keep stubble")
-    {
-        state.WorldState.SetFlag("shaved", false);
-        Console.WriteLine("You keep your beard. It lends you a faintly dangerous calm.");
-        return true;
-    }
-
-    return false;
-}
-
-bool CanGoOnDate()
-{
-    return state.WorldState.GetFlag("hair_long")
-        && !state.WorldState.GetFlag("shaved")
-        && state.WorldState.GetFlag("pants_jeans")
-        && state.WorldState.GetFlag("shirt_tshirt")
-        && state.WorldState.GetFlag("wear_blazer");
-}
-
-bool TryFinishIfReady()
-{
-    if (CanGoOnDate())
-    {
-        Console.WriteLine("You look perfect. Confidence unlocked.");
-        Console.WriteLine("You step out for the date, dressed impeccably. The night feels full of promise.");
-        gameOver = true;
-        return true;
-    }
-
-    Console.WriteLine("Something feels off... perhaps reconsider your choices.");
-    return false;
 }

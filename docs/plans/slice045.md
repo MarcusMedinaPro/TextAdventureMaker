@@ -55,7 +55,8 @@
 - Phrases class, takes an array of phrases and returns them in random order or sequencially depending on the need
   - Phrases.GetRandomPhrase()
   - Phrases.GetNextPhrase() (start over when done)
-
+- vehicles (cars, bikes, boats, planes, horse) with basic commands (enter, exit, drive, sail, fly) funkar som portaler
+- 
 
 ### Krav
 

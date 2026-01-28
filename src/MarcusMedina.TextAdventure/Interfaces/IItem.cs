@@ -27,7 +27,10 @@ public interface IItem : IGameEntity
     event Action<IItem>? OnDestroy;
 
     bool Matches(string name);
+    IItem SetTakeable(bool takeable);
+    IItem SetWeight(float weight);
     IItem Description(string text);
+    IItem AddAliases(params string[] aliases);
     string? GetReaction(ItemAction action);
     IItem SetReaction(ItemAction action, string text);
     bool CanRead(IGameState state);

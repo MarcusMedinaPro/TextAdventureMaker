@@ -4,6 +4,9 @@
 // </copyright>
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Helpers;
+using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 
 namespace MarcusMedina.TextAdventure.Tests;
 
@@ -62,5 +65,29 @@ public class ItemTests
 
         Assert.Equal("red_apple", item.Id);
         Assert.Equal(0.5f, item.Weight);
+    }
+
+    [Fact]
+    public void Item_Interface_AllowsFluentAliases()
+    {
+        IItem item = new Item("coin", "Coin")
+            .AddAliases("token")
+            .SetReaction(ItemAction.Take, "You pick it up.");
+
+        Assert.True(item.Matches("token"));
+    }
+
+    [Fact]
+    public void EnumerableExtensions_CanJoinEntityNames()
+    {
+        var items = new IItem[]
+        {
+            new Item("coin", "gold coin"),
+            new Item("torch", "old torch")
+        };
+
+        var joined = items.CommaJoinNames(properCase: true);
+
+        Assert.Equal("Gold Coin, Old Torch", joined);
     }
 }

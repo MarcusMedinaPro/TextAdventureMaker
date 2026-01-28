@@ -28,7 +28,10 @@ public abstract class ItemDecorator : IItem
     public virtual bool HiddenFromItemList => Inner.HiddenFromItemList;
 
     public virtual string GetDescription() => Inner.GetDescription();
+    public virtual IItem SetTakeable(bool takeable) => Inner.SetTakeable(takeable);
+    public virtual IItem SetWeight(float weight) => Inner.SetWeight(weight);
     public virtual IItem Description(string text) => Inner.Description(text);
+    public virtual IItem AddAliases(params string[] aliases) => Inner.AddAliases(aliases);
     public virtual string? GetReadText() => Inner.GetReadText();
 
     public event Action<IItem>? OnTake

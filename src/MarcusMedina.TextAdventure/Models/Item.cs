@@ -149,6 +149,10 @@ public class Item : IItem
         return this;
     }
 
+    IItem IItem.SetTakeable(bool takeable) => SetTakeable(takeable);
+    IItem IItem.SetWeight(float weight) => SetWeight(weight);
+    IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
+
     public void Take()
     {
         OnTake?.Invoke(this);

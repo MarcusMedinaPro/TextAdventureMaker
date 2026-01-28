@@ -2,7 +2,11 @@
 
 _Slice tag: Slice 3 — Command Pattern + Parser. Demo focuses on using the built-in parser and command objects to keep the game loop small._
 
-A tiny demo about a locked basement door and a flashlight.
+A tiny demo about a locked basement door, a torch, and a key that only appears once there is light.
+
+## Goal
+
+Find the basement key, unlock the door, and go down.
 
 ## Map (rough layout)
 
@@ -13,7 +17,7 @@ A tiny demo about a locked basement door and a flashlight.
 
 ┌────────────┐
 │  Hallway   │
-│     K      │  F
+│     K      │  T
 └─────┬──────┘
       │
       │
@@ -23,14 +27,14 @@ A tiny demo about a locked basement door and a flashlight.
 └────────────┘
 
 K = Basement key
-F = Flashlight (in inventory)
+T = Torch (in inventory)
 ```
 
 ## Story beats (max ~10 steps)
 
-1. You stand in the hallway.
+1. You start in a pitch-dark hallway.
 2. The basement door is locked.
-3. Use the flashlight.
+3. Use the torch.
 4. A key glints under the table.
 5. Unlock and open the door.
 6. Go down.
@@ -71,14 +75,14 @@ F = Flashlight (in inventory)
 - `unlock door`
 - `open door`
 - `go down` / `down` / `d`
-- `use flashlight` / `turn on flashlight` / `turn off flashlight`
+- `use torch` / `turn on torch` / `turn off torch`
 - `inventory` / `i`
 - `quit` / `exit`
 
 ## Optional helpers
 
-- `\"Steven\".SoundsLike(\"Stephen\")` → `true`
-- `\"look\".SimilarTo(\"lokk\")` → `1`
+- `"Steven".SoundsLike("Stephen")` → `true`
+- `"look".SimilarTo("lokk")` → `1`
 
 ## Example (parser + built-in commands)
 
@@ -87,23 +91,24 @@ using System;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using MarcusMedina.TextAdventure.Commands;
 
-var hallway = new Location("hallway", "It's dark. You can't see anything.");
+var hallway = new Location("hallway", "It is dark. You cannot see a thing.");
 var basement = new Location("basement", "Cold air and old stone. It smells of dust.");
 
 var key = new Key("basement_key", "basement key", "A small key with a stamped B.")
     .AddAliases("key", "basement")
     .SetWeight(0.02f);
 
-var flashlight = new Item("flashlight", "flashlight", "A small torch with a stiff switch.")
-    .AddAliases("torch", "light")
+var torch = new Item("torch", "torch", "A small torch with a stiff switch.")
+    .AddAliases("flashlight", "light")
     .SetWeight(0.2f)
     .SetReaction(ItemAction.Use, "Click. A clean circle of light blooms in the dark.");
 
-// The key is hidden until the flashlight is used.
+// The key is hidden until the torch is used.
 
 var basementDoor = new Door("basement_door", "basement door", "A solid door with a heavy latch.")
     .RequiresKey(key)
@@ -114,9 +119,10 @@ var basementDoor = new Door("basement_door", "basement door", "A solid door with
 hallway.AddExit(Direction.Down, basement, basementDoor);
 
 var state = new GameState(hallway, worldLocations: new[] { hallway, basement });
-state.Inventory.Add(flashlight);
+state.Inventory.Add(torch);
 state.EnableFuzzyMatching = true;
 state.FuzzyMaxDistance = 1;
+
 var isKeyRevealed = false;
 var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithStats("stats")
@@ -138,25 +144,20 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
 var parser = new KeywordParser(parserConfig);
 
 Console.WriteLine("=== LIGHT IN THE BASEMENT (Slice 3) ===");
-Console.WriteLine("Commands: Look, Examine <Item>, Take <Item>, Move <Item>, Unlock/Open Door, Go Down, Use/Turn On/Off Flashlight, Inventory, Quit");
-Console.WriteLine("It's dark. You can't see anything.");
+Console.WriteLine("Goal: find the basement key, unlock the door, and go down.");
+Console.WriteLine("Commands: look, examine <item>, take <item>, move <item>, unlock/open door, go down, use/turn on/off torch, inventory, quit.");
+ShowDark();
 
-bool IsFlashlightCommand(ICommand command)
+bool IsTorchCommand(ICommand command, out IItem? torchItem)
 {
-    if (command is not UseCommand use) return false;
-    var item = state.Inventory.FindItem(use.ItemName);
-    return item != null && item.Id.TextCompare("flashlight");
+    torchItem = command is UseCommand { ItemName: var name }
+        ? state.Inventory.FindItem(name)
+        : null;
+    return torchItem?.Id.Is("torch") == true;
 }
 
-bool WantsOff(string input)
-{
-    return input.Contains("off", StringComparison.OrdinalIgnoreCase);
-}
-
-bool WantsOn(string input)
-{
-    return input.Contains("on", StringComparison.OrdinalIgnoreCase);
-}
+bool WantsOff(string input) => input.Contains("off", StringComparison.OrdinalIgnoreCase);
+bool WantsOn(string input) => input.Contains("on", StringComparison.OrdinalIgnoreCase);
 
 void RevealKey()
 {
@@ -184,7 +185,8 @@ void WriteResult(CommandResult result)
 
 void ShowDark()
 {
-    Console.WriteLine("It's dark. You can't see anything.");
+    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    Console.WriteLine("It is dark. You cannot see a thing.");
 }
 
 void ShowLookResult(CommandResult result)
@@ -200,26 +202,28 @@ while (true)
     if (string.IsNullOrWhiteSpace(input)) continue;
 
     var command = parser.Parse(input);
-    var lightOn = state.WorldState.GetFlag("flashlight_on");
-    var isFlashlightCommand = IsFlashlightCommand(command);
+    var lightOn = state.WorldState.GetFlag("torch_on");
+    var wantsOff = WantsOff(input);
+    var wantsOn = WantsOn(input);
+    var isTorchCommand = IsTorchCommand(command, out _);
 
-    if (isFlashlightCommand && WantsOff(input))
+    if (isTorchCommand && wantsOff)
     {
         if (lightOn)
         {
-            state.WorldState.SetFlag("flashlight_on", false);
+            state.WorldState.SetFlag("torch_on", false);
             Console.WriteLine("The light goes out.");
         }
         else
         {
-            Console.WriteLine("It's already off.");
+            Console.WriteLine("It is already off.");
         }
         continue;
     }
 
-    if (isFlashlightCommand && lightOn && !WantsOn(input))
+    if (isTorchCommand && lightOn && !wantsOn)
     {
-        state.WorldState.SetFlag("flashlight_on", false);
+        state.WorldState.SetFlag("torch_on", false);
         Console.WriteLine("The light goes out.");
         continue;
     }
@@ -232,22 +236,22 @@ while (true)
 
     var result = state.Execute(command);
 
-    if (command is LookCommand && !lightOn)
+    switch (command)
     {
-        ShowDark();
-    }
-    else
-    {
-        if (command is LookCommand)
-        {
+        case LookCommand when !lightOn:
+            ShowDark();
+            break;
+        case LookCommand:
             ShowLookResult(result);
-        }
-        else WriteResult(result);
+            break;
+        default:
+            WriteResult(result);
+            break;
     }
 
     if (command is GoCommand && !result.ShouldQuit)
     {
-        if (state.WorldState.GetFlag("flashlight_on"))
+        if (state.WorldState.GetFlag("torch_on"))
         {
             ShowLookResult(state.Look());
         }
@@ -257,9 +261,9 @@ while (true)
         }
     }
 
-    if (isFlashlightCommand && !lightOn)
+    if (isTorchCommand && !lightOn)
     {
-        state.WorldState.SetFlag("flashlight_on", true);
+        state.WorldState.SetFlag("torch_on", true);
         RevealKey();
     }
 

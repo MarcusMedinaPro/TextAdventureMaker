@@ -1,6 +1,6 @@
 # The Door States
 
-_Slice tag: Slice 2.1 — Door States. Demo focuses on door state transitions (open/close/lock/unlock/destroy)._ 
+_Slice tag: Slice 2.1 — Door States. Demo focuses on door state transitions (open/close/lock/unlock/destroy)._
 
 ## Story beats (max ~10 steps)
 1) You stand in the hallway.

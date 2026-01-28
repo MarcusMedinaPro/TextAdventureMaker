@@ -287,6 +287,11 @@ while (true)
         }
     }
 
+    if (command is GoCommand && !result.ShouldQuit)
+    {
+        ShowRoom();
+    }
+
     if (command is UseCommand useCommand)
     {
         var target = useCommand.ItemName.Lower();

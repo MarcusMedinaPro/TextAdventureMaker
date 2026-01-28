@@ -30,6 +30,7 @@ S = Stone (key hidden underneath)
 
 ## Example (events + doors)
 ```csharp
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -39,7 +40,7 @@ using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
 // Location
-var garden = new Location("garden", "A quiet garden with a heavy stone near a gate.");
+var garden = new Location("garden", "A quiet garden with a weathered gate and a patient silence.");
 
 // Items
 var stone = new Item("stone", "stone", "A heavy flat stone.");
@@ -106,6 +107,10 @@ var parserConfig = new KeywordParserConfig(
 
 var parser = new KeywordParser(parserConfig);
 
+Console.WriteLine("=== THE KEY UNDER THE STONE (Slice 6) ===");
+Console.WriteLine("Goal: reveal the key, unlock the gate, and listen for the reaction.");
+ShowRoom();
+
 // Input loop
 while (true)
 {
@@ -128,6 +133,26 @@ while (true)
         }
     }
 
+    if (command is GoCommand && !result.ShouldQuit)
+    {
+        ShowRoom();
+    }
+
     if (result.ShouldQuit) break;
+}
+
+void ShowRoom()
+{
+    Console.WriteLine();
+    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    Console.WriteLine(state.CurrentLocation.GetDescription());
+
+    var items = state.CurrentLocation.Items.CommaJoinNames(properCase: true);
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items: None" : $"Items: {items}");
+
+    var exits = state.CurrentLocation.Exits.Keys
+        .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase())
+        .ToList();
+    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 ```

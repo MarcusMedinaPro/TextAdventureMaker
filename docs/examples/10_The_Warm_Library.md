@@ -138,6 +138,11 @@ while (true)
         }
     }
 
+    if (command is GoCommand && !result.ShouldQuit)
+    {
+        ShowRoom();
+    }
+
     if (result.ShouldQuit) break;
 }
 

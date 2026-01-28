@@ -241,6 +241,11 @@ while (true)
         WriteResult(result);
     }
 
+    if (command is GoCommand && !result.ShouldQuit)
+    {
+        ShowLookResult(state.Look());
+    }
+
     if (command is ReadCommand read && note.Matches(read.Target))
     {
         state.WorldState.SetFlag("knows_password", true);

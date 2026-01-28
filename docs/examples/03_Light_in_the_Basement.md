@@ -245,6 +245,18 @@ while (true)
         else WriteResult(result);
     }
 
+    if (command is GoCommand && !result.ShouldQuit)
+    {
+        if (state.WorldState.GetFlag("flashlight_on"))
+        {
+            ShowLookResult(state.Look());
+        }
+        else
+        {
+            ShowDark();
+        }
+    }
+
     if (isFlashlightCommand && !lightOn)
     {
         state.WorldState.SetFlag("flashlight_on", true);

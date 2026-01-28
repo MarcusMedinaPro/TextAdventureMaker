@@ -74,437 +74,427 @@ P = Photo
 ## Example (core engine + doors/keys only)
 ```csharp
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 
 // Locations
-var hallway = new Location("hallway", "A quiet hallway with a window and a small table.");
-var study = new Location("study", "A quiet study with a heavy desk and a single lamp.");
+var hallway = new Location("hallway", "A quiet hallway with a cold draft.");
+var study = new Location("study", "A small study with a single lamp and a faded photo.");
 
+// Items
 var key = new Key("study_key", "brass key", "A small brass key with a worn bow.")
-    .SetWeight(0.01f)
     .AddAliases("key", "brass");
 
-var photo = new Item("photo", "old photo", "A faded photo of a stranger.")
-    .SetWeight(0.05f)
-    .AddAliases("photo", "picture", "image", "old photo", "old");
+var photo = new Item("photo", "old photo", "A faded photo of someone you almost remember.")
+    .AddAliases("photo", "picture")
+    .SetTakeable(false);
+
+var lamp = new Item("lamp", "brass lamp", "A brass lamp with a stubborn little switch.")
+    .AddAliases("lamp", "light")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.TakeFailed, "The lamp is fixed in place, and far too proud to be moved.")
+    .SetReaction(ItemAction.Use, "You click the lamp on. The study warms instantly.")
+    .SetReaction(ItemAction.Move, "You nudge the lamp. It stays put, a creature of habit.");
 
 hallway.AddItem(key);
 study.AddItem(photo);
+study.AddItem(lamp);
 
-var studyDoor = new Door("study_door", "study door", "A sturdy door with a brass plate.")
+// Door
+var door = new Door("study_door", "study door", "A sturdy door with a stubborn lock.", DoorState.Locked)
     .RequiresKey(key)
-    .SetReaction(DoorAction.Unlock, "The lock clicks.")
-    .SetReaction(DoorAction.UnlockFailed, "The key does not fit.")
-    .SetReaction(DoorAction.Open, "The door swings open.")
+    .SetReaction(DoorAction.Unlock, "The lock clicks open.")
+    .SetReaction(DoorAction.UnlockFailed, "The key refuses to oblige.")
+    .SetReaction(DoorAction.Open, "The door opens with a reluctant creak.")
     .SetReaction(DoorAction.OpenFailed, "The door refuses to budge.")
-    .SetReaction(DoorAction.Close, "The door clicks shut.")
-    .SetReaction(DoorAction.Lock, "You hear the lock catch.")
-    .SetReaction(DoorAction.Destroy, "In a Hulk inspired rage you attack the door. Splinters fly. CRASH, BANG, KABOOM!!!\nThe hinges snap and the door slumps aside.");
+    .SetReaction(DoorAction.Close, "The door settles shut with a soft thud.")
+    .SetReaction(DoorAction.Lock, "The lock catches with a satisfying clunk.")
+    .SetReaction(DoorAction.Destroy, "You deliver a decisive blow. The door gives up entirely.");
 
-hallway.AddExit(Direction.East, study, studyDoor);
+hallway.AddExit(Direction.East, study, door);
 
-var state = new GameState(hallway, worldLocations: new[] { hallway, study });
+var state = new GameState(hallway, worldLocations: new[] { hallway, study })
+{
+    EnableFuzzyMatching = true,
+    FuzzyMaxDistance = 1
+};
 
 Console.WriteLine("=== THE LOCKED STUDY (Slice 2) ===");
-Console.WriteLine("Commands: Look, Look <Item>, Go <Direction>, Take <Item>, Unlock/Open/Close/Lock/Destroy Door, Inventory, North/South/East/West, Quit");
+Console.WriteLine("Goal: unlock the door, enter the study, and explore.");
+Console.WriteLine("Type 'look' to recheck your surroundings.");
+ShowRoom();
+
+while (true)
+{
+    Console.Write("\n> ");
+    var input = Console.ReadLine()?.Trim();
+    if (string.IsNullOrWhiteSpace(input))
+        continue;
+
+    var normalised = input.Lower();
+
+    if (normalised is "quit" or "exit")
+        break;
+
+    if (normalised is "look" or "l")
+    {
+        ShowRoom();
+        continue;
+    }
+
+    if (normalised.StartsWith("look "))
+    {
+        ShowTarget(normalised[5..]);
+        continue;
+    }
+
+    if (normalised is "inventory" or "inv" or "i")
+    {
+        ShowInventory();
+        continue;
+    }
+
+    if (normalised is "take all" or "take everything")
+    {
+        HandleTakeAll();
+        continue;
+    }
+
+    if (normalised.StartsWith("take "))
+    {
+        HandleTake(normalised[5..]);
+        continue;
+    }
+
+    if (normalised.StartsWith("unlock "))
+    {
+        HandleUnlock(normalised[7..]);
+        continue;
+    }
+
+    if (normalised.StartsWith("open "))
+    {
+        HandleOpen(normalised[5..]);
+        continue;
+    }
+
+    if (normalised.StartsWith("close "))
+    {
+        HandleClose(normalised[6..]);
+        continue;
+    }
+
+    if (normalised.StartsWith("lock "))
+    {
+        HandleLock(normalised[5..]);
+        continue;
+    }
+
+    if (normalised.StartsWith("destroy "))
+    {
+        HandleDestroy(normalised[8..]);
+        continue;
+    }
+
+    if (normalised.StartsWith("turn on "))
+    {
+        HandleUse(normalised[8..]);
+        continue;
+    }
+
+    if (normalised.StartsWith("turn off "))
+    {
+        Console.WriteLine("You turn it off. The lamp sulks quietly.");
+        continue;
+    }
+
+    if (normalised.StartsWith("use "))
+    {
+        HandleUse(normalised[4..]);
+        continue;
+    }
+
+    var moved = normalised switch
+    {
+        "east" or "e" => Move(Direction.East),
+        "west" or "w" => Move(Direction.West),
+        _ => false
+    };
+
+    if (moved)
+        continue;
+
+    if (normalised.StartsWith("go "))
+    {
+        HandleGo(normalised[3..]);
+        continue;
+    }
+
+    Console.WriteLine("Try: look, take key, unlock/open/close/lock/destroy door, east/west, inventory, quit.");
+}
+
+Exit? ResolveDoorExit(string token)
+{
+    if (token is "east" or "e")
+        return state.CurrentLocation.GetExit(Direction.East);
+    if (token is "west" or "w")
+        return state.CurrentLocation.GetExit(Direction.West);
+
+    return token is "door"
+        ? state.CurrentLocation.Exits.Values.FirstOrDefault(exit => exit.Door != null)
+        : state.CurrentLocation.Exits.Values.FirstOrDefault(exit => exit.Door != null);
+}
+
+bool Move(Direction direction)
+{
+    if (!state.Move(direction))
+    {
+        Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
+        return false;
+    }
+
+    ShowRoom();
+    return true;
+}
 
 void ShowRoom()
 {
     var location = state.CurrentLocation;
-    Console.WriteLine($"\nRoom: {location.Id.ToProperCase()}");
+    Console.WriteLine();
+    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
     Console.WriteLine(location.GetDescription());
 
-    var items = location.Items.Select(item => item.Name.ToProperCase()).ToList();
-    Console.WriteLine(items.Count > 0
-        ? $"In the room you can see the following things: {items.CommaJoin()}"
-        : "Items: None");
+    var items = location.Items.CommaJoinNames(properCase: true);
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items: None" : $"Items: {items}");
 
     var exits = location.Exits
-        .Select(kvp =>
+        .Select(exit =>
         {
-            var direction = kvp.Key.ToString().ToLowerInvariant().ToProperCase();
-            var door = kvp.Value.Door;
-            if (door == null) return direction;
-            var stateText = door.State.ToString().ToLowerInvariant().ToProperCase();
-            return $"{direction} ({door.Name.ToProperCase()}, {stateText})";
-        });
+            var direction = exit.Key.ToString().ToLowerInvariant().ToProperCase();
+            var exitDoor = exit.Value.Door;
+            if (exitDoor == null)
+                return direction;
+            var stateText = exitDoor.State.ToString().ToLowerInvariant().ToProperCase();
+            return $"{direction} ({exitDoor.Name.ToProperCase()}, {stateText})";
+        })
+        .ToList();
 
-    Console.WriteLine($"Exits: {exits.CommaJoin()}");
+    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 
-Direction? ParseDirection(string token)
+void ShowTarget(string token)
 {
-    return token switch
-    {
-        "north" or "n" => Direction.North,
-        "south" or "s" => Direction.South,
-        "east" or "e" => Direction.East,
-        "west" or "w" => Direction.West,
-        _ => null
-    };
-}
-
-Direction? ResolveDoorDirection(string token)
-{
-    if (token == "door")
-    {
-        var doorExits = state.CurrentLocation.Exits
-            .Where(kvp => kvp.Value.Door != null)
-            .Select(kvp => kvp.Key)
-            .ToList();
-
-        if (doorExits.Count == 1) return doorExits[0];
-        return null;
-    }
-
-    return ParseDirection(token);
-}
-
-bool TryShowDoor(string token)
-{
-    var direction = ResolveDoorDirection(token);
-    if (direction == null) return false;
-
-    var exit = state.CurrentLocation.GetExit(direction.Value);
-    if (exit?.Door == null) return false;
-
-    var door = exit.Door;
-    Console.WriteLine($"{door.Name.ToProperCase()}: {door.GetDescription()} ({door.State.ToString().ToLowerInvariant().ToProperCase()})");
-    return true;
-}
-
-void ShowInventory()
-{
-    var items = state.Inventory.Items.Select(i => i.Name);
-    if (!items.Any())
-    {
-        Console.WriteLine("You carry nothing.");
-        return;
-    }
-
-    var totalWeight = state.Inventory.TotalWeight;
-    Console.WriteLine($"You carry: {items.CommaJoin()} (Total weight: {totalWeight:0.##})");
-}
-
-bool HandleLook(string input)
-{
-    if (input == "look")
-    {
-        ShowRoom();
-        return true;
-    }
-
-    if (!input.StartsWith("look ")) return false;
-
-    var token = input.Replace("look ", "").Trim();
     if (string.IsNullOrWhiteSpace(token))
     {
         Console.WriteLine("Look at what?");
-        return true;
+        return;
     }
 
-    if (TryShowDoor(token))
+    if (token is "door" or "east" or "e" or "west" or "w")
     {
-        return true;
+        var exit = ResolveDoorExit(token);
+        if (exit?.Door == null)
+        {
+            Console.WriteLine("There is no door here.");
+            return;
+        }
+
+        Console.WriteLine($"{exit.Door.Name.ToProperCase()}: {exit.Door.GetDescription()} ({exit.Door.State.ToString().ToLowerInvariant().ToProperCase()})");
+        return;
     }
 
     var item = state.CurrentLocation.FindItem(token) ?? state.Inventory.FindItem(token);
     if (item == null)
     {
         Console.WriteLine($"You do not see a {token} here.");
-        return true;
+        return;
     }
 
     Console.WriteLine($"{item.Name.ToProperCase()}: {item.GetDescription()}");
-    return true;
 }
 
-bool HandleInventory(string input)
+void ShowInventory()
 {
-    if (input is not ("inventory" or "i")) return false;
-    ShowInventory();
-    return true;
+    var items = state.Inventory.Items.CommaJoinNames(properCase: true);
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "You carry nothing." : $"You carry: {items}");
 }
 
-bool HandleTake(string input)
+void HandleTake(string token)
 {
-    if (!input.StartsWith("take ")) return false;
-
-    var token = input.Replace("take ", "").Trim();
     if (string.IsNullOrWhiteSpace(token))
     {
-        Console.WriteLine("Take what? Try: take key.");
-        return true;
+        Console.WriteLine("Take what?");
+        return;
     }
 
-    var foundItem = state.CurrentLocation.FindItem(token);
-    if (foundItem == null)
+    var item = state.CurrentLocation.FindItem(token);
+    if (item == null)
     {
         Console.WriteLine($"There is no {token} here.");
-        return true;
+        return;
     }
 
-    state.CurrentLocation.RemoveItem(foundItem);
-    state.Inventory.Add(foundItem);
-    Console.WriteLine($"You take the {foundItem.Name.ToProperCase()}.");
-    return true;
+    if (!item.Takeable)
+    {
+        var reaction = item.GetReaction(ItemAction.TakeFailed);
+        Console.WriteLine(reaction ?? $"You cannot take the {item.Name.ToProperCase()}.");
+        return;
+    }
+
+    _ = state.CurrentLocation.RemoveItem(item);
+    _ = state.Inventory.Add(item);
+    Console.WriteLine($"You take the {item.Name.ToProperCase()}.");
 }
 
-bool HandleUnlock(string input)
+void HandleTakeAll()
 {
-    if (!input.StartsWith("unlock ")) return false;
-
-    var token = input.Replace("unlock ", "").Trim();
-    var direction = ResolveDoorDirection(token);
-    if (direction == null)
+    if (state.CurrentLocation.Items.Count == 0)
     {
-        Console.WriteLine("Unlock which door? Try: unlock east.");
-        return true;
+        Console.WriteLine("There is nothing to take.");
+        return;
     }
 
-    var exit = state.CurrentLocation.GetExit(direction.Value);
+    var taken = new List<IItem>();
+    foreach (var item in state.CurrentLocation.Items.ToList())
+    {
+        if (!item.Takeable)
+            continue;
+        _ = state.CurrentLocation.RemoveItem(item);
+        _ = state.Inventory.Add(item);
+        taken.Add(item);
+    }
+
+    Console.WriteLine(taken.Count > 0
+        ? $"You take: {taken.CommaJoinNames(properCase: true)}."
+        : "There is nothing here you can take.");
+}
+
+void HandleUnlock(string token)
+{
+    var exit = ResolveDoorExit(token);
     if (exit?.Door == null)
     {
-        Console.WriteLine("There is no door that way.");
-        return true;
+        Console.WriteLine("There is no door to unlock.");
+        return;
     }
 
     var keyInInventory = state.Inventory.Items.OfType<Key>().FirstOrDefault();
     if (keyInInventory == null)
     {
         Console.WriteLine("You do not have a key.");
-        return true;
+        return;
     }
 
     var unlocked = exit.Door.Unlock(keyInInventory);
-    if (unlocked)
-    {
-        Console.WriteLine(exit.Door.GetReaction(DoorAction.Unlock) ?? "Unlocked.");
-    }
-    else
-    {
-        Console.WriteLine(exit.Door.GetReaction(DoorAction.UnlockFailed) ?? "It will not unlock.");
-    }
-
-    return true;
+    Console.WriteLine(unlocked
+        ? (exit.Door.GetReaction(DoorAction.Unlock) ?? "Unlocked.")
+        : (exit.Door.GetReaction(DoorAction.UnlockFailed) ?? "It will not unlock."));
 }
 
-bool HandleOpen(string input)
+void HandleOpen(string token)
 {
-    if (!input.StartsWith("open ")) return false;
-
-    var token = input.Replace("open ", "").Trim();
-    var direction = ResolveDoorDirection(token);
-    if (direction == null)
-    {
-        Console.WriteLine("Open which door? Try: open east.");
-        return true;
-    }
-
-    var exit = state.CurrentLocation.GetExit(direction.Value);
+    var exit = ResolveDoorExit(token);
     if (exit?.Door == null)
     {
-        Console.WriteLine("There is no door that way.");
-        return true;
+        Console.WriteLine("There is no door to open.");
+        return;
     }
 
     var opened = exit.Door.Open();
     Console.WriteLine(opened
         ? (exit.Door.GetReaction(DoorAction.Open) ?? "Opened.")
         : (exit.Door.GetReaction(DoorAction.OpenFailed) ?? "It will not open."));
-    return true;
 }
 
-bool HandleClose(string input)
+void HandleClose(string token)
 {
-    if (!input.StartsWith("close ")) return false;
-
-    var token = input.Replace("close ", "").Trim();
-    var direction = ResolveDoorDirection(token);
-    if (direction == null)
-    {
-        Console.WriteLine("Close which door? Try: close east.");
-        return true;
-    }
-
-    var exit = state.CurrentLocation.GetExit(direction.Value);
+    var exit = ResolveDoorExit(token);
     if (exit?.Door == null)
     {
-        Console.WriteLine("There is no door that way.");
-        return true;
+        Console.WriteLine("There is no door to close.");
+        return;
     }
 
     var closed = exit.Door.Close();
     Console.WriteLine(closed
         ? (exit.Door.GetReaction(DoorAction.Close) ?? "Closed.")
         : "It will not close.");
-    return true;
 }
 
-bool HandleLock(string input)
+void HandleLock(string token)
 {
-    if (!input.StartsWith("lock ")) return false;
-
-    var token = input.Replace("lock ", "").Trim();
-    var direction = ResolveDoorDirection(token);
-    if (direction == null)
-    {
-        Console.WriteLine("Lock which door? Try: lock east.");
-        return true;
-    }
-
-    var exit = state.CurrentLocation.GetExit(direction.Value);
+    var exit = ResolveDoorExit(token);
     if (exit?.Door == null)
     {
-        Console.WriteLine("There is no door that way.");
-        return true;
+        Console.WriteLine("There is no door to lock.");
+        return;
     }
 
     var keyInInventory = state.Inventory.Items.OfType<Key>().FirstOrDefault();
     if (keyInInventory == null)
     {
         Console.WriteLine("You do not have a key.");
-        return true;
+        return;
     }
 
     var locked = exit.Door.Lock(keyInInventory);
     Console.WriteLine(locked
         ? (exit.Door.GetReaction(DoorAction.Lock) ?? "Locked.")
         : "It will not lock.");
-    return true;
 }
 
-bool HandleDestroy(string input)
+void HandleDestroy(string token)
 {
-    if (!input.StartsWith("destroy ")) return false;
-
-    var token = input.Replace("destroy ", "").Trim();
-    if (string.IsNullOrWhiteSpace(token))
+    var exit = ResolveDoorExit(token);
+    if (exit?.Door == null)
     {
-        Console.WriteLine("Destroy what? Try: destroy door.");
-        return true;
+        Console.WriteLine("There is no door to destroy.");
+        return;
     }
 
-    var direction = ResolveDoorDirection(token);
-    if (direction != null)
-    {
-        var exit = state.CurrentLocation.GetExit(direction.Value);
-        if (exit?.Door == null)
-        {
-            Console.WriteLine("There is no door that way.");
-            return true;
-        }
+    _ = exit.Door.Destroy();
+    Console.WriteLine(exit.Door.GetReaction(DoorAction.Destroy) ?? "Destroyed.");
+}
 
-        exit.Door.Destroy();
-        Console.WriteLine(exit.Door.GetReaction(DoorAction.Destroy) ?? "Destroyed.");
-        return true;
+void HandleUse(string token)
+{
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        Console.WriteLine("Use what?");
+        return;
     }
 
     var item = state.CurrentLocation.FindItem(token) ?? state.Inventory.FindItem(token);
     if (item == null)
     {
         Console.WriteLine($"You do not see a {token} here.");
-        return true;
+        return;
     }
 
-    var reaction = item.GetReaction(ItemAction.Destroy);
-    if (string.IsNullOrWhiteSpace(reaction))
-    {
-        Console.WriteLine($"Don't be silly. You are not destroying the {item.Name.ToProperCase()}.");
-        return true;
-    }
-
-    if (state.Inventory.Items.Contains(item))
-    {
-        state.Inventory.Remove(item);
-    }
-    else
-    {
-        state.CurrentLocation.RemoveItem(item);
-    }
-
-    Console.WriteLine(reaction);
-    return true;
+    item.Use();
+    var reaction = item.GetReaction(ItemAction.Use);
+    Console.WriteLine(reaction ?? $"You use the {item.Name.ToProperCase()}.");
 }
 
-bool HandleGo(string input)
+void HandleGo(string token)
 {
-    if (!input.StartsWith("go ")) return false;
-
-    var token = input.Replace("go ", "").Trim();
-    var direction = ParseDirection(token);
-    if (direction == null)
+    if (token is "east" or "e")
     {
-        Console.WriteLine("Go where? Try: go east.");
-        return true;
+        _ = Move(Direction.East);
+        return;
     }
 
-    var moved = state.Move(direction.Value);
-    if (moved)
+    if (token is "west" or "w")
     {
-        ShowRoom();
-    }
-    else
-    {
-        Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
+        _ = Move(Direction.West);
+        return;
     }
 
-    return true;
-}
-
-ShowRoom();
-
-while (true)
-{
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim().ToLowerInvariant();
-    if (string.IsNullOrWhiteSpace(input)) continue;
-
-    if (input == "quit" || input == "exit" || input == "/exit" || input == "/quit") break;
-
-    if (HandleLook(input)) continue;
-    if (HandleInventory(input)) continue;
-
-    if (input == "take")
-    {
-        Console.WriteLine("Take what? Try: take key.");
-        continue;
-    }
-
-    if (HandleTake(input)) continue;
-    if (HandleUnlock(input)) continue;
-    if (HandleOpen(input)) continue;
-    if (HandleClose(input)) continue;
-    if (HandleLock(input)) continue;
-    if (HandleDestroy(input)) continue;
-
-    var directionInput = ParseDirection(input);
-    if (directionInput != null)
-    {
-        var moved = state.Move(directionInput.Value);
-        if (moved)
-        {
-            ShowRoom();
-        }
-        else
-        {
-            Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
-        }
-        continue;
-    }
-
-    if (HandleGo(input)) continue;
-
-    if (input.StartsWith("use "))
-    {
-        Console.WriteLine("Try: unlock door, open door, or lock door.");
-        continue;
-    }
-
-    Console.WriteLine("Try: look, look <item>, go <direction>, take <item>, unlock/open/close/lock/destroy door, inventory, quit.");
+    Console.WriteLine("Go where? Try: go east.");
 }
 ```

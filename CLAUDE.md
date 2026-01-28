@@ -1,4 +1,4 @@
-# Agent Instructions
+# Claude Instructions
 
 Keep this workflow for every slice and do not skip steps:
 

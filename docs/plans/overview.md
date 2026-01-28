@@ -36,6 +36,12 @@ Keep this workflow for every slice and do not skip steps:
 4.5 - Använd pattern matching i ifsatser för att göra koden mer fluent.
 4.6 - använd metoder för att dela upp koden i mindre delar där det är möjligt.
 4.7 - skriv snygg läsbar kod.
+4.8 - börja alltid med intro (mål) och visa start-rummet.
+4.9 - gör alltid auto-look efter lyckad go/move.
+4.10 - använd extensions där det går; om kod upprepas för mycket, föreslå en extension.
+4.11 - håll koden liten: använd =>-metoder, ternary, switch och pattern matching där det går.
+4.12 - skriv alltid på brittisk engelska (även i dokumentation).
+4.13 - nämn inte takeable/destroyable interaktiva saker i rumsbeskrivningar (om de inte är icke-takeable och icke-destroyable).
 4 - Marcus testar
 5 - anpassa om något inte är ok
 6 - kopiera koden från sandbox Program.cs till docs/examples
@@ -104,7 +110,7 @@ C:\git\MarcusMedina\TextAdventure\
 │   └── TextAdventure.Sandbox\               (console app - testbädd)
 ├── docs\
 │   └── plans\
-└── TextAdventure.sln
+└── TextAdventure.slnx
 ```
 
 ---

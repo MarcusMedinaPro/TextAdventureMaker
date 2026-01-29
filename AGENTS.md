@@ -15,6 +15,7 @@ Keep this workflow for every slice and do not skip steps:
 4.8 - börja alltid med intro (mål) och visa start-rummet.
 4.9 - gör alltid auto-look efter lyckad go/move.
 4.10 - använd extensions där det går; om kod upprepas för mycket, föreslå en extension.
+4.10.1 - innan du börjar på en ny slice, lista vilka extensions som redan finns, använd dem flitigt och föreslå nya om samma mönster upprepas.
 4.11 - håll koden liten: använd =>-metoder, ternary, switch och pattern matching där det går.
 4.12 - skriv alltid på brittisk engelska (även i dokumentation).
 4.13 - nämn inte takeable/destroyable interaktiva saker i rumsbeskrivningar (om de inte är icke-takeable och icke-destroyable).

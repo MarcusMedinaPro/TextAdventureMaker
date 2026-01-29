@@ -1,12 +1,12 @@
 # Rain upon the Roof
 
-_Slice tag: Slice 7 — Combat + Movement + Events. This demo pairs an unmovable storm with a movable bucket, showcases NPC states, and keeps the loop compact with fluent helpers._
+_Slice tag: Slice 7 — Combat + Movement + Events. This demo pairs a choreographed leak with an unmovable bucket, showcases NPC reactions, and keeps the loop compact with fluent helpers._
 
-A storm stalks the attic roof, the rain hammering a fevered rhythm. A bucket sits beneath the leak and a training dummy occupies the corner, offering a playful sparring partner.
+The rain streams through the attic roof, hammering a fevered rhythm. A bucket waits beneath the leak and a training dummy lingers in the corner, offering a playful sparring partner.
 
 ## Goal
 
-Coax the bucket beneath the leak, calm the storm, experiment with the dummy, and keep an eye on the ever-dripping roof.
+Coax the bucket beneath the leak, calm the rain, experiment with the dummy, and keep an eye on the ever-dripping roof.
 
 ## Map (rough layout)
 
@@ -27,7 +27,7 @@ D = Training dummy (neutral NPC, can be attacked)
 
 1. You begin inside the dripping attic.
 2. The rain pounds the roof while a bucket watches the leak.
-3. Move the bucket to catch the drops; the storm subsides.
+3. Move the bucket to catch the drops; the rain finally calms.
 4. The dummy stands quietly. Try teasing it with `attack` or `flee`.
 5. Let the bucket dwell, listen to the whispers, and enjoy the chatter as the dummy observes.
 
@@ -92,15 +92,12 @@ var bucket = new Item(
 attic.AddItem(rain);
 attic.AddItem(bucket);
 
-var storm = new Npc("storm", "storm", NpcState.Hostile, stats: new Stats(18))
-    .Description("A relentless downpour that demands endurance rather than defiance.");
 var dummy = new Npc("dummy", "training dummy", NpcState.Neutral, stats: new Stats(12))
     .Description("A crash-test dummy slumped in the corner, patient and uncomplaining.");
 var brokenDummy = new Item("broken_dummy", "broken dummy", "You exhibited excellent form. The dummy cannot be taken.")
     .AddAliases("dummy", "training dummy")
     .SetTakeable(false);
 
-attic.AddNpc(storm);
 attic.AddNpc(dummy);
 
 var state = new GameState(attic, worldLocations: new[] { attic })
@@ -111,6 +108,7 @@ var state = new GameState(attic, worldLocations: new[] { attic })
 
 var bucketPlaced = false;
 var brokenDummyPlaced = false;
+var rainStopped = false;
 
 bucket.OnMove += _ =>
 {
@@ -121,8 +119,6 @@ bucket.OnMove += _ =>
     }
 
     bucketPlaced = true;
-    storm.Stats.Damage(storm.Stats.Health);
-    storm.SetState(NpcState.Dead);
 };
 
 var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
@@ -144,7 +140,7 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .Build());
 
 Console.WriteLine("=== RAIN UPON THE ROOF (Slice 7) ===");
-Console.WriteLine("Goal: shepherd the bucket beneath the leak, calm the storm, tease the dummy, and keep listening to the patter.");
+Console.WriteLine("Goal: shepherd the bucket beneath the leak, calm the rain, tease the dummy, and keep listening to the patter.");
 Console.WriteLine("Commands: look, examine, move bucket, attack dummy, flee, inventory, go south, quit.");
 ShowRoom();
 
@@ -188,9 +184,10 @@ while (true)
         brokenDummyPlaced = true;
     }
 
-    if (!storm.IsAlive)
+    if (bucketPlaced && !rainStopped)
     {
-        Console.WriteLine("The bucket receives the final, obedient drops. The storm, at last, withdraws.");
+        Console.WriteLine("The bucket receives the final, obedient drops. The rain, at last, withdraws.");
+        rainStopped = true;
         break;
     }
 

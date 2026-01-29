@@ -28,15 +28,12 @@ var bucket = new Item(
 attic.AddItem(rain);
 attic.AddItem(bucket);
 
-var storm = new Npc("storm", "storm", NpcState.Hostile, stats: new Stats(18))
-    .Description("A relentless downpour that demands endurance rather than defiance.");
 var dummy = new Npc("dummy", "training dummy", NpcState.Neutral, stats: new Stats(12))
     .Description("A crash-test dummy slumped in the corner, patient and uncomplaining.");
 var brokenDummy = new Item("broken_dummy", "broken dummy", "You exhibited excellent form. The dummy cannot be taken.")
     .AddAliases("dummy", "training dummy")
     .SetTakeable(false);
 
-attic.AddNpc(storm);
 attic.AddNpc(dummy);
 
 var state = new GameState(attic, worldLocations: [attic])
@@ -47,6 +44,7 @@ var state = new GameState(attic, worldLocations: [attic])
 
 var bucketPlaced = false;
 var brokenDummyPlaced = false;
+var rainStopped = false;
 
 bucket.OnMove += _ =>
 {
@@ -57,8 +55,6 @@ bucket.OnMove += _ =>
     }
 
     bucketPlaced = true;
-    storm.Stats.Damage(storm.Stats.Health);
-    storm.SetState(NpcState.Dead);
 };
 
 var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
@@ -127,9 +123,10 @@ while (true)
         brokenDummyPlaced = true;
     }
 
-    if (!storm.IsAlive)
+    if (bucketPlaced && !rainStopped)
     {
-        Console.WriteLine("The bucket receives the final, obedient drops. The storm, at last, withdraws.");
+        Console.WriteLine("The bucket receives the final, obedient drops. The rain, at last, withdraws.");
+        rainStopped = true;
         break;
     }
 

@@ -5,6 +5,7 @@ using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -143,8 +144,15 @@ while (true)
 
 void MaybeWhisper(INpc npc, Random random)
 {
-    if (!npc.IsAlive) return;
-    if (random.Next(100) <= 70) return;
+    if (!npc.IsAlive)
+    {
+        return;
+    }
+
+    if (random.Next(100) <= 70)
+    {
+        return;
+    }
 
     var whispers = new[]
     {
@@ -161,25 +169,25 @@ bool HandlePlayfulInput(string input)
 {
     var lower = input.Lower();
 
-    if (lower is "help" or "halp" or "?")
+    if (lower is ("help" or "halp" or "?"))
     {
         Console.WriteLine("Commands: look, examine, move bucket, attack dummy, flee, inventory, go south, quit");
         return true;
     }
 
-    if (lower is "kick bucket" or "kick the bucket")
+    if (lower is ("kick bucket" or "kick the bucket"))
     {
         Console.WriteLine("You promptly expire, in the purely figurative and strictly humorous manner.");
         return true;
     }
 
-    if (lower is "kiss dummy" or lower is "kiss the dummy")
+    if (lower is "kiss dummy" or (lower is "kiss the dummy"))
     {
         Console.WriteLine("Eeew! No!");
         return true;
     }
 
-    if (lower is "hug dummy" or lower is "hug the dummy")
+    if (lower is "hug dummy" or (lower is "hug the dummy"))
     {
         Console.WriteLine("The dummy pushes you away and shakes its head, muttering 'Eeew no, I am a married spooky dummy.'");
         return true;

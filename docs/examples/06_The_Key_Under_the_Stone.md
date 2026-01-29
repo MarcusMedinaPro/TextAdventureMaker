@@ -115,6 +115,7 @@ var keyRevealed = false;
 state.Events.Subscribe(GameEventType.PickupItem, e =>
 {
     if (keyRevealed) return;
+    if (e.Detail != "stone_move") return;
     if (e.Item?.Id.Is("stone") != true) return;
 
     keyRevealed = true;
@@ -167,7 +168,7 @@ while (true)
     var movedStone = command is MoveCommand { Target: var moveTarget } && moveTarget.Is("stone") && result.Success;
     if (movedStone)
     {
-        state.Events.Publish(new GameEvent(GameEventType.PickupItem, state, state.CurrentLocation, item: stone));
+        state.Events.Publish(new GameEvent(GameEventType.PickupItem, state, state.CurrentLocation, item: stone, detail: "stone_move"));
     }
 
     if (command is GoCommand && result.Success && !result.ShouldQuit)

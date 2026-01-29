@@ -13,7 +13,8 @@ var courtyard = new Location("courtyard", "A sheltered courtyard beyond the gate
 
 var stone = new Item("stone", "stone", "A heavy flat stone with moss on one edge.")
     .AddAliases("slab", "stoned")
-    .SetReaction(ItemAction.Take, "Duuuuude! That is so groovy.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.TakeFailed, "Duuuuude! That is so groovy.")
     .SetReaction(ItemAction.Move, "The stone scrapes across the soil and tilts.");
 var key = new Key("garden_key", "iron key", "A cold iron key hidden beneath the stone.")
     .AddAliases("key", "iron")

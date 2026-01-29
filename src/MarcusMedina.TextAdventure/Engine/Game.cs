@@ -8,31 +8,22 @@ using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
-public sealed class Game : IGame
+public sealed class Game(
+    GameState state,
+    ICommandParser parser,
+    TextReader? input = null,
+    TextWriter? output = null,
+    string? prompt = null) : IGame
 {
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private bool _stopRequested;
 
-    public GameState State { get; }
-    public ICommandParser Parser { get; }
-    public TextReader Input { get; }
-    public TextWriter Output { get; }
-    public string Prompt { get; set; }
-
-    public Game(
-        GameState state,
-        ICommandParser parser,
-        TextReader? input = null,
-        TextWriter? output = null,
-        string? prompt = null)
-    {
-        State = state ?? throw new ArgumentNullException(nameof(state));
-        Parser = parser ?? throw new ArgumentNullException(nameof(parser));
-        Input = input ?? Console.In;
-        Output = output ?? Console.Out;
-        Prompt = prompt ?? "> ";
-    }
+    public GameState State { get; } = state ?? throw new ArgumentNullException(nameof(state));
+    public ICommandParser Parser { get; } = parser ?? throw new ArgumentNullException(nameof(parser));
+    public TextReader Input { get; } = input ?? Console.In;
+    public TextWriter Output { get; } = output ?? Console.Out;
+    public string Prompt { get; set; } = prompt ?? "> ";
 
     public void AddTurnStartHandler(Action<Game> handler)
     {

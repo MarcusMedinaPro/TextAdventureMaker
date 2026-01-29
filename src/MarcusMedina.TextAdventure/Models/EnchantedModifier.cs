@@ -6,12 +6,8 @@ namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Interfaces;
 
-public class EnchantedModifier : ItemDecorator
+public class EnchantedModifier(IItem inner) : ItemDecorator(inner)
 {
-    public EnchantedModifier(IItem inner) : base(inner)
-    {
-    }
-
     public override string Name => $"enchanted {Inner.Name}";
 
     public override string GetDescription()

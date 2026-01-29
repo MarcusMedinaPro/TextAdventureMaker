@@ -8,14 +8,12 @@ using System.Linq;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
-public sealed class GameList<T> where T : IGameEntity
+public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGameEntity
 {
     private readonly Dictionary<string, T> _items = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Func<string, T> _factoryFromName;
+    private readonly Func<string, T> _factoryFromName = factoryFromName ?? throw new ArgumentNullException(nameof(factoryFromName));
 
     public IReadOnlyCollection<T> Items => _items.Values;
-
-    public GameList(Func<string, T> factoryFromName) => _factoryFromName = factoryFromName ?? throw new ArgumentNullException(nameof(factoryFromName));
 
     public T Add(string name)
     {

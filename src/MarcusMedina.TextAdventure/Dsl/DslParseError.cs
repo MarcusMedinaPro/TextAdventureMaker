@@ -8,41 +8,32 @@ namespace MarcusMedina.TextAdventure.Dsl;
 /// <summary>
 /// Represents a DSL parsing error with helpful context.
 /// </summary>
-public class DslParseError
+public class DslParseError(int line, string lineContent, string message, string? suggestion = null, int? column = null)
 {
     /// <summary>
     /// Line number where the error occurred (1-based).
     /// </summary>
-    public int Line { get; }
+    public int Line { get; } = line;
 
     /// <summary>
     /// Column where the error occurred (1-based), if known.
     /// </summary>
-    public int? Column { get; }
+    public int? Column { get; } = column;
 
     /// <summary>
     /// The problematic line content.
     /// </summary>
-    public string LineContent { get; }
+    public string LineContent { get; } = lineContent;
 
     /// <summary>
     /// The error message.
     /// </summary>
-    public string Message { get; }
+    public string Message { get; } = message;
 
     /// <summary>
     /// Suggestion for how to fix the error.
     /// </summary>
-    public string? Suggestion { get; }
-
-    public DslParseError(int line, string lineContent, string message, string? suggestion = null, int? column = null)
-    {
-        Line = line;
-        LineContent = lineContent;
-        Message = message;
-        Suggestion = suggestion;
-        Column = column;
-    }
+    public string? Suggestion { get; } = suggestion;
 
     public override string ToString()
     {
@@ -65,15 +56,12 @@ public class DslParseError
 /// <summary>
 /// Exception thrown when DSL parsing fails.
 /// </summary>
-public class DslParseException : Exception
+public class DslParseException(IReadOnlyList<DslParseError> errors) : Exception(FormatMessage(errors))
 {
     /// <summary>
     /// The parsing errors encountered.
     /// </summary>
-    public IReadOnlyList<DslParseError> Errors { get; }
-
-    public DslParseException(IReadOnlyList<DslParseError> errors)
-        : base(FormatMessage(errors)) => Errors = errors;
+    public IReadOnlyList<DslParseError> Errors { get; } = errors;
 
     public DslParseException(DslParseError error)
         : this(new[] { error })

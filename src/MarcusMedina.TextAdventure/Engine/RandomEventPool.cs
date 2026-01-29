@@ -78,22 +78,14 @@ public sealed class RandomEventPool : IRandomEventPool
         }
     }
 
-    private sealed class RandomEvent
+    private sealed class RandomEvent(string id, int weight, Action<IGameState> handler, Func<IGameState, bool>? condition)
     {
-        public string Id { get; }
-        public int Weight { get; }
+        public string Id { get; } = id;
+        public int Weight { get; } = weight;
         public int CooldownTicks { get; set; }
         public int LastTriggeredTick { get; private set; } = int.MinValue;
-        public Action<IGameState> Handler { get; }
-        public Func<IGameState, bool>? Condition { get; }
-
-        public RandomEvent(string id, int weight, Action<IGameState> handler, Func<IGameState, bool>? condition)
-        {
-            Id = id;
-            Weight = weight;
-            Handler = handler;
-            Condition = condition;
-        }
+        public Action<IGameState> Handler { get; } = handler;
+        public Func<IGameState, bool>? Condition { get; } = condition;
 
         public bool CanTrigger(IGameState state, int now) => (CooldownTicks <= 0 || (long)now - LastTriggeredTick >= CooldownTicks) && (Condition == null || Condition(state));
 

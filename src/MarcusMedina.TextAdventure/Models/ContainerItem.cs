@@ -6,14 +6,12 @@ namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Interfaces;
 
-public class ContainerItem<T> : Item, IContainer<T>
+public class ContainerItem<T>(string id, string name, int maxCount = 0) : Item(id, name), IContainer<T>
 {
     private readonly List<T> _contents = [];
 
-    public int MaxCount { get; private set; }
+    public int MaxCount { get; private set; } = maxCount;
     public IReadOnlyList<T> Contents => _contents;
-
-    public ContainerItem(string id, string name, int maxCount = 0) : base(id, name) => MaxCount = maxCount;
 
     public bool CanAdd(T item) => MaxCount <= 0 || _contents.Count + 1 <= MaxCount;
 

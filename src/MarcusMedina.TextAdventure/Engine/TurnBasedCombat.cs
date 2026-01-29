@@ -10,16 +10,10 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
-public sealed class TurnBasedCombat : ICombatSystem
+public sealed class TurnBasedCombat(int playerDamage = 10, int npcDamage = 4) : ICombatSystem
 {
-    private readonly int _playerDamage;
-    private readonly int _npcDamage;
-
-    public TurnBasedCombat(int playerDamage = 10, int npcDamage = 4)
-    {
-        _playerDamage = Math.Max(1, playerDamage);
-        _npcDamage = Math.Max(1, npcDamage);
-    }
+    private readonly int _playerDamage = Math.Max(1, playerDamage);
+    private readonly int _npcDamage = Math.Max(1, npcDamage);
 
     public CommandResult Attack(IGameState state, INpc target)
     {

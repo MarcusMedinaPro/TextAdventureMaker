@@ -2,20 +2,55 @@
 
 _Slice tag: Slice 8 — Quest System. Demo focuses on quest log updates, quest conditions, and a tiny login flow._
 
-## Story beats (max ~10 steps)
-1) You are back at your office desk.
-2) Move the chair to reveal a hidden note.
-3) Read the note to learn the password.
-4) Grab the server key from the break room.
-5) Unlock the server door and reach the terminal.
-6) Log in to finish the quest.
+A quiet office, a stubborn door, and a password that clearly expected to be forgotten.
+
+## Goal
+
+Reveal the note, learn the password, fetch the server key, and log in at the terminal.
 
 ## Map (rough layout)
+
 ```
 [Break Room]
      |
   [Office] --(locked)--> [Server Room]
 ```
+
+## Story beats (max ~10 steps)
+
+1. You begin at your office desk.
+2. Move the chair to reveal a hidden note.
+3. Read the note to learn the password.
+4. Collect the server key from the break room.
+5. Unlock the server door and reach the terminal.
+6. Log in to complete the quest.
+
+## Slice 1‑8 functions tested
+
+- `Quest`, `QuestLog`, `QuestState`
+- `HasItemCondition`, `AllOfCondition`, `WorldFlagCondition`
+- `QuestLog.CheckAll(state)`
+- `Location.AddExit(direction, target, door)`
+- `Door(id, name, description, state)` + `Door.RequiresKey(key)`
+- `Item.SetReaction(action, text)`
+- `Item.SetReadText(...)`, `Item.RequireTakeToRead()`
+- `ReadCommand`, `QuestCommand`
+- `KeywordParser`, `KeywordParserConfigBuilder`
+- `CommandExtensions.Execute(state, command)`
+
+## Demo commands (parser)
+
+- `look` / `l`
+- `examine <item>` / `x <item>`
+- `move chair`
+- `take note` / `get note`
+- `read note`
+- `unlock door` / `open door`
+- `quest` / `journal`
+- `inventory` / `i`
+- `go north/east/west/south`
+- `log in` / `login` / `use terminal`
+- `quit` / `exit`
 
 ## Example (quest log + conditions)
 ```csharp
@@ -30,15 +65,6 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 8 — Quest System
-// New functions tested:
-// - Quest, QuestLog, QuestState
-// - Quest conditions + visitor (HasItemCondition, AllOfCondition, WorldFlagCondition)
-// - KeywordParserConfigBuilder + KeywordParser
-// - ReadCommand, QuestCommand
-// - Item reactions (Move/Read) + WorldState flags
-// - Door + Key integration with parser commands
-
 var office = new Location(
     "office",
     "A quiet office with a humming monitor and a desk chair of dubious sturdiness. A secure door to the east leads to the server room.");
@@ -51,30 +77,21 @@ var serverRoom = new Location(
     "server room",
     "A low, cool room of blinking lights. The terminal waits with theatrical patience for a password.");
 
-var chair = new Item(
-        "chair",
-        "desk chair",
-        "A wheeled chair with a slightly loose castor, loyal in sentiment if not in stability.")
+var chair = new Item("chair", "desk chair", "A wheeled chair with a slightly loose castor, loyal in sentiment if not in stability.")
     .AddAliases("chair")
     .SetTakeable(false)
     .SetReaction(ItemAction.Move, "The chair rolls back with a dignified squeak, as if it has always intended to help.")
     .SetReaction(ItemAction.Use, "You sit. The chair creaks in a manner best described as concerned. You get up again.")
     .SetReaction(ItemAction.TakeFailed, "You attempt to hoist it. The chair refuses to dignify the effort.");
 
-var monitor = new Item(
-        "monitor",
-        "monitor",
-        "A perfectly ordinary monitor, humming faintly as though it has opinions.")
+var monitor = new Item("monitor", "monitor", "A perfectly ordinary monitor, humming faintly as though it has opinions.")
     .AddAliases("screen", "display")
     .SetTakeable(false)
     .SetReaction(ItemAction.TakeFailed, "You make a show of lifting it. The desk makes a show of keeping it.")
     .SetReaction(ItemAction.MoveFailed, "You nudge the monitor. It does not budge, as if bolted by principle.")
     .SetReaction(ItemAction.Use, "You tap the screen. It remains politely noncommittal.");
 
-var note = new Item(
-        "note",
-        "post-it note",
-        "A yellow note with a hurried scrawl, doing its best to look inconspicuous.")
+var note = new Item("note", "post-it note", "A yellow note with a hurried scrawl, doing its best to look inconspicuous.")
     .AddAliases("note", "post-it", "sticky note", "post it")
     .SetWeight(0.01f)
     .SetReadText("PASSWORD: HAWTHORN")
@@ -92,24 +109,19 @@ var serverKey = new Key("server_key", "server key", "A small brass key tagged 'S
     .SetReaction(ItemAction.Use, "You roll the key between your fingers. It remains a key.")
     .SetReaction(ItemAction.Drop, "The key lands with a prim little clink.");
 
-var terminal = new Item(
-        "terminal",
-        "terminal",
-        "A squat terminal with a blinking cursor that feels faintly judgemental.")
+var terminal = new Item("terminal", "terminal", "A squat terminal with a blinking cursor that feels faintly judgemental.")
     .AddAliases("computer", "console", "screen")
     .SetTakeable(false)
     .SetReaction(ItemAction.TakeFailed, "It is bolted to the desk and refuses to budge.")
     .SetReaction(ItemAction.MoveFailed, "You push the terminal. It does not move. It judges you for trying.");
 
-var kettle = new Item(
-        "kettle",
-        "kettle",
-        "A kettle of noble lineage, now retired and faintly insulted.")
+var kettle = new Item("kettle", "kettle", "A kettle of noble lineage, now retired and faintly insulted.")
     .AddAliases("tea kettle", "old kettle")
     .SetTakeable(false)
     .SetReaction(ItemAction.MoveFailed, "You nudge the kettle. It rattles with theatrical displeasure.")
     .SetReaction(ItemAction.Use, "You flick the switch. The kettle answers with a weary sigh and no heat.")
     .SetReaction(ItemAction.TakeFailed, "You lift it. It is far too attached to the counter to comply.");
+
 var serverDoor = new Door("server_door", "server door", "A slim security door with a key reader.", DoorState.Locked)
     .AddAliases("door", "server", "security door")
     .SetReaction(DoorAction.Unlock, "The reader blinks green.")
@@ -172,8 +184,8 @@ chair.OnMove += _ =>
     Console.WriteLine("> You spot a post-it note tucked beneath the desk, as if embarrassed to be noticed.");
 };
 
-var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
-    .WithLook("look", "l","ls")
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
+    .WithLook("look", "l", "ls")
     .WithExamine("examine", "exam", "x")
     .WithMove("move", "push", "shift", "slide")
     .WithInventory("inventory", "inv", "i")
@@ -187,30 +199,26 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithGo("go", "move")
     .WithFuzzyMatching(true, 1)
     .WithIgnoreItemTokens("on", "off", "at", "the", "a")
-    .Build();
-
-var parser = new KeywordParser(parserConfig);
+    .Build());
 
 Console.WriteLine("=== THE FORGOTTEN PASSWORD (Slice 8) ===");
-Console.WriteLine("Type 'help' if you want a brief reminder of commands.");
-ShowLookResult(state.Look());
+Console.WriteLine("Goal: reveal the note, learn the password, fetch the server key, and log in.");
+Console.WriteLine("Commands: look, examine, move chair, take/read note, unlock/open door, go north/east, quest, inventory, log in, quit.");
+ShowRoom();
 
 while (true)
 {
-    Console.Write("> ");
+    Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input))
-    {
-        continue;
-    }
+    if (string.IsNullOrWhiteSpace(input)) continue;
 
     if (IsHelp(input))
     {
-        Console.WriteLine("Commands: look, examine, move <item>, take <item>, read <item>, unlock/open door, go <direction>, inventory, quest, quit");
+        Console.WriteLine("Commands: look, examine, move chair, take/read note, unlock/open door, go <direction>, quest, inventory, log in, quit");
         continue;
     }
 
-    if (TryHandleSit(input, state, chair))
+    if (TryHandleSit(input, state))
     {
         continue;
     }
@@ -228,25 +236,25 @@ while (true)
     var command = parser.Parse(input);
     var result = state.Execute(command);
 
-    if (command is LookCommand look && !string.IsNullOrWhiteSpace(look.Target))
+    switch (command)
     {
-        WriteResult(result);
-    }
-    else if (command is LookCommand)
-    {
-        ShowLookResult(result);
-    }
-    else
-    {
-        WriteResult(result);
-    }
-
-    if (command is GoCommand && !result.ShouldQuit)
-    {
-        ShowLookResult(state.Look());
+        case LookCommand { Target: not null }:
+            WriteResult(result);
+            break;
+        case LookCommand:
+            ShowLookResult(result);
+            break;
+        default:
+            WriteResult(result);
+            break;
     }
 
-    if (command is ReadCommand read && note.Matches(read.Target))
+    if (command is GoCommand && result.Success && !result.ShouldQuit)
+    {
+        ShowRoom();
+    }
+
+    if (command is ReadCommand { Target: var target } && note.Matches(target))
     {
         state.WorldState.SetFlag("knows_password", true);
     }
@@ -275,53 +283,26 @@ void WriteResult(CommandResult result)
     }
 }
 
+void ShowRoom()
+{
+    var location = state.CurrentLocation;
+    Console.WriteLine();
+    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
+    Console.WriteLine(location.GetDescription());
+
+    var items = location.Items.CommaJoinNames(properCase: true);
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
+
+    var exits = location.Exits
+        .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())
+        .ToList();
+    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+}
+
 void ShowLookResult(CommandResult result)
 {
-    Console.WriteLine();
-    Console.WriteLine(new string('-', 60));
-    Console.WriteLine($"You are in the {state.CurrentLocation.Id.ToProperCase()}");
-    Console.WriteLine();
-
-    var lines = result.Message?
-        .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-        .ToList()
-        ?? new List<string>();
-
-    if (lines.Count > 0 && lines[0].StartsWith("I think you mean", StringComparison.OrdinalIgnoreCase))
-    {
-        Console.WriteLine(lines[0]);
-        Console.WriteLine();
-        lines.RemoveAt(0);
-    }
-
-    var description = lines.FirstOrDefault() ?? state.CurrentLocation.GetDescription();
-    if (!string.IsNullOrWhiteSpace(description))
-    {
-        Console.WriteLine(description);
-        Console.WriteLine();
-    }
-
-    var itemsLine = lines.FirstOrDefault(line => line.StartsWith("Items here:", StringComparison.OrdinalIgnoreCase));
-    if (!string.IsNullOrWhiteSpace(itemsLine))
-    {
-        var items = itemsLine.Replace("Items here:", "").Trim();
-        Console.WriteLine(items.Length > 0 ? $"You notice {items}" : "You notice nothing of interest.");
-        Console.WriteLine();
-    }
-
-    var exitsLine = lines.FirstOrDefault(line => line.StartsWith("Exits:", StringComparison.OrdinalIgnoreCase));
-    if (!string.IsNullOrWhiteSpace(exitsLine))
-    {
-        Console.WriteLine(exitsLine);
-        Console.WriteLine();
-    }
-
-    Console.WriteLine("Hints");
-    Console.WriteLine("- move chair");
-    Console.WriteLine("- read note");
-    Console.WriteLine("- quest");
-    Console.WriteLine("- log in");
-    Console.WriteLine(new string('-', 60));
+    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    WriteResult(result);
 }
 
 void UpdateQuestProgress()
@@ -340,7 +321,7 @@ void UpdateQuestProgress()
             if (quest.State == QuestState.Completed)
             {
                 Console.WriteLine($"Quest complete: {quest.Title}");
-                if (quest.Id.Equals("log_in", StringComparison.OrdinalIgnoreCase))
+                if (quest.Id.Is("log_in"))
                 {
                     Console.WriteLine("You have done it. The terminal yields, and the system is—if not yours—at least temporarily compliant.");
                     Environment.Exit(0);
@@ -391,9 +372,11 @@ bool IsLoginInput(string input)
     return normalized is "login" or "log in" or "log-in" or "use terminal" or "use computer" or "enter password" or "type password";
 }
 
-bool TryHandleSit(string input, GameState gameState, IItem chairItem)
+bool TryHandleSit(string input, GameState gameState)
 {
-    if (!IsSitInput(input)) return false;
+    var normalized = input.Lower();
+    var wantsSit = normalized is "sit" or "sit down" or "sit on chair" or "sit on the chair" or "sit in chair" or "sit in the chair";
+    if (!wantsSit) return false;
 
     if (!gameState.IsCurrentRoomId(office.Id))
     {
@@ -401,20 +384,7 @@ bool TryHandleSit(string input, GameState gameState, IItem chairItem)
         return true;
     }
 
-    if (!gameState.CurrentLocation.Items.Contains(chairItem))
-    {
-        Console.WriteLine("The chair seems to have wandered off.");
-        return true;
-    }
-
-    var reaction = chairItem.GetReaction(ItemAction.Use);
-    Console.WriteLine(reaction ?? "You sit for a moment, collecting yourself.");
+    Console.WriteLine("You sit. The chair creaks in a manner best described as concerned. You get up again.");
     return true;
-}
-
-bool IsSitInput(string input)
-{
-    var normalized = input.Lower();
-    return normalized is "sit" or "sit down" or "sit on chair" or "sit on the chair" or "sit in chair" or "sit in the chair";
 }
 ```

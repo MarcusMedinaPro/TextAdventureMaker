@@ -9,79 +9,92 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 5: The Silent Classroom
-// Tests: NPC dialog, movement, auto-look after go, talk command.
+// Slice 6: The Key Under the Stone
+// Tests: event subscriptions, hidden key reveal, door unlock, auto-look after go.
 
-var hallway = new Location("hallway", "A narrow corridor lined with lockers and a closed classroom door.");
-var classroom = new Location("classroom", "A quiet classroom with polished desks and a chalkboard half-erased.");
+var garden = new Location("garden", "A quiet garden with a weathered gate and patient silence.");
+var courtyard = new Location("courtyard", "A sheltered courtyard beyond the gate, lit by moonlight.");
 
-var curiosityNode = new DialogNode("The student nods once and whispers about footsteps in the corridor.")
-    .AddOption("Ask what they heard.", new DialogNode("Slow footsteps, then a door sighing open, then silence again."))
-    .AddOption("Ask why they stare at the floor.", new DialogNode("They say the floor is where promises are made and forgotten."));
-var offerComfortNode = new DialogNode("They crack a small smile and say the silence feels like a warm drink.")
-    .AddOption("Offer to share a joke.", new DialogNode("The smile lingers, and they murmur, 'Keep the jokes coming.'"));
+var stone = new Item("stone", "stone", "A heavy flat stone with moss on one edge.")
+    .AddAliases("slab")
+    .SetReaction(ItemAction.Move, "The stone scrapes across the soil and tilts.");
+var key = new Key("garden_key", "iron key", "A cold iron key hidden beneath the stone.")
+    .AddAliases("key", "iron")
+    .SetWeight(0.02f);
 
-var student = new Npc("student", "silent student")
-    .Description("A student sits in the back, voice barely above a breath.")
-    .SetDialog(new DialogNode("They raise their eyes when you enter and gesture for you to speak.")
-        .AddOption("Ask what keeps them here.", curiosityNode)
-        .AddOption("Offer some company.", offerComfortNode));
+var gate = new Door("garden_gate", "garden gate", "A barred gate choked with ivy.", DoorState.Locked)
+    .RequiresKey(key)
+    .SetReaction(DoorAction.Unlock, "The lock gives way with a croak of rust.")
+    .SetReaction(DoorAction.Open, "The gate swings open in a creak of metal.")
+    .SetReaction(DoorAction.OpenFailed, "The gate resists while the lock refuses to budge.");
 
-classroom.AddNpc(student);
-hallway.AddExit(Direction.East, classroom);
-classroom.AddExit(Direction.West, hallway);
+garden.AddItem(stone);
+garden.AddExit(Direction.North, courtyard, gate);
+courtyard.AddExit(Direction.South, garden, gate);
 
-var state = new GameState(hallway, worldLocations: [hallway, classroom])
+var state = new GameState(garden, worldLocations: new[] { garden, courtyard })
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
 };
 
+var keyRevealed = false;
+state.Events.Subscribe(GameEventType.PickupItem, e =>
+{
+    if (keyRevealed) return;
+    if (e.Item?.Id.Is("stone") != true) return;
+
+    keyRevealed = true;
+    garden.AddItem(key);
+    Console.WriteLine("> As you move the stone, a rusted key glints free of the earth.");
+});
+state.Events.Subscribe(GameEventType.UnlockDoor, e =>
+{
+    if (e.Door?.Id.Is("garden_gate") == true)
+    {
+        Console.WriteLine("> The gate rattles as the lock gives up.");
+    }
+});
+
 var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "x")
-    .WithGo("go", "move")
-    .WithTalk("talk", "speak")
+    .WithMove("move", "push", "shift", "slide")
+    .WithTake("take", "grab")
+    .WithOpen("open", "pull")
+    .WithUnlock("unlock", "unseal")
+    .WithGo("go", "travel")
+    .WithInventory("inventory", "inv", "i")
+    .WithUse("use")
     .WithFuzzyMatching(true, 1)
+    .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["n"] = Direction.North,
+        ["north"] = Direction.North,
+        ["s"] = Direction.South,
+        ["south"] = Direction.South
+    })
     .Build());
 
-Console.WriteLine("=== THE SILENT CLASSROOM (Slice 5) ===");
-Console.WriteLine("Goal: reach the classroom, speak with the student, and return with fresh whispers.");
-Console.WriteLine("Commands: look, examine, talk student, 1-3 in dialog, go east/west, leave, quit.");
+Console.WriteLine("=== THE KEY UNDER THE STONE (Slice 6) ===");
+Console.WriteLine("Goal: reveal the hidden key, unlock the gate, and step into the courtyard.");
+Console.WriteLine("Commands: look, examine, move stone, take key, unlock gate, open gate, go north/south, inventory, quit.");
 ShowRoom();
 
 while (true)
 {
     Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input))
-        continue;
-
-    if (input.Is("leave"))
-    {
-        Console.WriteLine("You leave the whispers for another day.");
-        break;
-    }
+    if (string.IsNullOrWhiteSpace(input)) continue;
 
     var command = parser.Parse(input);
-
-    if (command is TalkCommand talk && TryFindNpc(ExtractTalkTarget(talk.Target, input), out var npc))
-    {
-        RunDialog(npc);
-        continue;
-    }
-
     var result = state.Execute(command);
+    PrintResult(result);
 
-    switch (command)
+    var movedStone = command is MoveCommand { Target: var moveTarget } && moveTarget.Is("stone") && result.Success;
+    if (movedStone)
     {
-        case LookCommand:
-            ShowLookResult(result);
-            break;
-
-        default:
-            WriteResult(result);
-            break;
+        state.Events.Publish(new GameEvent(GameEventType.PickupItem, state, state.CurrentLocation, item: stone));
     }
 
     if (command is GoCommand && result.Success && !result.ShouldQuit)
@@ -89,13 +102,10 @@ while (true)
         ShowRoom();
     }
 
-    if (result.ShouldQuit)
-    {
-        break;
-    }
+    if (result.ShouldQuit) break;
 }
 
-void WriteResult(CommandResult result)
+void PrintResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
@@ -118,112 +128,11 @@ void ShowRoom()
     Console.WriteLine($"Room: {location.Id.ToProperCase()}");
     Console.WriteLine(location.GetDescription());
 
+    var items = location.Items.CommaJoinNames(properCase: true);
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
+
     var exits = location.Exits
         .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())
         .ToList();
-
-    Console.WriteLine(location.Npcs.Count > 0
-        ? $"People present: {location.Npcs.Count} ({location.Npcs.Select(npc => npc.Name).CommaJoin()})"
-        : "People present: None");
     Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
-}
-
-void ShowLookResult(CommandResult result)
-{
-    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
-    WriteResult(result);
-}
-
-bool TryFindNpc(string? target, out INpc npc)
-{
-    npc = default!;
-    if (string.IsNullOrWhiteSpace(target))
-    {
-        return false;
-    }
-
-    var trimmed = target.Trim();
-    var found = state.CurrentLocation.Npcs.FirstOrDefault(candidate =>
-        candidate.Name.TextCompare(trimmed) ||
-        candidate.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .Any(part => part.TextCompare(trimmed)));
-
-    if (found == null)
-    {
-        return false;
-    }
-
-    npc = found;
-    return true;
-}
-
-string? ExtractTalkTarget(string? target, string input)
-{
-    if (!string.IsNullOrWhiteSpace(target))
-    {
-        return target;
-    }
-
-    var tokens = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    if (tokens.Length <= 1)
-    {
-        return null;
-    }
-
-    return string.Join(' ', tokens.Skip(1));
-}
-
-void RunDialog(INpc npc)
-{
-    var node = npc.DialogRoot;
-    if (node == null)
-    {
-        Console.WriteLine("They have nothing to say.");
-        return;
-    }
-
-    while (true)
-    {
-        Console.WriteLine();
-        Console.WriteLine(node.Text);
-
-        if (node.Options.Count == 0)
-        {
-            Console.WriteLine("There is nothing more to ask.");
-            break;
-        }
-
-        for (var i = 0; i < node.Options.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}) {node.Options[i].Text}");
-        }
-
-        Console.WriteLine($"{node.Options.Count + 1}) OK thanks, bye.");
-        Console.Write("> ");
-        var choice = Console.ReadLine()?.Trim();
-        if (!int.TryParse(choice, out var selection))
-        {
-            Console.WriteLine("Pick one of the numbers.");
-            continue;
-        }
-
-        if (selection == node.Options.Count + 1)
-        {
-            Console.WriteLine("You step back and let the silence settle.");
-            break;
-        }
-
-        if (selection < 1 || selection > node.Options.Count)
-        {
-            Console.WriteLine("That is not a valid option.");
-            continue;
-        }
-
-        node = node.Options[selection - 1].Next;
-        if (node == null)
-        {
-            Console.WriteLine("They do not answer further.");
-            break;
-        }
-    }
 }

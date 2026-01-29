@@ -1,3 +1,4 @@
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -5,74 +6,43 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 8: The Forgotten Password
-// Tests: quest log, quest conditions, read command, chair reveal, auto-look after go.
+var state = BuildGameState();
+var parser = BuildParser();
 
-var world = BuildWorld();
-ConfigureQuests(world);
-ConfigureNoteReveal(world);
-
-Console.WriteLine("=== THE FORGOTTEN PASSWORD (Slice 8) ===");
-Console.WriteLine("Goal: reveal the note, learn the password, fetch the server key, and log in.");
-Console.WriteLine("Commands: look, examine, move chair, take/read note, unlock/open door, go north/east, quest, inventory, log in, quit.");
-ShowRoom(world.State);
+Console.WriteLine("=== THE WARM LIBRARY (Slice 10) ===");
+Console.WriteLine("Goal: unlock the library door, save your progress, quit, then load and continue.");
+Console.WriteLine("Type 'help' for the commands you can use.");
+ShowRoom();
 
 while (true)
 {
     Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
     if (string.IsNullOrWhiteSpace(input))
+    {
         continue;
+    }
 
     if (IsHelp(input))
     {
-        Console.WriteLine("Commands: look, examine, move chair, take/read note, unlock/open door, go <direction>, quest, inventory, log in, quit");
+        ShowHelp();
         continue;
     }
 
-    if (TryHandleSit(input, world))
+    var command = parser.Parse(input);
+    var result = state.Execute(command);
+
+    DisplayResult(result);
+
+    if (command is GoCommand and { } && result.Success && !result.ShouldQuit)
     {
-        continue;
+        ShowRoom();
     }
 
-    if (TryHandleLogin(input, world))
+    if (command is LoadCommand && result.Success && !result.ShouldQuit)
     {
-        UpdateQuestProgress(world);
-        if (world.State.WorldState.GetFlag("logged_in"))
-        {
-            Console.WriteLine("You are in. The terminal hums to life, grudgingly impressed.");
-        }
-
-        continue;
+        ShowRoom();
     }
-
-    var command = world.Parser.Parse(input);
-    var result = world.State.Execute(command);
-
-    switch (command)
-    {
-        case LookCommand { Target: not null }:
-            WriteResult(result);
-            break;
-        case LookCommand:
-            ShowLookResult(world.State, result);
-            break;
-        default:
-            WriteResult(result);
-            break;
-    }
-
-    if (command is GoCommand && result.Success && !result.ShouldQuit)
-    {
-        ShowRoom(world.State);
-    }
-
-    if (command is ReadCommand { Target: var target } && world.Note.Matches(target))
-    {
-        world.State.WorldState.SetFlag("knows_password", true);
-    }
-
-    UpdateQuestProgress(world);
 
     if (result.ShouldQuit)
     {
@@ -80,162 +50,72 @@ while (true)
     }
 }
 
-static DemoWorld BuildWorld()
+GameState BuildGameState()
 {
-    var office = new Location(
-        "office",
-        "A quiet office with a humming monitor and a desk chair of dubious sturdiness. A secure door to the east leads to the server room.");
+    var outside = new Location("outside", "Snow falls quietly outside a locked library.");
+    var library = new Location("library", "Warm light and quiet pages surround you.");
 
-    var breakRoom = new Location(
-        "break room",
-        "A cramped break room with a kettle that has long since surrendered its dignity.");
+    var key = new Key("library_key", "library key", "Cold metal in your hand.")
+        .AddAliases("key", "brass key")
+        .SetReaction(ItemAction.Take, "You pocket the key. It chills your palm and your resolve.");
 
-    var serverRoom = new Location(
-        "server room",
-        "A low, cool room of blinking lights. The terminal waits with theatrical patience for a password.");
+    var snow = new Item("snow", "snow", "Soft, patient snowflakes that refuse to melt for your convenience.")
+        .SetTakeable(false)
+        .AddAliases("snowfall", "flakes")
+        .SetReaction(ItemAction.Move, "You brush the snow aside. It drifts back with quiet dignity.")
+        .SetReaction(ItemAction.TakeFailed, "You attempt to gather the snow. It slips away, disinterested.");
 
-    var chair = new Item("chair", "desk chair", "A wheeled chair with a slightly loose castor, loyal in sentiment if not in stability.");
-    chair.AddAliases("chair");
-    chair.SetTakeable(false);
-    chair.SetReaction(ItemAction.Move, "The chair rolls back with a dignified squeak, as if it has always intended to help.");
-    chair.SetReaction(ItemAction.Use, "You sit. The chair creaks in a manner best described as concerned. You get up again.");
-    chair.SetReaction(ItemAction.TakeFailed, "You attempt to hoist it. The chair refuses to dignify the effort.");
+    var book = new Item("book", "old book", "An old book, warm from long companionship.")
+        .AddAliases("book", "volume")
+        .SetReaction(ItemAction.Use, "You open it at random and immediately feel better about the world.");
 
-    var monitor = new Item("monitor", "monitor", "A perfectly ordinary monitor, humming faintly as though it has opinions.");
-    monitor.AddAliases("screen", "display");
-    monitor.SetTakeable(false);
-    monitor.SetReaction(ItemAction.TakeFailed, "You make a show of lifting it. The desk makes a show of keeping it.");
-    monitor.SetReaction(ItemAction.MoveFailed, "You nudge the monitor. It does not budge, as if bolted by principle.");
-    monitor.SetReaction(ItemAction.Use, "You tap the screen. It remains politely noncommittal.");
+    outside.AddItem(key);
+    outside.AddItem(snow);
+    library.AddItem(book);
 
-    var note = new Item("note", "post-it note", "A yellow note with a hurried scrawl, doing its best to look inconspicuous.");
-    note.AddAliases("note", "post-it", "sticky note", "post it");
-    note.SetWeight(0.01f);
-    note.SetReadText("PASSWORD: HAWTHORN");
-    note.RequireTakeToRead();
-    note.SetReaction(ItemAction.Take, "You take the note; it offers no resistance whatsoever.");
-    note.SetReaction(ItemAction.Read, "You commit the password to memory, like a dutiful clerk.");
-    note.SetReaction(ItemAction.Move, "You nudge the note and it flutters back into place, pretending it was never moved.");
-    note.SetReaction(ItemAction.Use, "You consider employing the note in some grand scheme, then think better of it.");
+    var door = new Door("library_door", "library door", "A heavy wooden door with iron fittings.")
+        .AddAliases("door", "library")
+        .RequiresKey(key)
+        .SetReaction(DoorAction.Unlock, "The library door unlocks with a polite click.")
+        .SetReaction(DoorAction.Open, "The door swings inward, warm air rolling out to greet you.")
+        .SetReaction(DoorAction.UnlockFailed, "The lock refuses to concede.");
 
-    var serverKey = new Key("server_key", "server key", "A small brass key tagged 'Server Room'.");
-    serverKey.AddAliases("key", "brass key");
-    serverKey.SetWeight(0.02f);
-    serverKey.SetReaction(ItemAction.Take, "You pocket the key. It feels oddly heavier than its size should allow.");
-    serverKey.SetReaction(ItemAction.Move, "The key skitters across the counter, gleaming with misplaced importance.");
-    serverKey.SetReaction(ItemAction.Use, "You roll the key between your fingers. It remains a key.");
-    serverKey.SetReaction(ItemAction.Drop, "The key lands with a prim little clink.");
+    outside.AddExit(Direction.In, library, door);
+    library.AddExit(Direction.Out, outside, door);
 
-    var terminal = new Item("terminal", "terminal", "A squat terminal with a blinking cursor that feels faintly judgemental.");
-    terminal.AddAliases("computer", "console", "screen");
-    terminal.SetTakeable(false);
-    terminal.SetReaction(ItemAction.TakeFailed, "It is bolted to the desk and refuses to budge.");
-    terminal.SetReaction(ItemAction.MoveFailed, "You push the terminal. It does not move. It judges you for trying.");
-
-    var kettle = new Item("kettle", "kettle", "A kettle of noble lineage, now retired and faintly insulted.");
-    kettle.AddAliases("tea kettle", "old kettle");
-    kettle.SetTakeable(false);
-    kettle.SetReaction(ItemAction.MoveFailed, "You nudge the kettle. It rattles with theatrical displeasure.");
-    kettle.SetReaction(ItemAction.Use, "You flick the switch. The kettle answers with a weary sigh and no heat.");
-    kettle.SetReaction(ItemAction.TakeFailed, "You lift it. It is far too attached to the counter to comply.");
-
-    var serverDoor = new Door("server_door", "server door", "A slim security door with a key reader.", DoorState.Locked)
-        .AddAliases("door", "server", "security door")
-        .SetReaction(DoorAction.Unlock, "The reader blinks green.")
-        .SetReaction(DoorAction.Open, "The door slides open with a soft hiss.")
-        .SetReaction(DoorAction.OpenFailed, "The door gives a very polite refusal.")
-        .SetReaction(DoorAction.UnlockFailed, "The reader remains unimpressed.")
-        .RequiresKey(serverKey);
-
-    office.AddItem(chair);
-    office.AddItem(monitor);
-
-    breakRoom.AddItem(serverKey);
-    breakRoom.AddItem(kettle);
-
-    serverRoom.AddItem(terminal);
-
-    office.AddExit(Direction.North, breakRoom);
-    breakRoom.AddExit(Direction.South, office);
-
-    office.AddExit(Direction.East, serverRoom, serverDoor);
-    serverRoom.AddExit(Direction.West, office, serverDoor);
-
-    var state = new GameState(office, worldLocations: [office, breakRoom, serverRoom])
+    var state = new GameState(outside, worldLocations: [outside, library])
     {
         EnableFuzzyMatching = true,
-        FuzzyMaxDistance = 1,
-        ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith = true,
-        ShowDirectionsWhenThereAreDirectionsVisibleOnly = true
+        FuzzyMaxDistance = 1
     };
 
-    var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
-        .WithLook("look", "l", "ls")
-        .WithExamine("examine", "exam", "x")
-        .WithMove("move", "push", "shift", "slide")
+    return state;
+}
+
+KeywordParser BuildParser()
+{
+    var config = KeywordParserConfigBuilder.BritishDefaults()
+        .WithLook("look", "l")
+        .WithExamine("examine", "exam", "x", "inspect", "check")
         .WithInventory("inventory", "inv", "i")
         .WithTake("take", "get")
         .WithDrop("drop")
         .WithUse("use")
-        .WithRead("read")
-        .WithQuest("quest", "quests", "journal")
-        .WithUnlock("unlock")
+        .WithMove("move", "push", "shift", "slide")
+        .WithGo("go")
         .WithOpen("open")
-        .WithGo("go", "move")
-        .WithFuzzyMatching(true, 1)
+        .WithUnlock("unlock")
+        .WithSave("save")
+        .WithLoad("load")
+        .WithQuit("quit", "exit")
         .WithIgnoreItemTokens("on", "off", "at", "the", "a")
-        .Build());
+        .WithFuzzyMatching(true, 1)
+        .Build();
 
-    return new DemoWorld(
-        office,
-        breakRoom,
-        serverRoom,
-        chair,
-        note,
-        serverKey,
-        terminal,
-        serverDoor,
-        state,
-        parser);
+    return new KeywordParser(config);
 }
 
-static void ConfigureQuests(DemoWorld world)
-{
-    var questFindNote = new Quest("find_note", "Find the note", "Locate the password hint.")
-        .AddCondition(new HasItemCondition("note"))
-        .Start();
-
-    var questLogIn = new Quest("log_in", "Log in to the terminal", "Enter the password and access the system.")
-        .AddCondition(new AllOfCondition(
-        [
-            new WorldFlagCondition("knows_password"),
-            new WorldFlagCondition("logged_in")
-        ]))
-        .Start();
-
-    world.State.Quests.AddRange([questFindNote, questLogIn]);
-
-    world.QuestStates = world.State.Quests.Quests
-        .ToDictionary(quest => quest.Id, quest => quest.State, StringComparer.OrdinalIgnoreCase);
-}
-
-static void ConfigureNoteReveal(DemoWorld world)
-{
-    world.Chair.OnMove += _ =>
-    {
-        if (world.NoteRevealed)
-        {
-            _ = world.Chair.SetReaction(ItemAction.Move, "The chair is already out of the way.");
-            return;
-        }
-
-        world.NoteRevealed = true;
-        world.Office.AddItem(world.Note);
-        Console.WriteLine("> You spot a post-it note tucked beneath the desk, as if embarrassed to be noticed.");
-    };
-}
-
-static void WriteResult(CommandResult result)
+void DisplayResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
@@ -251,7 +131,7 @@ static void WriteResult(CommandResult result)
     }
 }
 
-static void ShowRoom(GameState state)
+void ShowRoom()
 {
     var location = state.CurrentLocation;
     Console.WriteLine();
@@ -259,141 +139,22 @@ static void ShowRoom(GameState state)
     Console.WriteLine(location.GetDescription());
 
     var items = location.Items.CommaJoinNames(properCase: true);
-    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items: None" : $"Items: {items}");
 
-    var exits = location.Exits
-        .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())
+    var exits = location.Exits.Keys
+        .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase())
         .ToList();
     Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 
-static void ShowLookResult(GameState state, CommandResult result)
+void ShowHelp()
 {
-    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
-    WriteResult(result);
+    Console.WriteLine("Commands: look, examine/check <item>, take <item>, use <item>, move <item>, unlock/open door, go <direction>, inventory, quit");
+    Console.WriteLine("Save/Load: save [file], load [file] (defaults to savegame.json)");
 }
 
-static void UpdateQuestProgress(DemoWorld world)
-{
-    var updated = world.State.Quests.CheckAll(world.State);
-    if (!updated)
-    {
-        return;
-    }
-
-    foreach (var quest in world.State.Quests.Quests)
-    {
-        if (!world.QuestStates.TryGetValue(quest.Id, out var previous) || previous != quest.State)
-        {
-            world.QuestStates[quest.Id] = quest.State;
-            if (quest.State == QuestState.Completed)
-            {
-                Console.WriteLine($"Quest complete: {quest.Title}");
-                if (quest.Id.Is("log_in"))
-                {
-                    Console.WriteLine("You have done it. The terminal yields, and the system is—if not yours—at least temporarily compliant.");
-                    Environment.Exit(0);
-                }
-            }
-        }
-    }
-}
-
-static bool IsHelp(string input)
+bool IsHelp(string input)
 {
     var normalized = input.Lower();
     return normalized is "help" or "halp" or "?";
-}
-
-static bool TryHandleLogin(string input, DemoWorld world)
-{
-    if (!IsLoginInput(input))
-    {
-        return false;
-    }
-
-    if (!world.State.IsCurrentRoomId(world.ServerRoom.Id))
-    {
-        Console.WriteLine("The terminal is not within reach from here, no matter how you squint.");
-        return true;
-    }
-
-    if (world.State.WorldState.GetFlag("logged_in"))
-    {
-        Console.WriteLine("You are already logged in, and the terminal remembers it.");
-        return true;
-    }
-
-    if (!world.State.WorldState.GetFlag("knows_password"))
-    {
-        Console.WriteLine("The terminal prompts for a password you do not yet remember.");
-        return true;
-    }
-
-    world.State.WorldState.SetFlag("logged_in", true);
-    return true;
-}
-
-static bool IsLoginInput(string input)
-{
-    var normalized = input.Lower();
-    return normalized is "login" or "log in" or "log-in" or "use terminal" or "use computer" or "enter password" or "type password";
-}
-
-static bool TryHandleSit(string input, DemoWorld world)
-{
-    var normalized = input.Lower();
-    var wantsSit = normalized is "sit" or "sit down" or "sit on chair" or "sit on the chair" or "sit in chair" or "sit in the chair";
-    if (!wantsSit)
-        return false;
-
-    if (!world.State.IsCurrentRoomId(world.Office.Id))
-    {
-        Console.WriteLine("There is nowhere suitable to sit here.");
-        return true;
-    }
-
-    Console.WriteLine("You sit. The chair creaks in a manner best described as concerned. You get up again.");
-    return true;
-}
-
-sealed class DemoWorld
-{
-    public DemoWorld(
-        Location office,
-        Location breakRoom,
-        Location serverRoom,
-        Item chair,
-        Item note,
-        Key serverKey,
-        Item terminal,
-        Door serverDoor,
-        GameState state,
-        KeywordParser parser)
-    {
-        Office = office;
-        BreakRoom = breakRoom;
-        ServerRoom = serverRoom;
-        Chair = chair;
-        Note = note;
-        ServerKey = serverKey;
-        Terminal = terminal;
-        ServerDoor = serverDoor;
-        State = state;
-        Parser = parser;
-    }
-
-    public Location Office { get; }
-    public Location BreakRoom { get; }
-    public Location ServerRoom { get; }
-    public Item Chair { get; }
-    public Item Note { get; }
-    public Key ServerKey { get; }
-    public Item Terminal { get; }
-    public Door ServerDoor { get; }
-    public GameState State { get; }
-    public KeywordParser Parser { get; }
-
-    public bool NoteRevealed { get; set; }
-    public Dictionary<string, QuestState> QuestStates { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }

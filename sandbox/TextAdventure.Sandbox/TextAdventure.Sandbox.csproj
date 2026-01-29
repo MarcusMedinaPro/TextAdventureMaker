@@ -5,7 +5,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="lang\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="lang\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="lang\*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="forest.adventure" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

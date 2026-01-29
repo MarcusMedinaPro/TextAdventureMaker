@@ -4,13 +4,37 @@
 // </copyright>
 namespace MarcusMedina.TextAdventure.Localization;
 
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 
 public static class Language
 {
     public static ILanguageProvider Provider { get; private set; } = new DefaultLanguageProvider();
 
     public static void SetProvider(ILanguageProvider provider) => Provider = provider ?? throw new ArgumentNullException(nameof(provider));
+
+    public const string DefaultLanguageCode = "en";
+    private static readonly IReadOnlyDictionary<string, (string File, string DisplayName)> _supportedLanguages =
+        new Dictionary<string, (string File, string DisplayName)>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en"] = ("gamelang.en.txt", "English"),
+            ["sv"] = ("gamelang.sv.txt", "Swedish")
+        };
+
+    public static IReadOnlyDictionary<string, (string File, string DisplayName)> SupportedLanguages => _supportedLanguages;
+
+    public static string GetLanguageFilePath(string code)
+    {
+        var file = _supportedLanguages.TryGetValue(code, out var info)
+            ? info.File
+            : _supportedLanguages[DefaultLanguageCode].File;
+
+        return Path.Combine(AppContext.BaseDirectory, "lang", file);
+    }
+
+    public static bool TryGetLanguageInfo(string code, out (string File, string DisplayName) info) => _supportedLanguages.TryGetValue(code, out info);
 
     public static string CantGoThatWay => Provider.Get("CantGoThatWay");
     public static string UnknownCommand => Provider.Get("UnknownCommand");

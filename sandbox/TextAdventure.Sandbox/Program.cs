@@ -14,7 +14,7 @@ using MarcusMedina.TextAdventure.Parsing;
 var localizedDescriptions = new List<(Action<string> Apply, string Key)>();
 var state = BuildGameState(localizedDescriptions);
 
-var languagePath = GetLanguagePath(LanguageSupport.DefaultLanguageCode);
+var languagePath = Language.GetLanguageFilePath(Language.DefaultLanguageCode);
 Language.SetProvider(new FileLanguageProvider(languagePath));
 RefreshLocalization(localizedDescriptions);
 var parser = new KeywordParser(KeywordParserConfig.Default);
@@ -138,7 +138,7 @@ bool TryHandleLanguageSwitch(string input, List<(Action<string> Apply, string Ke
         return false;
     }
 
-    var supportedCodes = string.Join(", ", LanguageSupport.SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
+    var supportedCodes = string.Join(", ", Language.SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
     if (tokens.Length == 1)
     {
         Console.WriteLine($"Usage: language <code> (supported: {supportedCodes}).");
@@ -146,13 +146,13 @@ bool TryHandleLanguageSwitch(string input, List<(Action<string> Apply, string Ke
     }
 
     var chosen = tokens[1].ToLowerInvariant();
-    if (!LanguageSupport.SupportedLanguages.TryGetValue(chosen, out var info))
+    if (!Language.SupportedLanguages.TryGetValue(chosen, out var info))
     {
         Console.WriteLine($"Unsupported language code '{chosen}'. Supported: {supportedCodes}.");
         return true;
     }
 
-    var path = GetLanguagePath(chosen);
+    var path = Language.GetLanguageFilePath(chosen);
     if (!File.Exists(path))
     {
         Console.WriteLine($"Language file '{info.File}' is missing.");
@@ -166,19 +166,5 @@ bool TryHandleLanguageSwitch(string input, List<(Action<string> Apply, string Ke
     return true;
 }
 
-static string GetLanguagePath(string code) =>
-    Path.Combine(AppContext.BaseDirectory, "lang", LanguageSupport.SupportedLanguages.TryGetValue(code, out var info) ? info.File : LanguageSupport.SupportedLanguages[LanguageSupport.DefaultLanguageCode].File);
-
 static bool ShouldShowRoom(ICommand command, CommandResult result) =>
     result.Success && !result.ShouldQuit && (command is GoCommand or MoveCommand or LoadCommand);
-
-static class LanguageSupport
-{
-    public const string DefaultLanguageCode = "en";
-    public static readonly IReadOnlyDictionary<string, (string File, string DisplayName)> SupportedLanguages =
-        new Dictionary<string, (string File, string DisplayName)>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en"] = ("gamelang.en.txt", "English"),
-            ["sv"] = ("gamelang.sv.txt", "Swedish")
-        };
-}

@@ -21,14 +21,14 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-var languagePath = Path.Combine(AppContext.BaseDirectory, "lang", "gamelang.sv.txt");
+var languagePath = Path.Combine(AppContext.BaseDirectory, "lang", "gamelang.en.txt");
 Language.SetProvider(new FileLanguageProvider(languagePath));
 
 var state = BuildGameState();
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
 Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
-Console.WriteLine("Goal: load the Swedish language provider before heading to the meeting.");
+Console.WriteLine("Goal: load the English language provider before heading to the meeting.");
 Console.WriteLine($"Language file: {Path.GetFileName(languagePath)}");
 ShowRoom();
 

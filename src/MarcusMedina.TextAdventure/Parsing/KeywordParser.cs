@@ -11,14 +11,9 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Parsing;
 
-public class KeywordParser : ICommandParser
+public class KeywordParser(KeywordParserConfig config) : ICommandParser
 {
-    private readonly KeywordParserConfig _config;
-
-    public KeywordParser(KeywordParserConfig config)
-    {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
-    }
+    private readonly KeywordParserConfig _config = config ?? throw new ArgumentNullException(nameof(config));
 
     public ICommand Parse(string input)
     {
@@ -210,7 +205,7 @@ public class KeywordParser : ICommandParser
 
     private ICommand? TryParseFuzzyKeyword(string keyword, string[] tokens)
     {
-        IEnumerable<string> candidates = GetAllCommandKeywords();
+        var candidates = GetAllCommandKeywords();
         string? best = FuzzyMatcher.FindBestToken(keyword, candidates, _config.FuzzyMaxDistance);
         if (string.IsNullOrWhiteSpace(best))
         {
@@ -301,7 +296,8 @@ public class KeywordParser : ICommandParser
 
         if (_config.Read.Contains(keyword))
         {
-            return new ReadCommand(ParseItemName(tokens, 1));
+            var target = ParseItemName(tokens, 1);
+            return target != null ? new ReadCommand(target) : new UnknownCommand();
         }
 
         if (_config.Move.Contains(keyword))
@@ -378,11 +374,11 @@ public class KeywordParser : ICommandParser
             return null;
         }
 
-        string[] parts = tokens.Skip(startIndex)
+        var parts = tokens.Skip(startIndex)
             .Where(t => !_config.IgnoreItemTokens.Contains(t))
-            .ToArray();
+            .ToList();
 
-        return parts.Length == 0 ? null : parts.SpaceJoin();
+        return parts.Count == 0 ? null : parts.SpaceJoin();
     }
 
     private ICommand ParseGoTarget(string[] tokens)
@@ -398,17 +394,15 @@ public class KeywordParser : ICommandParser
             return new UnknownCommand();
         }
 
-        string[] parts = tokens.Skip(1)
+        var parts = tokens.Skip(1)
             .Where(t => !_config.CombineSeparators.Contains(t))
-            .ToArray();
+            .ToList();
 
-        if (parts.Length < 2)
-        {
+        if (parts.Count < 2)
             return new UnknownCommand();
-        }
 
         string right = parts[^1];
-        string left = parts.Take(parts.Length - 1).SpaceJoin();
+        string left = parts.Take(parts.Count - 1).SpaceJoin();
         return new CombineCommand(left, right);
     }
 

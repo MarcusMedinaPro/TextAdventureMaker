@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -16,7 +12,8 @@ var garden = new Location("garden", "A quiet garden with a weathered gate and pa
 var courtyard = new Location("courtyard", "A sheltered courtyard beyond the gate, lit by moonlight.");
 
 var stone = new Item("stone", "stone", "A heavy flat stone with moss on one edge.")
-    .AddAliases("slab")
+    .AddAliases("slab", "stoned")
+    .SetReaction(ItemAction.Take, "Duuuuude! That is so groovy.")
     .SetReaction(ItemAction.Move, "The stone scrapes across the soil and tilts.");
 var key = new Key("garden_key", "iron key", "A cold iron key hidden beneath the stone.")
     .AddAliases("key", "iron")
@@ -32,7 +29,7 @@ garden.AddItem(stone);
 garden.AddExit(Direction.North, courtyard, gate);
 courtyard.AddExit(Direction.South, garden, gate);
 
-var state = new GameState(garden, worldLocations: new[] { garden, courtyard })
+var state = new GameState(garden, worldLocations: [garden, courtyard])
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
@@ -41,8 +38,10 @@ var state = new GameState(garden, worldLocations: new[] { garden, courtyard })
 var keyRevealed = false;
 state.Events.Subscribe(GameEventType.PickupItem, e =>
 {
-    if (keyRevealed) return;
-    if (e.Item?.Id.Is("stone") != true) return;
+    if (keyRevealed)
+        return;
+    if (e.Item?.Id.Is("stone") != true)
+        return;
 
     keyRevealed = true;
     garden.AddItem(key);
@@ -60,7 +59,7 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "x")
     .WithMove("move", "push", "shift", "slide")
-    .WithTake("take", "grab")
+    .WithTake("take", "grab", "get")
     .WithOpen("open", "pull")
     .WithUnlock("unlock", "unseal")
     .WithGo("go", "travel")
@@ -85,7 +84,8 @@ while (true)
 {
     Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input)) continue;
+    if (string.IsNullOrWhiteSpace(input))
+        continue;
 
     var command = parser.Parse(input);
     var result = state.Execute(command);
@@ -102,7 +102,8 @@ while (true)
         ShowRoom();
     }
 
-    if (result.ShouldQuit) break;
+    if (result.ShouldQuit)
+        break;
 }
 
 void PrintResult(CommandResult result)

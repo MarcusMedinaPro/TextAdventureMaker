@@ -88,7 +88,8 @@ var garden = new Location("garden", "A quiet garden with a weathered gate and pa
 var courtyard = new Location("courtyard", "A sheltered courtyard beyond the gate, lit by moonlight.");
 
 var stone = new Item("stone", "stone", "A heavy flat stone with moss on one edge.")
-    .AddAliases("slab")
+    .AddAliases("slab", "stoned")
+    .SetReaction(ItemAction.Take, "Duuuuude! That is so groovy.")
     .SetReaction(ItemAction.Move, "The stone scrapes across the soil and lifts tipsily.");
 var key = new Key("garden_key", "iron key", "A cold iron key hidden beneath the stone.")
     .AddAliases("key", "iron")
@@ -132,7 +133,7 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "x")
     .WithMove("move", "push", "shift", "slide")
-    .WithTake("take", "grab")
+    .WithTake("take", "grab", "get")
     .WithOpen("open", "pull")
     .WithUnlock("unlock", "unseal")
     .WithGo("go", "travel")

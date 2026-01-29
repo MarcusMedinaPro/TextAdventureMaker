@@ -22,23 +22,16 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-static readonly IReadOnlyDictionary<string, (string File, string DisplayName)> SupportedLanguages =
-    new Dictionary<string, (string File, string DisplayName)>(StringComparer.OrdinalIgnoreCase)
-    {
-        ["en"] = ("gamelang.en.txt", "English"),
-        ["sv"] = ("gamelang.sv.txt", "Swedish")
-    };
-
-const string DefaultLanguageCode = "en";
-var languagePath = GetLanguagePath(DefaultLanguageCode);
+var languagePath = GetLanguagePath(LanguageSupport.DefaultLanguageCode);
 Language.SetProvider(new FileLanguageProvider(languagePath));
 
 var state = BuildGameState();
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
 Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
-Console.WriteLine("Goal: load the English language provider before heading to the meeting.");
+Console.WriteLine($"{Language.GoalLabel} {Language.GoalIntro}");
 Console.WriteLine($"Language file: {Path.GetFileName(languagePath)}");
+Console.WriteLine(Language.LanguageHint);
 ShowRoom();
 
 while (true)
@@ -111,8 +104,8 @@ void ShowRoom()
 {
     var location = state.CurrentLocation;
     Console.WriteLine();
-    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
-    Console.WriteLine(location.GetDescription());
+    Console.WriteLine($"{Language.RoomLabel} {location.Id.ToProperCase()}");
+    Console.WriteLine($"{Language.RoomDescriptionLabel} {location.GetDescription()}");
 
     var items = location.Items.CommaJoinNames(properCase: true);
     Console.WriteLine(string.IsNullOrWhiteSpace(items)
@@ -141,7 +134,7 @@ bool TryHandleLanguageSwitch(string input)
         return false;
     }
 
-    var supportedCodes = string.Join(", ", SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
+    var supportedCodes = string.Join(", ", LanguageSupport.SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
     if (tokens.Length == 1)
     {
         Console.WriteLine($"Usage: language <code> (supported: {supportedCodes}).");
@@ -149,7 +142,7 @@ bool TryHandleLanguageSwitch(string input)
     }
 
     var chosen = tokens[1].ToLowerInvariant();
-    if (!SupportedLanguages.TryGetValue(chosen, out var info))
+    if (!LanguageSupport.SupportedLanguages.TryGetValue(chosen, out var info))
     {
         Console.WriteLine($"Unsupported language code '{chosen}'. Supported: {supportedCodes}.");
         return true;
@@ -163,16 +156,27 @@ bool TryHandleLanguageSwitch(string input)
     }
 
     Language.SetProvider(new FileLanguageProvider(path));
-    Console.WriteLine($"Loaded {info.DisplayName} ({chosen.ToUpperInvariant()}) language file.");
+    Console.WriteLine(Language.LanguageLoaded(info.DisplayName, chosen.ToUpperInvariant()));
     ShowRoom();
     return true;
 }
 
 static string GetLanguagePath(string code) =>
-    Path.Combine(AppContext.BaseDirectory, "lang", SupportedLanguages.TryGetValue(code, out var info) ? info.File : SupportedLanguages[DefaultLanguageCode].File);
+    Path.Combine(AppContext.BaseDirectory, "lang", LanguageSupport.SupportedLanguages.TryGetValue(code, out var info) ? info.File : LanguageSupport.SupportedLanguages[LanguageSupport.DefaultLanguageCode].File);
 
 static bool ShouldShowRoom(ICommand command, CommandResult result) =>
     result.Success && !result.ShouldQuit && (command is GoCommand or MoveCommand or LoadCommand);
+
+static class LanguageSupport
+{
+    public const string DefaultLanguageCode = "en";
+    public static readonly IReadOnlyDictionary<string, (string File, string DisplayName)> SupportedLanguages =
+        new Dictionary<string, (string File, string DisplayName)>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en"] = ("gamelang.en.txt", "English"),
+            ["sv"] = ("gamelang.sv.txt", "Swedish")
+        };
+}
 ```
 
 ## Language file format (key=value)

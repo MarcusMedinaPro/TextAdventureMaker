@@ -156,6 +156,14 @@ public static class Language
     public static string LoadFailed(string path) =>
         Provider.Format("LoadFailedTemplate", path);
 
+    public static string GoalLabel => Provider.Get("GoalLabel");
+    public static string GoalIntro => Provider.Get("GoalIntro");
+    public static string LanguageHint => Provider.Get("LanguageHint");
+    public static string LanguageLoaded(string displayName, string code) =>
+        Provider.Format("LanguageLoadedTemplate", displayName, code);
+    public static string RoomLabel => Provider.Get("RoomLabel");
+    public static string RoomDescriptionLabel => Provider.Get("RoomDescriptionLabel");
+
     private sealed class DefaultLanguageProvider : ILanguageProvider
     {
         private readonly Dictionary<string, string> _entries = new(StringComparer.OrdinalIgnoreCase)
@@ -236,7 +244,13 @@ public static class Language
             ["AttackTargetTemplate"] = "You attack the {0}.",
             ["AttackDamageTemplate"] = "You hit for {0} damage.",
             ["EnemyAttackTemplate"] = "The {0} hits you for {1} damage.",
-            ["TargetDefeatedTemplate"] = "The {0} is defeated."
+            ["TargetDefeatedTemplate"] = "The {0} is defeated.",
+            ["GoalLabel"] = "Goal:",
+            ["GoalIntro"] = "Load whichever language provider you prefer before heading to the meeting.",
+            ["LanguageHint"] = "Type 'language <code>' to switch languages.",
+            ["LanguageLoadedTemplate"] = "Loaded {0} ({1}) language file.",
+            ["RoomLabel"] = "Room:",
+            ["RoomDescriptionLabel"] = "Description:"
         };
 
         public string Get(string key) => string.IsNullOrWhiteSpace(key) ? "" : _entries.TryGetValue(key, out var value) ? value : $"[[{key}]]";

@@ -1,6 +1,6 @@
 # Before the Meeting
 
-_Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swapping UI text without changing game logic._
+_Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swapping UI text and narration without changing game logic._
 
 ## Story beats (max ~10 steps)
 1) You wake up late.
@@ -10,6 +10,7 @@ _Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swappin
 
 ## Example (swap language at runtime)
 ```csharp
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,10 +23,14 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
+var localizedDescriptions = new List<(Action<string> Apply, string Key)>();
+
+var state = BuildGameState(localizedDescriptions);
+
 var languagePath = GetLanguagePath(LanguageSupport.DefaultLanguageCode);
 Language.SetProvider(new FileLanguageProvider(languagePath));
+RefreshLocalization(localizedDescriptions);
 
-var state = BuildGameState();
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
 Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
@@ -49,7 +54,7 @@ while (true)
         continue;
     }
 
-    if (TryHandleLanguageSwitch(input))
+    if (TryHandleLanguageSwitch(input, localizedDescriptions))
     {
         continue;
     }
@@ -70,12 +75,17 @@ while (true)
     }
 }
 
-static GameState BuildGameState()
+static GameState BuildGameState(List<(Action<string> Apply, string Key)> localizedDescriptions)
 {
-    var bedroom = new Location("bedroom", "Your alarm blinks 08:57. A coat hangs by the door.");
-    var hallway = new Location("hallway", "A quiet hallway with a mirror.");
+    var bedroom = new Location("bedroom");
+    var hallway = new Location("hallway");
 
-    var coffee = new Item("coffee", "coffee", "A hot cup of coffee.");
+    localizedDescriptions.Add((text => bedroom.Description(text), "BedroomDescription"));
+    localizedDescriptions.Add((text => hallway.Description(text), "HallwayDescription"));
+
+    var coffee = new Item("coffee", "coffee");
+    localizedDescriptions.Add((text => coffee.Description(text), "CoffeeDescription"));
+
     bedroom.AddItem(coffee);
 
     bedroom.AddExit(Direction.East, hallway);
@@ -126,7 +136,7 @@ static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction
 
 static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?";
 
-bool TryHandleLanguageSwitch(string input)
+bool TryHandleLanguageSwitch(string input, List<(Action<string> Apply, string Key)> localizedDescriptions)
 {
     var tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
     if (tokens.Length == 0 || !tokens[0].TextCompare("language"))
@@ -156,6 +166,7 @@ bool TryHandleLanguageSwitch(string input)
     }
 
     Language.SetProvider(new FileLanguageProvider(path));
+    RefreshLocalization(localizedDescriptions);
     Console.WriteLine(Language.LanguageLoaded(info.DisplayName, chosen.ToUpperInvariant()));
     ShowRoom();
     return true;
@@ -166,6 +177,14 @@ static string GetLanguagePath(string code) =>
 
 static bool ShouldShowRoom(ICommand command, CommandResult result) =>
     result.Success && !result.ShouldQuit && (command is GoCommand or MoveCommand or LoadCommand);
+
+static void RefreshLocalization(List<(Action<string> Apply, string Key)> localizedDescriptions)
+{
+    foreach (var (apply, key) in localizedDescriptions)
+    {
+        apply(Language.Provider.Get(key));
+    }
+}
 
 static class LanguageSupport
 {
@@ -181,7 +200,23 @@ static class LanguageSupport
 
 ## Language file format (key=value)
 ```text
-UnknownCommand=Okänt kommando.
-ThanksForPlaying=Tack för att du spelade!
-DoorLockedTemplate={0} är låst.
+# English file highlights (same keys exist for Swedish)
+BedroomDescription=Your alarm blinks 08:57. A coat hangs by the door.
+HallwayDescription=A quiet hallway with a mirror.
+CoffeeDescription=A hot cup of coffee.
+GoalLabel=Goal:
+GoalIntro=Load whichever language provider you prefer before heading to the meeting.
+LanguageHint=Type "language <code>" to switch languages.
+RoomLabel=Room:
+RoomDescriptionLabel=Description:
+
+# Swedish file equivalents
+BedroomDescription=Sovrummet doftar av kall luft och möblerad disciplin.
+HallwayDescription=En stilla hall med ett spegelliknande tyst sinne.
+CoffeeDescription=En rykande kopp kaffe som väntar på din uppmärksamhet.
+GoalLabel=Mål:
+GoalIntro=Ladda det språk du föredrar innan du går till mötet.
+LanguageHint=Skriv "language <kod>" för att byta språk.
+RoomLabel=Rum:
+RoomDescriptionLabel=Beskrivning:
 ```

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,10 +11,12 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
+var localizedDescriptions = new List<(Action<string> Apply, string Key)>();
+var state = BuildGameState(localizedDescriptions);
+
 var languagePath = GetLanguagePath(LanguageSupport.DefaultLanguageCode);
 Language.SetProvider(new FileLanguageProvider(languagePath));
-
-var state = BuildGameState();
+RefreshLocalization(localizedDescriptions);
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
 Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
@@ -37,7 +40,7 @@ while (true)
         continue;
     }
 
-    if (TryHandleLanguageSwitch(input))
+    if (TryHandleLanguageSwitch(input, localizedDescriptions))
     {
         continue;
     }
@@ -58,12 +61,17 @@ while (true)
     }
 }
 
-static GameState BuildGameState()
+static GameState BuildGameState(List<(Action<string> Apply, string Key)> localizedDescriptions)
 {
-    var bedroom = new Location("bedroom", "Your alarm blinks 08:57. A coat hangs by the door.");
-    var hallway = new Location("hallway", "A quiet hallway with a mirror.");
+    var bedroom = new Location("bedroom");
+    var hallway = new Location("hallway");
 
-    var coffee = new Item("coffee", "coffee", "A hot cup of coffee.");
+    localizedDescriptions.Add((text => bedroom.Description(text), "BedroomDescription"));
+    localizedDescriptions.Add((text => hallway.Description(text), "HallwayDescription"));
+
+    var coffee = new Item("coffee", "coffee");
+    localizedDescriptions.Add((text => coffee.Description(text), "CoffeeDescription"));
+
     bedroom.AddItem(coffee);
 
     bedroom.AddExit(Direction.East, hallway);
@@ -110,11 +118,19 @@ void ShowRoom()
 
 static string FormatLabel(string label, string value) => $"{label.TrimEnd()} {value}";
 
+static void RefreshLocalization(List<(Action<string> Apply, string Key)> localizedDescriptions)
+{
+    foreach (var (apply, key) in localizedDescriptions)
+    {
+        apply(Language.Provider.Get(key));
+    }
+}
+
 static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, language <code>, quit");
 
 static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?";
 
-bool TryHandleLanguageSwitch(string input)
+bool TryHandleLanguageSwitch(string input, List<(Action<string> Apply, string Key)> localizedDescriptions)
 {
     var tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
     if (tokens.Length == 0 || !tokens[0].TextCompare("language"))
@@ -144,6 +160,7 @@ bool TryHandleLanguageSwitch(string input)
     }
 
     Language.SetProvider(new FileLanguageProvider(path));
+    RefreshLocalization(localizedDescriptions);
     Console.WriteLine(Language.LanguageLoaded(info.DisplayName, chosen.ToUpperInvariant()));
     ShowRoom();
     return true;

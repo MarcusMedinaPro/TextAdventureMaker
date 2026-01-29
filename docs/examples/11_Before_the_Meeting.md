@@ -10,6 +10,7 @@ _Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swappin
 
 ## Example (swap language at runtime)
 ```csharp
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
@@ -21,7 +22,15 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-var languagePath = Path.Combine(AppContext.BaseDirectory, "lang", "gamelang.en.txt");
+static readonly IReadOnlyDictionary<string, (string File, string DisplayName)> SupportedLanguages =
+    new Dictionary<string, (string File, string DisplayName)>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["en"] = ("gamelang.en.txt", "English"),
+        ["sv"] = ("gamelang.sv.txt", "Swedish")
+    };
+
+const string DefaultLanguageCode = "en";
+var languagePath = GetLanguagePath(DefaultLanguageCode);
 Language.SetProvider(new FileLanguageProvider(languagePath));
 
 var state = BuildGameState();
@@ -44,6 +53,11 @@ while (true)
     if (IsHelp(input))
     {
         ShowHelp();
+        continue;
+    }
+
+    if (TryHandleLanguageSwitch(input))
+    {
         continue;
     }
 
@@ -115,9 +129,47 @@ void ShowRoom()
 
 static string FormatLabel(string label, string value) => $"{label.TrimEnd()} {value}";
 
-static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, quit");
+static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, language <code>, quit");
 
 static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?";
+
+bool TryHandleLanguageSwitch(string input)
+{
+    var tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+    if (tokens.Length == 0 || !tokens[0].TextCompare("language"))
+    {
+        return false;
+    }
+
+    var supportedCodes = string.Join(", ", SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
+    if (tokens.Length == 1)
+    {
+        Console.WriteLine($"Usage: language <code> (supported: {supportedCodes}).");
+        return true;
+    }
+
+    var chosen = tokens[1].ToLowerInvariant();
+    if (!SupportedLanguages.TryGetValue(chosen, out var info))
+    {
+        Console.WriteLine($"Unsupported language code '{chosen}'. Supported: {supportedCodes}.");
+        return true;
+    }
+
+    var path = GetLanguagePath(chosen);
+    if (!File.Exists(path))
+    {
+        Console.WriteLine($"Language file '{info.File}' is missing.");
+        return true;
+    }
+
+    Language.SetProvider(new FileLanguageProvider(path));
+    Console.WriteLine($"Loaded {info.DisplayName} ({chosen.ToUpperInvariant()}) language file.");
+    ShowRoom();
+    return true;
+}
+
+static string GetLanguagePath(string code) =>
+    Path.Combine(AppContext.BaseDirectory, "lang", SupportedLanguages.TryGetValue(code, out var info) ? info.File : SupportedLanguages[DefaultLanguageCode].File);
 
 static bool ShouldShowRoom(ICommand command, CommandResult result) =>
     result.Success && !result.ShouldQuit && (command is GoCommand or MoveCommand or LoadCommand);

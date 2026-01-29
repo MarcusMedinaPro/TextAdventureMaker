@@ -25,26 +25,8 @@ var bucket = new Item(
     .SetReaction(ItemAction.TakeFailed, "It is far too substantial to be carried, darling, but you could certainly persuade it to slide into place.")
     .SetReaction(ItemAction.Move, "You draw the bucket beneath the leak with deliberate grace. The dripping finally finds a worthy accomplice.");
 
-var feet = new Item("feet", "feet", "Five toes each... amazing!")
-    .AddAliases("foot", "toes", "toe")
-    .SetTakeable(false)
-    .HideFromItemList();
-
-var fingers = new Item("fingers", "fingers", "Five of each! Truly unremarkable yet wonderfully dramatic up here.")
-    .AddAliases("finger")
-    .SetTakeable(false)
-    .HideFromItemList();
-
-var silverFingers = new Item("silver_fingers", "silver fingers", "They glisten like someone from a thin Victorian ghost story.")
-    .AddAliases("silver", "silver finger")
-    .SetTakeable(false)
-    .HideFromItemList();
-
 attic.AddItem(rain);
 attic.AddItem(bucket);
-attic.AddItem(feet);
-attic.AddItem(fingers);
-attic.AddItem(silverFingers);
 
 var dummy = new Npc("dummy", "training dummy", NpcState.Neutral, stats: new Stats(12))
     .Description("A crash-test dummy slumped in the corner, patient and uncomplaining.");

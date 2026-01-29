@@ -1,17 +1,23 @@
+using System.IO;
 using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-var state = BuildGameState();
-var parser = BuildParser();
+var languagePath = Path.Combine(AppContext.BaseDirectory, "lang", "gamelang.sv.txt");
+Language.SetProvider(new FileLanguageProvider(languagePath));
 
-Console.WriteLine("=== THE WARM LIBRARY (Slice 10) ===");
-Console.WriteLine("Goal: unlock the library door, save your progress, quit, then load and continue.");
-Console.WriteLine("Type 'help' for the commands you can use.");
+var state = BuildGameState();
+var parser = new KeywordParser(KeywordParserConfig.Default);
+
+Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
+Console.WriteLine("Goal: load the Swedish language provider before heading to the meeting.");
+Console.WriteLine($"Language file: {Path.GetFileName(languagePath)}");
 ShowRoom();
 
 while (true)
@@ -33,89 +39,33 @@ while (true)
     var result = state.Execute(command);
 
     DisplayResult(result);
-
-    if (command is GoCommand and { } && result.Success && !result.ShouldQuit)
-    {
-        ShowRoom();
-    }
-
-    if (command is LoadCommand && result.Success && !result.ShouldQuit)
+    if (ShouldShowRoom(command, result))
     {
         ShowRoom();
     }
 
     if (result.ShouldQuit)
     {
+        Console.WriteLine(Language.ThanksForPlaying);
         break;
     }
 }
 
-GameState BuildGameState()
+static GameState BuildGameState()
 {
-    var outside = new Location("outside", "Snow falls quietly outside a locked library.");
-    var library = new Location("library", "Warm light and quiet pages surround you.");
+    var bedroom = new Location("bedroom", "Your alarm blinks 08:57. A coat hangs by the door.");
+    var hallway = new Location("hallway", "A quiet hallway with a mirror.");
 
-    var key = new Key("library_key", "library key", "Cold metal in your hand.")
-        .AddAliases("key", "brass key")
-        .SetReaction(ItemAction.Take, "You pocket the key. It chills your palm and your resolve.");
+    var coffee = new Item("coffee", "coffee", "A hot cup of coffee.");
+    bedroom.AddItem(coffee);
 
-    var snow = new Item("snow", "snow", "Soft, patient snowflakes that refuse to melt for your convenience.")
-        .SetTakeable(false)
-        .AddAliases("snowfall", "flakes")
-        .SetReaction(ItemAction.Move, "You brush the snow aside. It drifts back with quiet dignity.")
-        .SetReaction(ItemAction.TakeFailed, "You attempt to gather the snow. It slips away, disinterested.");
+    bedroom.AddExit(Direction.East, hallway);
+    hallway.AddExit(Direction.West, bedroom);
 
-    var book = new Item("book", "old book", "An old book, warm from long companionship.")
-        .AddAliases("book", "volume")
-        .SetReaction(ItemAction.Use, "You open it at random and immediately feel better about the world.");
-
-    outside.AddItem(key);
-    outside.AddItem(snow);
-    library.AddItem(book);
-
-    var door = new Door("library_door", "library door", "A heavy wooden door with iron fittings.")
-        .AddAliases("door", "library")
-        .RequiresKey(key)
-        .SetReaction(DoorAction.Unlock, "The library door unlocks with a polite click.")
-        .SetReaction(DoorAction.Open, "The door swings inward, warm air rolling out to greet you.")
-        .SetReaction(DoorAction.UnlockFailed, "The lock refuses to concede.");
-
-    outside.AddExit(Direction.In, library, door);
-    library.AddExit(Direction.Out, outside, door);
-
-    var state = new GameState(outside, worldLocations: [outside, library])
-    {
-        EnableFuzzyMatching = true,
-        FuzzyMaxDistance = 1
-    };
-
-    return state;
+    return new GameState(bedroom, worldLocations: [bedroom, hallway]);
 }
 
-KeywordParser BuildParser()
-{
-    var config = KeywordParserConfigBuilder.BritishDefaults()
-        .WithLook("look", "l")
-        .WithExamine("examine", "exam", "x", "inspect", "check")
-        .WithInventory("inventory", "inv", "i")
-        .WithTake("take", "get")
-        .WithDrop("drop")
-        .WithUse("use")
-        .WithMove("move", "push", "shift", "slide")
-        .WithGo("go")
-        .WithOpen("open")
-        .WithUnlock("unlock")
-        .WithSave("save")
-        .WithLoad("load")
-        .WithQuit("quit", "exit")
-        .WithIgnoreItemTokens("on", "off", "at", "the", "a")
-        .WithFuzzyMatching(true, 1)
-        .Build();
-
-    return new KeywordParser(config);
-}
-
-void DisplayResult(CommandResult result)
+static void DisplayResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
@@ -139,22 +89,23 @@ void ShowRoom()
     Console.WriteLine(location.GetDescription());
 
     var items = location.Items.CommaJoinNames(properCase: true);
-    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items: None" : $"Items: {items}");
+    Console.WriteLine(string.IsNullOrWhiteSpace(items)
+        ? FormatLabel(Language.ItemsHereLabel, Language.None)
+        : FormatLabel(Language.ItemsHereLabel, items));
 
     var exits = location.Exits.Keys
         .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase())
         .ToList();
-    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+    Console.WriteLine(exits.Count > 0
+        ? FormatLabel(Language.ExitsLabel, exits.CommaJoin())
+        : FormatLabel(Language.ExitsLabel, Language.None));
 }
 
-void ShowHelp()
-{
-    Console.WriteLine("Commands: look, examine/check <item>, take <item>, use <item>, move <item>, unlock/open door, go <direction>, inventory, quit");
-    Console.WriteLine("Save/Load: save [file], load [file] (defaults to savegame.json)");
-}
+static string FormatLabel(string label, string value) => $"{label.TrimEnd()} {value}";
 
-bool IsHelp(string input)
-{
-    var normalized = input.Lower();
-    return normalized is "help" or "halp" or "?";
-}
+static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, quit");
+
+static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?";
+
+static bool ShouldShowRoom(ICommand command, CommandResult result) =>
+    result.Success && !result.ShouldQuit && (command is GoCommand or MoveCommand or LoadCommand);

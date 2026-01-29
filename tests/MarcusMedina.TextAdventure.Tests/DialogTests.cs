@@ -2,16 +2,17 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class DialogTests
 {
     [Fact]
     public void DialogNode_StoresTextAndOptions()
     {
-        var node = new DialogNode("Hello there.");
+        DialogNode node = new("Hello there.");
 
         Assert.Equal("Hello there.", node.Text);
         Assert.Empty(node.Options);
@@ -20,8 +21,8 @@ public class DialogTests
     [Fact]
     public void DialogNode_AddOption_WiresNextNode()
     {
-        var next = new DialogNode("Second line.");
-        var node = new DialogNode("First line.")
+        DialogNode next = new("Second line.");
+        DialogNode node = new DialogNode("First line.")
             .AddOption("Continue", next);
 
         _ = Assert.Single(node.Options);

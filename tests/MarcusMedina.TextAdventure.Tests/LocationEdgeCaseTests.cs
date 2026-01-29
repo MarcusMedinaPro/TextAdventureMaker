@@ -2,19 +2,20 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class LocationEdgeCaseTests
 {
     [Fact]
     public void AddExit_WithDoor_CreatesBidirectionalExitUsingSameDoor()
     {
-        var a = new Location("a");
-        var b = new Location("b");
-        var door = new Door("door1", "stone door");
+        Location a = new("a");
+        Location b = new("b");
+        Door door = new("door1", "stone door");
 
         _ = a.AddExit(Direction.North, b, door);
 
@@ -26,9 +27,9 @@ public class LocationEdgeCaseTests
     [Fact]
     public void AddExit_WithDoor_OneWay_DoesNotCreateReturnPath()
     {
-        var a = new Location("a");
-        var b = new Location("b");
-        var door = new Door("door1", "stone door");
+        Location a = new("a");
+        Location b = new("b");
+        Door door = new("door1", "stone door");
 
         _ = a.AddExit(Direction.North, b, door, oneWay: true);
 

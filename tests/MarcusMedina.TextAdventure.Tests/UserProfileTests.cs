@@ -3,17 +3,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class UserProfileTests
 {
     [Fact]
     public void IsBirthday_WhenTodayIsBirthday_ReturnsTrue()
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var profile = new UserProfile
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        UserProfile profile = new()
         {
             Birthdate = new DateOnly(1990, today.Month, today.Day)
         };
@@ -24,8 +25,8 @@ public class UserProfileTests
     [Fact]
     public void IsBirthday_WhenNotBirthday_ReturnsFalse()
     {
-        var tomorrow = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
-        var profile = new UserProfile
+        DateOnly tomorrow = DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+        UserProfile profile = new()
         {
             Birthdate = new DateOnly(1990, tomorrow.Month, tomorrow.Day)
         };
@@ -36,7 +37,7 @@ public class UserProfileTests
     [Fact]
     public void IsBirthday_WhenNoBirthdate_ReturnsFalse()
     {
-        var profile = new UserProfile();
+        UserProfile profile = new();
 
         Assert.False(profile.IsBirthday());
     }
@@ -44,9 +45,9 @@ public class UserProfileTests
     [Fact]
     public void GetCalculatedAge_CalculatesCorrectly()
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var birthYear = today.Year - 30;
-        var profile = new UserProfile
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        int birthYear = today.Year - 30;
+        UserProfile profile = new()
         {
             Birthdate = new DateOnly(birthYear, today.Month, today.Day)
         };
@@ -57,7 +58,7 @@ public class UserProfileTests
     [Fact]
     public void GetCalculatedAge_WhenNoBirthdate_ReturnsAge()
     {
-        var profile = new UserProfile { Age = 25 };
+        UserProfile profile = new() { Age = 25 };
 
         Assert.Equal(25, profile.GetCalculatedAge());
     }
@@ -65,7 +66,7 @@ public class UserProfileTests
     [Fact]
     public void GetRomanceNpcGender_WhenUnspecified_ReturnsOriginal()
     {
-        var profile = new UserProfile
+        UserProfile profile = new()
         {
             RomancePreference = Gender.Unspecified
         };
@@ -77,7 +78,7 @@ public class UserProfileTests
     [Fact]
     public void GetRomanceNpcGender_WhenAny_ReturnsOriginal()
     {
-        var profile = new UserProfile
+        UserProfile profile = new()
         {
             RomancePreference = Gender.Any
         };
@@ -89,7 +90,7 @@ public class UserProfileTests
     [Fact]
     public void GetRomanceNpcGender_WhenPreferenceSet_ReturnsPreference()
     {
-        var profile = new UserProfile
+        UserProfile profile = new()
         {
             RomancePreference = Gender.Male
         };
@@ -101,10 +102,10 @@ public class UserProfileTests
     [Fact]
     public void SaveAndLoad_RoundTrip_PreservesData()
     {
-        var tempFile = Path.GetTempFileName();
+        string tempFile = Path.GetTempFileName();
         try
         {
-            var original = new UserProfile
+            UserProfile original = new()
             {
                 Name = "Test Player",
                 Gender = Gender.Female,
@@ -121,7 +122,7 @@ public class UserProfileTests
             original.CustomProperties["Theme"] = "Dark";
 
             original.Save(tempFile);
-            var loaded = UserProfile.Load(tempFile);
+            UserProfile loaded = UserProfile.Load(tempFile);
 
             Assert.Equal(original.Name, loaded.Name);
             Assert.Equal(original.Gender, loaded.Gender);
@@ -145,7 +146,7 @@ public class UserProfileTests
     [Fact]
     public void Load_WhenFileDoesNotExist_ReturnsNewProfile()
     {
-        var profile = UserProfile.Load("/nonexistent/path/profile.json");
+        UserProfile profile = UserProfile.Load("/nonexistent/path/profile.json");
 
         Assert.NotNull(profile);
         Assert.Equal("", profile.Name);

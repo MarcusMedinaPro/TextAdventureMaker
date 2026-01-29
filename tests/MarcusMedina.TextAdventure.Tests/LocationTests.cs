@@ -2,17 +2,18 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class LocationTests
 {
     [Fact]
     public void Location_ShouldHaveId()
     {
-        var loc = new Location("cave");
+        Location loc = new("cave");
         Assert.Equal("cave", loc.Id);
     }
 
@@ -27,7 +28,7 @@ public class LocationTests
     [Fact]
     public void Location_ShouldHaveDescription()
     {
-        var loc = new Location("cave")
+        Location loc = new Location("cave")
             .Description("A dark cave with glowing mushrooms");
 
         Assert.Equal("A dark cave with glowing mushrooms", loc.GetDescription());
@@ -36,8 +37,8 @@ public class LocationTests
     [Fact]
     public void AddExit_ShouldCreateBidirectionalPassage()
     {
-        var hall = new Location("hall");
-        var bedroom = new Location("bedroom");
+        Location hall = new("hall");
+        Location bedroom = new("bedroom");
 
         _ = hall.AddExit(Direction.North, bedroom);
 
@@ -48,8 +49,8 @@ public class LocationTests
     [Fact]
     public void AddExit_OneWay_ShouldNotCreateReturnPath()
     {
-        var hall = new Location("hall");
-        var pit = new Location("pit");
+        Location hall = new("hall");
+        Location pit = new("pit");
 
         _ = hall.AddExit(Direction.Down, pit, oneWay: true);
 
@@ -60,7 +61,7 @@ public class LocationTests
     [Fact]
     public void Location_CanUseDescriptionConstructorAndTuple()
     {
-        var cave = new Location("cave", "A dark cave.");
+        Location cave = new("cave", "A dark cave.");
         Location cellar = (id: "cellar", description: "A damp cellar.");
 
         Assert.Equal("A dark cave.", cave.GetDescription());

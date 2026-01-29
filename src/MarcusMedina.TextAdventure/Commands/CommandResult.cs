@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
+
+namespace MarcusMedina.TextAdventure.Commands;
 
 public sealed record CommandResult(
     bool Success,
@@ -15,13 +16,28 @@ public sealed record CommandResult(
 {
     public IReadOnlyList<string> ReactionsList { get; } = Reactions ?? Array.Empty<string>();
 
-    public static CommandResult Ok(string message) => new(true, message);
-    public static CommandResult Ok(string message, params string[] reactions) =>
-        new(true, message, GameError.None, false, reactions);
+    public static CommandResult Ok(string message)
+    {
+        return new(true, message);
+    }
 
-    public static CommandResult Fail(string message, GameError error) => new(false, message, error);
-    public static CommandResult Fail(string message, GameError error, params string[] reactions) =>
-        new(false, message, error, false, reactions);
+    public static CommandResult Ok(string message, params string[] reactions)
+    {
+        return new(true, message, GameError.None, false, reactions);
+    }
 
-    public static CommandResult Quit(string message) => new(true, message, GameError.None, true);
+    public static CommandResult Fail(string message, GameError error)
+    {
+        return new(false, message, error);
+    }
+
+    public static CommandResult Fail(string message, GameError error, params string[] reactions)
+    {
+        return new(false, message, error, false, reactions);
+    }
+
+    public static CommandResult Quit(string message)
+    {
+        return new(true, message, GameError.None, true);
+    }
 }

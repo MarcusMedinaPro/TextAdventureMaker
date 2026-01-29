@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Extensions;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class DoorList
 {
@@ -12,8 +13,16 @@ public sealed class DoorList
 
     public IReadOnlyCollection<Door> Items => _doors.Items;
 
-    public Door Add(string name) => _doors.Add(name);
-    public Door Add(Door door) => _doors.Add(door);
+    public Door Add(string name)
+    {
+        return _doors.Add(name);
+    }
+
+    public Door Add(Door door)
+    {
+        return _doors.Add(door);
+    }
+
     public DoorList AddMany(params string[] names)
     {
         _ = _doors.AddMany(names);
@@ -25,12 +34,34 @@ public sealed class DoorList
         return this;
     }
 
-    public Door? Find(string token) => _doors.Find(token);
-    public Door Get(string token) => _doors.Get(token);
-    public bool TryGet(string token, out Door door) => _doors.TryGet(token, out door);
-    public bool Remove(string token) => _doors.Remove(token);
-    public void Clear() => _doors.Clear();
+    public Door? Find(string token)
+    {
+        return _doors.Find(token);
+    }
+
+    public Door Get(string token)
+    {
+        return _doors.Get(token);
+    }
+
+    public bool TryGet(string token, out Door door)
+    {
+        return _doors.TryGet(token, out door);
+    }
+
+    public bool Remove(string token)
+    {
+        return _doors.Remove(token);
+    }
+
+    public void Clear()
+    {
+        _doors.Clear();
+    }
 
     public Door this[string token] => _doors[token];
-    public Door Call(string token) => _doors.Call(token);
+    public Door Call(string token)
+    {
+        return _doors.Call(token);
+    }
 }

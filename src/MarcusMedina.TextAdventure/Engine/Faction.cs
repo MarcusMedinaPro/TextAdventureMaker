@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class Faction : IFaction
 {
@@ -25,8 +26,11 @@ public sealed class Faction : IFaction
     public IFaction WithNpcs(params string[] npcIds)
     {
         if (npcIds == null)
+        {
             return this;
-        foreach (var npcId in npcIds)
+        }
+
+        foreach (string npcId in npcIds)
         {
             if (!string.IsNullOrWhiteSpace(npcId))
             {
@@ -44,19 +48,24 @@ public sealed class Faction : IFaction
         return this;
     }
 
-    public bool HasNpc(string npcId) => !string.IsNullOrWhiteSpace(npcId) && _npcIds.Contains(npcId);
+    public bool HasNpc(string npcId)
+    {
+        return !string.IsNullOrWhiteSpace(npcId) && _npcIds.Contains(npcId);
+    }
 
     public int ModifyReputation(int amount, IGameState state)
     {
-        var previous = Reputation;
+        int previous = Reputation;
         Reputation += amount;
 
-        foreach (var (threshold, handler) in _thresholds)
+        foreach ((int threshold, Action<IGameState>? handler) in _thresholds)
         {
             if (_thresholdsFired.Contains(threshold))
+            {
                 continue;
+            }
 
-            var crossed = threshold >= 0
+            bool crossed = threshold >= 0
                 ? previous < threshold && Reputation >= threshold
                 : previous > threshold && Reputation <= threshold;
 

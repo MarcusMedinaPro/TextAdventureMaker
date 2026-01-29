@@ -2,18 +2,22 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 public class ReadCommand : ICommand
 {
     public string Target { get; }
 
-    public ReadCommand(string target) => Target = target;
+    public ReadCommand(string target)
+    {
+        Target = target;
+    }
 
     public CommandResult Execute(CommandContext context)
     {
@@ -22,17 +26,17 @@ public class ReadCommand : ICommand
             return CommandResult.Fail(Language.NothingToRead, GameError.MissingArgument);
         }
 
-        var location = context.State.CurrentLocation;
-        var itemInRoom = location.FindItem(Target);
-        var itemInInventory = context.State.Inventory.FindItem(Target);
+        ILocation location = context.State.CurrentLocation;
+        IItem? itemInRoom = location.FindItem(Target);
+        IItem? itemInInventory = context.State.Inventory.FindItem(Target);
         string? suggestion = null;
         if (itemInRoom == null && itemInInventory == null &&
             context.State.EnableFuzzyMatching &&
             !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
-            var bestRoom = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
-            var bestInventory = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, Target, context.State.FuzzyMaxDistance);
-            var best = bestInventory ?? bestRoom;
+            IItem? bestRoom = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
+            IItem? bestInventory = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, Target, context.State.FuzzyMaxDistance);
+            IItem? best = bestInventory ?? bestRoom;
             if (best != null)
             {
                 suggestion = best.Name;
@@ -47,7 +51,7 @@ public class ReadCommand : ICommand
             }
         }
 
-        var item = itemInInventory ?? itemInRoom;
+        IItem? item = itemInInventory ?? itemInRoom;
 
         if (item == null)
         {
@@ -66,19 +70,19 @@ public class ReadCommand : ICommand
 
         if (!item.CanRead(context.State))
         {
-            var reaction = item.GetReaction(ItemAction.ReadFailed);
+            string? reaction = item.GetReaction(ItemAction.ReadFailed);
             return reaction != null
                 ? CommandResult.Fail(Language.TooDarkToRead, GameError.ItemNotUsable, reaction)
                 : CommandResult.Fail(Language.TooDarkToRead, GameError.ItemNotUsable);
         }
 
-        var text = item.GetReadText() ?? "";
-        var message = item.ReadingCost > 0
+        string text = item.GetReadText() ?? "";
+        string message = item.ReadingCost > 0
             ? Language.ReadingCost(item.ReadingCost, text)
             : text;
 
-        var onRead = item.GetReaction(ItemAction.Read);
-        var result = onRead != null
+        string? onRead = item.GetReaction(ItemAction.Read);
+        CommandResult result = onRead != null
             ? CommandResult.Ok(message, onRead)
             : CommandResult.Ok(message);
 

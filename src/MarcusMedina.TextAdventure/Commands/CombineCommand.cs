@@ -2,12 +2,14 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Commands;
 
 public class CombineCommand : ICommand
 {
@@ -22,16 +24,16 @@ public class CombineCommand : ICommand
 
     public CommandResult Execute(CommandContext context)
     {
-        var inventory = context.State.Inventory;
-        var leftItem = inventory.FindItem(Left);
-        var rightItem = inventory.FindItem(Right);
+        IInventory inventory = context.State.Inventory;
+        IItem? leftItem = inventory.FindItem(Left);
+        IItem? rightItem = inventory.FindItem(Right);
         string? suggestion = null;
 
         if (context.State.EnableFuzzyMatching)
         {
             if (leftItem == null && !FuzzyMatcher.IsLikelyCommandToken(Left))
             {
-                var bestLeft = FuzzyMatcher.FindBestItem(inventory.Items, Left, context.State.FuzzyMaxDistance);
+                IItem? bestLeft = FuzzyMatcher.FindBestItem(inventory.Items, Left, context.State.FuzzyMaxDistance);
                 if (bestLeft != null)
                 {
                     leftItem = bestLeft;
@@ -41,7 +43,7 @@ public class CombineCommand : ICommand
 
             if (rightItem == null && !FuzzyMatcher.IsLikelyCommandToken(Right))
             {
-                var bestRight = FuzzyMatcher.FindBestItem(inventory.Items, Right, context.State.FuzzyMaxDistance);
+                IItem? bestRight = FuzzyMatcher.FindBestItem(inventory.Items, Right, context.State.FuzzyMaxDistance);
                 if (bestRight != null)
                 {
                     rightItem = bestRight;
@@ -55,7 +57,7 @@ public class CombineCommand : ICommand
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
         }
 
-        var result = context.State.RecipeBook.Combine(leftItem, rightItem);
+        CombinationResult result = context.State.RecipeBook.Combine(leftItem, rightItem);
         if (!result.Success)
         {
             return CommandResult.Fail(Language.CannotCombineItems, GameError.ItemNotUsable);
@@ -64,12 +66,12 @@ public class CombineCommand : ICommand
         _ = inventory.Remove(leftItem);
         _ = inventory.Remove(rightItem);
 
-        foreach (var created in result.Created)
+        foreach (IItem created in result.Created)
         {
             _ = inventory.Add(created);
         }
 
-        var ok = CommandResult.Ok(Language.CombineResult(leftItem.Name, rightItem.Name));
+        CommandResult ok = CommandResult.Ok(Language.CombineResult(leftItem.Name, rightItem.Name));
         return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

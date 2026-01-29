@@ -1,17 +1,17 @@
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-using Xunit;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class LocationDiscoveryTests
 {
     [Fact]
     public void StartLocation_IsDiscovered()
     {
-        var start = new Location("start");
-        var state = new GameState(start);
+        Location start = new("start");
+        GameState state = new(start);
 
         Assert.True(state.LocationDiscovery.IsDiscovered("start"));
     }
@@ -19,11 +19,11 @@ public class LocationDiscoveryTests
     [Fact]
     public void Move_DiscoversNewLocation()
     {
-        var start = new Location("start");
-        var next = new Location("next");
+        Location start = new("start");
+        Location next = new("next");
         _ = start.AddExit(Direction.North, next);
 
-        var state = new GameState(start, worldLocations: new[] { start, next });
+        GameState state = new(start, worldLocations: new[] { start, next });
 
         _ = state.Move(Direction.North);
 

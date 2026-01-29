@@ -2,20 +2,22 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class NpcMovementTests
 {
     [Fact]
     public void NoNpcMovement_ReturnsNull()
     {
-        var movement = new NoNpcMovement();
-        var current = new Location("room");
-        var state = new GameState(current);
+        NoNpcMovement movement = new();
+        Location current = new("room");
+        GameState state = new(current);
 
         Assert.Null(movement.GetNextLocation(current, state));
     }
@@ -23,15 +25,15 @@ public class NpcMovementTests
     [Fact]
     public void RandomNpcMovement_PicksPassableExitTarget()
     {
-        var start = new Location("start");
-        var a = new Location("a");
-        var b = new Location("b");
+        Location start = new("start");
+        Location a = new("a");
+        Location b = new("b");
         _ = start.AddExit(Direction.North, a);
         _ = start.AddExit(Direction.South, b);
 
-        var movement = new RandomNpcMovement(new Random(5));
-        var state = new GameState(start);
-        var next = movement.GetNextLocation(start, state);
+        RandomNpcMovement movement = new(new Random(5));
+        GameState state = new(start);
+        ILocation? next = movement.GetNextLocation(start, state);
 
         Assert.NotNull(next);
         Assert.Contains(next, new[] { a, b });
@@ -40,11 +42,11 @@ public class NpcMovementTests
     [Fact]
     public void PatrolNpcMovement_CyclesRoute()
     {
-        var a = new Location("a");
-        var b = new Location("b");
-        var c = new Location("c");
-        var movement = new PatrolNpcMovement(new[] { a, b, c });
-        var state = new GameState(a);
+        Location a = new("a");
+        Location b = new("b");
+        Location c = new("c");
+        PatrolNpcMovement movement = new(new[] { a, b, c });
+        GameState state = new(a);
 
         Assert.Equal(b, movement.GetNextLocation(a, state));
         Assert.Equal(c, movement.GetNextLocation(b, state));
@@ -54,10 +56,10 @@ public class NpcMovementTests
     [Fact]
     public void FollowNpcMovement_MovesToPlayerLocationWhenDifferent()
     {
-        var npcRoom = new Location("cave");
-        var playerRoom = new Location("forest");
-        var state = new GameState(playerRoom);
-        var movement = new FollowNpcMovement();
+        Location npcRoom = new("cave");
+        Location playerRoom = new("forest");
+        GameState state = new(playerRoom);
+        FollowNpcMovement movement = new();
 
         Assert.Equal(playerRoom, movement.GetNextLocation(npcRoom, state));
         Assert.Null(movement.GetNextLocation(playerRoom, state));
@@ -66,10 +68,10 @@ public class NpcMovementTests
     [Fact]
     public void Npc_UsesMovementStrategy()
     {
-        var npcRoom = new Location("camp");
-        var playerRoom = new Location("village");
-        var state = new GameState(playerRoom);
-        var npc = new Npc("traveler", "Traveler")
+        Location npcRoom = new("camp");
+        Location playerRoom = new("village");
+        GameState state = new(playerRoom);
+        INpc npc = new Npc("traveler", "Traveler")
             .SetMovement(new FollowNpcMovement());
 
         Assert.Equal(playerRoom, npc.GetNextLocation(npcRoom, state));

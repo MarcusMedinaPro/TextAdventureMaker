@@ -3,15 +3,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Dsl;
 
-using System.Globalization;
-using System.Text;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
+using System.Globalization;
+using System.Text;
 
+namespace MarcusMedina.TextAdventure.Dsl;
 /// <summary>
 /// Exports game state to .adventure DSL format.
 /// </summary>
@@ -24,8 +24,8 @@ public class AdventureDslExporter
     {
         ArgumentNullException.ThrowIfNull(state);
 
-        var sb = new StringBuilder();
-        var exportedDoors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        StringBuilder sb = new();
+        HashSet<string> exportedDoors = new(StringComparer.OrdinalIgnoreCase);
 
         // Header
         if (!string.IsNullOrWhiteSpace(worldTitle))
@@ -42,7 +42,7 @@ public class AdventureDslExporter
         _ = sb.AppendLine();
 
         // Export all locations
-        foreach (var location in state.Locations)
+        foreach (ILocation location in state.Locations)
         {
             ExportLocation(sb, location, exportedDoors);
             _ = sb.AppendLine();
@@ -59,7 +59,7 @@ public class AdventureDslExporter
         ArgumentNullException.ThrowIfNull(state);
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-        var content = Export(state, worldTitle, goal);
+        string content = Export(state, worldTitle, goal);
         File.WriteAllText(path, content);
     }
 
@@ -70,8 +70,8 @@ public class AdventureDslExporter
     {
         ArgumentNullException.ThrowIfNull(adventure);
 
-        var worldTitle = adventure.Metadata.TryGetValue("world", out var w) ? w : null;
-        var goal = adventure.Metadata.TryGetValue("goal", out var g) ? g : null;
+        string? worldTitle = adventure.Metadata.TryGetValue("world", out string? w) ? w : null;
+        string? goal = adventure.Metadata.TryGetValue("goal", out string? g) ? g : null;
 
         return Export(adventure.State, worldTitle, goal);
     }
@@ -79,13 +79,13 @@ public class AdventureDslExporter
     private void ExportLocation(StringBuilder sb, ILocation location, HashSet<string> exportedDoors)
     {
         // Location header
-        var desc = location.GetDescription();
+        string desc = location.GetDescription();
         _ = !string.IsNullOrWhiteSpace(desc)
             ? sb.AppendLine($"location: {location.Id} | {desc}")
             : sb.AppendLine($"location: {location.Id}");
 
         // Export items in this location
-        foreach (var item in location.Items)
+        foreach (IItem item in location.Items)
         {
             if (item is Key key)
             {
@@ -98,7 +98,7 @@ public class AdventureDslExporter
         }
 
         // Export doors (only once per door)
-        foreach (var exit in location.Exits)
+        foreach (KeyValuePair<Direction, Exit> exit in location.Exits)
         {
             if (exit.Value.Door != null && !exportedDoors.Contains(exit.Value.Door.Id))
             {
@@ -108,7 +108,7 @@ public class AdventureDslExporter
         }
 
         // Export exits
-        foreach (var exit in location.Exits)
+        foreach (KeyValuePair<Direction, Exit> exit in location.Exits)
         {
             ExportExit(sb, exit.Key, exit.Value);
         }
@@ -116,16 +116,16 @@ public class AdventureDslExporter
 
     private void ExportItem(StringBuilder sb, IItem item)
     {
-        var parts = new List<string> { item.Id, item.Name };
+        List<string> parts = [item.Id, item.Name];
 
-        var description = item.GetDescription();
+        string description = item.GetDescription();
         if (!string.IsNullOrWhiteSpace(description))
         {
             parts.Add(description);
         }
 
         // Options
-        var options = new List<string>();
+        List<string> options = [];
 
         if (Math.Abs(item.Weight) > 0.001f)
         {
@@ -142,7 +142,7 @@ public class AdventureDslExporter
             options.Add($"aliases={string.Join(",", item.Aliases)}");
         }
 
-        var line = string.Join(" | ", parts);
+        string line = string.Join(" | ", parts);
         if (options.Count > 0)
         {
             line += " | " + string.Join(" | ", options);
@@ -153,15 +153,15 @@ public class AdventureDslExporter
 
     private void ExportKey(StringBuilder sb, Key key)
     {
-        var parts = new List<string> { key.Id, key.Name };
+        List<string> parts = [key.Id, key.Name];
 
-        var description = key.GetDescription();
+        string description = key.GetDescription();
         if (!string.IsNullOrWhiteSpace(description))
         {
             parts.Add(description);
         }
 
-        var options = new List<string>();
+        List<string> options = [];
 
         if (Math.Abs(key.Weight) > 0.001f)
         {
@@ -173,7 +173,7 @@ public class AdventureDslExporter
             options.Add($"aliases={string.Join(",", key.Aliases)}");
         }
 
-        var line = string.Join(" | ", parts);
+        string line = string.Join(" | ", parts);
         if (options.Count > 0)
         {
             line += " | " + string.Join(" | ", options);
@@ -184,22 +184,22 @@ public class AdventureDslExporter
 
     private void ExportDoor(StringBuilder sb, IDoor door)
     {
-        var parts = new List<string> { door.Id, door.Name };
+        List<string> parts = [door.Id, door.Name];
 
-        var description = door.GetDescription();
+        string description = door.GetDescription();
         if (!string.IsNullOrWhiteSpace(description))
         {
             parts.Add(description);
         }
 
-        var options = new List<string>();
+        List<string> options = [];
 
         if (door.RequiredKey != null)
         {
             options.Add($"key={door.RequiredKey.Id}");
         }
 
-        var line = string.Join(" | ", parts);
+        string line = string.Join(" | ", parts);
         if (options.Count > 0)
         {
             line += " | " + string.Join(" | ", options);
@@ -210,7 +210,7 @@ public class AdventureDslExporter
 
     private void ExportExit(StringBuilder sb, Direction direction, Exit exit)
     {
-        var parts = new List<string> { $"{direction.ToString().ToLowerInvariant()} -> {exit.Target.Id}" };
+        List<string> parts = [$"{direction.ToString().ToLowerInvariant()} -> {exit.Target.Id}"];
 
         if (exit.Door != null)
         {

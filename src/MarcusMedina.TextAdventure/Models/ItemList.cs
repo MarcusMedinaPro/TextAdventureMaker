@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Extensions;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class ItemList
 {
@@ -12,8 +13,16 @@ public sealed class ItemList
 
     public IReadOnlyCollection<Item> Items => _items.Items;
 
-    public Item Add(string name) => _items.Add(name);
-    public Item Add(Item item) => _items.Add(item);
+    public Item Add(string name)
+    {
+        return _items.Add(name);
+    }
+
+    public Item Add(Item item)
+    {
+        return _items.Add(item);
+    }
+
     public ItemList AddMany(params string[] names)
     {
         _ = _items.AddMany(names);
@@ -25,12 +34,34 @@ public sealed class ItemList
         return this;
     }
 
-    public Item? Find(string token) => _items.Find(token);
-    public Item Get(string token) => _items.Get(token);
-    public bool TryGet(string token, out Item item) => _items.TryGet(token, out item);
-    public bool Remove(string token) => _items.Remove(token);
-    public void Clear() => _items.Clear();
+    public Item? Find(string token)
+    {
+        return _items.Find(token);
+    }
+
+    public Item Get(string token)
+    {
+        return _items.Get(token);
+    }
+
+    public bool TryGet(string token, out Item item)
+    {
+        return _items.TryGet(token, out item);
+    }
+
+    public bool Remove(string token)
+    {
+        return _items.Remove(token);
+    }
+
+    public void Clear()
+    {
+        _items.Clear();
+    }
 
     public Item this[string token] => _items[token];
-    public Item Call(string token) => _items.Call(token);
+    public Item Call(string token)
+    {
+        return _items.Call(token);
+    }
 }

@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Extensions;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class KeyList
 {
@@ -12,8 +13,16 @@ public sealed class KeyList
 
     public IReadOnlyCollection<Key> Items => _keys.Items;
 
-    public Key Add(string name) => _keys.Add(name);
-    public Key Add(Key key) => _keys.Add(key);
+    public Key Add(string name)
+    {
+        return _keys.Add(name);
+    }
+
+    public Key Add(Key key)
+    {
+        return _keys.Add(key);
+    }
+
     public KeyList AddMany(params string[] names)
     {
         _ = _keys.AddMany(names);
@@ -25,12 +34,34 @@ public sealed class KeyList
         return this;
     }
 
-    public Key? Find(string token) => _keys.Find(token);
-    public Key Get(string token) => _keys.Get(token);
-    public bool TryGet(string token, out Key key) => _keys.TryGet(token, out key);
-    public bool Remove(string token) => _keys.Remove(token);
-    public void Clear() => _keys.Clear();
+    public Key? Find(string token)
+    {
+        return _keys.Find(token);
+    }
+
+    public Key Get(string token)
+    {
+        return _keys.Get(token);
+    }
+
+    public bool TryGet(string token, out Key key)
+    {
+        return _keys.TryGet(token, out key);
+    }
+
+    public bool Remove(string token)
+    {
+        return _keys.Remove(token);
+    }
+
+    public void Clear()
+    {
+        _keys.Clear();
+    }
 
     public Key this[string token] => _keys[token];
-    public Key Call(string token) => _keys.Call(token);
+    public Key Call(string token)
+    {
+        return _keys.Call(token);
+    }
 }

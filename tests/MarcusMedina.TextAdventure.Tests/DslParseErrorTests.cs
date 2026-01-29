@@ -3,9 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Dsl;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class DslParseErrorTests
 {
@@ -20,7 +21,7 @@ public class DslParseErrorTests
     [InlineData("gol", "goal")]
     public void SuggestKeyword_SuggestsCorrectKeyword(string input, string expected)
     {
-        var suggestion = DslErrorHelper.SuggestKeyword(input);
+        string? suggestion = DslErrorHelper.SuggestKeyword(input);
 
         Assert.Equal(expected, suggestion);
     }
@@ -28,7 +29,7 @@ public class DslParseErrorTests
     [Fact]
     public void SuggestKeyword_ReturnsNull_ForVeryDifferentInput()
     {
-        var suggestion = DslErrorHelper.SuggestKeyword("xyz123");
+        string? suggestion = DslErrorHelper.SuggestKeyword("xyz123");
 
         Assert.Null(suggestion);
     }
@@ -36,7 +37,7 @@ public class DslParseErrorTests
     [Fact]
     public void UnknownKeyword_CreatesErrorWithSuggestion()
     {
-        var error = DslErrorHelper.UnknownKeyword(5, "locaton: test", "locaton");
+        DslParseError error = DslErrorHelper.UnknownKeyword(5, "locaton: test", "locaton");
 
         Assert.Equal(5, error.Line);
         Assert.Contains("Unknown keyword", error.Message);
@@ -46,7 +47,7 @@ public class DslParseErrorTests
     [Fact]
     public void NoCurrentLocation_CreatesHelpfulError()
     {
-        var error = DslErrorHelper.NoCurrentLocation(3, "item: sword | sword | A sword.", "item");
+        DslParseError error = DslErrorHelper.NoCurrentLocation(3, "item: sword | sword | A sword.", "item");
 
         Assert.Equal(3, error.Line);
         Assert.Contains("requires a location", error.Message);
@@ -56,7 +57,7 @@ public class DslParseErrorTests
     [Fact]
     public void InvalidExitSyntax_CreatesHelpfulError()
     {
-        var error = DslErrorHelper.InvalidExitSyntax(7, "exit: north forest");
+        DslParseError error = DslErrorHelper.InvalidExitSyntax(7, "exit: north forest");
 
         Assert.Contains("Invalid exit syntax", error.Message);
         Assert.Contains("direction -> target", error.Suggestion);
@@ -65,14 +66,14 @@ public class DslParseErrorTests
     [Fact]
     public void DslParseError_ToString_FormatsCorrectly()
     {
-        var error = new DslParseError(
+        DslParseError error = new(
             line: 10,
             lineContent: "locaton: test_room",
             message: "Unknown keyword: 'locaton'",
             suggestion: "Did you mean 'location'?",
             column: 1);
 
-        var result = error.ToString();
+        string result = error.ToString();
 
         Assert.Contains("Line 10:", result);
         Assert.Contains("Unknown keyword", result);
@@ -83,8 +84,8 @@ public class DslParseErrorTests
     [Fact]
     public void DslParseException_WithSingleError_FormatsCorrectly()
     {
-        var error = new DslParseError(1, "bad line", "Something went wrong");
-        var exception = new DslParseException(error);
+        DslParseError error = new(1, "bad line", "Something went wrong");
+        DslParseException exception = new(error);
 
         Assert.Contains("parsing error", exception.Message);
         _ = Assert.Single(exception.Errors);
@@ -93,12 +94,12 @@ public class DslParseErrorTests
     [Fact]
     public void DslParseException_WithMultipleErrors_FormatsCorrectly()
     {
-        var errors = new[]
+        DslParseError[] errors = new[]
         {
             new DslParseError(1, "error 1", "First error"),
             new DslParseError(5, "error 2", "Second error")
         };
-        var exception = new DslParseException(errors);
+        DslParseException exception = new(errors);
 
         Assert.Contains("2 errors", exception.Message);
         Assert.Equal(2, exception.Errors.Count);

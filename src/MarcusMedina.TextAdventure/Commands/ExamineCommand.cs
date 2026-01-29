@@ -2,18 +2,22 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 public sealed class ExamineCommand : ICommand
 {
     public string? Target { get; }
 
-    public ExamineCommand(string? target = null) => Target = target;
+    public ExamineCommand(string? target = null)
+    {
+        Target = target;
+    }
 
     public CommandResult Execute(CommandContext context)
     {
@@ -22,15 +26,18 @@ public sealed class ExamineCommand : ICommand
             return CommandResult.Fail(Language.ExamineWhat, GameError.MissingArgument);
         }
 
-        var location = context.State.CurrentLocation;
+        ILocation location = context.State.CurrentLocation;
         return IsRoomReference(location.Id, Target) ? new LookCommand().Execute(context) : LookCommand.ExecuteTarget(context, Target);
     }
 
     private static bool IsRoomReference(string locationId, string target)
     {
         if (string.IsNullOrWhiteSpace(target))
+        {
             return false;
-        var token = target.Trim();
+        }
+
+        string token = target.Trim();
 
         return token.TextCompare(locationId)
                || token.TextCompare("room")

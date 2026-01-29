@@ -2,10 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class NpcStateCondition : IQuestCondition
 {
@@ -19,5 +20,8 @@ public sealed class NpcStateCondition : IQuestCondition
         RequiredState = requiredState;
     }
 
-    public bool Accept(IQuestConditionVisitor visitor) => visitor.Visit(this);
+    public bool Accept(IQuestConditionVisitor visitor)
+    {
+        return visitor.Visit(this);
+    }
 }

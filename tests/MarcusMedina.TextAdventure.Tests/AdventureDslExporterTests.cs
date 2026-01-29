@@ -3,23 +3,24 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Dsl;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 public class AdventureDslExporterTests
 {
     [Fact]
     public void Export_BasicLocation_IncludesLocationLine()
     {
-        var location = new Location("test_room", "A test room.");
-        var state = new GameState(location);
-        var exporter = new AdventureDslExporter();
+        Location location = new("test_room", "A test room.");
+        GameState state = new(location);
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("location: test_room | A test room.", result);
     }
@@ -27,11 +28,11 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithWorldTitle_IncludesWorldLine()
     {
-        var location = new Location("start", "Start room.");
-        var state = new GameState(location);
-        var exporter = new AdventureDslExporter();
+        Location location = new("start", "Start room.");
+        GameState state = new(location);
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state, worldTitle: "My Adventure");
+        string result = exporter.Export(state, worldTitle: "My Adventure");
 
         Assert.Contains("world: My Adventure", result);
     }
@@ -39,11 +40,11 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithGoal_IncludesGoalLine()
     {
-        var location = new Location("start", "Start room.");
-        var state = new GameState(location);
-        var exporter = new AdventureDslExporter();
+        Location location = new("start", "Start room.");
+        GameState state = new(location);
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state, goal: "Find the treasure");
+        string result = exporter.Export(state, goal: "Find the treasure");
 
         Assert.Contains("goal: Find the treasure", result);
     }
@@ -51,13 +52,13 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithItem_IncludesItemLine()
     {
-        var location = new Location("room", "A room.");
-        var item = new Item("sword", "rusty sword", "An old rusty sword.");
+        Location location = new("room", "A room.");
+        Item item = new("sword", "rusty sword", "An old rusty sword.");
         location.AddItem(item);
-        var state = new GameState(location);
-        var exporter = new AdventureDslExporter();
+        GameState state = new(location);
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("item: sword | rusty sword | An old rusty sword.", result);
     }
@@ -65,13 +66,13 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithKey_IncludesKeyLine()
     {
-        var location = new Location("room", "A room.");
-        var key = new Key("brass_key", "brass key", "A small brass key.");
+        Location location = new("room", "A room.");
+        Key key = new("brass_key", "brass key", "A small brass key.");
         location.AddItem(key);
-        var state = new GameState(location);
-        var exporter = new AdventureDslExporter();
+        GameState state = new(location);
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("key: brass_key | brass key | A small brass key.", result);
     }
@@ -79,14 +80,14 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithDoor_IncludesDoorLine()
     {
-        var room1 = new Location("room1", "Room one.");
-        var room2 = new Location("room2", "Room two.");
-        var door = new Door("wooden_door", "wooden door", "A heavy wooden door.");
+        Location room1 = new("room1", "Room one.");
+        Location room2 = new("room2", "Room two.");
+        Door door = new("wooden_door", "wooden door", "A heavy wooden door.");
         _ = room1.AddExit(Direction.North, room2, door);
-        var state = new GameState(room1, worldLocations: new[] { room1, room2 });
-        var exporter = new AdventureDslExporter();
+        GameState state = new(room1, worldLocations: new[] { room1, room2 });
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("door: wooden_door | wooden door | A heavy wooden door.", result);
     }
@@ -94,13 +95,13 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithExit_IncludesExitLine()
     {
-        var room1 = new Location("room1", "Room one.");
-        var room2 = new Location("room2", "Room two.");
+        Location room1 = new("room1", "Room one.");
+        Location room2 = new("room2", "Room two.");
         _ = room1.AddExit(Direction.North, room2);
-        var state = new GameState(room1, worldLocations: new[] { room1, room2 });
-        var exporter = new AdventureDslExporter();
+        GameState state = new(room1, worldLocations: new[] { room1, room2 });
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("exit: north -> room2", result);
     }
@@ -108,14 +109,14 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithDoorOnExit_IncludesDoorOption()
     {
-        var room1 = new Location("room1", "Room one.");
-        var room2 = new Location("room2", "Room two.");
-        var door = new Door("gate", "iron gate", "A rusty iron gate.");
+        Location room1 = new("room1", "Room one.");
+        Location room2 = new("room2", "Room two.");
+        Door door = new("gate", "iron gate", "A rusty iron gate.");
         _ = room1.AddExit(Direction.East, room2, door);
-        var state = new GameState(room1, worldLocations: new[] { room1, room2 });
-        var exporter = new AdventureDslExporter();
+        GameState state = new(room1, worldLocations: new[] { room1, room2 });
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("exit: east -> room2 | door=gate", result);
     }
@@ -123,13 +124,13 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_WithOneWayExit_IncludesOneWayOption()
     {
-        var room1 = new Location("room1", "Room one.");
-        var room2 = new Location("room2", "Room two.");
+        Location room1 = new("room1", "Room one.");
+        Location room2 = new("room2", "Room two.");
         _ = room1.AddExit(Direction.Down, room2, oneWay: true);
-        var state = new GameState(room1, worldLocations: new[] { room1, room2 });
-        var exporter = new AdventureDslExporter();
+        GameState state = new(room1, worldLocations: new[] { room1, room2 });
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("exit: down -> room2 | oneway", result);
     }
@@ -137,14 +138,14 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_ItemWithWeight_IncludesWeightOption()
     {
-        var location = new Location("room", "A room.");
-        var item = new Item("rock", "heavy rock", "A very heavy rock.");
+        Location location = new("room", "A room.");
+        Item item = new("rock", "heavy rock", "A very heavy rock.");
         _ = item.SetWeight(5.5f);
         location.AddItem(item);
-        var state = new GameState(location);
-        var exporter = new AdventureDslExporter();
+        GameState state = new(location);
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("weight=5.5", result);
     }
@@ -152,14 +153,14 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_NonTakeableItem_IncludesTakeableFalse()
     {
-        var location = new Location("room", "A room.");
-        var item = new Item("statue", "stone statue", "A heavy stone statue.");
+        Location location = new("room", "A room.");
+        Item item = new("statue", "stone statue", "A heavy stone statue.");
         _ = item.SetTakeable(false);
         location.AddItem(item);
-        var state = new GameState(location);
-        var exporter = new AdventureDslExporter();
+        GameState state = new(location);
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("takeable=false", result);
     }
@@ -167,17 +168,17 @@ public class AdventureDslExporterTests
     [Fact]
     public void Export_DoorWithKey_IncludesKeyOption()
     {
-        var room1 = new Location("room1", "Room one.");
-        var room2 = new Location("room2", "Room two.");
-        var key = new Key("gold_key", "gold key", "A shiny gold key.");
-        var door = new Door("vault_door", "vault door", "A massive vault door.");
+        Location room1 = new("room1", "Room one.");
+        Location room2 = new("room2", "Room two.");
+        Key key = new("gold_key", "gold key", "A shiny gold key.");
+        Door door = new("vault_door", "vault door", "A massive vault door.");
         _ = door.RequiresKey(key);
         room1.AddItem(key);
         _ = room1.AddExit(Direction.North, room2, door);
-        var state = new GameState(room1, worldLocations: new[] { room1, room2 });
-        var exporter = new AdventureDslExporter();
+        GameState state = new(room1, worldLocations: new[] { room1, room2 });
+        AdventureDslExporter exporter = new();
 
-        var result = exporter.Export(state);
+        string result = exporter.Export(state);
 
         Assert.Contains("door: vault_door | vault door | A massive vault door. | key=gold_key", result);
     }
@@ -186,27 +187,27 @@ public class AdventureDslExporterTests
     public void Export_RoundTrip_ParsedResultMatchesOriginal()
     {
         // Create original state
-        var room1 = new Location("entrance", "The entrance hall.");
-        var room2 = new Location("garden", "A beautiful garden.");
-        var key = new Key("gate_key", "rusty key", "A rusty old key.");
-        var door = new Door("garden_gate", "garden gate", "An ornate garden gate.");
+        Location room1 = new("entrance", "The entrance hall.");
+        Location room2 = new("garden", "A beautiful garden.");
+        Key key = new("gate_key", "rusty key", "A rusty old key.");
+        Door door = new("garden_gate", "garden gate", "An ornate garden gate.");
         _ = door.RequiresKey(key);
         room1.AddItem(key);
         _ = room1.AddExit(Direction.North, room2, door);
 
-        var originalState = new GameState(room1, worldLocations: new[] { room1, room2 });
+        GameState originalState = new(room1, worldLocations: new[] { room1, room2 });
 
         // Export to DSL
-        var exporter = new AdventureDslExporter();
-        var dslContent = exporter.Export(originalState, "Test World", "Find the garden");
+        AdventureDslExporter exporter = new();
+        string dslContent = exporter.Export(originalState, "Test World", "Find the garden");
 
         // Write to temp file and parse back
-        var tempFile = Path.GetTempFileName();
+        string tempFile = Path.GetTempFileName();
         try
         {
             File.WriteAllText(tempFile, dslContent);
-            var parser = new AdventureDslParser();
-            var parsed = parser.ParseFile(tempFile);
+            AdventureDslParser parser = new();
+            DslAdventure parsed = parser.ParseFile(tempFile);
 
             // Verify round-trip
             Assert.Equal(2, parsed.Locations.Count);

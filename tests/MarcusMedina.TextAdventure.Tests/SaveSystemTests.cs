@@ -2,22 +2,23 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class SaveSystemTests
 {
     [Fact]
     public void JsonSaveSystem_RoundTripsMemento()
     {
-        var saveSystem = new JsonSaveSystem();
-        var tempFile = Path.GetTempFileName();
+        JsonSaveSystem saveSystem = new();
+        string tempFile = Path.GetTempFileName();
 
         try
         {
-            var memento = new GameMemento(
+            GameMemento memento = new(
                 currentLocationId: "cabin",
                 inventoryItemIds: new[] { "sword", "key" },
                 health: 50,
@@ -28,7 +29,7 @@ public class SaveSystemTests
                 timeline: ["Entered cave."]);
 
             saveSystem.Save(tempFile, memento);
-            var loaded = saveSystem.Load(tempFile);
+            GameMemento loaded = saveSystem.Load(tempFile);
 
             Assert.Equal("cabin", loaded.CurrentLocationId);
             Assert.Contains("sword", loaded.InventoryItemIds);
@@ -44,13 +45,13 @@ public class SaveSystemTests
     [Fact]
     public void GameState_ApplyMemento_RestoresLocationAndInventory()
     {
-        var start = new Location("start");
-        var cabin = new Location("cabin");
-        var sword = new Item("sword", "sword");
+        Location start = new("start");
+        Location cabin = new("cabin");
+        Item sword = new("sword", "sword");
         cabin.AddItem(sword);
 
-        var state = new GameState(start, worldLocations: new[] { start, cabin });
-        var memento = new GameMemento(
+        GameState state = new(start, worldLocations: new[] { start, cabin });
+        GameMemento memento = new(
             currentLocationId: "cabin",
             inventoryItemIds: new[] { "sword" },
             health: 80,

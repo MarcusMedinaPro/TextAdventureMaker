@@ -2,19 +2,22 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
+namespace MarcusMedina.TextAdventure.Commands;
 /// <summary>Move or push an item in the current location.</summary>
 public class MoveCommand : ICommand
 {
     public string Target { get; }
 
-    public MoveCommand(string target) => Target = target;
+    public MoveCommand(string target)
+    {
+        Target = target;
+    }
 
     public CommandResult Execute(CommandContext context)
     {
@@ -23,13 +26,13 @@ public class MoveCommand : ICommand
             return CommandResult.Fail(Language.NothingToMove, GameError.MissingArgument);
         }
 
-        var location = context.State.CurrentLocation;
-        var item = location.FindItem(Target);
+        ILocation location = context.State.CurrentLocation;
+        IItem? item = location.FindItem(Target);
         string? suggestion = null;
 
         if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
-            var best = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
+            IItem? best = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 item = best;
@@ -42,22 +45,22 @@ public class MoveCommand : ICommand
             return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
         }
 
-        var moveFailed = item.GetReaction(ItemAction.MoveFailed);
+        string? moveFailed = item.GetReaction(ItemAction.MoveFailed);
         if (!string.IsNullOrWhiteSpace(moveFailed))
         {
-            var failed = CommandResult.Fail(Language.CannotMoveItem, GameError.ItemNotUsable, moveFailed);
+            CommandResult failed = CommandResult.Fail(Language.CannotMoveItem, GameError.ItemNotUsable, moveFailed);
             return suggestion != null ? failed.WithSuggestion(suggestion) : failed;
         }
 
         if (item.Takeable && item.GetReaction(ItemAction.Move) == null)
         {
-            var failed = CommandResult.Fail(Language.CanTakeInstead(item.Name), GameError.ItemNotUsable);
+            CommandResult failed = CommandResult.Fail(Language.CanTakeInstead(item.Name), GameError.ItemNotUsable);
             return suggestion != null ? failed.WithSuggestion(suggestion) : failed;
         }
 
         item.Move();
-        var onMove = item.GetReaction(ItemAction.Move);
-        var ok = onMove != null
+        string? onMove = item.GetReaction(ItemAction.Move);
+        CommandResult ok = onMove != null
             ? CommandResult.Ok(Language.MoveItem(item.Name), onMove)
             : CommandResult.Ok(Language.MoveItem(item.Name));
 

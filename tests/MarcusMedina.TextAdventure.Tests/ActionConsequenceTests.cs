@@ -3,23 +3,24 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class ActionConsequenceTests
 {
     [Fact]
     public void OnDrop_SetsConsequence()
     {
-        var glass = new Item("glass", "wine glass", "A delicate wine glass.");
-        var brokenGlass = new Item("broken_glass", "broken glass", "Sharp glass shards.");
+        Item glass = new("glass", "wine glass", "A delicate wine glass.");
+        Item brokenGlass = new("broken_glass", "broken glass", "Sharp glass shards.");
 
         _ = glass.SetDropConsequence(ActionConsequence.Break("The glass shatters!", brokenGlass));
 
         Assert.True(glass.HasConsequence(ItemAction.Drop));
-        var consequence = glass.GetConsequence(ItemAction.Drop);
+        ActionConsequence? consequence = glass.GetConsequence(ItemAction.Drop);
         Assert.NotNull(consequence);
         Assert.True(consequence.DestroyItem);
         _ = Assert.Single(consequence.CreatedItems);
@@ -29,12 +30,12 @@ public class ActionConsequenceTests
     [Fact]
     public void OnUse_SetsConsequence()
     {
-        var potion = new Item("potion", "health potion", "A red potion.");
+        Item potion = new("potion", "health potion", "A red potion.");
 
         _ = potion.SetUseConsequence(ActionConsequence.Destroy("You drink the potion. It tastes like cherries."));
 
         Assert.True(potion.HasConsequence(ItemAction.Use));
-        var consequence = potion.GetConsequence(ItemAction.Use);
+        ActionConsequence? consequence = potion.GetConsequence(ItemAction.Use);
         Assert.NotNull(consequence);
         Assert.True(consequence.DestroyItem);
     }
@@ -42,7 +43,7 @@ public class ActionConsequenceTests
     [Fact]
     public void OnTake_SetsConsequence()
     {
-        var trap = new Item("trap", "bear trap", "A rusty bear trap.");
+        Item trap = new("trap", "bear trap", "A rusty bear trap.");
 
         _ = trap.SetTakeConsequence(new ActionConsequence
         {
@@ -56,13 +57,13 @@ public class ActionConsequenceTests
     [Fact]
     public void MakeFragile_SetsDropConsequence()
     {
-        var vase = new Item("vase", "ming vase", "An ancient vase.");
-        var shards = new Item("shards", "ceramic shards", "Broken pieces of the vase.");
+        Item vase = new("vase", "ming vase", "An ancient vase.");
+        Item shards = new("shards", "ceramic shards", "Broken pieces of the vase.");
 
         _ = vase.MakeFragile("The vase shatters into a thousand pieces!", shards);
 
         Assert.True(vase.HasConsequence(ItemAction.Drop));
-        var consequence = vase.GetConsequence(ItemAction.Drop);
+        ActionConsequence? consequence = vase.GetConsequence(ItemAction.Drop);
         Assert.NotNull(consequence);
         Assert.True(consequence.DestroyItem);
         _ = Assert.Single(consequence.CreatedItems);
@@ -72,12 +73,12 @@ public class ActionConsequenceTests
     [Fact]
     public void MakeConsumable_SetsUseConsequence()
     {
-        var apple = new Item("apple", "red apple", "A juicy red apple.");
+        Item apple = new("apple", "red apple", "A juicy red apple.");
 
         _ = apple.MakeConsumable("You eat the apple. Delicious!");
 
         Assert.True(apple.HasConsequence(ItemAction.Use));
-        var consequence = apple.GetConsequence(ItemAction.Use);
+        ActionConsequence? consequence = apple.GetConsequence(ItemAction.Use);
         Assert.NotNull(consequence);
         Assert.True(consequence.DestroyItem);
         Assert.Equal("You eat the apple. Delicious!", consequence.Message);
@@ -86,9 +87,9 @@ public class ActionConsequenceTests
     [Fact]
     public void GetConsequence_ReturnsNull_WhenNoConsequence()
     {
-        var rock = new Item("rock", "rock", "A plain rock.");
+        Item rock = new("rock", "rock", "A plain rock.");
 
-        var consequence = rock.GetConsequence(ItemAction.Drop);
+        ActionConsequence? consequence = rock.GetConsequence(ItemAction.Drop);
 
         Assert.Null(consequence);
     }
@@ -96,7 +97,7 @@ public class ActionConsequenceTests
     [Fact]
     public void HasConsequence_ReturnsFalse_WhenNoConsequence()
     {
-        var rock = new Item("rock", "rock", "A plain rock.");
+        Item rock = new("rock", "rock", "A plain rock.");
 
         Assert.False(rock.HasConsequence(ItemAction.Drop));
         Assert.False(rock.HasConsequence(ItemAction.Use));
@@ -106,10 +107,10 @@ public class ActionConsequenceTests
     [Fact]
     public void ActionConsequence_Transform_CreatesCorrectConsequence()
     {
-        var caterpillar = new Item("caterpillar", "caterpillar", "A fuzzy caterpillar.");
-        var butterfly = new Item("butterfly", "butterfly", "A beautiful butterfly.");
+        _ = new Item("caterpillar", "caterpillar", "A fuzzy caterpillar.");
+        Item butterfly = new("butterfly", "butterfly", "A beautiful butterfly.");
 
-        var consequence = ActionConsequence.Transform(butterfly, "The caterpillar transforms into a butterfly!");
+        ActionConsequence consequence = ActionConsequence.Transform(butterfly, "The caterpillar transforms into a butterfly!");
 
         Assert.True(consequence.DestroyItem);
         _ = Assert.Single(consequence.CreatedItems);
@@ -120,11 +121,11 @@ public class ActionConsequenceTests
     [Fact]
     public void ActionConsequence_Break_CreatesMultiplePieces()
     {
-        var mirror = new Item("mirror", "mirror", "A magic mirror.");
-        var shard1 = new Item("shard1", "mirror shard", "A piece of the mirror.");
-        var shard2 = new Item("shard2", "mirror shard", "Another piece of the mirror.");
+        _ = new Item("mirror", "mirror", "A magic mirror.");
+        Item shard1 = new("shard1", "mirror shard", "A piece of the mirror.");
+        Item shard2 = new("shard2", "mirror shard", "Another piece of the mirror.");
 
-        var consequence = ActionConsequence.Break("The mirror breaks!", shard1, shard2);
+        ActionConsequence consequence = ActionConsequence.Break("The mirror breaks!", shard1, shard2);
 
         Assert.True(consequence.DestroyItem);
         Assert.Equal(2, consequence.CreatedItems.Count);

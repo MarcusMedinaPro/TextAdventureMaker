@@ -2,21 +2,22 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class EventSystemTests
 {
     [Fact]
     public void Publish_NotifiesSubscriber()
     {
-        var events = new EventSystem();
-        var location = new Location("camp");
-        var state = new GameState(location);
-        var called = false;
+        EventSystem events = new();
+        Location location = new("camp");
+        GameState state = new(location);
+        bool called = false;
 
         events.Subscribe(GameEventType.EnterLocation, _ => called = true);
         events.Publish(new GameEvent(GameEventType.EnterLocation, state, location));
@@ -27,11 +28,14 @@ public class EventSystemTests
     [Fact]
     public void Unsubscribe_RemovesHandler()
     {
-        var events = new EventSystem();
-        var location = new Location("camp");
-        var state = new GameState(location);
-        var called = false;
-        void handler(GameEvent _) => called = true;
+        EventSystem events = new();
+        Location location = new("camp");
+        GameState state = new(location);
+        bool called = false;
+        void handler(GameEvent _)
+        {
+            called = true;
+        }
 
         events.Subscribe(GameEventType.ExitLocation, handler);
         events.Unsubscribe(GameEventType.ExitLocation, handler);
@@ -43,10 +47,10 @@ public class EventSystemTests
     [Fact]
     public void Publish_NotifiesAllHandlers()
     {
-        var events = new EventSystem();
-        var location = new Location("camp");
-        var state = new GameState(location);
-        var count = 0;
+        EventSystem events = new();
+        Location location = new("camp");
+        GameState state = new(location);
+        int count = 0;
 
         events.Subscribe(GameEventType.PickupItem, _ => count++);
         events.Subscribe(GameEventType.PickupItem, _ => count++);

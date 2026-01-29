@@ -2,7 +2,6 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
@@ -10,20 +9,25 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 public class TakeCommand : ICommand
 {
     public string ItemName { get; }
 
-    public TakeCommand(string itemName) => ItemName = itemName;
+    public TakeCommand(string itemName)
+    {
+        ItemName = itemName;
+    }
 
     public CommandResult Execute(CommandContext context)
     {
-        var location = context.State.CurrentLocation;
-        var item = location.FindItem(ItemName);
+        ILocation location = context.State.CurrentLocation;
+        IItem? item = location.FindItem(ItemName);
         string? suggestion = null;
         if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
         {
-            var best = FuzzyMatcher.FindBestItem(location.Items, ItemName, context.State.FuzzyMaxDistance);
+            IItem? best = FuzzyMatcher.FindBestItem(location.Items, ItemName, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 item = best;
@@ -38,13 +42,13 @@ public class TakeCommand : ICommand
 
         if (!item.Takeable)
         {
-            var reaction = item.GetReaction(ItemAction.TakeFailed);
+            string? reaction = item.GetReaction(ItemAction.TakeFailed);
             return reaction != null
                 ? CommandResult.Fail(Language.CannotTakeItem, GameError.ItemNotTakeable, reaction)
                 : CommandResult.Fail(Language.CannotTakeItem, GameError.ItemNotTakeable);
         }
 
-        var inventory = context.State.Inventory;
+        IInventory inventory = context.State.Inventory;
         if (!inventory.Add(item))
         {
             return inventory.LimitType == InventoryLimitType.ByCount
@@ -56,8 +60,8 @@ public class TakeCommand : ICommand
         item.Take();
         context.State.Events.Publish(new GameEvent(GameEventType.PickupItem, context.State, location, item));
 
-        var onTake = item.GetReaction(ItemAction.Take);
-        var result = onTake != null
+        string? onTake = item.GetReaction(ItemAction.Take);
+        CommandResult result = onTake != null
             ? CommandResult.Ok(Language.TakeItem(item.Name), onTake)
             : CommandResult.Ok(Language.TakeItem(item.Name));
 

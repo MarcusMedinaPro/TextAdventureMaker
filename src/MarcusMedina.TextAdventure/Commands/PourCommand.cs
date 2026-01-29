@@ -2,12 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+
+namespace MarcusMedina.TextAdventure.Commands;
 
 public class PourCommand : ICommand
 {
@@ -22,8 +23,8 @@ public class PourCommand : ICommand
 
     public CommandResult Execute(CommandContext context)
     {
-        var inventory = context.State.Inventory;
-        var fluidItem = inventory.FindItem(FluidName) as IFluid;
+        IInventory inventory = context.State.Inventory;
+        IFluid? fluidItem = inventory.FindItem(FluidName) as IFluid;
         string? suggestion = null;
         if (fluidItem == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(FluidName))
         {
@@ -39,10 +40,10 @@ public class PourCommand : ICommand
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
         }
 
-        var containerItem = inventory.FindItem(ContainerName);
+        IItem? containerItem = inventory.FindItem(ContainerName);
         if (containerItem == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ContainerName))
         {
-            var best = FuzzyMatcher.FindBestItem(inventory.Items, ContainerName, context.State.FuzzyMaxDistance);
+            IItem? best = FuzzyMatcher.FindBestItem(inventory.Items, ContainerName, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 containerItem = best;
@@ -61,7 +62,7 @@ public class PourCommand : ICommand
         }
 
         _ = inventory.Remove((IItem)fluidItem);
-        var ok = CommandResult.Ok(Language.PourResult(fluidItem.Name, containerItem.Name));
+        CommandResult ok = CommandResult.Ok(Language.PourResult(fluidItem.Name, containerItem.Name));
         return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

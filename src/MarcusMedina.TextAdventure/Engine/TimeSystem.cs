@@ -2,10 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class TimeSystem : ITimeSystem
 {
@@ -60,7 +61,7 @@ public sealed class TimeSystem : ITimeSystem
     public ITimeSystem OnPhase(TimeOfDay phase, Action<IGameState> handler)
     {
         ArgumentNullException.ThrowIfNull(handler);
-        if (!_phaseHandlers.TryGetValue(phase, out var handlers))
+        if (!_phaseHandlers.TryGetValue(phase, out List<Action<IGameState>>? handlers))
         {
             handlers = [];
             _phaseHandlers[phase] = handlers;
@@ -73,8 +74,8 @@ public sealed class TimeSystem : ITimeSystem
     public ITimeSystem OnMovesRemaining(int movesRemaining, Action<IGameState> handler)
     {
         ArgumentNullException.ThrowIfNull(handler);
-        var key = Math.Max(0, movesRemaining);
-        if (!_movesRemainingHandlers.TryGetValue(key, out var handlers))
+        int key = Math.Max(0, movesRemaining);
+        if (!_movesRemainingHandlers.TryGetValue(key, out List<Action<IGameState>>? handlers))
         {
             handlers = [];
             _movesRemainingHandlers[key] = handlers;
@@ -93,7 +94,7 @@ public sealed class TimeSystem : ITimeSystem
 
     public ITimedChallenge CreateTimedChallenge(string id)
     {
-        var challenge = new TimedChallenge(id);
+        TimedChallenge challenge = new(id);
         _challenges.Add(challenge);
         return challenge;
     }
@@ -101,18 +102,21 @@ public sealed class TimeSystem : ITimeSystem
     public void Tick(IGameState state)
     {
         if (!Enabled)
+        {
             return;
+        }
+
         ArgumentNullException.ThrowIfNull(state);
 
         MovesUsed++;
 
         if (MaxMoves.HasValue)
         {
-            var remaining = MovesRemaining ?? 0;
-            if (_movesRemainingHandlers.TryGetValue(remaining, out var handlers) && !_movesRemainingFired.Contains(remaining))
+            int remaining = MovesRemaining ?? 0;
+            if (_movesRemainingHandlers.TryGetValue(remaining, out List<Action<IGameState>>? handlers) && !_movesRemainingFired.Contains(remaining))
             {
                 _ = _movesRemainingFired.Add(remaining);
-                foreach (var handler in handlers)
+                foreach (Action<IGameState> handler in handlers)
                 {
                     handler(state);
                 }
@@ -121,7 +125,7 @@ public sealed class TimeSystem : ITimeSystem
             if (remaining <= 0 && !_movesExhaustedFired)
             {
                 _movesExhaustedFired = true;
-                foreach (var handler in _movesExhaustedHandlers)
+                foreach (Action<IGameState> handler in _movesExhaustedHandlers)
                 {
                     handler(state);
                 }
@@ -129,43 +133,46 @@ public sealed class TimeSystem : ITimeSystem
         }
 
         CurrentTick++;
-        var tickInDay = CurrentTick % TicksPerDay;
+        int tickInDay = CurrentTick % TicksPerDay;
         if (tickInDay == 0)
         {
             CurrentDay++;
         }
 
-        var nextPhase = GetPhaseFromTick(tickInDay, TicksPerDay);
+        TimeOfDay nextPhase = GetPhaseFromTick(tickInDay, TicksPerDay);
         if (nextPhase != CurrentTimeOfDay)
         {
             CurrentTimeOfDay = nextPhase;
-            if (_phaseHandlers.TryGetValue(nextPhase, out var handlers))
+            if (_phaseHandlers.TryGetValue(nextPhase, out List<Action<IGameState>>? handlers))
             {
-                foreach (var handler in handlers)
+                foreach (Action<IGameState> handler in handlers)
                 {
                     handler(state);
                 }
             }
         }
 
-        foreach (var challenge in _challenges)
+        foreach (TimedChallenge challenge in _challenges)
         {
             challenge.Tick(state);
         }
     }
 
-    private int GetPhaseStartTick(TimeOfDay phase) => phase switch
+    private int GetPhaseStartTick(TimeOfDay phase)
     {
-        TimeOfDay.Dawn => 0,
-        TimeOfDay.Day => TicksPerDay / 4,
-        TimeOfDay.Dusk => TicksPerDay / 2,
-        TimeOfDay.Night => TicksPerDay * 3 / 4,
-        _ => 0
-    };
+        return phase switch
+        {
+            TimeOfDay.Dawn => 0,
+            TimeOfDay.Day => TicksPerDay / 4,
+            TimeOfDay.Dusk => TicksPerDay / 2,
+            TimeOfDay.Night => TicksPerDay * 3 / 4,
+            _ => 0
+        };
+    }
 
     private static TimeOfDay GetPhaseFromTick(int tickInDay, int ticksPerDay)
     {
-        var quarter = ticksPerDay / 4.0;
+        double quarter = ticksPerDay / 4.0;
         return tickInDay < quarter
             ? TimeOfDay.Dawn
             : tickInDay < quarter * 2 ? TimeOfDay.Day : tickInDay < quarter * 3 ? TimeOfDay.Dusk : TimeOfDay.Night;

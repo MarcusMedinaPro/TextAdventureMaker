@@ -2,10 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public class Quest : IQuest
 {
@@ -64,7 +65,7 @@ public class Quest : IQuest
             return false;
         }
 
-        var evaluator = new QuestConditionEvaluator(state);
+        QuestConditionEvaluator evaluator = new(state);
         if (_conditions.All(condition => condition.Accept(evaluator)))
         {
             State = QuestState.Completed;

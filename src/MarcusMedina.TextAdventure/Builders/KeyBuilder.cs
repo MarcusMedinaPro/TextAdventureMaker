@@ -2,21 +2,25 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Builders;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Builders;
+
 public sealed class KeyBuilder
 {
     private readonly Key _key;
 
-    private KeyBuilder(Key key) => _key = key;
+    private KeyBuilder(Key key)
+    {
+        _key = key;
+    }
 
     public static KeyBuilder Create(string id, string name, string description = "")
     {
-        var key = string.IsNullOrWhiteSpace(description)
+        Key key = string.IsNullOrWhiteSpace(description)
             ? new Key(id, name)
             : new Key(id, name, description);
         return new KeyBuilder(key);
@@ -82,5 +86,8 @@ public sealed class KeyBuilder
         return this;
     }
 
-    public Key Build() => _key;
+    public Key Build()
+    {
+        return _key;
+    }
 }

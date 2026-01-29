@@ -2,23 +2,24 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class NavigationTests
 {
     [Fact]
     public void Player_CanMoveNorth()
     {
-        var entrance = new Location("entrance");
-        var forest = new Location("forest");
+        Location entrance = new("entrance");
+        Location forest = new("forest");
         _ = entrance.AddExit(Direction.North, forest);
 
-        var state = new GameState(entrance);
-        var moved = state.Move(Direction.North);
+        GameState state = new(entrance);
+        bool moved = state.Move(Direction.North);
 
         Assert.True(moved);
         Assert.Equal(forest, state.CurrentLocation);
@@ -27,9 +28,9 @@ public class NavigationTests
     [Fact]
     public void Player_CannotMoveWhereNoExit()
     {
-        var entrance = new Location("entrance");
-        var state = new GameState(entrance);
-        var moved = state.Move(Direction.North);
+        Location entrance = new("entrance");
+        GameState state = new(entrance);
+        bool moved = state.Move(Direction.North);
 
         Assert.False(moved);
         Assert.Equal(entrance, state.CurrentLocation);
@@ -38,11 +39,11 @@ public class NavigationTests
     [Fact]
     public void Player_CanUseInOutDirections()
     {
-        var outside = new Location("outside");
-        var inside = new Location("inside");
+        Location outside = new("outside");
+        Location inside = new("inside");
         _ = outside.AddExit(Direction.In, inside);
 
-        var state = new GameState(outside);
+        GameState state = new(outside);
 
         Assert.True(state.Move(Direction.In));
         Assert.Equal(inside, state.CurrentLocation);

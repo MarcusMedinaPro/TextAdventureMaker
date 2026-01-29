@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class FactionSystem : IFactionSystem
 {
@@ -19,23 +20,29 @@ public sealed class FactionSystem : IFactionSystem
             throw new ArgumentException("Faction id cannot be empty.", nameof(id));
         }
 
-        if (_factions.TryGetValue(id, out var existing))
+        if (_factions.TryGetValue(id, out IFaction? existing))
         {
             return existing;
         }
 
-        var faction = new Faction(id);
+        Faction faction = new(id);
         _factions[id] = faction;
         return faction;
     }
 
-    public IFaction? GetFaction(string id) => string.IsNullOrWhiteSpace(id) ? null : _factions.TryGetValue(id, out var faction) ? faction : null;
+    public IFaction? GetFaction(string id)
+    {
+        return string.IsNullOrWhiteSpace(id) ? null : _factions.TryGetValue(id, out IFaction? faction) ? faction : null;
+    }
 
-    public int GetReputation(string id) => GetFaction(id)?.Reputation ?? 0;
+    public int GetReputation(string id)
+    {
+        return GetFaction(id)?.Reputation ?? 0;
+    }
 
     public int ModifyReputation(string id, int amount, IGameState state)
     {
-        var faction = AddFaction(id);
+        IFaction faction = AddFaction(id);
         return ((Faction)faction).ModifyReputation(amount, state);
     }
 }

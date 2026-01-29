@@ -2,10 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class GameBuilder
 {
@@ -20,7 +21,10 @@ public sealed class GameBuilder
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
 
-    public static GameBuilder Create() => new();
+    public static GameBuilder Create()
+    {
+        return new();
+    }
 
     public GameBuilder UseState(GameState state)
     {
@@ -79,11 +83,17 @@ public sealed class GameBuilder
     public GameBuilder AddLocations(IEnumerable<ILocation> locations)
     {
         if (locations == null)
+        {
             return this;
-        foreach (var location in locations)
+        }
+
+        foreach (ILocation location in locations)
         {
             if (location == null)
+            {
                 continue;
+            }
+
             _locations.Add(location);
         }
 
@@ -106,8 +116,8 @@ public sealed class GameBuilder
 
     public Game Build()
     {
-        var parser = _parser ?? throw new InvalidOperationException("Parser must be provided.");
-        var state = _state ?? BuildStateFromLocations();
+        ICommandParser parser = _parser ?? throw new InvalidOperationException("Parser must be provided.");
+        GameState state = _state ?? BuildStateFromLocations();
 
         if (_state != null && _locations.Count > 0)
         {
@@ -119,14 +129,14 @@ public sealed class GameBuilder
             state.SetTimeSystem(_timeSystem);
         }
 
-        var game = new Game(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
+        Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
-        foreach (var handler in _turnStartHandlers)
+        foreach (Action<Game> handler in _turnStartHandlers)
         {
             game.AddTurnStartHandler(handler);
         }
 
-        foreach (var handler in _turnEndHandlers)
+        foreach (Action<Game, ICommand, CommandResult> handler in _turnEndHandlers)
         {
             game.AddTurnEndHandler(handler);
         }
@@ -136,16 +146,16 @@ public sealed class GameBuilder
 
     private GameState BuildStateFromLocations()
     {
-        var start = _startLocation ?? _locations.FirstOrDefault();
+        ILocation? start = _startLocation ?? _locations.FirstOrDefault();
         if (start == null)
         {
             throw new InvalidOperationException("Start location must be provided.");
         }
 
-        var allLocations = new HashSet<ILocation>(_locations)
-        {
-            start
-        };
+        HashSet<ILocation> allLocations =
+        [
+.. _locations,             start
+        ];
 
         return new GameState(start, timeSystem: _timeSystem, worldLocations: allLocations);
     }

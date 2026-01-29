@@ -2,16 +2,20 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Parsing;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class KeywordParserTests
 {
-    private static KeywordParserConfig CreateEnglishConfig() => new(
+    private static KeywordParserConfig CreateEnglishConfig()
+    {
+        return new(
             quit: CommandHelper.NewCommands("quit", "exit", "q"),
             look: CommandHelper.NewCommands("look", "l", "ls"),
             examine: CommandHelper.NewCommands("examine", "x"),
@@ -53,6 +57,7 @@ public class KeywordParserTests
                 ["out"] = Direction.Out
             },
             allowDirectionEnumNames: true);
+    }
 
     [Theory]
     [InlineData("north", Direction.North)]
@@ -62,11 +67,11 @@ public class KeywordParserTests
     [InlineData("out", Direction.Out)]
     public void Parse_Directions_ReturnsGoCommand(string input, Direction expected)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
-        var go = Assert.IsType<GoCommand>(command);
+        GoCommand go = Assert.IsType<GoCommand>(command);
         Assert.Equal(expected, go.Direction);
     }
 
@@ -76,9 +81,9 @@ public class KeywordParserTests
     [InlineData("ls")]
     public void Parse_Look_ReturnsLookCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<LookCommand>(command);
     }
@@ -88,9 +93,9 @@ public class KeywordParserTests
     [InlineData("push stone")]
     public void Parse_Move_ReturnsMoveCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<MoveCommand>(command);
     }
@@ -98,11 +103,11 @@ public class KeywordParserTests
     [Fact]
     public void Parse_MoveWithDirection_ReturnsGoCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("move north");
+        ICommand command = parser.Parse("move north");
 
-        var go = Assert.IsType<GoCommand>(command);
+        GoCommand go = Assert.IsType<GoCommand>(command);
         Assert.Equal(Direction.North, go.Direction);
     }
 
@@ -111,9 +116,9 @@ public class KeywordParserTests
     [InlineData("x")]
     public void Parse_Examine_ReturnsExamineCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<ExamineCommand>(command);
     }
@@ -121,22 +126,22 @@ public class KeywordParserTests
     [Fact]
     public void Parse_ExamineAt_ReturnsExamineCommandWithTarget()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("examine key");
+        ICommand command = parser.Parse("examine key");
 
-        var examine = Assert.IsType<ExamineCommand>(command);
+        ExamineCommand examine = Assert.IsType<ExamineCommand>(command);
         Assert.Equal("key", examine.Target);
     }
 
     [Fact]
     public void Parse_LookAt_ReturnsLookCommandWithTarget()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("look key");
+        ICommand command = parser.Parse("look key");
 
-        var look = Assert.IsType<LookCommand>(command);
+        LookCommand look = Assert.IsType<LookCommand>(command);
         Assert.Equal("key", look.Target);
     }
 
@@ -147,9 +152,9 @@ public class KeywordParserTests
     [InlineData("health")]
     public void Parse_Stats_ReturnsStatsCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<StatsCommand>(command);
     }
@@ -160,9 +165,9 @@ public class KeywordParserTests
     [InlineData("i")]
     public void Parse_Inventory_ReturnsInventoryCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<InventoryCommand>(command);
     }
@@ -173,9 +178,9 @@ public class KeywordParserTests
     [InlineData("pick up coin")]
     public void Parse_Take_ReturnsTakeCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<TakeCommand>(command);
     }
@@ -185,9 +190,9 @@ public class KeywordParserTests
     [InlineData("get all")]
     public void Parse_TakeAll_ReturnsTakeAllCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<TakeAllCommand>(command);
     }
@@ -195,9 +200,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Drop_ReturnsDropCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("drop coin");
+        ICommand command = parser.Parse("drop coin");
 
         _ = Assert.IsType<DropCommand>(command);
     }
@@ -205,9 +210,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Use_ReturnsUseCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("use wand");
+        ICommand command = parser.Parse("use wand");
 
         _ = Assert.IsType<UseCommand>(command);
     }
@@ -215,14 +220,14 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Synonym_ReturnsCanonicalCommand()
     {
-        var config = KeywordParserConfigBuilder.BritishDefaults()
+        KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
             .WithTake("take")
             .AddSynonyms("take", "grab", "pickup")
             .Build();
 
-        var parser = new KeywordParser(config);
+        KeywordParser parser = new(config);
 
-        var command = parser.Parse("grab coin");
+        ICommand command = parser.Parse("grab coin");
 
         _ = Assert.IsType<TakeCommand>(command);
     }
@@ -230,9 +235,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Read_ReturnsReadCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("read sign");
+        ICommand command = parser.Parse("read sign");
 
         _ = Assert.IsType<ReadCommand>(command);
     }
@@ -240,9 +245,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Talk_ReturnsTalkCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("talk fox");
+        ICommand command = parser.Parse("talk fox");
 
         _ = Assert.IsType<TalkCommand>(command);
     }
@@ -250,9 +255,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Attack_ReturnsAttackCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("attack troll");
+        ICommand command = parser.Parse("attack troll");
 
         _ = Assert.IsType<AttackCommand>(command);
     }
@@ -260,9 +265,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Flee_ReturnsFleeCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("flee");
+        ICommand command = parser.Parse("flee");
 
         _ = Assert.IsType<FleeCommand>(command);
     }
@@ -270,9 +275,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Save_ReturnsSaveCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("save");
+        ICommand command = parser.Parse("save");
 
         _ = Assert.IsType<SaveCommand>(command);
     }
@@ -280,9 +285,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Load_ReturnsLoadCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("load savegame.json");
+        ICommand command = parser.Parse("load savegame.json");
 
         _ = Assert.IsType<LoadCommand>(command);
     }
@@ -293,9 +298,9 @@ public class KeywordParserTests
     [InlineData("journal")]
     public void Parse_Quest_ReturnsQuestCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<QuestCommand>(command);
     }
@@ -305,9 +310,9 @@ public class KeywordParserTests
     [InlineData("bite ice")]
     public void Parse_EatOrBite_ReturnsUseCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<UseCommand>(command);
     }
@@ -316,9 +321,9 @@ public class KeywordParserTests
     [InlineData("cd north")]
     public void Parse_Cd_ReturnsGoCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<GoCommand>(command);
     }
@@ -328,9 +333,9 @@ public class KeywordParserTests
     [InlineData("drop all items")]
     public void Parse_DropAll_ReturnsDropAllCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<DropAllCommand>(command);
     }
@@ -338,9 +343,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_GoDoor_ReturnsGoToCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("go door");
+        ICommand command = parser.Parse("go door");
 
         _ = Assert.IsType<GoToCommand>(command);
     }
@@ -351,9 +356,9 @@ public class KeywordParserTests
     [InlineData("q")]
     public void Parse_Quit_ReturnsQuitCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<QuitCommand>(command);
     }
@@ -363,9 +368,9 @@ public class KeywordParserTests
     [InlineData("open door")]
     public void Parse_Open_ReturnsOpenCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<OpenCommand>(command);
     }
@@ -375,9 +380,9 @@ public class KeywordParserTests
     [InlineData("unlock door")]
     public void Parse_Unlock_ReturnsUnlockCommand(string input)
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse(input);
+        ICommand command = parser.Parse(input);
 
         _ = Assert.IsType<UnlockCommand>(command);
     }
@@ -385,9 +390,9 @@ public class KeywordParserTests
     [Fact]
     public void Parse_Unknown_ReturnsUnknownCommand()
     {
-        var parser = new KeywordParser(CreateEnglishConfig());
+        KeywordParser parser = new(CreateEnglishConfig());
 
-        var command = parser.Parse("dance");
+        ICommand command = parser.Parse("dance");
 
         _ = Assert.IsType<UnknownCommand>(command);
     }

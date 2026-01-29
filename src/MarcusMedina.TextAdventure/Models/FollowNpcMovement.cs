@@ -2,12 +2,16 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
+namespace MarcusMedina.TextAdventure.Models;
+
 public sealed class FollowNpcMovement : INpcMovement
 {
-    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state) => currentLocation.Id.TextCompare(state.CurrentLocation.Id) ? null : state.CurrentLocation;
+    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
+    {
+        return currentLocation.Id.TextCompare(state.CurrentLocation.Id) ? null : state.CurrentLocation;
+    }
 }

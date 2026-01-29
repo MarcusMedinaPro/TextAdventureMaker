@@ -2,16 +2,17 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class StatsTests
 {
     [Fact]
     public void Stats_DefaultsCurrentHealthToMax()
     {
-        var stats = new Stats(10);
+        Stats stats = new(10);
 
         Assert.Equal(10, stats.MaxHealth);
         Assert.Equal(10, stats.Health);
@@ -20,7 +21,7 @@ public class StatsTests
     [Fact]
     public void Stats_HealthIsClampedOnConstruction()
     {
-        var stats = new Stats(10, currentHealth: 50);
+        Stats stats = new(10, currentHealth: 50);
 
         Assert.Equal(10, stats.Health);
     }
@@ -28,7 +29,7 @@ public class StatsTests
     [Fact]
     public void Damage_CannotGoBelowZero()
     {
-        var stats = new Stats(10, currentHealth: 3);
+        Stats stats = new(10, currentHealth: 3);
 
         stats.Damage(10);
 
@@ -38,7 +39,7 @@ public class StatsTests
     [Fact]
     public void Heal_CannotExceedMax()
     {
-        var stats = new Stats(10, currentHealth: 8);
+        Stats stats = new(10, currentHealth: 8);
 
         stats.Heal(10);
 
@@ -48,7 +49,7 @@ public class StatsTests
     [Fact]
     public void SetMaxHealth_ClampsCurrentHealth()
     {
-        var stats = new Stats(10, currentHealth: 10);
+        Stats stats = new(10, currentHealth: 10);
 
         stats.SetMaxHealth(6);
 

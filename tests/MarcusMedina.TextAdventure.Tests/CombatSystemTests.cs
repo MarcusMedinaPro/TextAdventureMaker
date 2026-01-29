@@ -2,22 +2,24 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class CombatSystemTests
 {
     [Fact]
     public void TurnBasedCombat_Attack_DamagesBothSides()
     {
-        var combat = new TurnBasedCombat(playerDamage: 5, npcDamage: 3);
-        var location = new Location("arena");
-        var state = new GameState(location);
-        var npc = new Npc("bandit", "Bandit", stats: new Stats(10));
+        TurnBasedCombat combat = new(playerDamage: 5, npcDamage: 3);
+        Location location = new("arena");
+        GameState state = new(location);
+        Npc npc = new("bandit", "Bandit", stats: new Stats(10));
 
-        var result = combat.Attack(state, npc);
+        CommandResult result = combat.Attack(state, npc);
 
         Assert.True(result.Success);
         Assert.Equal(5, npc.Stats.Health);
@@ -27,12 +29,12 @@ public class CombatSystemTests
     [Fact]
     public void TurnBasedCombat_Attack_CanDefeatTarget()
     {
-        var combat = new TurnBasedCombat(playerDamage: 20, npcDamage: 3);
-        var location = new Location("arena");
-        var state = new GameState(location);
-        var npc = new Npc("bandit", "Bandit", stats: new Stats(10));
+        TurnBasedCombat combat = new(playerDamage: 20, npcDamage: 3);
+        Location location = new("arena");
+        GameState state = new(location);
+        Npc npc = new("bandit", "Bandit", stats: new Stats(10));
 
-        var result = combat.Attack(state, npc);
+        CommandResult result = combat.Attack(state, npc);
 
         Assert.True(result.Success);
         Assert.False(npc.IsAlive);

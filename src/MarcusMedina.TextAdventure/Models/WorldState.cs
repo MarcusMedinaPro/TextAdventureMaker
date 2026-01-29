@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class WorldState : IWorldState
 {
@@ -15,45 +16,77 @@ public sealed class WorldState : IWorldState
 
     public IReadOnlyList<string> Timeline => _timeline;
 
-    public bool GetFlag(string key) => !string.IsNullOrWhiteSpace(key) && _flags.TryGetValue(key, out var value) && value;
+    public bool GetFlag(string key)
+    {
+        return !string.IsNullOrWhiteSpace(key) && _flags.TryGetValue(key, out bool value) && value;
+    }
 
     public void SetFlag(string key, bool value)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             return;
+        }
+
         _flags[key] = value;
     }
 
-    public int GetCounter(string key) => string.IsNullOrWhiteSpace(key) ? 0 : _counters.TryGetValue(key, out var value) ? value : 0;
+    public int GetCounter(string key)
+    {
+        return string.IsNullOrWhiteSpace(key) ? 0 : _counters.TryGetValue(key, out int value) ? value : 0;
+    }
 
     public int Increment(string key, int amount = 1)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             return 0;
-        var next = GetCounter(key) + amount;
+        }
+
+        int next = GetCounter(key) + amount;
         _counters[key] = next;
         return next;
     }
 
-    public int GetRelationship(string npcId) => string.IsNullOrWhiteSpace(npcId) ? 0 : _relationships.TryGetValue(npcId, out var value) ? value : 0;
+    public int GetRelationship(string npcId)
+    {
+        return string.IsNullOrWhiteSpace(npcId) ? 0 : _relationships.TryGetValue(npcId, out int value) ? value : 0;
+    }
 
     public void SetRelationship(string npcId, int value)
     {
         if (string.IsNullOrWhiteSpace(npcId))
+        {
             return;
+        }
+
         _relationships[npcId] = value;
     }
 
     public void AddTimeline(string entry)
     {
         if (string.IsNullOrWhiteSpace(entry))
+        {
             return;
+        }
+
         _timeline.Add(entry);
     }
 
-    public IReadOnlyDictionary<string, bool> GetFlagsSnapshot() => new Dictionary<string, bool>(_flags, StringComparer.OrdinalIgnoreCase);
-    public IReadOnlyDictionary<string, int> GetCountersSnapshot() => new Dictionary<string, int>(_counters, StringComparer.OrdinalIgnoreCase);
-    public IReadOnlyDictionary<string, int> GetRelationshipsSnapshot() => new Dictionary<string, int>(_relationships, StringComparer.OrdinalIgnoreCase);
+    public IReadOnlyDictionary<string, bool> GetFlagsSnapshot()
+    {
+        return new Dictionary<string, bool>(_flags, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public IReadOnlyDictionary<string, int> GetCountersSnapshot()
+    {
+        return new Dictionary<string, int>(_counters, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public IReadOnlyDictionary<string, int> GetRelationshipsSnapshot()
+    {
+        return new Dictionary<string, int>(_relationships, StringComparer.OrdinalIgnoreCase);
+    }
 
     public void Apply(
         IDictionary<string, bool>? flags,
@@ -68,7 +101,7 @@ public sealed class WorldState : IWorldState
 
         if (flags != null)
         {
-            foreach (var entry in flags)
+            foreach (KeyValuePair<string, bool> entry in flags)
             {
                 _flags[entry.Key] = entry.Value;
             }
@@ -76,7 +109,7 @@ public sealed class WorldState : IWorldState
 
         if (counters != null)
         {
-            foreach (var entry in counters)
+            foreach (KeyValuePair<string, int> entry in counters)
             {
                 _counters[entry.Key] = entry.Value;
             }
@@ -84,7 +117,7 @@ public sealed class WorldState : IWorldState
 
         if (relationships != null)
         {
-            foreach (var entry in relationships)
+            foreach (KeyValuePair<string, int> entry in relationships)
             {
                 _relationships[entry.Key] = entry.Value;
             }
@@ -92,7 +125,7 @@ public sealed class WorldState : IWorldState
 
         if (timeline != null)
         {
-            foreach (var entry in timeline)
+            foreach (string entry in timeline)
             {
                 if (!string.IsNullOrWhiteSpace(entry))
                 {

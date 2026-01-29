@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class TimedChallenge : ITimedChallenge
 {
@@ -43,8 +44,8 @@ public sealed class TimedChallenge : ITimedChallenge
     public ITimedChallenge OnMovesRemaining(int movesRemaining, Action<IGameState> handler)
     {
         ArgumentNullException.ThrowIfNull(handler);
-        var key = Math.Max(0, movesRemaining);
-        if (!_movesRemainingHandlers.TryGetValue(key, out var handlers))
+        int key = Math.Max(0, movesRemaining);
+        if (!_movesRemainingHandlers.TryGetValue(key, out List<Action<IGameState>>? handlers))
         {
             handlers = [];
             _movesRemainingHandlers[key] = handlers;
@@ -75,7 +76,7 @@ public sealed class TimedChallenge : ITimedChallenge
         MovesUsed = 0;
         _exhaustedFired = false;
         _movesRemainingFired.Clear();
-        foreach (var handler in _startHandlers)
+        foreach (Action<IGameState> handler in _startHandlers)
         {
             handler(state);
         }
@@ -85,9 +86,12 @@ public sealed class TimedChallenge : ITimedChallenge
     {
         ArgumentNullException.ThrowIfNull(state);
         if (!IsActive)
+        {
             return;
+        }
+
         IsActive = false;
-        foreach (var handler in _successHandlers)
+        foreach (Action<IGameState> handler in _successHandlers)
         {
             handler(state);
         }
@@ -97,9 +101,12 @@ public sealed class TimedChallenge : ITimedChallenge
     {
         ArgumentNullException.ThrowIfNull(state);
         if (!IsActive)
+        {
             return;
+        }
+
         IsActive = false;
-        foreach (var handler in _failureHandlers)
+        foreach (Action<IGameState> handler in _failureHandlers)
         {
             handler(state);
         }
@@ -108,13 +115,16 @@ public sealed class TimedChallenge : ITimedChallenge
     public void Tick(IGameState state)
     {
         if (!IsActive)
+        {
             return;
+        }
+
         MovesUsed++;
 
-        if (_movesRemainingHandlers.TryGetValue(MovesRemaining, out var handlers) && !_movesRemainingFired.Contains(MovesRemaining))
+        if (_movesRemainingHandlers.TryGetValue(MovesRemaining, out List<Action<IGameState>>? handlers) && !_movesRemainingFired.Contains(MovesRemaining))
         {
             _ = _movesRemainingFired.Add(MovesRemaining);
-            foreach (var handler in handlers)
+            foreach (Action<IGameState> handler in handlers)
             {
                 handler(state);
             }

@@ -1,20 +1,21 @@
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-using Xunit;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class RandomEventPoolTests
 {
     [Fact]
     public void EventTriggers_WhenEnabledAndChanceIsOne()
     {
-        var state = new GameState(new Location("start"));
-        var pool = new RandomEventPool()
+        GameState state = new(new Location("start"));
+        IRandomEventPool pool = new RandomEventPool()
             .Enable()
             .SetTriggerChance(1.0);
 
-        var triggered = false;
+        bool triggered = false;
         _ = pool.AddEvent("spark", 1, _ => triggered = true);
 
         pool.Tick(state);
@@ -25,12 +26,12 @@ public class RandomEventPoolTests
     [Fact]
     public void Cooldown_PreventsImmediateRepeat()
     {
-        var state = new GameState(new Location("start"));
-        var pool = new RandomEventPool()
+        GameState state = new(new Location("start"));
+        IRandomEventPool pool = new RandomEventPool()
             .Enable()
             .SetTriggerChance(1.0);
 
-        var hits = 0;
+        int hits = 0;
         _ = pool.AddEvent("gust", 1, _ => hits++);
         _ = pool.SetCooldown("gust", 2);
 

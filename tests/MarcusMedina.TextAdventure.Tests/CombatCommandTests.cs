@@ -2,7 +2,6 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
@@ -10,6 +9,8 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class CombatCommandTests
 {
@@ -34,10 +35,10 @@ public class CombatCommandTests
     [Fact]
     public void AttackCommand_RequiresTarget()
     {
-        var location = new Location("arena");
-        var state = new GameState(location);
+        Location location = new("arena");
+        GameState state = new(location);
 
-        var result = new AttackCommand(null).Execute(new CommandContext(state));
+        CommandResult result = new AttackCommand(null).Execute(new CommandContext(state));
 
         Assert.False(result.Success);
         Assert.Equal(Language.NoTargetToAttack, result.Message);
@@ -47,17 +48,17 @@ public class CombatCommandTests
     [Fact]
     public void AttackCommand_UsesCombatSystemAndPublishesEvent()
     {
-        var events = new EventSystem();
-        var combat = new StubCombatSystem { Result = CommandResult.Ok("strike") };
-        var location = new Location("arena");
-        var npc = new Npc("rat", "rat");
+        EventSystem events = new();
+        StubCombatSystem combat = new() { Result = CommandResult.Ok("strike") };
+        Location location = new("arena");
+        Npc npc = new("rat", "rat");
         location.AddNpc(npc);
-        var state = new GameState(location, eventSystem: events, combatSystem: combat);
+        GameState state = new(location, eventSystem: events, combatSystem: combat);
 
         GameEvent? combatEvent = null;
         events.Subscribe(GameEventType.CombatStart, e => combatEvent = e);
 
-        var result = new AttackCommand("rat").Execute(new CommandContext(state));
+        CommandResult result = new AttackCommand("rat").Execute(new CommandContext(state));
 
         Assert.True(result.Success);
         Assert.Equal("strike", result.Message);
@@ -68,10 +69,10 @@ public class CombatCommandTests
     [Fact]
     public void FleeCommand_FailsWhenNoNpcPresent()
     {
-        var location = new Location("arena");
-        var state = new GameState(location);
+        Location location = new("arena");
+        GameState state = new(location);
 
-        var result = new FleeCommand().Execute(new CommandContext(state));
+        CommandResult result = new FleeCommand().Execute(new CommandContext(state));
 
         Assert.False(result.Success);
         Assert.Equal(Language.NoOneToFlee, result.Message);
@@ -81,13 +82,13 @@ public class CombatCommandTests
     [Fact]
     public void FleeCommand_UsesCombatSystemWhenNpcPresent()
     {
-        var combat = new StubCombatSystem { Result = CommandResult.Ok("escape") };
-        var location = new Location("arena");
-        var npc = new Npc("rat", "rat");
+        StubCombatSystem combat = new() { Result = CommandResult.Ok("escape") };
+        Location location = new("arena");
+        Npc npc = new("rat", "rat");
         location.AddNpc(npc);
-        var state = new GameState(location, combatSystem: combat);
+        GameState state = new(location, combatSystem: combat);
 
-        var result = new FleeCommand().Execute(new CommandContext(state));
+        CommandResult result = new FleeCommand().Execute(new CommandContext(state));
 
         Assert.True(result.Success);
         Assert.Equal("escape", result.Message);

@@ -2,12 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace TextAdventure.Sandbox;
 
-using System.Globalization;
-using System.Text.Json;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Localization;
+using System.Globalization;
+using System.Text.Json;
+
+namespace TextAdventure.Sandbox;
 
 public sealed class JsonLanguageProvider : ILanguageProvider
 {
@@ -16,7 +17,7 @@ public sealed class JsonLanguageProvider : ILanguageProvider
     public JsonLanguageProvider(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        var json = File.ReadAllText(path);
+        string json = File.ReadAllText(path);
         _data = JsonSerializer.Deserialize<JsonLanguageData>(json, JsonOptions)
             ?? throw new InvalidOperationException($"Failed to parse language file: {path}");
     }
@@ -33,72 +34,84 @@ public sealed class JsonLanguageProvider : ILanguageProvider
     public string Get(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             return "";
+        }
 
         // Normalize key: remove "Template" suffix and convert to camelCase
-        var normalizedKey = NormalizeKey(key);
+        string normalizedKey = NormalizeKey(key);
 
         // Try labels first
-        if (_data.Labels?.TryGetValue(normalizedKey, out var label) == true)
+        if (_data.Labels?.TryGetValue(normalizedKey, out string? label) == true)
+        {
             return label;
+        }
 
         // Then messages
-        if (_data.Messages?.TryGetValue(normalizedKey, out var message) == true)
+        if (_data.Messages?.TryGetValue(normalizedKey, out string? message) == true)
+        {
             return message;
+        }
 
         // Then templates
-        if (_data.Templates?.TryGetValue(normalizedKey, out var template) == true)
-            return template;
-
-        return $"[[{key}]]";
+        return _data.Templates?.TryGetValue(normalizedKey, out string? template) == true ? template : $"[[{key}]]";
     }
 
     private static string NormalizeKey(string key)
     {
         // Remove "Template" suffix if present
         if (key.EndsWith("Template", StringComparison.Ordinal))
+        {
             key = key[..^8];
+        }
 
         // Convert PascalCase to camelCase
-        if (key.Length > 0 && char.IsUpper(key[0]))
-            return char.ToLowerInvariant(key[0]) + key[1..];
-
-        return key;
+        return key.Length > 0 && char.IsUpper(key[0]) ? char.ToLowerInvariant(key[0]) + key[1..] : key;
     }
 
     public string Format(string key, params object[] args)
     {
-        var template = Get(key);
+        string template = Get(key);
         return string.Format(CultureInfo.InvariantCulture, template, args);
     }
 
-    public string GetName(string id) =>
-        _data.Names?.TryGetValue(id, out var name) == true ? name : id;
+    public string GetName(string id)
+    {
+        return _data.Names?.TryGetValue(id, out string? name) == true ? name : id;
+    }
 
-    public string GetDescription(string id) =>
-        _data.Descriptions?.TryGetValue(id, out var desc) == true ? desc : "";
+    public string GetDescription(string id)
+    {
+        return _data.Descriptions?.TryGetValue(id, out string? desc) == true ? desc : "";
+    }
 
     public string GetDirectionName(Direction direction)
     {
-        var key = direction.ToString().ToLowerInvariant();
-        return _data.Directions?.TryGetValue(key, out var dir) == true ? dir.Name : direction.ToString();
+        string key = direction.ToString().ToLowerInvariant();
+        return _data.Directions?.TryGetValue(key, out DirectionData? dir) == true ? dir.Name : direction.ToString();
     }
 
-    public IReadOnlyList<string> GetCommandAliases(string command) =>
-        _data.Commands?.TryGetValue(command, out var aliases) == true ? aliases : [];
+    public IReadOnlyList<string> GetCommandAliases(string command)
+    {
+        return _data.Commands?.TryGetValue(command, out List<string>? aliases) == true ? aliases : [];
+    }
 
     public IReadOnlyDictionary<string, Direction> GetDirectionAliases()
     {
-        var result = new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, Direction> result = new(StringComparer.OrdinalIgnoreCase);
         if (_data.Directions == null)
-            return result;
-
-        foreach (var (key, dir) in _data.Directions)
         {
-            if (!Enum.TryParse<Direction>(key, true, out var direction))
-                continue;
+            return result;
+        }
 
-            foreach (var alias in dir.Aliases)
+        foreach ((string? key, DirectionData? dir) in _data.Directions)
+        {
+            if (!Enum.TryParse<Direction>(key, true, out Direction direction))
+            {
+                continue;
+            }
+
+            foreach (string alias in dir.Aliases)
             {
                 result[alias] = direction;
             }
@@ -109,11 +122,13 @@ public sealed class JsonLanguageProvider : ILanguageProvider
 
     public ISet<string> GetAllCommandAliases(string command)
     {
-        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (_data.Commands?.TryGetValue(command, out var aliases) == true)
+        HashSet<string> set = new(StringComparer.OrdinalIgnoreCase);
+        if (_data.Commands?.TryGetValue(command, out List<string>? aliases) == true)
         {
-            foreach (var alias in aliases)
-                set.Add(alias);
+            foreach (string alias in aliases)
+            {
+                _ = set.Add(alias);
+            }
         }
         return set;
     }

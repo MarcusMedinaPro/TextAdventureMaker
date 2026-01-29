@@ -2,11 +2,12 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class EventSystem : IEventSystem
 {
@@ -15,7 +16,7 @@ public sealed class EventSystem : IEventSystem
     public void Subscribe(GameEventType type, Action<GameEvent> handler)
     {
         ArgumentNullException.ThrowIfNull(handler);
-        if (!_handlers.TryGetValue(type, out var list))
+        if (!_handlers.TryGetValue(type, out List<Action<GameEvent>>? list))
         {
             list = [];
             _handlers[type] = list;
@@ -29,7 +30,7 @@ public sealed class EventSystem : IEventSystem
 
     public void Unsubscribe(GameEventType type, Action<GameEvent> handler)
     {
-        if (_handlers.TryGetValue(type, out var list))
+        if (_handlers.TryGetValue(type, out List<Action<GameEvent>>? list))
         {
             _ = list.Remove(handler);
             if (list.Count == 0)
@@ -42,10 +43,12 @@ public sealed class EventSystem : IEventSystem
     public void Publish(GameEvent gameEvent)
     {
         ArgumentNullException.ThrowIfNull(gameEvent);
-        if (!_handlers.TryGetValue(gameEvent.Type, out var list))
+        if (!_handlers.TryGetValue(gameEvent.Type, out List<Action<GameEvent>>? list))
+        {
             return;
+        }
 
-        foreach (var handler in list.ToArray())
+        foreach (Action<GameEvent> handler in list.ToArray())
         {
             handler(gameEvent);
         }

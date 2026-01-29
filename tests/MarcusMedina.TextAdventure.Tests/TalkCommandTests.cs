@@ -2,24 +2,26 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class TalkCommandTests
 {
     [Fact]
     public void TalkCommand_RequiresTarget()
     {
-        var location = new Location("camp");
-        var state = new GameState(location);
-        var command = new TalkCommand(null);
+        Location location = new("camp");
+        GameState state = new(location);
+        TalkCommand command = new(null);
 
-        var result = command.Execute(new CommandContext(state));
+        CommandResult result = command.Execute(new CommandContext(state));
 
         Assert.False(result.Success);
         Assert.Equal(GameError.MissingArgument, result.Error);
@@ -29,11 +31,11 @@ public class TalkCommandTests
     [Fact]
     public void TalkCommand_FailsWhenNpcMissing()
     {
-        var location = new Location("camp");
-        var state = new GameState(location);
-        var command = new TalkCommand("fox");
+        Location location = new("camp");
+        GameState state = new(location);
+        TalkCommand command = new("fox");
 
-        var result = command.Execute(new CommandContext(state));
+        CommandResult result = command.Execute(new CommandContext(state));
 
         Assert.False(result.Success);
         Assert.Equal(GameError.TargetNotFound, result.Error);
@@ -43,16 +45,16 @@ public class TalkCommandTests
     [Fact]
     public void TalkCommand_OutputsDialogAndOptions()
     {
-        var location = new Location("camp");
-        var npc = new Npc("fox", "Fox")
+        Location location = new("camp");
+        INpc npc = new Npc("fox", "Fox")
             .SetDialog(new DialogNode("Hello traveler.")
                 .AddOption("Ask about the forest")
                 .AddOption("Say goodbye"));
         location.AddNpc(npc);
-        var state = new GameState(location);
-        var command = new TalkCommand("fox");
+        GameState state = new(location);
+        TalkCommand command = new("fox");
 
-        var result = command.Execute(new CommandContext(state));
+        CommandResult result = command.Execute(new CommandContext(state));
 
         Assert.True(result.Success);
         Assert.Contains("Hello traveler.", result.Message);
@@ -64,12 +66,12 @@ public class TalkCommandTests
     [Fact]
     public void TalkCommand_HandlesNpcWithoutDialog()
     {
-        var location = new Location("camp");
+        Location location = new("camp");
         location.AddNpc(new Npc("fox", "Fox"));
-        var state = new GameState(location);
-        var command = new TalkCommand("fox");
+        GameState state = new(location);
+        TalkCommand command = new("fox");
 
-        var result = command.Execute(new CommandContext(state));
+        CommandResult result = command.Execute(new CommandContext(state));
 
         Assert.True(result.Success);
         Assert.Equal(Language.NpcHasNothingToSay, result.Message);

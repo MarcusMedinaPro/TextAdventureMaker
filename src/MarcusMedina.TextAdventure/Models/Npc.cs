@@ -2,13 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public class Npc : INpc
 {
@@ -37,7 +35,10 @@ public class Npc : INpc
         Stats = stats ?? new Stats(20);
     }
 
-    public string GetDescription() => _description;
+    public string GetDescription()
+    {
+        return _description;
+    }
 
     public INpc Description(string text)
     {
@@ -86,7 +87,7 @@ public class Npc : INpc
 
     public DialogRule AddDialogRule(string id)
     {
-        var rule = new DialogRule(id);
+        DialogRule rule = new(id);
         _dialogRules.Add(rule);
         return rule;
     }
@@ -95,24 +96,30 @@ public class Npc : INpc
     {
         ArgumentNullException.ThrowIfNull(state);
         if (_dialogRules.Count == 0)
+        {
             return null;
+        }
 
-        var context = new DialogContext(state, this, Memory);
-        var matching = _dialogRules
+        DialogContext context = new(state, this, Memory);
+        List<DialogRule> matching = _dialogRules
             .Where(rule => rule.Matches(context) && rule.GetText(context) != null)
             .ToList();
 
         if (matching.Count == 0)
+        {
             return null;
+        }
 
-        var selected = matching
+        DialogRule selected = matching
             .OrderByDescending(rule => rule.CriteriaCount)
             .ThenByDescending(rule => rule.PriorityValue)
             .First();
 
-        var text = selected.GetText(context);
+        string? text = selected.GetText(context);
         if (string.IsNullOrWhiteSpace(text))
+        {
             return null;
+        }
 
         selected.Apply(context);
         Memory.MarkMet();

@@ -2,16 +2,17 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class WorldStateTests
 {
     [Fact]
     public void WorldState_TracksFlagsAndCounters()
     {
-        var state = new WorldState();
+        WorldState state = new();
 
         state.SetFlag("dragon_dead", true);
         _ = state.Increment("days", 2);
@@ -23,7 +24,7 @@ public class WorldStateTests
     [Fact]
     public void WorldState_TracksRelationships()
     {
-        var state = new WorldState();
+        WorldState state = new();
 
         state.SetRelationship("fox", 10);
 
@@ -33,7 +34,7 @@ public class WorldStateTests
     [Fact]
     public void WorldState_TracksTimeline()
     {
-        var state = new WorldState();
+        WorldState state = new();
 
         state.AddTimeline("Entered cave.");
 

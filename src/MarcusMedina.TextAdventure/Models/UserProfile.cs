@@ -3,10 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Models;
 
 using System.Text.Json;
 
+namespace MarcusMedina.TextAdventure.Models;
 /// <summary>
 /// Represents the player's persistent profile across all games.
 /// Used for personalization and NPC romance customization.
@@ -84,8 +84,11 @@ public class UserProfile
     public bool IsBirthday()
     {
         if (Birthdate == null)
+        {
             return false;
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        }
+
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
         return Birthdate.Value.Month == today.Month && Birthdate.Value.Day == today.Day;
     }
 
@@ -95,11 +98,17 @@ public class UserProfile
     public int? GetCalculatedAge()
     {
         if (Birthdate == null)
+        {
             return Age;
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var age = today.Year - Birthdate.Value.Year;
+        }
+
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        int age = today.Year - Birthdate.Value.Year;
         if (Birthdate.Value > today.AddYears(-age))
+        {
             age--;
+        }
+
         return age;
     }
 
@@ -109,7 +118,7 @@ public class UserProfile
     public void Save(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        var json = JsonSerializer.Serialize(this, JsonOptions);
+        string json = JsonSerializer.Serialize(this, JsonOptions);
         File.WriteAllText(path, json);
     }
 
@@ -124,7 +133,7 @@ public class UserProfile
             return new UserProfile();
         }
 
-        var json = File.ReadAllText(path);
+        string json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<UserProfile>(json, JsonOptions) ?? new UserProfile();
     }
 
@@ -133,7 +142,7 @@ public class UserProfile
     /// </summary>
     public static UserProfile LoadDefault()
     {
-        var defaultPath = GetDefaultProfilePath();
+        string defaultPath = GetDefaultProfilePath();
         return Load(defaultPath);
     }
 
@@ -142,8 +151,8 @@ public class UserProfile
     /// </summary>
     public void SaveDefault()
     {
-        var defaultPath = GetDefaultProfilePath();
-        var directory = Path.GetDirectoryName(defaultPath);
+        string defaultPath = GetDefaultProfilePath();
+        string? directory = Path.GetDirectoryName(defaultPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
             _ = Directory.CreateDirectory(directory);
@@ -157,7 +166,7 @@ public class UserProfile
     /// </summary>
     public static string GetDefaultProfilePath()
     {
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         return Path.Combine(home, ".textadventure", "profile.json");
     }
 

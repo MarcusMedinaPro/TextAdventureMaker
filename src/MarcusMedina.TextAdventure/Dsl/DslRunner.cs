@@ -3,12 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Dsl;
 
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Parsing;
 
+namespace MarcusMedina.TextAdventure.Dsl;
 /// <summary>
 /// Simple runner for .adventure DSL files from command line.
 /// </summary>
@@ -28,9 +29,11 @@ public static class DslRunner
     public static bool TryRunFromArgs(string[] args)
     {
         if (args.Length == 0)
+        {
             return false;
+        }
 
-        var path = args[0];
+        string path = args[0];
         if (!path.EndsWith(".adventure", StringComparison.OrdinalIgnoreCase))
         {
             return false;
@@ -55,11 +58,11 @@ public static class DslRunner
 
         try
         {
-            var parser = new AdventureDslParser();
-            var adventure = parser.ParseFile(path);
+            AdventureDslParser parser = new();
+            DslAdventure adventure = parser.ParseFile(path);
 
-            var title = adventure.Metadata.TryGetValue("world", out var w) ? w : Path.GetFileNameWithoutExtension(path);
-            var goal = adventure.Metadata.TryGetValue("goal", out var g) ? g : null;
+            string title = adventure.Metadata.TryGetValue("world", out string? w) ? w : Path.GetFileNameWithoutExtension(path);
+            string? goal = adventure.Metadata.TryGetValue("goal", out string? g) ? g : null;
 
             Console.WriteLine($"=== {title} ===");
             if (!string.IsNullOrWhiteSpace(goal))
@@ -69,12 +72,12 @@ public static class DslRunner
 
             Console.WriteLine();
 
-            var game = GameBuilder.Create()
+            Game game = GameBuilder.Create()
                 .UseState(adventure.State)
                 .UseParser(new KeywordParser(KeywordParserConfig.Default))
                 .AddTurnStart(g =>
                 {
-                    var look = g.State.Look();
+                    CommandResult look = g.State.Look();
                     g.Output.WriteLine(look.Message);
                 })
                 .Build();

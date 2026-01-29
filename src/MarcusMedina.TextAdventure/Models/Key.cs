@@ -2,12 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
-using System;
-using System.Linq;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public class Key : Item, IKey
 {
@@ -81,7 +80,7 @@ public class Key : Item, IKey
 
     public override IItem Clone()
     {
-        var copy = new Key(Id, Name, GetDescription())
+        IItem copy = new Key(Id, Name, GetDescription())
             .SetTakeable(Takeable)
             .SetWeight(Weight)
             .SetReadable(Readable)
@@ -95,19 +94,19 @@ public class Key : Item, IKey
 
         foreach (ItemAction action in Enum.GetValues(typeof(ItemAction)))
         {
-            var reaction = GetReaction(action);
+            string? reaction = GetReaction(action);
             if (!string.IsNullOrWhiteSpace(reaction))
             {
                 _ = copy.SetReaction(action, reaction);
             }
         }
 
-        foreach (var entry in Properties)
+        foreach (KeyValuePair<string, string> entry in Properties)
         {
             copy.Properties[entry.Key] = entry.Value;
         }
 
-        var readText = GetReadText();
+        string? readText = GetReadText();
         if (readText != null)
         {
             _ = copy.SetReadText(readText);
@@ -121,6 +120,8 @@ public class Key : Item, IKey
         return copy;
     }
 
-    public static implicit operator Key((string id, string name, string description) data) =>
-        new(data.id, data.name, data.description);
+    public static implicit operator Key((string id, string name, string description) data)
+    {
+        return new(data.id, data.name, data.description);
+    }
 }

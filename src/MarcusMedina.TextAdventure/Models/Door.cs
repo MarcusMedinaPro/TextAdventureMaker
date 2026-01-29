@@ -2,12 +2,12 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
-using System;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public class Door : IDoor
 {
@@ -19,7 +19,11 @@ public class Door : IDoor
     public string Name { get; }
     public IDictionary<string, string> Properties => _properties;
     public IReadOnlyList<string> Aliases => _aliases;
-    public string GetDescription() => _description;
+    public string GetDescription()
+    {
+        return _description;
+    }
+
     public DoorState State { get; private set; }
     public IKey? RequiredKey { get; private set; }
 
@@ -41,7 +45,10 @@ public class Door : IDoor
     }
 
     public Door(string id, string name, string description, DoorState initialState = DoorState.Closed)
-        : this(id, name, initialState) => _description = description ?? "";
+        : this(id, name, initialState)
+    {
+        _description = description ?? "";
+    }
 
     public Door Description(string text)
     {
@@ -49,11 +56,14 @@ public class Door : IDoor
         return this;
     }
 
-    public string? GetReaction(DoorAction action) => _reactions.TryGetValue(action, out var reaction) ? reaction : null;
+    public string? GetReaction(DoorAction action)
+    {
+        return _reactions.TryGetValue(action, out string? reaction) ? reaction : null;
+    }
 
     public Door AddAliases(params string[] aliases)
     {
-        foreach (var alias in aliases)
+        foreach (string alias in aliases)
         {
             if (!string.IsNullOrWhiteSpace(alias))
             {
@@ -67,8 +77,11 @@ public class Door : IDoor
     public bool Matches(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
+        {
             return false;
-        var token = name.Trim();
+        }
+
+        string token = name.Trim();
 
         return Name.TextCompare(token) || _aliases.Any(a => a.TextCompare(token));
     }
@@ -89,11 +102,20 @@ public class Door : IDoor
     public bool Open()
     {
         if (State == DoorState.Locked)
+        {
             return false;
+        }
+
         if (State == DoorState.Destroyed)
+        {
             return true;
+        }
+
         if (State == DoorState.Open)
+        {
             return true;
+        }
+
         State = DoorState.Open;
         OnOpen?.Invoke(this);
         return true;
@@ -102,11 +124,20 @@ public class Door : IDoor
     public bool Close()
     {
         if (State == DoorState.Destroyed)
+        {
             return false;
+        }
+
         if (State == DoorState.Locked)
+        {
             return false;
+        }
+
         if (State == DoorState.Closed)
+        {
             return true;
+        }
+
         State = DoorState.Closed;
         OnClose?.Invoke(this);
         return true;
@@ -115,13 +146,25 @@ public class Door : IDoor
     public bool Lock(IKey key)
     {
         if (State == DoorState.Destroyed)
+        {
             return false;
+        }
+
         if (State == DoorState.Open)
+        {
             return false;
+        }
+
         if (RequiredKey != null && RequiredKey.Id != key.Id)
+        {
             return false;
+        }
+
         if (State == DoorState.Locked && RequiredKey != null && RequiredKey.Id == key.Id)
+        {
             return true;
+        }
+
         RequiredKey = key;
         State = DoorState.Locked;
         OnLock?.Invoke(this);
@@ -131,9 +174,15 @@ public class Door : IDoor
     public bool Unlock(IKey key)
     {
         if (State != DoorState.Locked)
+        {
             return false;
+        }
+
         if (RequiredKey == null || RequiredKey.Id != key.Id)
+        {
             return false;
+        }
+
         State = DoorState.Closed;
         OnUnlock?.Invoke(this);
         return true;
@@ -142,19 +191,42 @@ public class Door : IDoor
     public bool Destroy()
     {
         if (State == DoorState.Destroyed)
+        {
             return true;
+        }
+
         State = DoorState.Destroyed;
         OnDestroy?.Invoke(this);
         return true;
     }
 
-    public static implicit operator Door(string name) => new(name.ToId(), name);
+    public static implicit operator Door(string name)
+    {
+        return new(name.ToId(), name);
+    }
 
-    IDoor IDoor.Description(string text) => Description(text);
-    IDoor IDoor.AddAliases(params string[] aliases) => AddAliases(aliases);
-    bool IDoor.Matches(string name) => Matches(name);
-    IDoor IDoor.SetReaction(DoorAction action, string text) => SetReaction(action, text);
+    IDoor IDoor.Description(string text)
+    {
+        return Description(text);
+    }
 
-    public static implicit operator Door((string id, string name, string description) data) =>
-        new(data.id, data.name, data.description);
+    IDoor IDoor.AddAliases(params string[] aliases)
+    {
+        return AddAliases(aliases);
+    }
+
+    bool IDoor.Matches(string name)
+    {
+        return Matches(name);
+    }
+
+    IDoor IDoor.SetReaction(DoorAction action, string text)
+    {
+        return SetReaction(action, text);
+    }
+
+    public static implicit operator Door((string id, string name, string description) data)
+    {
+        return new(data.id, data.name, data.description);
+    }
 }

@@ -2,17 +2,19 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Dsl;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class AdventureDslParserTests
 {
     [Fact]
     public void ParseFile_BuildsWorldWithExitsAndDoors()
     {
-        var file = Path.GetTempFileName();
+        string file = Path.GetTempFileName();
         try
         {
             File.WriteAllText(file, """
@@ -32,27 +34,27 @@ exit: in -> cabin | door=cabin_door
 location: cabin | Cozy and quiet.
 """);
 
-            var parser = new AdventureDslParser();
-            var adventure = parser.ParseFile(file);
+            AdventureDslParser parser = new();
+            DslAdventure adventure = parser.ParseFile(file);
 
             Assert.Equal("Demo World", adventure.WorldName);
             Assert.Equal("Find the key", adventure.Goal);
             Assert.Equal("entrance", adventure.State.CurrentLocation.Id);
 
-            var entrance = adventure.Locations["entrance"];
-            var forest = adventure.Locations["forest"];
-            var cabin = adventure.Locations["cabin"];
+            Location entrance = adventure.Locations["entrance"];
+            Location forest = adventure.Locations["forest"];
+            Location cabin = adventure.Locations["cabin"];
 
             Assert.NotNull(entrance.GetExit(Direction.North));
             Assert.Equal(forest, entrance.GetExit(Direction.North)!.Target);
 
-            var forestExit = forest.GetExit(Direction.In);
+            Exit? forestExit = forest.GetExit(Direction.In);
             Assert.NotNull(forestExit);
             Assert.Equal(cabin, forestExit!.Target);
             Assert.NotNull(forestExit.Door);
             Assert.Equal("cabin_key", forestExit.Door!.RequiredKey!.Id);
 
-            var ice = adventure.Items["ice"];
+            Item ice = adventure.Items["ice"];
             Assert.Equal(0.5f, ice.Weight);
             Assert.Contains("ice", ice.Aliases);
         }
@@ -65,17 +67,17 @@ location: cabin | Cozy and quiet.
     [Fact]
     public void RegisterKeyword_AddsMetadata()
     {
-        var file = Path.GetTempFileName();
+        string file = Path.GetTempFileName();
         try
         {
             File.WriteAllText(file, """
 mood: eerie
 location: room
 """);
-            var parser = new AdventureDslParser()
+            AdventureDslParser parser = new AdventureDslParser()
                 .RegisterKeyword("mood", (ctx, value) => ctx.SetMetadata("mood", value));
 
-            var adventure = parser.ParseFile(file);
+            DslAdventure adventure = parser.ParseFile(file);
 
             Assert.Equal("eerie", adventure.GetMetadata("mood"));
         }

@@ -2,23 +2,25 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class EventEmissionTests
 {
     [Fact]
     public void Move_PublishesEnterAndExitEvents()
     {
-        var events = new EventSystem();
-        var roomA = new Location("room_a");
-        var roomB = new Location("room_b");
+        EventSystem events = new();
+        Location roomA = new("room_a");
+        Location roomB = new("room_b");
         _ = roomA.AddExit(Direction.North, roomB);
-        var state = new GameState(roomA, eventSystem: events);
+        GameState state = new(roomA, eventSystem: events);
 
         GameEvent? exitEvent = null;
         GameEvent? enterEvent = null;
@@ -34,11 +36,11 @@ public class EventEmissionTests
     [Fact]
     public void TakeCommand_PublishesPickupEvent()
     {
-        var events = new EventSystem();
-        var location = new Location("camp");
-        var item = new Item("coin", "coin");
+        EventSystem events = new();
+        Location location = new("camp");
+        Item item = new("coin", "coin");
         location.AddItem(item);
-        var state = new GameState(location, eventSystem: events);
+        GameState state = new(location, eventSystem: events);
 
         GameEvent? pickupEvent = null;
         events.Subscribe(GameEventType.PickupItem, e => pickupEvent = e);
@@ -52,10 +54,10 @@ public class EventEmissionTests
     [Fact]
     public void DropCommand_PublishesDropEvent()
     {
-        var events = new EventSystem();
-        var location = new Location("camp");
-        var item = new Item("coin", "coin");
-        var state = new GameState(location, eventSystem: events);
+        EventSystem events = new();
+        Location location = new("camp");
+        Item item = new("coin", "coin");
+        GameState state = new(location, eventSystem: events);
         _ = state.Inventory.Add(item);
 
         GameEvent? dropEvent = null;
@@ -70,11 +72,11 @@ public class EventEmissionTests
     [Fact]
     public void TalkCommand_PublishesTalkEvent()
     {
-        var events = new EventSystem();
-        var location = new Location("camp");
-        var npc = new Npc("fox", "fox").Dialog("Hi.");
+        EventSystem events = new();
+        Location location = new("camp");
+        INpc npc = new Npc("fox", "fox").Dialog("Hi.");
         location.AddNpc(npc);
-        var state = new GameState(location, eventSystem: events);
+        GameState state = new(location, eventSystem: events);
 
         GameEvent? talkEvent = null;
         events.Subscribe(GameEventType.TalkToNpc, e => talkEvent = e);
@@ -88,12 +90,12 @@ public class EventEmissionTests
     [Fact]
     public void OpenCommand_PublishesDoorOpenEvent()
     {
-        var events = new EventSystem();
-        var location = new Location("hall");
-        var next = new Location("yard");
-        var door = new Door("gate", "gate");
+        EventSystem events = new();
+        Location location = new("hall");
+        Location next = new("yard");
+        Door door = new("gate", "gate");
         _ = location.AddExit(Direction.North, next, door);
-        var state = new GameState(location, eventSystem: events);
+        GameState state = new(location, eventSystem: events);
 
         GameEvent? openEvent = null;
         events.Subscribe(GameEventType.OpenDoor, e => openEvent = e);
@@ -107,13 +109,13 @@ public class EventEmissionTests
     [Fact]
     public void UnlockCommand_PublishesDoorUnlockEvent()
     {
-        var events = new EventSystem();
-        var location = new Location("hall");
-        var next = new Location("yard");
-        var key = new Key("gate_key", "gate key");
-        var door = new Door("gate", "gate").RequiresKey(key);
+        EventSystem events = new();
+        Location location = new("hall");
+        Location next = new("yard");
+        Key key = new("gate_key", "gate key");
+        Door door = new Door("gate", "gate").RequiresKey(key);
         _ = location.AddExit(Direction.North, next, door);
-        var state = new GameState(location, eventSystem: events);
+        GameState state = new(location, eventSystem: events);
         _ = state.Inventory.Add(key);
 
         GameEvent? unlockEvent = null;

@@ -2,9 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Extensions;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class NpcList
 {
@@ -12,8 +13,16 @@ public sealed class NpcList
 
     public IReadOnlyCollection<Npc> Items => _npcs.Items;
 
-    public Npc Add(string name) => _npcs.Add(name);
-    public Npc Add(Npc npc) => _npcs.Add(npc);
+    public Npc Add(string name)
+    {
+        return _npcs.Add(name);
+    }
+
+    public Npc Add(Npc npc)
+    {
+        return _npcs.Add(npc);
+    }
+
     public NpcList AddMany(params string[] names)
     {
         _ = _npcs.AddMany(names);
@@ -25,12 +34,34 @@ public sealed class NpcList
         return this;
     }
 
-    public Npc? Find(string token) => _npcs.Find(token);
-    public Npc Get(string token) => _npcs.Get(token);
-    public bool TryGet(string token, out Npc npc) => _npcs.TryGet(token, out npc);
-    public bool Remove(string token) => _npcs.Remove(token);
-    public void Clear() => _npcs.Clear();
+    public Npc? Find(string token)
+    {
+        return _npcs.Find(token);
+    }
+
+    public Npc Get(string token)
+    {
+        return _npcs.Get(token);
+    }
+
+    public bool TryGet(string token, out Npc npc)
+    {
+        return _npcs.TryGet(token, out npc);
+    }
+
+    public bool Remove(string token)
+    {
+        return _npcs.Remove(token);
+    }
+
+    public void Clear()
+    {
+        _npcs.Clear();
+    }
 
     public Npc this[string token] => _npcs[token];
-    public Npc Call(string token) => _npcs.Call(token);
+    public Npc Call(string token)
+    {
+        return _npcs.Call(token);
+    }
 }

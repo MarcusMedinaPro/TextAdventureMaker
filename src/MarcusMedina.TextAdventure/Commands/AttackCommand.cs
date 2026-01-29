@@ -2,7 +2,6 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Commands;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
@@ -10,11 +9,16 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 public class AttackCommand : ICommand
 {
     public string? Target { get; }
 
-    public AttackCommand(string? target) => Target = target;
+    public AttackCommand(string? target)
+    {
+        Target = target;
+    }
 
     public CommandResult Execute(CommandContext context)
     {
@@ -23,12 +27,12 @@ public class AttackCommand : ICommand
             return CommandResult.Fail(Language.NoTargetToAttack, GameError.MissingArgument);
         }
 
-        var location = context.State.CurrentLocation;
-        var npc = location.FindNpc(Target);
+        ILocation location = context.State.CurrentLocation;
+        INpc? npc = location.FindNpc(Target);
         string? suggestion = null;
         if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
-            var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
+            INpc? best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 npc = best;
@@ -52,7 +56,7 @@ public class AttackCommand : ICommand
         }
 
         context.State.Events.Publish(new GameEvent(GameEventType.CombatStart, context.State, location, npc: npc));
-        var result = context.State.CombatSystem.Attack(context.State, npc);
+        CommandResult result = context.State.CombatSystem.Attack(context.State, npc);
         return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }
 }

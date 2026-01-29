@@ -2,7 +2,6 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
@@ -10,12 +9,14 @@ using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 public class ItemTests
 {
     [Fact]
     public void Item_Matches_Name_And_Alias()
     {
-        var item = new Item("sword", "Sword").AddAliases("blade", "steel");
+        Item item = new Item("sword", "Sword").AddAliases("blade", "steel");
 
         Assert.True(item.Matches("sword"));
         Assert.True(item.Matches("Blade"));
@@ -34,7 +35,7 @@ public class ItemTests
     [Fact]
     public void Item_CanHaveDescription()
     {
-        var item = new Item("coin", "Coin")
+        IItem item = new Item("coin", "Coin")
             .Description("A shiny gold coin.");
 
         Assert.Equal("A shiny gold coin.", item.GetDescription());
@@ -43,7 +44,7 @@ public class ItemTests
     [Fact]
     public void Key_CanHaveDescription()
     {
-        var key = new Key("key1", "Brass Key")
+        Key key = new Key("key1", "Brass Key")
             .Description("A small brass key with a lion crest.");
 
         Assert.Equal("A small brass key with a lion crest.", key.GetDescription());
@@ -61,7 +62,7 @@ public class ItemTests
     [Fact]
     public void ItemFactory_DerivesIdFromName()
     {
-        var item = ItemFactory.NewItem("Red Apple", 0.5f);
+        Item item = ItemFactory.NewItem("Red Apple", 0.5f);
 
         Assert.Equal("red_apple", item.Id);
         Assert.Equal(0.5f, item.Weight);
@@ -70,7 +71,7 @@ public class ItemTests
     [Fact]
     public void Item_Interface_AllowsFluentAliases()
     {
-        var item = new Item("coin", "Coin")
+        IItem item = new Item("coin", "Coin")
             .AddAliases("token")
             .SetReaction(ItemAction.Take, "You pick it up.");
 
@@ -80,13 +81,13 @@ public class ItemTests
     [Fact]
     public void EnumerableExtensions_CanJoinEntityNames()
     {
-        var items = new IItem[]
+        IItem[] items = new IItem[]
         {
             new Item("coin", "gold coin"),
             new Item("torch", "old torch")
         };
 
-        var joined = items.CommaJoinNames(properCase: true);
+        string joined = items.CommaJoinNames(properCase: true);
 
         Assert.Equal("Gold Coin, Old Torch", joined);
     }
@@ -94,7 +95,7 @@ public class ItemTests
     [Fact]
     public void Item_Clone_CopiesConfig()
     {
-        var original = new Item("note", "Note")
+        IItem original = new Item("note", "Note")
             .AddAliases("paper")
             .SetTakeable(false)
             .SetWeight(0.5f)
@@ -104,7 +105,7 @@ public class ItemTests
 
         _ = original.SetProperty("mood", "quiet");
 
-        var clone = original.Clone();
+        IItem clone = original.Clone();
 
         Assert.NotSame(original, clone);
         Assert.Equal(original.Id, clone.Id);

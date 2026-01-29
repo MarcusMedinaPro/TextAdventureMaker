@@ -2,13 +2,14 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
-using System.Text;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using System.Text;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class TurnBasedCombat(int playerDamage = 10, int npcDamage = 4) : ICombatSystem
 {
@@ -27,7 +28,7 @@ public sealed class TurnBasedCombat(int playerDamage = 10, int npcDamage = 4) : 
             return CommandResult.Fail(Language.TargetAlreadyDead, GameError.AlreadyDead);
         }
 
-        var builder = new StringBuilder();
+        StringBuilder builder = new();
         _ = builder.Append(Language.AttackTarget(target.Name));
         _ = builder.Append("\n");
         _ = builder.Append(Language.AttackDamage(_playerDamage));
@@ -55,5 +56,8 @@ public sealed class TurnBasedCombat(int playerDamage = 10, int npcDamage = 4) : 
         return CommandResult.Ok(builder.ToString());
     }
 
-    public CommandResult Flee(IGameState state, INpc? target = null) => CommandResult.Ok(Language.FleeSuccess);
+    public CommandResult Flee(IGameState state, INpc? target = null)
+    {
+        return CommandResult.Ok(Language.FleeSuccess);
+    }
 }

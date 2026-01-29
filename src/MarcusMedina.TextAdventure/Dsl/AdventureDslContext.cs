@@ -2,10 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Dsl;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Dsl;
 
 public sealed class AdventureDslContext
 {
@@ -29,11 +30,17 @@ public sealed class AdventureDslContext
     public void SetMetadata(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             return;
+        }
+
         _metadata[key.Trim()] = value ?? "";
     }
 
-    public string? GetMetadata(string key) => string.IsNullOrWhiteSpace(key) ? null : _metadata.TryGetValue(key.Trim(), out var value) ? value : null;
+    public string? GetMetadata(string key)
+    {
+        return string.IsNullOrWhiteSpace(key) ? null : _metadata.TryGetValue(key.Trim(), out string? value) ? value : null;
+    }
 
     public Location GetOrCreateLocation(string id)
     {
@@ -42,7 +49,7 @@ public sealed class AdventureDslContext
             throw new ArgumentException("Location id is required.", nameof(id));
         }
 
-        if (_locations.TryGetValue(id, out var location))
+        if (_locations.TryGetValue(id, out Location? location))
         {
             return location;
         }
@@ -54,7 +61,7 @@ public sealed class AdventureDslContext
 
     public void SetCurrentLocation(string id, string? description = null)
     {
-        var location = GetOrCreateLocation(id);
+        Location location = GetOrCreateLocation(id);
         if (!string.IsNullOrWhiteSpace(description))
         {
             _ = location.Description(description);
@@ -65,7 +72,7 @@ public sealed class AdventureDslContext
 
     public Item GetOrCreateItem(string id, string name, string? description = null)
     {
-        if (_items.TryGetValue(id, out var item))
+        if (_items.TryGetValue(id, out Item? item))
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
@@ -85,7 +92,7 @@ public sealed class AdventureDslContext
 
     public Key GetOrCreateKey(string id, string name, string? description = null)
     {
-        if (_keys.TryGetValue(id, out var key))
+        if (_keys.TryGetValue(id, out Key? key))
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
@@ -105,7 +112,7 @@ public sealed class AdventureDslContext
 
     public Door GetOrCreateDoor(string id, string name, string? description = null)
     {
-        if (_doors.TryGetValue(id, out var door))
+        if (_doors.TryGetValue(id, out Door? door))
         {
             if (!string.IsNullOrWhiteSpace(description))
             {

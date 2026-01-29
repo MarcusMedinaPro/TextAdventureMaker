@@ -2,13 +2,14 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-namespace MarcusMedina.TextAdventure.Engine;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public class GameState : IGameState
 {
@@ -77,11 +78,17 @@ public class GameState : IGameState
     public void RegisterLocations(IEnumerable<ILocation> locations)
     {
         if (locations == null)
+        {
             return;
-        foreach (var location in locations)
+        }
+
+        foreach (ILocation location in locations)
         {
             if (location == null)
+            {
                 continue;
+            }
+
             _locations[location.Id] = location;
         }
     }
@@ -89,28 +96,40 @@ public class GameState : IGameState
     public void SetTimeSystem(ITimeSystem timeSystem)
     {
         if (timeSystem == null)
+        {
             return;
+        }
+
         TimeSystem = timeSystem;
     }
 
     public void SetFactionSystem(IFactionSystem factionSystem)
     {
         if (factionSystem == null)
+        {
             return;
+        }
+
         Factions = factionSystem;
     }
 
     public void SetRandomEventPool(IRandomEventPool randomEventPool)
     {
         if (randomEventPool == null)
+        {
             return;
+        }
+
         RandomEvents = randomEventPool;
     }
 
     public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)
     {
         if (locationDiscovery == null)
+        {
             return;
+        }
+
         LocationDiscovery = locationDiscovery;
         if (locationDiscovery is LocationDiscoverySystem discovery)
         {
@@ -120,10 +139,10 @@ public class GameState : IGameState
 
     public GameMemento CreateMemento()
     {
-        var flags = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-        var counters = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var relationships = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var timeline = new List<string>();
+        Dictionary<string, bool> flags = new(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, int> counters = new(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, int> relationships = new(StringComparer.OrdinalIgnoreCase);
+        List<string> timeline = [];
 
         if (WorldState is WorldState worldState)
         {
@@ -148,7 +167,7 @@ public class GameState : IGameState
     {
         ArgumentNullException.ThrowIfNull(memento);
 
-        if (_locations.TryGetValue(memento.CurrentLocationId, out var location))
+        if (_locations.TryGetValue(memento.CurrentLocationId, out ILocation? location))
         {
             CurrentLocation = location;
         }
@@ -157,13 +176,16 @@ public class GameState : IGameState
         Stats.SetHealth(memento.Health);
 
         Inventory.Clear();
-        var allLocations = _locations.Values.ToList();
-        foreach (var itemId in memento.InventoryItemIds)
+        List<ILocation> allLocations = _locations.Values.ToList();
+        foreach (string itemId in memento.InventoryItemIds)
         {
-            var item = FindItemById(itemId, allLocations);
+            IItem? item = FindItemById(itemId, allLocations);
             if (item == null)
+            {
                 continue;
-            var itemLocation = allLocations.FirstOrDefault(l => l.Items.Contains(item));
+            }
+
+            ILocation? itemLocation = allLocations.FirstOrDefault(l => l.Items.Contains(item));
             _ = (itemLocation?.RemoveItem(item));
             _ = Inventory.Add(item);
         }
@@ -176,11 +198,13 @@ public class GameState : IGameState
 
     private static IItem? FindItemById(string id, IEnumerable<ILocation> locations)
     {
-        foreach (var location in locations)
+        foreach (ILocation location in locations)
         {
-            var item = location.Items.FirstOrDefault(i => i.Id.TextCompare(id));
+            IItem? item = location.Items.FirstOrDefault(i => i.Id.TextCompare(id));
             if (item != null)
+            {
                 return item;
+            }
         }
 
         return null;
@@ -190,7 +214,7 @@ public class GameState : IGameState
     {
         LastMoveError = null;
         LastMoveErrorCode = GameError.None;
-        var exit = CurrentLocation.GetExit(direction);
+        Exit? exit = CurrentLocation.GetExit(direction);
 
         if (exit == null)
         {
@@ -215,12 +239,15 @@ public class GameState : IGameState
             return false;
         }
 
-        var previousLocation = CurrentLocation;
+        ILocation previousLocation = CurrentLocation;
         Events.Publish(new GameEvent(GameEventType.ExitLocation, this, previousLocation));
         CurrentLocation = exit.Target;
         Events.Publish(new GameEvent(GameEventType.EnterLocation, this, CurrentLocation));
         return true;
     }
 
-    public bool IsCurrentRoomId(string id) => !string.IsNullOrWhiteSpace(id) && CurrentLocation.Id.TextCompare(id);
+    public bool IsCurrentRoomId(string id)
+    {
+        return !string.IsNullOrWhiteSpace(id) && CurrentLocation.Id.TextCompare(id);
+    }
 }

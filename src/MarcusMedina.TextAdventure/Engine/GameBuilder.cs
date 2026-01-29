@@ -2,11 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Engine;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class GameBuilder
 {
@@ -15,11 +14,11 @@ public sealed class GameBuilder
     private TextReader? _input;
     private TextWriter? _output;
     private string _prompt = "> ";
-    private readonly List<ILocation> _locations = new();
+    private readonly List<ILocation> _locations = [];
     private ILocation? _startLocation;
     private ITimeSystem? _timeSystem;
-    private readonly List<Action<Game>> _turnStartHandlers = new();
-    private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = new();
+    private readonly List<Action<Game>> _turnStartHandlers = [];
+    private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
 
     public static GameBuilder Create() => new();
 
@@ -79,10 +78,12 @@ public sealed class GameBuilder
 
     public GameBuilder AddLocations(IEnumerable<ILocation> locations)
     {
-        if (locations == null) return this;
+        if (locations == null)
+            return this;
         foreach (var location in locations)
         {
-            if (location == null) continue;
+            if (location == null)
+                continue;
             _locations.Add(location);
         }
 
@@ -112,6 +113,7 @@ public sealed class GameBuilder
         {
             state.RegisterLocations(_locations);
         }
+
         if (_timeSystem != null)
         {
             state.SetTimeSystem(_timeSystem);
@@ -140,8 +142,10 @@ public sealed class GameBuilder
             throw new InvalidOperationException("Start location must be provided.");
         }
 
-        var allLocations = new HashSet<ILocation>(_locations);
-        allLocations.Add(start);
+        var allLocations = new HashSet<ILocation>(_locations)
+        {
+            start
+        };
 
         return new GameState(start, timeSystem: _timeSystem, worldLocations: allLocations);
     }

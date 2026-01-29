@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class NpcMovementTests
 {
@@ -26,8 +26,8 @@ public class NpcMovementTests
         var start = new Location("start");
         var a = new Location("a");
         var b = new Location("b");
-        start.AddExit(Direction.North, a);
-        start.AddExit(Direction.South, b);
+        _ = start.AddExit(Direction.North, a);
+        _ = start.AddExit(Direction.South, b);
 
         var movement = new RandomNpcMovement(new Random(5));
         var state = new GameState(start);

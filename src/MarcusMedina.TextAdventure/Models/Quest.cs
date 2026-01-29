@@ -2,14 +2,14 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public class Quest : IQuest
 {
-    private readonly List<IQuestCondition> _conditions = new();
+    private readonly List<IQuestCondition> _conditions = [];
 
     public string Id { get; }
     public string Title { get; }
@@ -34,6 +34,7 @@ public class Quest : IQuest
         {
             State = QuestState.Active;
         }
+
         return this;
     }
 

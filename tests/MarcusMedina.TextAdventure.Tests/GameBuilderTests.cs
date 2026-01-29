@@ -2,12 +2,12 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class GameBuilderTests
 {
@@ -51,10 +51,7 @@ public class GameBuilderTests
     {
         private readonly ICommand _command;
 
-        public StubParser(ICommand command)
-        {
-            _command = command;
-        }
+        public StubParser(ICommand command) => _command = command;
 
         public ICommand Parse(string input) => _command;
     }
@@ -63,14 +60,8 @@ public class GameBuilderTests
     {
         private readonly ILocation _target;
 
-        public FixedMovement(ILocation target)
-        {
-            _target = target;
-        }
+        public FixedMovement(ILocation target) => _target = target;
 
-        public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
-        {
-            return _target;
-        }
+        public ILocation? GetNextLocation(ILocation currentLocation, IGameState state) => _target;
     }
 }

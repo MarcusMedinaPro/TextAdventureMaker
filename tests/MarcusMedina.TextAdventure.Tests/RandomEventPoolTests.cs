@@ -1,8 +1,8 @@
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
 using Xunit;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class RandomEventPoolTests
 {
@@ -15,7 +15,7 @@ public class RandomEventPoolTests
             .SetTriggerChance(1.0);
 
         var triggered = false;
-        pool.AddEvent("spark", 1, _ => triggered = true);
+        _ = pool.AddEvent("spark", 1, _ => triggered = true);
 
         pool.Tick(state);
 
@@ -31,8 +31,8 @@ public class RandomEventPoolTests
             .SetTriggerChance(1.0);
 
         var hits = 0;
-        pool.AddEvent("gust", 1, _ => hits++);
-        pool.SetCooldown("gust", 2);
+        _ = pool.AddEvent("gust", 1, _ => hits++);
+        _ = pool.SetCooldown("gust", 2);
 
         pool.Tick(state);
         pool.Tick(state);

@@ -2,15 +2,15 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Models;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public sealed class DialogRule
 {
-    private readonly List<Func<DialogContext, bool>> _conditions = new();
+    private readonly List<Func<DialogContext, bool>> _conditions = [];
     private Func<DialogContext, string>? _say;
     private Action<DialogContext>? _then;
 

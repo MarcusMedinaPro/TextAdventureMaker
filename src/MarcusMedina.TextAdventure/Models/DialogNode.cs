@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class DialogNode : IDialogNode
 {
-    private readonly List<DialogOption> _options = new();
+    private readonly List<DialogOption> _options = [];
 
     public string Text { get; }
     public IReadOnlyList<DialogOption> Options => _options;

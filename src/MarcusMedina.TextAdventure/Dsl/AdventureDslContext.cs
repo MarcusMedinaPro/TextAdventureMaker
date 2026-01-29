@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Dsl;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Dsl;
 
 public sealed class AdventureDslContext
 {
@@ -15,8 +15,8 @@ public sealed class AdventureDslContext
     private readonly Dictionary<string, Door> _doors = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> _metadata = new(StringComparer.OrdinalIgnoreCase);
 
-    internal List<PendingExit> PendingExits { get; } = new();
-    internal List<PendingDoorKey> PendingDoorKeys { get; } = new();
+    internal List<PendingExit> PendingExits { get; } = [];
+    internal List<PendingDoorKey> PendingDoorKeys { get; } = [];
 
     public Location? CurrentLocation { get; private set; }
     public IReadOnlyDictionary<string, Location> Locations => _locations;
@@ -28,15 +28,12 @@ public sealed class AdventureDslContext
 
     public void SetMetadata(string key, string value)
     {
-        if (string.IsNullOrWhiteSpace(key)) return;
+        if (string.IsNullOrWhiteSpace(key))
+            return;
         _metadata[key.Trim()] = value ?? "";
     }
 
-    public string? GetMetadata(string key)
-    {
-        if (string.IsNullOrWhiteSpace(key)) return null;
-        return _metadata.TryGetValue(key.Trim(), out var value) ? value : null;
-    }
+    public string? GetMetadata(string key) => string.IsNullOrWhiteSpace(key) ? null : _metadata.TryGetValue(key.Trim(), out var value) ? value : null;
 
     public Location GetOrCreateLocation(string id)
     {
@@ -60,7 +57,7 @@ public sealed class AdventureDslContext
         var location = GetOrCreateLocation(id);
         if (!string.IsNullOrWhiteSpace(description))
         {
-            location.Description(description);
+            _ = location.Description(description);
         }
 
         CurrentLocation = location;
@@ -72,7 +69,7 @@ public sealed class AdventureDslContext
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
-                item.Description(description);
+                _ = item.Description(description);
             }
 
             return item;
@@ -92,7 +89,7 @@ public sealed class AdventureDslContext
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
-                key.Description(description);
+                _ = key.Description(description);
             }
 
             return key;
@@ -112,7 +109,7 @@ public sealed class AdventureDslContext
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
-                door.Description(description);
+                _ = door.Description(description);
             }
 
             return door;

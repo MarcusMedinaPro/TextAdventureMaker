@@ -2,13 +2,12 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Commands;
 
 public class PourCommand : ICommand
 {
@@ -28,13 +27,13 @@ public class PourCommand : ICommand
         string? suggestion = null;
         if (fluidItem == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(FluidName))
         {
-            var best = FuzzyMatcher.FindBestItem(inventory.Items, FluidName, context.State.FuzzyMaxDistance) as IFluid;
-            if (best != null)
+            if (FuzzyMatcher.FindBestItem(inventory.Items, FluidName, context.State.FuzzyMaxDistance) is IFluid best)
             {
                 fluidItem = best;
                 suggestion = best.Name;
             }
         }
+
         if (fluidItem == null)
         {
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
@@ -50,6 +49,7 @@ public class PourCommand : ICommand
                 suggestion ??= best.Name;
             }
         }
+
         if (containerItem is not IContainer<IFluid> container)
         {
             return CommandResult.Fail(Language.CannotPourThat, GameError.ItemNotUsable);
@@ -60,7 +60,7 @@ public class PourCommand : ICommand
             return CommandResult.Fail(Language.InventoryFull, GameError.InventoryFull);
         }
 
-        inventory.Remove((IItem)fluidItem);
+        _ = inventory.Remove((IItem)fluidItem);
         var ok = CommandResult.Ok(Language.PourResult(fluidItem.Name, containerItem.Name));
         return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }

@@ -2,24 +2,20 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Parsing;
+
 using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Localization;
-
-namespace MarcusMedina.TextAdventure.Parsing;
 
 public class KeywordParser : ICommandParser
 {
     private readonly KeywordParserConfig _config;
 
-    public KeywordParser(KeywordParserConfig config)
-    {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
-    }
+    public KeywordParser(KeywordParserConfig config) => _config = config ?? throw new ArgumentNullException(nameof(config));
 
     public ICommand Parse(string input)
     {
@@ -227,33 +223,48 @@ public class KeywordParser : ICommandParser
     private ICommand? BuildCommandForKeyword(string keyword, string[] tokens)
     {
         keyword = NormalizeKeyword(keyword);
-        if (_config.Quit.Contains(keyword)) return new QuitCommand();
-        if (_config.Examine.Contains(keyword)) return new ExamineCommand(ParseItemName(tokens, 1));
-        if (_config.Look.Contains(keyword)) return new LookCommand(ParseItemName(tokens, 1));
-        if (_config.Inventory.Contains(keyword)) return new InventoryCommand();
-        if (_config.Stats.Contains(keyword)) return new StatsCommand();
-        if (_config.Open.Contains(keyword)) return new OpenCommand();
-        if (_config.Unlock.Contains(keyword)) return new UnlockCommand();
+        if (_config.Quit.Contains(keyword))
+            return new QuitCommand();
+        if (_config.Examine.Contains(keyword))
+            return new ExamineCommand(ParseItemName(tokens, 1));
+        if (_config.Look.Contains(keyword))
+            return new LookCommand(ParseItemName(tokens, 1));
+        if (_config.Inventory.Contains(keyword))
+            return new InventoryCommand();
+        if (_config.Stats.Contains(keyword))
+            return new StatsCommand();
+        if (_config.Open.Contains(keyword))
+            return new OpenCommand();
+        if (_config.Unlock.Contains(keyword))
+            return new UnlockCommand();
         if (_config.Take.Contains(keyword))
         {
-            if (tokens.Length >= 2 && _config.All.Contains(tokens[1])) return new TakeAllCommand();
+            if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
+                return new TakeAllCommand();
             var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
         }
+
         if (_config.Drop.Contains(keyword))
         {
-            if (tokens.Length >= 2 && _config.All.Contains(tokens[1])) return new DropAllCommand();
+            if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
+                return new DropAllCommand();
             var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new DropCommand(itemName) : new UnknownCommand();
         }
+
         if (_config.Use.Contains(keyword))
         {
             var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
         }
-        if (_config.Combine.Contains(keyword)) return ParseCombine(tokens);
-        if (_config.Pour.Contains(keyword)) return ParsePour(tokens);
-        if (_config.Read.Contains(keyword)) return new ReadCommand(ParseItemName(tokens, 1));
+
+        if (_config.Combine.Contains(keyword))
+            return ParseCombine(tokens);
+        if (_config.Pour.Contains(keyword))
+            return ParsePour(tokens);
+        if (_config.Read.Contains(keyword))
+            return new ReadCommand(ParseItemName(tokens, 1));
         if (_config.Move.Contains(keyword))
         {
             if (tokens.Length >= 2 && TryParseDirection(tokens[1], out var moveDirection))
@@ -264,32 +275,35 @@ public class KeywordParser : ICommandParser
             var target = ParseItemName(tokens, 1);
             return target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
         }
-        if (_config.Talk.Contains(keyword)) return new TalkCommand(ParseItemName(tokens, 1));
-        if (_config.Attack.Contains(keyword)) return new AttackCommand(ParseItemName(tokens, 1));
-        if (_config.Flee.Contains(keyword)) return new FleeCommand(ParseItemName(tokens, 1));
-        if (_config.Save.Contains(keyword)) return new SaveCommand(ParseItemName(tokens, 1));
-        if (_config.Load.Contains(keyword)) return new LoadCommand(ParseItemName(tokens, 1));
-        if (_config.Quest.Contains(keyword)) return new QuestCommand();
-        if (_config.Go.Contains(keyword))
-        {
-            return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
-                ? new GoCommand(direction)
-                : ParseGoTarget(tokens);
-        }
 
-        return null;
+        if (_config.Talk.Contains(keyword))
+            return new TalkCommand(ParseItemName(tokens, 1));
+        if (_config.Attack.Contains(keyword))
+            return new AttackCommand(ParseItemName(tokens, 1));
+        if (_config.Flee.Contains(keyword))
+            return new FleeCommand(ParseItemName(tokens, 1));
+        return _config.Save.Contains(keyword)
+            ? new SaveCommand(ParseItemName(tokens, 1))
+            : _config.Load.Contains(keyword)
+            ? new LoadCommand(ParseItemName(tokens, 1))
+            : _config.Quest.Contains(keyword)
+            ? new QuestCommand()
+            : _config.Go.Contains(keyword)
+            ? tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
+                ? new GoCommand(direction)
+                : ParseGoTarget(tokens)
+            : null;
     }
 
     private string NormalizeKeyword(string token)
     {
-        if (string.IsNullOrWhiteSpace(token)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(token))
+            return string.Empty;
         var keyword = token.ToLowerInvariant();
         return _config.Synonyms.TryGetValue(keyword, out var canonical) ? canonical : keyword;
     }
 
-    private IEnumerable<string> GetAllCommandKeywords()
-    {
-        return _config.Quit
+    private IEnumerable<string> GetAllCommandKeywords() => _config.Quit
             .Concat(_config.Examine)
             .Concat(_config.Look)
             .Concat(_config.Inventory)
@@ -311,7 +325,6 @@ public class KeywordParser : ICommandParser
             .Concat(_config.Load)
             .Concat(_config.Quest)
             .Distinct(StringComparer.OrdinalIgnoreCase);
-    }
 
     private string? ParseItemName(string[] tokens, int startIndex)
     {
@@ -356,7 +369,7 @@ public class KeywordParser : ICommandParser
 
     private ICommand ParsePour(string[] tokens)
     {
-        var index = Array.FindIndex(tokens, t => _config.PourPrepositions.Contains(t));
+        var index = Array.FindIndex(tokens, _config.PourPrepositions.Contains);
         if (index <= 1 || index >= tokens.Length - 1)
         {
             return new UnknownCommand();

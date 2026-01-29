@@ -2,14 +2,14 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
-using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class ItemCommandTests
 {
@@ -25,7 +25,7 @@ public class ItemCommandTests
 
         Assert.True(result.Success);
         Assert.Empty(location.Items);
-        Assert.Single(state.Inventory.Items);
+        _ = Assert.Single(state.Inventory.Items);
     }
 
     [Fact]
@@ -48,12 +48,12 @@ public class ItemCommandTests
         var location = new Location("room");
         var state = new GameState(location);
         var item = new Item("coin", "Coin");
-        state.Inventory.Add(item);
+        _ = state.Inventory.Add(item);
 
         var result = state.Execute(new DropCommand("coin"));
 
         Assert.True(result.Success);
-        Assert.Single(location.Items);
+        _ = Assert.Single(location.Items);
         Assert.Empty(state.Inventory.Items);
     }
 
@@ -62,7 +62,7 @@ public class ItemCommandTests
     {
         var location = new Location("room");
         var state = new GameState(location);
-        state.Inventory.Add(new Item("rock", "Rock").SetWeight(2f));
+        _ = state.Inventory.Add(new Item("rock", "Rock").SetWeight(2f));
 
         var result = state.InventoryView();
 
@@ -115,8 +115,8 @@ public class ItemCommandTests
     {
         var location = new Location("room");
         var state = new GameState(location);
-        state.Inventory.Add(new Item("coin", "Coin"));
-        state.Inventory.Add(new Item("apple", "Apple"));
+        _ = state.Inventory.Add(new Item("coin", "Coin"));
+        _ = state.Inventory.Add(new Item("apple", "Apple"));
 
         var result = state.Execute(new DropAllCommand());
 

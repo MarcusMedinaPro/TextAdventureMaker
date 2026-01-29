@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class QuestConditionTests
 {
@@ -15,7 +15,7 @@ public class QuestConditionTests
     {
         var location = new Location("camp");
         var state = new GameState(location);
-        state.Inventory.Add(new Item("sword", "sword"));
+        _ = state.Inventory.Add(new Item("sword", "sword"));
         var condition = new HasItemCondition("sword");
 
         var evaluator = new QuestConditionEvaluator(state);
@@ -39,10 +39,10 @@ public class QuestConditionTests
     {
         var location = new Location("camp");
         var state = new GameState(location);
-        state.Inventory.Add(new Item("sword", "sword"));
+        _ = state.Inventory.Add(new Item("sword", "sword"));
         var npc = new Npc("dragon", "Dragon").SetState(NpcState.Dead);
         state.WorldState.SetFlag("dragon_defeated", true);
-        state.WorldState.Increment("villagers_saved", 2);
+        _ = state.WorldState.Increment("villagers_saved", 2);
         state.WorldState.SetRelationship("fox", 5);
 
         var quest = new Quest("dragon_hunt", "Dragon Hunt", "Find the sword and slay the dragon.")

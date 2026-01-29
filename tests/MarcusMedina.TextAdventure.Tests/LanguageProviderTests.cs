@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Localization;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Localization;
 
 public class LanguageProviderTests
 {

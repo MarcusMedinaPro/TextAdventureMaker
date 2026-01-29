@@ -3,12 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Dsl;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class AdventureDslExporterTests
 {
@@ -82,7 +82,7 @@ public class AdventureDslExporterTests
         var room1 = new Location("room1", "Room one.");
         var room2 = new Location("room2", "Room two.");
         var door = new Door("wooden_door", "wooden door", "A heavy wooden door.");
-        room1.AddExit(Direction.North, room2, door);
+        _ = room1.AddExit(Direction.North, room2, door);
         var state = new GameState(room1, worldLocations: new[] { room1, room2 });
         var exporter = new AdventureDslExporter();
 
@@ -96,7 +96,7 @@ public class AdventureDslExporterTests
     {
         var room1 = new Location("room1", "Room one.");
         var room2 = new Location("room2", "Room two.");
-        room1.AddExit(Direction.North, room2);
+        _ = room1.AddExit(Direction.North, room2);
         var state = new GameState(room1, worldLocations: new[] { room1, room2 });
         var exporter = new AdventureDslExporter();
 
@@ -111,7 +111,7 @@ public class AdventureDslExporterTests
         var room1 = new Location("room1", "Room one.");
         var room2 = new Location("room2", "Room two.");
         var door = new Door("gate", "iron gate", "A rusty iron gate.");
-        room1.AddExit(Direction.East, room2, door);
+        _ = room1.AddExit(Direction.East, room2, door);
         var state = new GameState(room1, worldLocations: new[] { room1, room2 });
         var exporter = new AdventureDslExporter();
 
@@ -125,7 +125,7 @@ public class AdventureDslExporterTests
     {
         var room1 = new Location("room1", "Room one.");
         var room2 = new Location("room2", "Room two.");
-        room1.AddExit(Direction.Down, room2, oneWay: true);
+        _ = room1.AddExit(Direction.Down, room2, oneWay: true);
         var state = new GameState(room1, worldLocations: new[] { room1, room2 });
         var exporter = new AdventureDslExporter();
 
@@ -139,7 +139,7 @@ public class AdventureDslExporterTests
     {
         var location = new Location("room", "A room.");
         var item = new Item("rock", "heavy rock", "A very heavy rock.");
-        item.SetWeight(5.5f);
+        _ = item.SetWeight(5.5f);
         location.AddItem(item);
         var state = new GameState(location);
         var exporter = new AdventureDslExporter();
@@ -154,7 +154,7 @@ public class AdventureDslExporterTests
     {
         var location = new Location("room", "A room.");
         var item = new Item("statue", "stone statue", "A heavy stone statue.");
-        item.SetTakeable(false);
+        _ = item.SetTakeable(false);
         location.AddItem(item);
         var state = new GameState(location);
         var exporter = new AdventureDslExporter();
@@ -171,9 +171,9 @@ public class AdventureDslExporterTests
         var room2 = new Location("room2", "Room two.");
         var key = new Key("gold_key", "gold key", "A shiny gold key.");
         var door = new Door("vault_door", "vault door", "A massive vault door.");
-        door.RequiresKey(key);
+        _ = door.RequiresKey(key);
         room1.AddItem(key);
-        room1.AddExit(Direction.North, room2, door);
+        _ = room1.AddExit(Direction.North, room2, door);
         var state = new GameState(room1, worldLocations: new[] { room1, room2 });
         var exporter = new AdventureDslExporter();
 
@@ -190,9 +190,9 @@ public class AdventureDslExporterTests
         var room2 = new Location("garden", "A beautiful garden.");
         var key = new Key("gate_key", "rusty key", "A rusty old key.");
         var door = new Door("garden_gate", "garden gate", "An ornate garden gate.");
-        door.RequiresKey(key);
+        _ = door.RequiresKey(key);
         room1.AddItem(key);
-        room1.AddExit(Direction.North, room2, door);
+        _ = room1.AddExit(Direction.North, room2, door);
 
         var originalState = new GameState(room1, worldLocations: new[] { room1, room2 });
 

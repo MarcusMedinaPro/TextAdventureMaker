@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class LocationEdgeCaseTests
 {
@@ -16,7 +16,7 @@ public class LocationEdgeCaseTests
         var b = new Location("b");
         var door = new Door("door1", "stone door");
 
-        a.AddExit(Direction.North, b, door);
+        _ = a.AddExit(Direction.North, b, door);
 
         Assert.Same(door, a.GetExit(Direction.North)?.Door);
         Assert.Same(door, b.GetExit(Direction.South)?.Door);
@@ -30,7 +30,7 @@ public class LocationEdgeCaseTests
         var b = new Location("b");
         var door = new Door("door1", "stone door");
 
-        a.AddExit(Direction.North, b, door, oneWay: true);
+        _ = a.AddExit(Direction.North, b, door, oneWay: true);
 
         Assert.NotNull(a.GetExit(Direction.North));
         Assert.Null(b.GetExit(Direction.South));

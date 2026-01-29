@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Models;
 
 public class WorldStateTests
 {
@@ -14,7 +14,7 @@ public class WorldStateTests
         var state = new WorldState();
 
         state.SetFlag("dragon_dead", true);
-        state.Increment("days", 2);
+        _ = state.Increment("days", 2);
 
         Assert.True(state.GetFlag("dragon_dead"));
         Assert.Equal(2, state.GetCounter("days"));
@@ -37,6 +37,6 @@ public class WorldStateTests
 
         state.AddTimeline("Entered cave.");
 
-        Assert.Single(state.Timeline);
+        _ = Assert.Single(state.Timeline);
     }
 }

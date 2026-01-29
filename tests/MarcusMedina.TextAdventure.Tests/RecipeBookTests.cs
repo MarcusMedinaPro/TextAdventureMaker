@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Models;
 
 public class RecipeBookTests
 {
@@ -19,7 +19,7 @@ public class RecipeBookTests
         var result = book.Combine(ice, fire);
 
         Assert.True(result.Success);
-        Assert.Single(result.Created);
+        _ = Assert.Single(result.Created);
         Assert.Equal("water", result.Created[0].Id);
     }
 

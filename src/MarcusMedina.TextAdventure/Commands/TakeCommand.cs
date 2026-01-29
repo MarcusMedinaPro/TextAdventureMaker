@@ -2,22 +2,19 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
 public class TakeCommand : ICommand
 {
     public string ItemName { get; }
 
-    public TakeCommand(string itemName)
-    {
-        ItemName = itemName;
-    }
+    public TakeCommand(string itemName) => ItemName = itemName;
 
     public CommandResult Execute(CommandContext context)
     {
@@ -33,6 +30,7 @@ public class TakeCommand : ICommand
                 suggestion = best.Name;
             }
         }
+
         if (item == null)
         {
             return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
@@ -49,15 +47,12 @@ public class TakeCommand : ICommand
         var inventory = context.State.Inventory;
         if (!inventory.Add(item))
         {
-            if (inventory.LimitType == InventoryLimitType.ByCount)
-            {
-                return CommandResult.Fail(Language.InventoryFull, GameError.InventoryFull);
-            }
-
-            return CommandResult.Fail(Language.TooHeavy, GameError.ItemTooHeavy);
+            return inventory.LimitType == InventoryLimitType.ByCount
+                ? CommandResult.Fail(Language.InventoryFull, GameError.InventoryFull)
+                : CommandResult.Fail(Language.TooHeavy, GameError.ItemTooHeavy);
         }
 
-        location.RemoveItem(item);
+        _ = location.RemoveItem(item);
         item.Take();
         context.State.Events.Publish(new GameEvent(GameEventType.PickupItem, context.State, location, item));
 

@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-
-namespace MarcusMedina.TextAdventure.Commands;
 
 public class InventoryCommand : ICommand
 {
@@ -20,6 +20,7 @@ public class InventoryCommand : ICommand
             {
                 emptyMessage += $"\n{Language.TotalWeight(inventory.TotalWeight)}";
             }
+
             return CommandResult.Ok(emptyMessage);
         }
 
@@ -31,6 +32,7 @@ public class InventoryCommand : ICommand
         {
             message += $"\n{Language.TotalWeight(inventory.TotalWeight)}";
         }
+
         return CommandResult.Ok(message);
     }
 }

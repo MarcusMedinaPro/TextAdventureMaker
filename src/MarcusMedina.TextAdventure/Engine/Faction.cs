@@ -2,15 +2,15 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Engine;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class Faction : IFaction
 {
     private readonly HashSet<string> _npcIds = new(StringComparer.OrdinalIgnoreCase);
-    private readonly List<(int threshold, Action<IGameState> handler)> _thresholds = new();
-    private readonly HashSet<int> _thresholdsFired = new();
+    private readonly List<(int threshold, Action<IGameState> handler)> _thresholds = [];
+    private readonly HashSet<int> _thresholdsFired = [];
 
     public string Id { get; }
     public int Reputation { get; private set; }
@@ -24,14 +24,16 @@ public sealed class Faction : IFaction
 
     public IFaction WithNpcs(params string[] npcIds)
     {
-        if (npcIds == null) return this;
+        if (npcIds == null)
+            return this;
         foreach (var npcId in npcIds)
         {
             if (!string.IsNullOrWhiteSpace(npcId))
             {
-                _npcIds.Add(npcId.Trim());
+                _ = _npcIds.Add(npcId.Trim());
             }
         }
+
         return this;
     }
 
@@ -42,11 +44,7 @@ public sealed class Faction : IFaction
         return this;
     }
 
-    public bool HasNpc(string npcId)
-    {
-        if (string.IsNullOrWhiteSpace(npcId)) return false;
-        return _npcIds.Contains(npcId);
-    }
+    public bool HasNpc(string npcId) => !string.IsNullOrWhiteSpace(npcId) && _npcIds.Contains(npcId);
 
     public int ModifyReputation(int amount, IGameState state)
     {
@@ -55,7 +53,8 @@ public sealed class Faction : IFaction
 
         foreach (var (threshold, handler) in _thresholds)
         {
-            if (_thresholdsFired.Contains(threshold)) continue;
+            if (_thresholdsFired.Contains(threshold))
+                continue;
 
             var crossed = threshold >= 0
                 ? previous < threshold && Reputation >= threshold
@@ -63,7 +62,7 @@ public sealed class Faction : IFaction
 
             if (crossed)
             {
-                _thresholdsFired.Add(threshold);
+                _ = _thresholdsFired.Add(threshold);
                 handler(state);
             }
         }

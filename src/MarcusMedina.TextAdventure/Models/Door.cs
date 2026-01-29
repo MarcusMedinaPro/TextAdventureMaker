@@ -2,19 +2,19 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Models;
+
 using System;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public class Door : IDoor
 {
     private string _description = "";
-    private readonly Dictionary<DoorAction, string> _reactions = new();
+    private readonly Dictionary<DoorAction, string> _reactions = [];
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
-    private readonly List<string> _aliases = new();
+    private readonly List<string> _aliases = [];
     public string Id { get; }
     public string Name { get; }
     public IDictionary<string, string> Properties => _properties;
@@ -29,7 +29,7 @@ public class Door : IDoor
     public event Action<IDoor>? OnUnlock;
     public event Action<IDoor>? OnDestroy;
 
-    public bool IsPassable => State == DoorState.Open || State == DoorState.Destroyed;
+    public bool IsPassable => State is DoorState.Open or DoorState.Destroyed;
 
     public Door(string id, string name, DoorState initialState = DoorState.Closed)
     {
@@ -41,10 +41,7 @@ public class Door : IDoor
     }
 
     public Door(string id, string name, string description, DoorState initialState = DoorState.Closed)
-        : this(id, name, initialState)
-    {
-        _description = description ?? "";
-    }
+        : this(id, name, initialState) => _description = description ?? "";
 
     public Door Description(string text)
     {
@@ -52,10 +49,7 @@ public class Door : IDoor
         return this;
     }
 
-    public string? GetReaction(DoorAction action)
-    {
-        return _reactions.TryGetValue(action, out var reaction) ? reaction : null;
-    }
+    public string? GetReaction(DoorAction action) => _reactions.TryGetValue(action, out var reaction) ? reaction : null;
 
     public Door AddAliases(params string[] aliases)
     {
@@ -72,11 +66,11 @@ public class Door : IDoor
 
     public bool Matches(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) return false;
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
         var token = name.Trim();
 
-        if (Name.TextCompare(token)) return true;
-        return _aliases.Any(a => a.TextCompare(token));
+        return Name.TextCompare(token) || _aliases.Any(a => a.TextCompare(token));
     }
 
     public Door SetReaction(DoorAction action, string text)
@@ -94,9 +88,12 @@ public class Door : IDoor
 
     public bool Open()
     {
-        if (State == DoorState.Locked) return false;
-        if (State == DoorState.Destroyed) return true;
-        if (State == DoorState.Open) return true;
+        if (State == DoorState.Locked)
+            return false;
+        if (State == DoorState.Destroyed)
+            return true;
+        if (State == DoorState.Open)
+            return true;
         State = DoorState.Open;
         OnOpen?.Invoke(this);
         return true;
@@ -104,9 +101,12 @@ public class Door : IDoor
 
     public bool Close()
     {
-        if (State == DoorState.Destroyed) return false;
-        if (State == DoorState.Locked) return false;
-        if (State == DoorState.Closed) return true;
+        if (State == DoorState.Destroyed)
+            return false;
+        if (State == DoorState.Locked)
+            return false;
+        if (State == DoorState.Closed)
+            return true;
         State = DoorState.Closed;
         OnClose?.Invoke(this);
         return true;
@@ -114,10 +114,14 @@ public class Door : IDoor
 
     public bool Lock(IKey key)
     {
-        if (State == DoorState.Destroyed) return false;
-        if (State == DoorState.Open) return false;
-        if (RequiredKey != null && RequiredKey.Id != key.Id) return false;
-        if (State == DoorState.Locked && RequiredKey != null && RequiredKey.Id == key.Id) return true;
+        if (State == DoorState.Destroyed)
+            return false;
+        if (State == DoorState.Open)
+            return false;
+        if (RequiredKey != null && RequiredKey.Id != key.Id)
+            return false;
+        if (State == DoorState.Locked && RequiredKey != null && RequiredKey.Id == key.Id)
+            return true;
         RequiredKey = key;
         State = DoorState.Locked;
         OnLock?.Invoke(this);
@@ -126,8 +130,10 @@ public class Door : IDoor
 
     public bool Unlock(IKey key)
     {
-        if (State != DoorState.Locked) return false;
-        if (RequiredKey == null || RequiredKey.Id != key.Id) return false;
+        if (State != DoorState.Locked)
+            return false;
+        if (RequiredKey == null || RequiredKey.Id != key.Id)
+            return false;
         State = DoorState.Closed;
         OnUnlock?.Invoke(this);
         return true;
@@ -135,7 +141,8 @@ public class Door : IDoor
 
     public bool Destroy()
     {
-        if (State == DoorState.Destroyed) return true;
+        if (State == DoorState.Destroyed)
+            return true;
         State = DoorState.Destroyed;
         OnDestroy?.Invoke(this);
         return true;

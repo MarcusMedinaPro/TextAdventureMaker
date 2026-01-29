@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class NavigationTests
 {
@@ -15,7 +15,7 @@ public class NavigationTests
     {
         var entrance = new Location("entrance");
         var forest = new Location("forest");
-        entrance.AddExit(Direction.North, forest);
+        _ = entrance.AddExit(Direction.North, forest);
 
         var state = new GameState(entrance);
         var moved = state.Move(Direction.North);
@@ -40,7 +40,7 @@ public class NavigationTests
     {
         var outside = new Location("outside");
         var inside = new Location("inside");
-        outside.AddExit(Direction.In, inside);
+        _ = outside.AddExit(Direction.In, inside);
 
         var state = new GameState(outside);
 

@@ -1,8 +1,8 @@
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
 using Xunit;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class FactionSystemTests
 {
@@ -13,13 +13,13 @@ public class FactionSystemTests
         var system = new FactionSystem();
         var fired = false;
 
-        system.AddFaction("wardens")
+        _ = system.AddFaction("wardens")
             .OnReputationThreshold(10, _ => fired = true);
 
-        system.ModifyReputation("wardens", 5, state);
+        _ = system.ModifyReputation("wardens", 5, state);
         Assert.False(fired);
 
-        system.ModifyReputation("wardens", 5, state);
+        _ = system.ModifyReputation("wardens", 5, state);
         Assert.True(fired);
     }
 
@@ -30,10 +30,10 @@ public class FactionSystemTests
         var system = new FactionSystem();
         var fired = false;
 
-        system.AddFaction("street")
+        _ = system.AddFaction("street")
             .OnReputationThreshold(-5, _ => fired = true);
 
-        system.ModifyReputation("street", -6, state);
+        _ = system.ModifyReputation("street", -6, state);
         Assert.True(fired);
     }
 }

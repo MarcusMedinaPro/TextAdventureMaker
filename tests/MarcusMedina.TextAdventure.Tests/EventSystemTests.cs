@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class EventSystemTests
 {
@@ -31,7 +31,7 @@ public class EventSystemTests
         var location = new Location("camp");
         var state = new GameState(location);
         var called = false;
-        Action<GameEvent> handler = _ => called = true;
+        void handler(GameEvent _) => called = true;
 
         events.Subscribe(GameEventType.ExitLocation, handler);
         events.Unsubscribe(GameEventType.ExitLocation, handler);

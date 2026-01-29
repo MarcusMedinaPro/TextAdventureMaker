@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class PourCommandTests
 {
@@ -18,14 +18,14 @@ public class PourCommandTests
         var water = new FluidItem("water", "water");
         var glass = new Glass("glass", "glass");
         var state = new GameState(new Location("start"));
-        state.Inventory.Add(water);
-        state.Inventory.Add(glass);
+        _ = state.Inventory.Add(water);
+        _ = state.Inventory.Add(glass);
 
         var result = state.Execute(new PourCommand("water", "glass"));
 
         Assert.True(result.Success);
         Assert.DoesNotContain(state.Inventory.Items, i => i.Id == "water");
-        Assert.Single(glass.Contents);
+        _ = Assert.Single(glass.Contents);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class PourCommandTests
     {
         var glass = new Glass("glass", "glass");
         var state = new GameState(new Location("start"));
-        state.Inventory.Add(glass);
+        _ = state.Inventory.Add(glass);
 
         var result = state.Execute(new PourCommand("water", "glass"));
 

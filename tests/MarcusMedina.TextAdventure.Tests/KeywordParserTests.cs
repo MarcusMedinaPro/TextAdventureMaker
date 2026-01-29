@@ -2,18 +2,16 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Parsing;
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 public class KeywordParserTests
 {
-    private static KeywordParserConfig CreateEnglishConfig()
-    {
-        return new KeywordParserConfig(
+    private static KeywordParserConfig CreateEnglishConfig() => new(
             quit: CommandHelper.NewCommands("quit", "exit", "q"),
             look: CommandHelper.NewCommands("look", "l", "ls"),
             examine: CommandHelper.NewCommands("examine", "x"),
@@ -55,7 +53,6 @@ public class KeywordParserTests
                 ["out"] = Direction.Out
             },
             allowDirectionEnumNames: true);
-    }
 
     [Theory]
     [InlineData("north", Direction.North)]
@@ -83,7 +80,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<LookCommand>(command);
+        _ = Assert.IsType<LookCommand>(command);
     }
 
     [Theory]
@@ -95,7 +92,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<MoveCommand>(command);
+        _ = Assert.IsType<MoveCommand>(command);
     }
 
     [Fact]
@@ -118,7 +115,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<ExamineCommand>(command);
+        _ = Assert.IsType<ExamineCommand>(command);
     }
 
     [Fact]
@@ -154,7 +151,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<StatsCommand>(command);
+        _ = Assert.IsType<StatsCommand>(command);
     }
 
     [Theory]
@@ -167,7 +164,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<InventoryCommand>(command);
+        _ = Assert.IsType<InventoryCommand>(command);
     }
 
     [Theory]
@@ -180,9 +177,8 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<TakeCommand>(command);
+        _ = Assert.IsType<TakeCommand>(command);
     }
-
 
     [Theory]
     [InlineData("take all")]
@@ -193,7 +189,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<TakeAllCommand>(command);
+        _ = Assert.IsType<TakeAllCommand>(command);
     }
 
     [Fact]
@@ -203,7 +199,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("drop coin");
 
-        Assert.IsType<DropCommand>(command);
+        _ = Assert.IsType<DropCommand>(command);
     }
 
     [Fact]
@@ -213,7 +209,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("use wand");
 
-        Assert.IsType<UseCommand>(command);
+        _ = Assert.IsType<UseCommand>(command);
     }
 
     [Fact]
@@ -228,7 +224,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("grab coin");
 
-        Assert.IsType<TakeCommand>(command);
+        _ = Assert.IsType<TakeCommand>(command);
     }
 
     [Fact]
@@ -238,7 +234,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("read sign");
 
-        Assert.IsType<ReadCommand>(command);
+        _ = Assert.IsType<ReadCommand>(command);
     }
 
     [Fact]
@@ -248,7 +244,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("talk fox");
 
-        Assert.IsType<TalkCommand>(command);
+        _ = Assert.IsType<TalkCommand>(command);
     }
 
     [Fact]
@@ -258,7 +254,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("attack troll");
 
-        Assert.IsType<AttackCommand>(command);
+        _ = Assert.IsType<AttackCommand>(command);
     }
 
     [Fact]
@@ -268,7 +264,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("flee");
 
-        Assert.IsType<FleeCommand>(command);
+        _ = Assert.IsType<FleeCommand>(command);
     }
 
     [Fact]
@@ -278,7 +274,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("save");
 
-        Assert.IsType<SaveCommand>(command);
+        _ = Assert.IsType<SaveCommand>(command);
     }
 
     [Fact]
@@ -288,7 +284,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("load savegame.json");
 
-        Assert.IsType<LoadCommand>(command);
+        _ = Assert.IsType<LoadCommand>(command);
     }
 
     [Theory]
@@ -301,7 +297,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<QuestCommand>(command);
+        _ = Assert.IsType<QuestCommand>(command);
     }
 
     [Theory]
@@ -313,7 +309,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<UseCommand>(command);
+        _ = Assert.IsType<UseCommand>(command);
     }
 
     [Theory]
@@ -324,7 +320,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<GoCommand>(command);
+        _ = Assert.IsType<GoCommand>(command);
     }
 
     [Theory]
@@ -336,7 +332,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<DropAllCommand>(command);
+        _ = Assert.IsType<DropAllCommand>(command);
     }
 
     [Fact]
@@ -346,7 +342,7 @@ public class KeywordParserTests
 
         var command = parser.Parse("go door");
 
-        Assert.IsType<GoToCommand>(command);
+        _ = Assert.IsType<GoToCommand>(command);
     }
 
     [Theory]
@@ -359,7 +355,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<QuitCommand>(command);
+        _ = Assert.IsType<QuitCommand>(command);
     }
 
     [Theory]
@@ -371,7 +367,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<OpenCommand>(command);
+        _ = Assert.IsType<OpenCommand>(command);
     }
 
     [Theory]
@@ -383,7 +379,7 @@ public class KeywordParserTests
 
         var command = parser.Parse(input);
 
-        Assert.IsType<UnlockCommand>(command);
+        _ = Assert.IsType<UnlockCommand>(command);
     }
 
     [Fact]
@@ -393,6 +389,6 @@ public class KeywordParserTests
 
         var command = parser.Parse("dance");
 
-        Assert.IsType<UnknownCommand>(command);
+        _ = Assert.IsType<UnknownCommand>(command);
     }
 }

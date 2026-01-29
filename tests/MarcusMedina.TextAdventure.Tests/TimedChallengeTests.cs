@@ -1,8 +1,8 @@
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
 using Xunit;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class TimedChallengeTests
 {
@@ -14,7 +14,7 @@ public class TimedChallengeTests
         var challenge = (TimedChallenge)time.CreateTimedChallenge("bomb");
         var failed = false;
 
-        challenge.MaxMovesLimit(2)
+        _ = challenge.MaxMovesLimit(2)
             .OnFailure(_ => failed = true);
 
         challenge.Start(state);

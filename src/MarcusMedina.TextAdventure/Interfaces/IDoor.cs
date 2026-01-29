@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Interfaces;
+
 using System;
 using MarcusMedina.TextAdventure.Enums;
-
-namespace MarcusMedina.TextAdventure.Interfaces;
 
 public interface IDoor : IGameEntity
 {

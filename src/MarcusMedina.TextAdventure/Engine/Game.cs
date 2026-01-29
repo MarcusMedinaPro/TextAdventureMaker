@@ -2,16 +2,16 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Engine;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Engine;
-
 public sealed class Game : IGame
 {
-    private readonly List<Action<Game>> _turnStartHandlers = new();
-    private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = new();
+    private readonly List<Action<Game>> _turnStartHandlers = [];
+    private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private bool _stopRequested;
 
     public GameState State { get; }
@@ -46,10 +46,7 @@ public sealed class Game : IGame
         _turnEndHandlers.Add(handler);
     }
 
-    public void RequestStop()
-    {
-        _stopRequested = true;
-    }
+    public void RequestStop() => _stopRequested = true;
 
     public CommandResult Execute(string input)
     {
@@ -81,7 +78,7 @@ public sealed class Game : IGame
 
         foreach (var (npc, from, to) in moves)
         {
-            from.RemoveNpc(npc);
+            _ = from.RemoveNpc(npc);
             to.AddNpc(npc);
         }
     }
@@ -97,10 +94,12 @@ public sealed class Game : IGame
 
             Output.Write(Prompt);
             var input = Input.ReadLine();
-            if (input == null) break;
+            if (input == null)
+                break;
 
             input = input.Trim();
-            if (string.IsNullOrWhiteSpace(input)) continue;
+            if (string.IsNullOrWhiteSpace(input))
+                continue;
 
             var command = Parser.Parse(input);
             var result = State.Execute(command);

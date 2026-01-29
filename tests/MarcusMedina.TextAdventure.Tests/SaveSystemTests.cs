@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class SaveSystemTests
 {
@@ -25,7 +25,7 @@ public class SaveSystemTests
                 flags: new Dictionary<string, bool> { ["dragon_defeated"] = true },
                 counters: new Dictionary<string, int> { ["days"] = 2 },
                 relationships: new Dictionary<string, int> { ["fox"] = 3 },
-                timeline: new List<string> { "Entered cave." });
+                timeline: ["Entered cave."]);
 
             saveSystem.Save(tempFile, memento);
             var loaded = saveSystem.Load(tempFile);
@@ -55,10 +55,10 @@ public class SaveSystemTests
             inventoryItemIds: new[] { "sword" },
             health: 80,
             maxHealth: 100,
-            flags: new Dictionary<string, bool>(),
-            counters: new Dictionary<string, int>(),
-            relationships: new Dictionary<string, int>(),
-            timeline: new List<string>());
+            flags: [],
+            counters: [],
+            relationships: [],
+            timeline: []);
 
         state.ApplyMemento(memento);
 

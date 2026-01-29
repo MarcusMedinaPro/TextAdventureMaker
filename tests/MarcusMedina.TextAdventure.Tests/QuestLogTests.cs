@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class QuestLogTests
 {
@@ -16,10 +16,10 @@ public class QuestLogTests
         var log = new QuestLog();
         var quest = new Quest("find_note", "Find the Note", "Locate the sticky note.");
 
-        log.Add(quest);
-        log.Add(quest);
+        _ = log.Add(quest);
+        _ = log.Add(quest);
 
-        Assert.Single(log.Quests);
+        _ = Assert.Single(log.Quests);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class QuestLogTests
             .AddCondition(new WorldFlagCondition("knows_password"))
             .Start();
 
-        state.Quests.Add(quest);
+        _ = state.Quests.Add(quest);
         state.WorldState.SetFlag("knows_password", true);
 
         var completed = state.Quests.CheckAll(state);

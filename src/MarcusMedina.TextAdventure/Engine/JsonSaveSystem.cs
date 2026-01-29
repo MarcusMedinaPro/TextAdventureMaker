@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Engine;
+
 using System.Text.Json;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class JsonSaveSystem : ISaveSystem
 {
@@ -28,10 +28,6 @@ public sealed class JsonSaveSystem : ISaveSystem
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         var json = File.ReadAllText(path);
         var memento = JsonSerializer.Deserialize<GameMemento>(json, Options);
-        if (memento == null)
-        {
-            throw new InvalidDataException("Save file is invalid.");
-        }
-        return memento;
+        return memento ?? throw new InvalidDataException("Save file is invalid.");
     }
 }

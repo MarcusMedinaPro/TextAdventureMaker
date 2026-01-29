@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Parsing;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
-
-namespace MarcusMedina.TextAdventure.Parsing;
 
 /// <summary>Fluent builder for <see cref="KeywordParserConfig"/>.</summary>
 public sealed class KeywordParserConfigBuilder
@@ -242,13 +242,15 @@ public sealed class KeywordParserConfigBuilder
     /// <summary>Add synonyms that map to a canonical command keyword.</summary>
     public KeywordParserConfigBuilder AddSynonyms(string canonical, params string[] synonyms)
     {
-        if (string.IsNullOrWhiteSpace(canonical)) return this;
+        if (string.IsNullOrWhiteSpace(canonical))
+            return this;
         var canonicalToken = canonical.Trim().ToLowerInvariant();
         _synonyms[canonicalToken] = canonicalToken;
 
         foreach (var synonym in synonyms)
         {
-            if (string.IsNullOrWhiteSpace(synonym)) continue;
+            if (string.IsNullOrWhiteSpace(synonym))
+                continue;
             _synonyms[synonym.Trim().ToLowerInvariant()] = canonicalToken;
         }
 
@@ -306,9 +308,7 @@ public sealed class KeywordParserConfigBuilder
     }
 
     /// <summary>Build the parser configuration.</summary>
-    public KeywordParserConfig Build()
-    {
-        return new KeywordParserConfig(
+    public KeywordParserConfig Build() => new(
             quit: _quit,
             look: _look,
             examine: _examine,
@@ -339,5 +339,4 @@ public sealed class KeywordParserConfigBuilder
             allowDirectionEnumNames: _allowDirectionEnumNames,
             enableFuzzyMatching: _enableFuzzyMatching,
             fuzzyMaxDistance: _fuzzyMaxDistance);
-    }
 }

@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class DoorList
 {
@@ -16,12 +16,12 @@ public sealed class DoorList
     public Door Add(Door door) => _doors.Add(door);
     public DoorList AddMany(params string[] names)
     {
-        _doors.AddMany(names);
+        _ = _doors.AddMany(names);
         return this;
     }
     public DoorList AddMany(IEnumerable<string> names)
     {
-        _doors.AddMany(names);
+        _ = _doors.AddMany(names);
         return this;
     }
 

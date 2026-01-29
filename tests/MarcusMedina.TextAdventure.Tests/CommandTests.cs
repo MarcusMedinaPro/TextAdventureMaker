@@ -2,14 +2,14 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
-using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class CommandTests
 {
@@ -18,7 +18,7 @@ public class CommandTests
     {
         var start = new Location("start");
         var next = new Location("next");
-        start.AddExit(Direction.North, next);
+        _ = start.AddExit(Direction.North, next);
         var state = new GameState(start);
 
         var result = state.Execute(new GoCommand(Direction.North));
@@ -28,10 +28,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void CommandContext_NullState_Throws()
-    {
-        Assert.Throws<ArgumentNullException>(() => new CommandContext(null!));
-    }
+    public void CommandContext_NullState_Throws() => Assert.Throws<ArgumentNullException>(() => new CommandContext(null!));
 
     [Fact]
     public void GoCommand_ReturnsErrorWhenNoExit()
@@ -49,7 +46,7 @@ public class CommandTests
     {
         var start = new Location("start").Description("A small room.");
         var next = new Location("next");
-        start.AddExit(Direction.East, next);
+        _ = start.AddExit(Direction.East, next);
         var state = new GameState(start);
 
         var result = state.Look();
@@ -84,7 +81,7 @@ public class CommandTests
         var start = new Location("start");
         var coin = new Item("coin", "Coin").Description("A shiny coin.");
         var state = new GameState(start);
-        state.Inventory.Add(coin);
+        _ = state.Inventory.Add(coin);
 
         var result = state.Execute(new LookCommand("coin"));
 
@@ -98,7 +95,7 @@ public class CommandTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "oak door").Description("An old oak door.");
-        start.AddExit(Direction.North, next, door);
+        _ = start.AddExit(Direction.North, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new LookCommand("door"));
@@ -124,7 +121,7 @@ public class CommandTests
     {
         var start = new Location("start");
         var next = new Location("next");
-        start.AddExit(Direction.East, next);
+        _ = start.AddExit(Direction.East, next);
         var state = new GameState(start);
 
         var result = state.Execute(new OpenCommand());
@@ -139,7 +136,7 @@ public class CommandTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door").RequiresKey(new Key("key1", "key"));
-        start.AddExit(Direction.East, next, door);
+        _ = start.AddExit(Direction.East, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new OpenCommand());
@@ -154,7 +151,7 @@ public class CommandTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door").RequiresKey(new Key("key1", "key"));
-        start.AddExit(Direction.East, next, door);
+        _ = start.AddExit(Direction.East, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new UnlockCommand());
@@ -170,10 +167,10 @@ public class CommandTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door").RequiresKey(key);
-        start.AddExit(Direction.East, next, door);
+        _ = start.AddExit(Direction.East, next, door);
         var state = new GameState(start);
 
-        state.Inventory.Add(key);
+        _ = state.Inventory.Add(key);
         var result = state.Execute(new UnlockCommand());
 
         Assert.True(result.Success);
@@ -198,8 +195,8 @@ public class CommandTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door");
-        door.Open();
-        start.AddExit(Direction.North, next, door);
+        _ = door.Open();
+        _ = start.AddExit(Direction.North, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new GoToCommand("door"));

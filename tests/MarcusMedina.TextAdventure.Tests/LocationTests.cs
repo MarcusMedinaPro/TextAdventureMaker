@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class LocationTests
 {
@@ -19,9 +19,9 @@ public class LocationTests
     [Fact]
     public void Location_InvalidId_Throws()
     {
-        Assert.Throws<ArgumentException>(() => new Location(""));
-        Assert.Throws<ArgumentException>(() => new Location(" "));
-        Assert.Throws<ArgumentNullException>(() => new Location(null!));
+        _ = Assert.Throws<ArgumentException>(() => new Location(""));
+        _ = Assert.Throws<ArgumentException>(() => new Location(" "));
+        _ = Assert.Throws<ArgumentNullException>(() => new Location(null!));
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class LocationTests
         var hall = new Location("hall");
         var bedroom = new Location("bedroom");
 
-        hall.AddExit(Direction.North, bedroom);
+        _ = hall.AddExit(Direction.North, bedroom);
 
         Assert.Equal(bedroom, hall.GetExit(Direction.North)?.Target);
         Assert.Equal(hall, bedroom.GetExit(Direction.South)?.Target);
@@ -51,7 +51,7 @@ public class LocationTests
         var hall = new Location("hall");
         var pit = new Location("pit");
 
-        hall.AddExit(Direction.Down, pit, oneWay: true);
+        _ = hall.AddExit(Direction.Down, pit, oneWay: true);
 
         Assert.Equal(pit, hall.GetExit(Direction.Down)?.Target);
         Assert.Null(pit.GetExit(Direction.Up));

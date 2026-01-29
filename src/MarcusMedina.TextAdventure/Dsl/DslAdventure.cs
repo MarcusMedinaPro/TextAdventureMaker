@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Dsl;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Dsl;
 
 public sealed class DslAdventure
 {
@@ -35,9 +35,5 @@ public sealed class DslAdventure
         Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
     }
 
-    public string? GetMetadata(string key)
-    {
-        if (string.IsNullOrWhiteSpace(key)) return null;
-        return Metadata.TryGetValue(key, out var value) ? value : null;
-    }
+    public string? GetMetadata(string key) => string.IsNullOrWhiteSpace(key) ? null : Metadata.TryGetValue(key, out var value) ? value : null;
 }

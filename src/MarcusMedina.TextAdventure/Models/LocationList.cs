@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
-using System.Linq;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using System.Linq;
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class LocationList
 {
@@ -34,45 +34,42 @@ public sealed class LocationList
 
     public LocationList AddMany(params string[] names)
     {
-        if (names == null) return this;
+        if (names == null)
+            return this;
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Add(name);
+                _ = Add(name);
             }
         }
+
         return this;
     }
 
     public LocationList AddMany(IEnumerable<string> names)
     {
-        if (names == null) return this;
+        if (names == null)
+            return this;
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Add(name);
+                _ = Add(name);
             }
         }
+
         return this;
     }
 
-    public Location? Find(string token)
-    {
-        if (string.IsNullOrWhiteSpace(token)) return null;
-        if (_locations.TryGetValue(token, out var location)) return location;
-        return _locations.Values.FirstOrDefault(l => l.Id.TextCompare(token));
-    }
+    public Location? Find(string token) => string.IsNullOrWhiteSpace(token)
+            ? null
+            : _locations.TryGetValue(token, out var location) ? location : _locations.Values.FirstOrDefault(l => l.Id.TextCompare(token));
 
     public Location Get(string token)
     {
         var location = Find(token);
-        if (location == null)
-        {
-            throw new KeyNotFoundException($"No location found for '{token}'.");
-        }
-        return location;
+        return location ?? throw new KeyNotFoundException($"No location found for '{token}'.");
     }
 
     public bool TryGet(string token, out Location location)
@@ -84,8 +81,7 @@ public sealed class LocationList
     public bool Remove(string token)
     {
         var location = Find(token);
-        if (location == null) return false;
-        return _locations.Remove(location.Id);
+        return location != null && _locations.Remove(location.Id);
     }
 
     public void Clear() => _locations.Clear();

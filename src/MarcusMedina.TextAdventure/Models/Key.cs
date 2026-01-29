@@ -2,12 +2,12 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Models;
+
 using System;
 using System.Linq;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
-
-namespace MarcusMedina.TextAdventure.Models;
 
 public class Key : Item, IKey
 {
@@ -21,61 +21,61 @@ public class Key : Item, IKey
 
     public new Key SetTakeable(bool takeable)
     {
-        base.SetTakeable(takeable);
+        _ = base.SetTakeable(takeable);
         return this;
     }
 
     public new Key SetWeight(float weight)
     {
-        base.SetWeight(weight);
+        _ = base.SetWeight(weight);
         return this;
     }
 
     public new Key AddAliases(params string[] aliases)
     {
-        base.AddAliases(aliases);
+        _ = base.AddAliases(aliases);
         return this;
     }
 
     public new Key Description(string text)
     {
-        base.Description(text);
+        _ = base.Description(text);
         return this;
     }
 
     public new Key SetReaction(ItemAction action, string text)
     {
-        base.SetReaction(action, text);
+        _ = base.SetReaction(action, text);
         return this;
     }
 
     public new Key SetReadable(bool readable = true)
     {
-        base.SetReadable(readable);
+        _ = base.SetReadable(readable);
         return this;
     }
 
     public new Key SetReadText(string text)
     {
-        base.SetReadText(text);
+        _ = base.SetReadText(text);
         return this;
     }
 
     public new Key RequireTakeToRead()
     {
-        base.RequireTakeToRead();
+        _ = base.RequireTakeToRead();
         return this;
     }
 
     public new Key SetReadingCost(int turns)
     {
-        base.SetReadingCost(turns);
+        _ = base.SetReadingCost(turns);
         return this;
     }
 
     public new Key RequiresToRead(Func<IGameState, bool> predicate)
     {
-        base.RequiresToRead(predicate);
+        _ = base.RequiresToRead(predicate);
         return this;
     }
 
@@ -90,7 +90,7 @@ public class Key : Item, IKey
 
         if (Aliases.Count > 0)
         {
-            copy.AddAliases(Aliases.ToArray());
+            _ = copy.AddAliases(Aliases.ToArray());
         }
 
         foreach (ItemAction action in Enum.GetValues(typeof(ItemAction)))
@@ -98,7 +98,7 @@ public class Key : Item, IKey
             var reaction = GetReaction(action);
             if (!string.IsNullOrWhiteSpace(reaction))
             {
-                copy.SetReaction(action, reaction);
+                _ = copy.SetReaction(action, reaction);
             }
         }
 
@@ -110,12 +110,12 @@ public class Key : Item, IKey
         var readText = GetReadText();
         if (readText != null)
         {
-            copy.SetReadText(readText);
+            _ = copy.SetReadText(readText);
         }
 
         if (RequiresTakeToRead)
         {
-            copy.RequireTakeToRead();
+            _ = copy.RequireTakeToRead();
         }
 
         return copy;

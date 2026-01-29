@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Dsl;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Dsl;
 
 public class DslParseErrorTests
 {
@@ -87,7 +87,7 @@ public class DslParseErrorTests
         var exception = new DslParseException(error);
 
         Assert.Contains("parsing error", exception.Message);
-        Assert.Single(exception.Errors);
+        _ = Assert.Single(exception.Errors);
     }
 
     [Fact]

@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Commands;
 
 public class DropAllCommand : ICommand
 {
@@ -26,7 +26,7 @@ public class DropAllCommand : ICommand
 
         foreach (var item in items)
         {
-            inventory.Remove(item);
+            _ = inventory.Remove(item);
             location.AddItem(item);
             item.Drop();
             context.State.Events.Publish(new GameEvent(GameEventType.DropItem, context.State, location, item));

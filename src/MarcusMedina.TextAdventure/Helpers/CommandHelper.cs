@@ -12,13 +12,14 @@ public static class CommandHelper
     public static HashSet<string> NewCommands(params string[] commands)
     {
         var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (commands == null) return set;
+        if (commands == null)
+            return set;
 
         foreach (var command in commands)
         {
             if (!string.IsNullOrWhiteSpace(command))
             {
-                set.Add(command.Trim());
+                _ = set.Add(command.Trim());
             }
         }
 

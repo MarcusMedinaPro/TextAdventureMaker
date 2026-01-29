@@ -3,14 +3,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Dsl;
+
 using System.Globalization;
 using System.Text;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Dsl;
 
 /// <summary>
 /// Exports game state to .adventure DSL format.
@@ -30,22 +30,22 @@ public class AdventureDslExporter
         // Header
         if (!string.IsNullOrWhiteSpace(worldTitle))
         {
-            sb.AppendLine($"world: {worldTitle}");
+            _ = sb.AppendLine($"world: {worldTitle}");
         }
 
         if (!string.IsNullOrWhiteSpace(goal))
         {
-            sb.AppendLine($"goal: {goal}");
+            _ = sb.AppendLine($"goal: {goal}");
         }
 
-        sb.AppendLine($"start: {state.CurrentLocation.Id}");
-        sb.AppendLine();
+        _ = sb.AppendLine($"start: {state.CurrentLocation.Id}");
+        _ = sb.AppendLine();
 
         // Export all locations
         foreach (var location in state.Locations)
         {
             ExportLocation(sb, location, exportedDoors);
-            sb.AppendLine();
+            _ = sb.AppendLine();
         }
 
         return sb.ToString();
@@ -80,14 +80,9 @@ public class AdventureDslExporter
     {
         // Location header
         var desc = location.GetDescription();
-        if (!string.IsNullOrWhiteSpace(desc))
-        {
-            sb.AppendLine($"location: {location.Id} | {desc}");
-        }
-        else
-        {
-            sb.AppendLine($"location: {location.Id}");
-        }
+        _ = !string.IsNullOrWhiteSpace(desc)
+            ? sb.AppendLine($"location: {location.Id} | {desc}")
+            : sb.AppendLine($"location: {location.Id}");
 
         // Export items in this location
         foreach (var item in location.Items)
@@ -108,7 +103,7 @@ public class AdventureDslExporter
             if (exit.Value.Door != null && !exportedDoors.Contains(exit.Value.Door.Id))
             {
                 ExportDoor(sb, exit.Value.Door);
-                exportedDoors.Add(exit.Value.Door.Id);
+                _ = exportedDoors.Add(exit.Value.Door.Id);
             }
         }
 
@@ -153,7 +148,7 @@ public class AdventureDslExporter
             line += " | " + string.Join(" | ", options);
         }
 
-        sb.AppendLine($"item: {line}");
+        _ = sb.AppendLine($"item: {line}");
     }
 
     private void ExportKey(StringBuilder sb, Key key)
@@ -184,7 +179,7 @@ public class AdventureDslExporter
             line += " | " + string.Join(" | ", options);
         }
 
-        sb.AppendLine($"key: {line}");
+        _ = sb.AppendLine($"key: {line}");
     }
 
     private void ExportDoor(StringBuilder sb, IDoor door)
@@ -210,7 +205,7 @@ public class AdventureDslExporter
             line += " | " + string.Join(" | ", options);
         }
 
-        sb.AppendLine($"door: {line}");
+        _ = sb.AppendLine($"door: {line}");
     }
 
     private void ExportExit(StringBuilder sb, Direction direction, Exit exit)
@@ -227,6 +222,6 @@ public class AdventureDslExporter
             parts.Add("oneway");
         }
 
-        sb.AppendLine($"exit: {string.Join(" | ", parts)}");
+        _ = sb.AppendLine($"exit: {string.Join(" | ", parts)}");
     }
 }

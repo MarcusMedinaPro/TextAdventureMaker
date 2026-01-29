@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Models;
+
+using System.Linq;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
-using System.Linq;
-
-namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class PatrolNpcMovement : INpcMovement
 {

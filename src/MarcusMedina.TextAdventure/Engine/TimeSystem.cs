@@ -2,18 +2,18 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Engine;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Engine;
-
 public sealed class TimeSystem : ITimeSystem
 {
-    private readonly Dictionary<TimeOfDay, List<Action<IGameState>>> _phaseHandlers = new();
-    private readonly Dictionary<int, List<Action<IGameState>>> _movesRemainingHandlers = new();
-    private readonly List<Action<IGameState>> _movesExhaustedHandlers = new();
-    private readonly List<TimedChallenge> _challenges = new();
-    private readonly HashSet<int> _movesRemainingFired = new();
+    private readonly Dictionary<TimeOfDay, List<Action<IGameState>>> _phaseHandlers = [];
+    private readonly Dictionary<int, List<Action<IGameState>>> _movesRemainingHandlers = [];
+    private readonly List<Action<IGameState>> _movesExhaustedHandlers = [];
+    private readonly List<TimedChallenge> _challenges = [];
+    private readonly HashSet<int> _movesRemainingFired = [];
     private bool _movesExhaustedFired;
     private TimeOfDay _startTime = TimeOfDay.Dawn;
 
@@ -62,9 +62,10 @@ public sealed class TimeSystem : ITimeSystem
         ArgumentNullException.ThrowIfNull(handler);
         if (!_phaseHandlers.TryGetValue(phase, out var handlers))
         {
-            handlers = new List<Action<IGameState>>();
+            handlers = [];
             _phaseHandlers[phase] = handlers;
         }
+
         handlers.Add(handler);
         return this;
     }
@@ -75,9 +76,10 @@ public sealed class TimeSystem : ITimeSystem
         var key = Math.Max(0, movesRemaining);
         if (!_movesRemainingHandlers.TryGetValue(key, out var handlers))
         {
-            handlers = new List<Action<IGameState>>();
+            handlers = [];
             _movesRemainingHandlers[key] = handlers;
         }
+
         handlers.Add(handler);
         return this;
     }
@@ -98,7 +100,8 @@ public sealed class TimeSystem : ITimeSystem
 
     public void Tick(IGameState state)
     {
-        if (!Enabled) return;
+        if (!Enabled)
+            return;
         ArgumentNullException.ThrowIfNull(state);
 
         MovesUsed++;
@@ -108,7 +111,7 @@ public sealed class TimeSystem : ITimeSystem
             var remaining = MovesRemaining ?? 0;
             if (_movesRemainingHandlers.TryGetValue(remaining, out var handlers) && !_movesRemainingFired.Contains(remaining))
             {
-                _movesRemainingFired.Add(remaining);
+                _ = _movesRemainingFired.Add(remaining);
                 foreach (var handler in handlers)
                 {
                     handler(state);
@@ -151,24 +154,20 @@ public sealed class TimeSystem : ITimeSystem
         }
     }
 
-    private int GetPhaseStartTick(TimeOfDay phase)
+    private int GetPhaseStartTick(TimeOfDay phase) => phase switch
     {
-        return phase switch
-        {
-            TimeOfDay.Dawn => 0,
-            TimeOfDay.Day => TicksPerDay / 4,
-            TimeOfDay.Dusk => TicksPerDay / 2,
-            TimeOfDay.Night => (TicksPerDay * 3) / 4,
-            _ => 0
-        };
-    }
+        TimeOfDay.Dawn => 0,
+        TimeOfDay.Day => TicksPerDay / 4,
+        TimeOfDay.Dusk => TicksPerDay / 2,
+        TimeOfDay.Night => TicksPerDay * 3 / 4,
+        _ => 0
+    };
 
     private static TimeOfDay GetPhaseFromTick(int tickInDay, int ticksPerDay)
     {
         var quarter = ticksPerDay / 4.0;
-        if (tickInDay < quarter) return TimeOfDay.Dawn;
-        if (tickInDay < quarter * 2) return TimeOfDay.Day;
-        if (tickInDay < quarter * 3) return TimeOfDay.Dusk;
-        return TimeOfDay.Night;
+        return tickInDay < quarter
+            ? TimeOfDay.Dawn
+            : tickInDay < quarter * 2 ? TimeOfDay.Day : tickInDay < quarter * 3 ? TimeOfDay.Dusk : TimeOfDay.Night;
     }
 }

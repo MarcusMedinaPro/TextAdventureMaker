@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
-using System.Linq;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using System.Linq;
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class GameItemList
 {
@@ -42,45 +42,42 @@ public sealed class GameItemList
 
     public GameItemList AddMany(params string[] names)
     {
-        if (names == null) return this;
+        if (names == null)
+            return this;
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Add(name);
+                _ = Add(name);
             }
         }
+
         return this;
     }
 
     public GameItemList AddMany(IEnumerable<string> names)
     {
-        if (names == null) return this;
+        if (names == null)
+            return this;
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Add(name);
+                _ = Add(name);
             }
         }
+
         return this;
     }
 
-    public Item? Find(string token)
-    {
-        if (string.IsNullOrWhiteSpace(token)) return null;
-        if (_items.TryGetValue(token, out var item)) return item;
-        return _items.Values.FirstOrDefault(i => i.Matches(token));
-    }
+    public Item? Find(string token) => string.IsNullOrWhiteSpace(token)
+            ? null
+            : _items.TryGetValue(token, out var item) ? item : _items.Values.FirstOrDefault(i => i.Matches(token));
 
     public Item Get(string token)
     {
         var item = Find(token);
-        if (item == null)
-        {
-            throw new KeyNotFoundException($"No item found for '{token}'.");
-        }
-        return item;
+        return item ?? throw new KeyNotFoundException($"No item found for '{token}'.");
     }
 
     public bool TryGet(string token, out Item item)
@@ -92,8 +89,7 @@ public sealed class GameItemList
     public bool Remove(string token)
     {
         var item = Find(token);
-        if (item == null) return false;
-        return _items.Remove(item.Id);
+        return item != null && _items.Remove(item.Id);
     }
 
     public void Clear() => _items.Clear();

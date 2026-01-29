@@ -2,23 +2,20 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Dsl;
+
 using System.Globalization;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Dsl;
-
 public class AdventureDslParser : IDslParser
 {
     private readonly Dictionary<string, Action<AdventureDslContext, string>> _handlers =
         new(StringComparer.OrdinalIgnoreCase);
 
-    public AdventureDslParser()
-    {
-        RegisterDefaultKeywords();
-    }
+    public AdventureDslParser() => RegisterDefaultKeywords();
 
     public AdventureDslParser RegisterKeyword(string keyword, Action<AdventureDslContext, string> handler)
     {
@@ -38,7 +35,8 @@ public class AdventureDslParser : IDslParser
         foreach (var line in File.ReadLines(path))
         {
             var parsedLine = ParseLine(line);
-            if (parsedLine == null) continue;
+            if (parsedLine == null)
+                continue;
             Dispatch(context, parsedLine.Value.Keyword, parsedLine.Value.Value);
         }
 
@@ -59,19 +57,21 @@ public class AdventureDslParser : IDslParser
 
     protected virtual (string Keyword, string Value)? ParseLine(string line)
     {
-        if (string.IsNullOrWhiteSpace(line)) return null;
+        if (string.IsNullOrWhiteSpace(line))
+            return null;
         var trimmed = line.Trim();
-        if (trimmed.StartsWith("#", StringComparison.Ordinal)) return null;
-        if (trimmed.StartsWith("//", StringComparison.Ordinal)) return null;
+        if (trimmed.StartsWith("#", StringComparison.Ordinal))
+            return null;
+        if (trimmed.StartsWith("//", StringComparison.Ordinal))
+            return null;
 
         var separatorIndex = trimmed.IndexOf(':');
-        if (separatorIndex <= 0) return null;
+        if (separatorIndex <= 0)
+            return null;
 
         var keyword = trimmed[..separatorIndex].Trim();
         var value = trimmed[(separatorIndex + 1)..].Trim();
-        if (keyword.Length == 0) return null;
-
-        return (keyword, value);
+        return keyword.Length == 0 ? null : (keyword, value);
     }
 
     private void Dispatch(AdventureDslContext context, string keyword, string value)
@@ -84,21 +84,22 @@ public class AdventureDslParser : IDslParser
 
     private void RegisterDefaultKeywords()
     {
-        RegisterKeyword("world", (ctx, value) => ctx.SetMetadata("world", value));
-        RegisterKeyword("goal", (ctx, value) => ctx.SetMetadata("goal", value));
-        RegisterKeyword("start", (ctx, value) => ctx.StartLocationId = NormalizeId(value));
-        RegisterKeyword("location", HandleLocation);
-        RegisterKeyword("description", HandleDescription);
-        RegisterKeyword("item", HandleItem);
-        RegisterKeyword("key", HandleKey);
-        RegisterKeyword("door", HandleDoor);
-        RegisterKeyword("exit", HandleExit);
+        _ = RegisterKeyword("world", (ctx, value) => ctx.SetMetadata("world", value));
+        _ = RegisterKeyword("goal", (ctx, value) => ctx.SetMetadata("goal", value));
+        _ = RegisterKeyword("start", (ctx, value) => ctx.StartLocationId = NormalizeId(value));
+        _ = RegisterKeyword("location", HandleLocation);
+        _ = RegisterKeyword("description", HandleDescription);
+        _ = RegisterKeyword("item", HandleItem);
+        _ = RegisterKeyword("key", HandleKey);
+        _ = RegisterKeyword("door", HandleDoor);
+        _ = RegisterKeyword("exit", HandleExit);
     }
 
     private static void HandleLocation(AdventureDslContext context, string value)
     {
         var parts = SplitParts(value);
-        if (parts.Count == 0) return;
+        if (parts.Count == 0)
+            return;
 
         var id = NormalizeId(parts[0]);
         var description = parts.Count > 1 ? parts[1] : null;
@@ -108,7 +109,7 @@ public class AdventureDslParser : IDslParser
     private static void HandleDescription(AdventureDslContext context, string value)
     {
         context.RequireCurrentLocation();
-        context.CurrentLocation!.Description(value);
+        _ = context.CurrentLocation!.Description(value);
     }
 
     private static void HandleItem(AdventureDslContext context, string value)
@@ -145,7 +146,7 @@ public class AdventureDslParser : IDslParser
                 var keyId = NormalizeId(option.Value);
                 if (context.Keys.TryGetValue(keyId, out var key))
                 {
-                    door.RequiresKey(key);
+                    _ = door.RequiresKey(key);
                 }
                 else
                 {
@@ -160,16 +161,19 @@ public class AdventureDslParser : IDslParser
         context.RequireCurrentLocation();
 
         var parts = SplitParts(value);
-        if (parts.Count == 0) return;
+        if (parts.Count == 0)
+            return;
 
         var route = parts[0];
         var arrowIndex = route.IndexOf("->", StringComparison.Ordinal);
-        if (arrowIndex <= 0) return;
+        if (arrowIndex <= 0)
+            return;
 
         var directionText = route[..arrowIndex].Trim();
         var targetText = route[(arrowIndex + 2)..].Trim();
 
-        if (!TryParseDirection(directionText, out var direction)) return;
+        if (!TryParseDirection(directionText, out var direction))
+            return;
         var targetId = NormalizeId(targetText);
 
         string? doorId = null;
@@ -178,7 +182,8 @@ public class AdventureDslParser : IDslParser
         for (var i = 1; i < parts.Count; i++)
         {
             var option = ParseOption(parts[i]);
-            if (option == null) continue;
+            if (option == null)
+                continue;
 
             if (option.Value.Key.TextCompare("door"))
             {
@@ -209,8 +214,7 @@ public class AdventureDslParser : IDslParser
         string id;
         string name;
         string? description = null;
-        var optionStart = 0;
-
+        int optionStart;
         if (parts.Count >= 3)
         {
             id = NormalizeId(parts[0]);
@@ -247,8 +251,7 @@ public class AdventureDslParser : IDslParser
         string id;
         string name;
         string? description = null;
-        var optionStart = 0;
-
+        int optionStart;
         if (parts.Count >= 3)
         {
             id = NormalizeId(parts[0]);
@@ -281,16 +284,16 @@ public class AdventureDslParser : IDslParser
             if (option.Key.TextCompare("weight") &&
                 float.TryParse(option.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var weight))
             {
-                item.SetWeight(weight);
+                _ = item.SetWeight(weight);
             }
             else if (option.Key.TextCompare("aliases"))
             {
                 var aliases = option.Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                item.AddAliases(aliases);
+                _ = item.AddAliases(aliases);
             }
             else if (option.Key.TextCompare("takeable") && bool.TryParse(option.Value, out var takeable))
             {
-                item.SetTakeable(takeable);
+                _ = item.SetTakeable(takeable);
             }
         }
     }
@@ -302,29 +305,31 @@ public class AdventureDslParser : IDslParser
             if (option.Key.TextCompare("weight") &&
                 float.TryParse(option.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var weight))
             {
-                key.SetWeight(weight);
+                _ = key.SetWeight(weight);
             }
             else if (option.Key.TextCompare("aliases"))
             {
                 var aliases = option.Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                key.AddAliases(aliases);
+                _ = key.AddAliases(aliases);
             }
             else if (option.Key.TextCompare("takeable") && bool.TryParse(option.Value, out var takeable))
             {
-                key.SetTakeable(takeable);
+                _ = key.SetTakeable(takeable);
             }
         }
     }
 
     private static IReadOnlyDictionary<string, string> ParseOptions(IReadOnlyList<string> parts, int startIndex)
     {
-        if (startIndex >= parts.Count) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (startIndex >= parts.Count)
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         var options = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         for (var i = startIndex; i < parts.Count; i++)
         {
             var option = ParseOption(parts[i]);
-            if (option == null) continue;
+            if (option == null)
+                continue;
             options[option.Value.Key] = option.Value.Value;
         }
 
@@ -334,7 +339,8 @@ public class AdventureDslParser : IDslParser
     private static KeyValuePair<string, string>? ParseOption(string raw)
     {
         var trimmed = raw.Trim();
-        if (string.IsNullOrWhiteSpace(trimmed)) return null;
+        if (string.IsNullOrWhiteSpace(trimmed))
+            return null;
 
         var equalsIndex = trimmed.IndexOf('=');
         if (equalsIndex <= 0)
@@ -347,38 +353,24 @@ public class AdventureDslParser : IDslParser
         return new KeyValuePair<string, string>(key, value);
     }
 
-    private static List<string> SplitParts(string value)
-    {
-        return value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-    }
+    private static List<string> SplitParts(string value) => value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
-    private static string NormalizeId(string value)
-    {
-        return value.Trim().ToId();
-    }
+    private static string NormalizeId(string value) => value.Trim().ToId();
 
-    private static bool TryParseDirection(string value, out Direction direction)
+    private static bool TryParseDirection(string value, out Direction direction) => Enum.TryParse(value, true, out direction) || value.ToLowerInvariant() switch
     {
-        if (Enum.TryParse(value, true, out direction))
-        {
-            return true;
-        }
-
-        return value.ToLowerInvariant() switch
-        {
-            "n" => AssignDirection(Direction.North, out direction),
-            "s" => AssignDirection(Direction.South, out direction),
-            "e" => AssignDirection(Direction.East, out direction),
-            "w" => AssignDirection(Direction.West, out direction),
-            "ne" => AssignDirection(Direction.NorthEast, out direction),
-            "nw" => AssignDirection(Direction.NorthWest, out direction),
-            "se" => AssignDirection(Direction.SouthEast, out direction),
-            "sw" => AssignDirection(Direction.SouthWest, out direction),
-            "u" => AssignDirection(Direction.Up, out direction),
-            "d" => AssignDirection(Direction.Down, out direction),
-            _ => AssignDirection(Direction.North, out direction, false)
-        };
-    }
+        "n" => AssignDirection(Direction.North, out direction),
+        "s" => AssignDirection(Direction.South, out direction),
+        "e" => AssignDirection(Direction.East, out direction),
+        "w" => AssignDirection(Direction.West, out direction),
+        "ne" => AssignDirection(Direction.NorthEast, out direction),
+        "nw" => AssignDirection(Direction.NorthWest, out direction),
+        "se" => AssignDirection(Direction.SouthEast, out direction),
+        "sw" => AssignDirection(Direction.SouthWest, out direction),
+        "u" => AssignDirection(Direction.Up, out direction),
+        "d" => AssignDirection(Direction.Down, out direction),
+        _ => AssignDirection(Direction.North, out direction, false)
+    };
 
     private static bool AssignDirection(Direction direction, out Direction output, bool success = true)
     {
@@ -413,21 +405,18 @@ public class AdventureDslParser : IDslParser
         }
 
         var firstLocation = context.Locations.Values.FirstOrDefault();
-        if (firstLocation == null)
-        {
-            throw new InvalidOperationException("No locations defined in DSL.");
-        }
-
-        return firstLocation;
+        return firstLocation ?? throw new InvalidOperationException("No locations defined in DSL.");
     }
 
     private static void ResolveDoorKeys(AdventureDslContext context)
     {
         foreach (var pending in context.PendingDoorKeys)
         {
-            if (!context.Doors.TryGetValue(pending.DoorId, out var door)) continue;
-            if (!context.Keys.TryGetValue(pending.KeyId, out var key)) continue;
-            door.RequiresKey(key);
+            if (!context.Doors.TryGetValue(pending.DoorId, out var door))
+                continue;
+            if (!context.Keys.TryGetValue(pending.KeyId, out var key))
+                continue;
+            _ = door.RequiresKey(key);
         }
     }
 
@@ -435,18 +424,14 @@ public class AdventureDslParser : IDslParser
     {
         foreach (var pending in context.PendingExits)
         {
-            if (!context.Locations.TryGetValue(pending.FromId, out var from)) continue;
+            if (!context.Locations.TryGetValue(pending.FromId, out var from))
+                continue;
 
             var target = context.GetOrCreateLocation(pending.TargetId);
-            if (!string.IsNullOrWhiteSpace(pending.DoorId) &&
-                context.Doors.TryGetValue(pending.DoorId, out var door))
-            {
-                from.AddExit(pending.Direction, target, door, pending.IsOneWay);
-            }
-            else
-            {
-                from.AddExit(pending.Direction, target, pending.IsOneWay);
-            }
+            _ = !string.IsNullOrWhiteSpace(pending.DoorId) &&
+                context.Doors.TryGetValue(pending.DoorId, out var door)
+                ? from.AddExit(pending.Direction, target, door, pending.IsOneWay)
+                : from.AddExit(pending.Direction, target, pending.IsOneWay);
         }
     }
 

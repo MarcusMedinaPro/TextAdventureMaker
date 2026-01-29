@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class NpcList
 {
@@ -16,12 +16,12 @@ public sealed class NpcList
     public Npc Add(Npc npc) => _npcs.Add(npc);
     public NpcList AddMany(params string[] names)
     {
-        _npcs.AddMany(names);
+        _ = _npcs.AddMany(names);
         return this;
     }
     public NpcList AddMany(IEnumerable<string> names)
     {
-        _npcs.AddMany(names);
+        _ = _npcs.AddMany(names);
         return this;
     }
 

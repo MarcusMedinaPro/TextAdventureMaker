@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Models;
-using MarcusMedina.TextAdventure.Helpers;
-using MarcusMedina.TextAdventure.Interfaces;
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-
-namespace MarcusMedina.TextAdventure.Tests;
+using MarcusMedina.TextAdventure.Helpers;
+using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Models;
 
 public class ItemTests
 {
@@ -25,10 +25,10 @@ public class ItemTests
     [Fact]
     public void Item_InvalidIdOrName_Throws()
     {
-        Assert.Throws<ArgumentException>(() => new Item("", "Item"));
-        Assert.Throws<ArgumentException>(() => new Item("id", ""));
-        Assert.Throws<ArgumentNullException>(() => new Item(null!, "Item"));
-        Assert.Throws<ArgumentNullException>(() => new Item("id", null!));
+        _ = Assert.Throws<ArgumentException>(() => new Item("", "Item"));
+        _ = Assert.Throws<ArgumentException>(() => new Item("id", ""));
+        _ = Assert.Throws<ArgumentNullException>(() => new Item(null!, "Item"));
+        _ = Assert.Throws<ArgumentNullException>(() => new Item("id", null!));
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class ItemTests
     [Fact]
     public void Item_Interface_AllowsFluentAliases()
     {
-        IItem item = new Item("coin", "Coin")
+        var item = new Item("coin", "Coin")
             .AddAliases("token")
             .SetReaction(ItemAction.Take, "You pick it up.");
 
@@ -102,7 +102,7 @@ public class ItemTests
             .SetReadText("Hello")
             .SetReaction(ItemAction.Use, "Used.");
 
-        original.SetProperty("mood", "quiet");
+        _ = original.SetProperty("mood", "quiet");
 
         var clone = original.Clone();
 

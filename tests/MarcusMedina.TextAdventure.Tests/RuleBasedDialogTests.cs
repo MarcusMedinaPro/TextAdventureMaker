@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class RuleBasedDialogTests
 {
@@ -13,11 +13,11 @@ public class RuleBasedDialogTests
     public void RuleBasedDialog_PicksMostSpecificRule()
     {
         var npc = new Npc("fox", "Fox");
-        npc.AddDialogRule("fallback")
+        _ = npc.AddDialogRule("fallback")
             .When(_ => true)
             .Say("Hello.");
 
-        npc.AddDialogRule("specific")
+        _ = npc.AddDialogRule("specific")
             .When(_ => true)
             .When(_ => true)
             .Say("Specific hello.");
@@ -33,12 +33,12 @@ public class RuleBasedDialogTests
     public void RuleBasedDialog_UsesPriorityForTies()
     {
         var npc = new Npc("fox", "Fox");
-        npc.AddDialogRule("low")
+        _ = npc.AddDialogRule("low")
             .When(_ => true)
             .Priority(0)
             .Say("Low.");
 
-        npc.AddDialogRule("high")
+        _ = npc.AddDialogRule("high")
             .When(_ => true)
             .Priority(10)
             .Say("High.");
@@ -54,7 +54,7 @@ public class RuleBasedDialogTests
     public void RuleBasedDialog_ThenActionUpdatesMemory()
     {
         var npc = new Npc("fox", "Fox");
-        npc.AddDialogRule("remember")
+        _ = npc.AddDialogRule("remember")
             .Say("Remembered.")
             .Then(ctx => ctx.NpcMemory.MarkSaid("remembered"));
 
@@ -70,11 +70,11 @@ public class RuleBasedDialogTests
     public void RuleBasedDialog_FirstMeetingOnlyOnce()
     {
         var npc = new Npc("fox", "Fox");
-        npc.AddDialogRule("first")
+        _ = npc.AddDialogRule("first")
             .When(ctx => ctx.FirstMeeting)
             .Say("First time.");
 
-        npc.AddDialogRule("repeat")
+        _ = npc.AddDialogRule("repeat")
             .Say("Again.");
 
         var state = new GameState(new Location("start"));

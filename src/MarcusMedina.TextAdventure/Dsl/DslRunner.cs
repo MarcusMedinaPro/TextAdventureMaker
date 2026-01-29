@@ -3,11 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Dsl;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Parsing;
-
-namespace MarcusMedina.TextAdventure.Dsl;
 
 /// <summary>
 /// Simple runner for .adventure DSL files from command line.
@@ -27,7 +27,8 @@ public static class DslRunner
     /// </example>
     public static bool TryRunFromArgs(string[] args)
     {
-        if (args.Length == 0) return false;
+        if (args.Length == 0)
+            return false;
 
         var path = args[0];
         if (!path.EndsWith(".adventure", StringComparison.OrdinalIgnoreCase))

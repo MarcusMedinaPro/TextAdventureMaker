@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Helpers;
+
 using System.Linq;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
-
-namespace MarcusMedina.TextAdventure.Helpers;
 
 public static class FuzzyMatcher
 {
@@ -48,26 +48,26 @@ public static class FuzzyMatcher
     };
 
     /// <summary>Return true when the token looks like a command word.</summary>
-    public static bool IsLikelyCommandToken(string? token)
-    {
-        if (string.IsNullOrWhiteSpace(token)) return false;
-        return DefaultStopWords.Contains(token.Trim());
-    }
+    public static bool IsLikelyCommandToken(string? token) => !string.IsNullOrWhiteSpace(token) && DefaultStopWords.Contains(token.Trim());
 
     /// <summary>Find the closest token within the maximum distance, or null if none/ambiguous.</summary>
     public static string? FindBestToken(string input, IEnumerable<string> candidates, int maxDistance)
     {
-        if (string.IsNullOrWhiteSpace(input)) return null;
-        if (candidates == null) return null;
+        if (string.IsNullOrWhiteSpace(input))
+            return null;
+        if (candidates == null)
+            return null;
 
         var bestDistance = int.MaxValue;
         string? best = null;
 
         foreach (var candidate in candidates)
         {
-            if (string.IsNullOrWhiteSpace(candidate)) continue;
+            if (string.IsNullOrWhiteSpace(candidate))
+                continue;
             var distance = input.FuzzyDistanceTo(candidate, maxDistance);
-            if (distance > maxDistance) continue;
+            if (distance > maxDistance)
+                continue;
 
             if (distance < bestDistance)
             {
@@ -84,25 +84,16 @@ public static class FuzzyMatcher
     }
 
     /// <summary>Find the closest item by name/id/aliases within the maximum distance.</summary>
-    public static IItem? FindBestItem(IEnumerable<IItem> items, string input, int maxDistance)
-    {
-        return FindBestEntity(items, input, maxDistance, item =>
-            new[] { item.Name, item.Id }.Concat(item.Aliases));
-    }
+    public static IItem? FindBestItem(IEnumerable<IItem> items, string input, int maxDistance) => FindBestEntity(items, input, maxDistance, item =>
+                                                                                                           new[] { item.Name, item.Id }.Concat(item.Aliases));
 
     /// <summary>Find the closest NPC by name/id within the maximum distance.</summary>
-    public static INpc? FindBestNpc(IEnumerable<INpc> npcs, string input, int maxDistance)
-    {
-        return FindBestEntity(npcs, input, maxDistance, npc =>
-            new[] { npc.Name, npc.Id });
-    }
+    public static INpc? FindBestNpc(IEnumerable<INpc> npcs, string input, int maxDistance) => FindBestEntity(npcs, input, maxDistance, npc =>
+                                                                                                       new[] { npc.Name, npc.Id });
 
     /// <summary>Find the closest door by name/id/aliases within the maximum distance.</summary>
-    public static IDoor? FindBestDoor(IEnumerable<IDoor> doors, string input, int maxDistance)
-    {
-        return FindBestEntity(doors, input, maxDistance, door =>
-            new[] { door.Name, door.Id }.Concat(door.Aliases));
-    }
+    public static IDoor? FindBestDoor(IEnumerable<IDoor> doors, string input, int maxDistance) => FindBestEntity(doors, input, maxDistance, door =>
+                                                                                                           new[] { door.Name, door.Id }.Concat(door.Aliases));
 
     private static T? FindBestEntity<T>(
         IEnumerable<T> entities,
@@ -111,7 +102,8 @@ public static class FuzzyMatcher
         Func<T, IEnumerable<string>> tokens)
         where T : class
     {
-        if (string.IsNullOrWhiteSpace(input)) return null;
+        if (string.IsNullOrWhiteSpace(input))
+            return null;
 
         var bestDistance = int.MaxValue;
         T? best = null;
@@ -119,10 +111,12 @@ public static class FuzzyMatcher
         foreach (var entity in entities)
         {
             var candidates = tokens(entity);
-            if (candidates == null) continue;
+            if (candidates == null)
+                continue;
 
             var distance = GetBestDistance(input, candidates, maxDistance);
-            if (distance > maxDistance) continue;
+            if (distance > maxDistance)
+                continue;
 
             if (distance < bestDistance)
             {
@@ -143,10 +137,13 @@ public static class FuzzyMatcher
         var best = int.MaxValue;
         foreach (var candidate in candidates)
         {
-            if (string.IsNullOrWhiteSpace(candidate)) continue;
+            if (string.IsNullOrWhiteSpace(candidate))
+                continue;
             var distance = input.FuzzyDistanceTo(candidate, maxDistance);
-            if (distance < best) best = distance;
+            if (distance < best)
+                best = distance;
         }
+
         return best;
     }
 }

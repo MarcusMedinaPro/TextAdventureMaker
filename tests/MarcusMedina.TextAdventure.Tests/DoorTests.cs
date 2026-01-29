@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class DoorTests
 {
@@ -21,10 +21,10 @@ public class DoorTests
     [Fact]
     public void Door_InvalidIdOrName_Throws()
     {
-        Assert.Throws<ArgumentException>(() => new Door("", "door"));
-        Assert.Throws<ArgumentException>(() => new Door("id", ""));
-        Assert.Throws<ArgumentNullException>(() => new Door(null!, "door"));
-        Assert.Throws<ArgumentNullException>(() => new Door("id", null!));
+        _ = Assert.Throws<ArgumentException>(() => new Door("", "door"));
+        _ = Assert.Throws<ArgumentException>(() => new Door("id", ""));
+        _ = Assert.Throws<ArgumentNullException>(() => new Door(null!, "door"));
+        _ = Assert.Throws<ArgumentNullException>(() => new Door("id", null!));
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class DoorTests
         var inside = new Location("inside");
         var door = new Door("door1", "heavy door");
 
-        outside.AddExit(Direction.North, inside, door);
+        _ = outside.AddExit(Direction.North, inside, door);
 
         var state = new GameState(outside);
         Assert.False(state.Move(Direction.North));
@@ -89,9 +89,9 @@ public class DoorTests
         var outside = new Location("outside");
         var inside = new Location("inside");
         var door = new Door("door1", "heavy door");
-        door.Open();
+        _ = door.Open();
 
-        outside.AddExit(Direction.North, inside, door);
+        _ = outside.AddExit(Direction.North, inside, door);
 
         var state = new GameState(outside);
         Assert.True(state.Move(Direction.North));
@@ -102,7 +102,7 @@ public class DoorTests
     public void Door_CanBeDestroyed()
     {
         var door = new Door("door1", "wooden door", DoorState.Locked);
-        door.Destroy();
+        _ = door.Destroy();
 
         Assert.Equal(DoorState.Destroyed, door.State);
         Assert.True(door.IsPassable);
@@ -149,7 +149,7 @@ public class DoorTests
     public void Door_Close_ClosesWhenOpen()
     {
         var door = new Door("door1", "iron door");
-        door.Open();
+        _ = door.Open();
 
         Assert.True(door.Close());
         Assert.Equal(DoorState.Closed, door.State);
@@ -161,7 +161,7 @@ public class DoorTests
     {
         var key = new Key("key1", "rusty key");
         var door = new Door("door1", "iron door");
-        door.Open();
+        _ = door.Open();
 
         Assert.False(door.Lock(key));
         Assert.Equal(DoorState.Open, door.State);
@@ -172,7 +172,7 @@ public class DoorTests
     {
         var key = new Key("key1", "rusty key");
         var door = new Door("door1", "iron door");
-        door.Destroy();
+        _ = door.Destroy();
 
         Assert.False(door.Lock(key));
         Assert.Equal(DoorState.Destroyed, door.State);
@@ -195,7 +195,7 @@ public class DoorTests
         var raised = 0;
         door.OnOpen += _ => raised++;
 
-        door.Open();
+        _ = door.Open();
 
         Assert.Equal(1, raised);
     }
@@ -208,7 +208,7 @@ public class DoorTests
         var raised = 0;
         door.OnOpen += _ => raised++;
 
-        door.Open();
+        _ = door.Open();
 
         Assert.Equal(0, raised);
     }
@@ -217,11 +217,11 @@ public class DoorTests
     public void Door_Close_RaisesEvent()
     {
         var door = new Door("door1", "iron door");
-        door.Open();
+        _ = door.Open();
         var raised = 0;
         door.OnClose += _ => raised++;
 
-        door.Close();
+        _ = door.Close();
 
         Assert.Equal(1, raised);
     }
@@ -234,7 +234,7 @@ public class DoorTests
         var raised = 0;
         door.OnLock += _ => raised++;
 
-        door.Lock(key);
+        _ = door.Lock(key);
 
         Assert.Equal(1, raised);
     }
@@ -247,7 +247,7 @@ public class DoorTests
         var raised = 0;
         door.OnUnlock += _ => raised++;
 
-        door.Unlock(key);
+        _ = door.Unlock(key);
 
         Assert.Equal(1, raised);
     }
@@ -259,7 +259,7 @@ public class DoorTests
         var raised = 0;
         door.OnDestroy += _ => raised++;
 
-        door.Destroy();
+        _ = door.Destroy();
 
         Assert.Equal(1, raised);
     }

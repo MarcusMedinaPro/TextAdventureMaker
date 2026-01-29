@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class KeyList
 {
@@ -16,12 +16,12 @@ public sealed class KeyList
     public Key Add(Key key) => _keys.Add(key);
     public KeyList AddMany(params string[] names)
     {
-        _keys.AddMany(names);
+        _ = _keys.AddMany(names);
         return this;
     }
     public KeyList AddMany(IEnumerable<string> names)
     {
-        _keys.AddMany(names);
+        _ = _keys.AddMany(names);
         return this;
     }
 

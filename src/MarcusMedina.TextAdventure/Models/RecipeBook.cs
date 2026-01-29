@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class RecipeBook
 {
-    private readonly List<ItemCombinationRecipe> _recipes = new();
+    private readonly List<ItemCombinationRecipe> _recipes = [];
 
     public RecipeBook Add(ItemCombinationRecipe recipe)
     {

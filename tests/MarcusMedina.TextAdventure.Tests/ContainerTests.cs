@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class ContainerTests
 {
@@ -16,7 +16,7 @@ public class ContainerTests
         IFluid water = new Fluid("water", "water");
 
         Assert.True(glass.Add(water));
-        Assert.Single(glass.Contents);
+        _ = Assert.Single(glass.Contents);
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class ContainerTests
         var coin = new Item("coin", "coin");
 
         Assert.True(chest.Add(coin));
-        Assert.Single(chest.Contents);
+        _ = Assert.Single(chest.Contents);
     }
 
     [Fact]

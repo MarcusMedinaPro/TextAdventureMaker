@@ -2,6 +2,8 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
@@ -9,16 +11,11 @@ using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
 public class LookCommand : ICommand
 {
     public string? Target { get; }
 
-    public LookCommand(string? target = null)
-    {
-        Target = target;
-    }
+    public LookCommand(string? target = null) => Target = target;
 
     public CommandResult Execute(CommandContext context)
     {
@@ -42,28 +39,28 @@ public class LookCommand : ICommand
         var builder = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(description))
         {
-            builder.Append(description.Trim());
+            _ = builder.Append(description.Trim());
         }
 
-        builder.Append(builder.Length > 0 ? "\n" : string.Empty);
-        builder.Append(Language.HealthStatus(context.State.Stats.Health, context.State.Stats.MaxHealth));
-        builder.Append("\n");
+        _ = builder.Append(builder.Length > 0 ? "\n" : string.Empty);
+        _ = builder.Append(Language.HealthStatus(context.State.Stats.Health, context.State.Stats.MaxHealth));
+        _ = builder.Append("\n");
         var items = location.Items
             .Where(i => !i.HiddenFromItemList)
             .Select(i => Language.ItemWithWeight(i.Name, i.Weight))
             .ToList();
         if (!context.State.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith || items.Count > 0)
         {
-            builder.Append(Language.ItemsHereLabel);
-            builder.Append(items.Count > 0 ? items.CommaJoin() : Language.None);
-            builder.Append("\n");
+            _ = builder.Append(Language.ItemsHereLabel);
+            _ = builder.Append(items.Count > 0 ? items.CommaJoin() : Language.None);
+            _ = builder.Append("\n");
         }
 
         var exitsList = exits.ToList();
         if (!context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly || exitsList.Count > 0)
         {
-            builder.Append(Language.ExitsLabel);
-            builder.Append(exitsList.Count > 0 ? exitsList.CommaJoin() : Language.None);
+            _ = builder.Append(Language.ExitsLabel);
+            _ = builder.Append(exitsList.Count > 0 ? exitsList.CommaJoin() : Language.None);
         }
 
         return CommandResult.Ok(builder.ToString());
@@ -84,6 +81,7 @@ public class LookCommand : ICommand
                 suggestion = best.Name;
             }
         }
+
         if (item != null)
         {
             var description = item.GetDescription();

@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class ItemList
 {
@@ -16,12 +16,12 @@ public sealed class ItemList
     public Item Add(Item item) => _items.Add(item);
     public ItemList AddMany(params string[] names)
     {
-        _items.AddMany(names);
+        _ = _items.AddMany(names);
         return this;
     }
     public ItemList AddMany(IEnumerable<string> names)
     {
-        _items.AddMany(names);
+        _ = _items.AddMany(names);
         return this;
     }
 

@@ -2,21 +2,18 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
 public class UseCommand : ICommand
 {
     public string ItemName { get; }
 
-    public UseCommand(string itemName)
-    {
-        ItemName = itemName;
-    }
+    public UseCommand(string itemName) => ItemName = itemName;
 
     public CommandResult Execute(CommandContext context)
     {
@@ -31,6 +28,7 @@ public class UseCommand : ICommand
                 suggestion = best.Name;
             }
         }
+
         if (item == null)
         {
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotFound);

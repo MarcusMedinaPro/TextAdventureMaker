@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Extensions;
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Commands;
 
 public class TakeAllCommand : ICommand
 {
@@ -31,7 +31,7 @@ public class TakeAllCommand : ICommand
         {
             if (inventory.Add(item))
             {
-                location.RemoveItem(item);
+                _ = location.RemoveItem(item);
                 item.Take();
                 taken.Add(item);
                 context.State.Events.Publish(new GameEvent(GameEventType.PickupItem, context.State, location, item));
@@ -49,12 +49,9 @@ public class TakeAllCommand : ICommand
 
         if (taken.Count == 0)
         {
-            if (inventory.LimitType == InventoryLimitType.ByCount)
-            {
-                return CommandResult.Fail(Language.InventoryFull, GameError.InventoryFull);
-            }
-
-            return CommandResult.Fail(Language.TooHeavy, GameError.ItemTooHeavy);
+            return inventory.LimitType == InventoryLimitType.ByCount
+                ? CommandResult.Fail(Language.InventoryFull, GameError.InventoryFull)
+                : CommandResult.Fail(Language.TooHeavy, GameError.ItemTooHeavy);
         }
 
         var takenList = taken.Select(i => i.Name).CommaJoin();

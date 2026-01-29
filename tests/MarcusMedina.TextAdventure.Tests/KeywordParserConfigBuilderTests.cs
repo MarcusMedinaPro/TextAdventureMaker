@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Parsing;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class KeywordParserConfigBuilderTests
 {
@@ -15,9 +15,9 @@ public class KeywordParserConfigBuilderTests
     {
         var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
 
-        Assert.IsType<LookCommand>(parser.Parse("look"));
-        Assert.IsType<InventoryCommand>(parser.Parse("inventory"));
-        Assert.IsType<QuitCommand>(parser.Parse("quit"));
+        _ = Assert.IsType<LookCommand>(parser.Parse("look"));
+        _ = Assert.IsType<InventoryCommand>(parser.Parse("inventory"));
+        _ = Assert.IsType<QuitCommand>(parser.Parse("quit"));
 
         var take = Assert.IsType<TakeCommand>(parser.Parse("take key"));
         Assert.Equal("key", take.ItemName);
@@ -43,7 +43,7 @@ public class KeywordParserConfigBuilderTests
         var go = Assert.IsType<GoCommand>(parser.Parse("in"));
         Assert.Equal(Direction.In, go.Direction);
 
-        Assert.IsType<UnknownCommand>(parser.Parse("n"));
+        _ = Assert.IsType<UnknownCommand>(parser.Parse("n"));
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class KeywordParserConfigBuilderTests
             .Build();
         var parser = new KeywordParser(config);
 
-        Assert.IsType<UnknownCommand>(parser.Parse("use lamp"));
+        _ = Assert.IsType<UnknownCommand>(parser.Parse("use lamp"));
         var use = Assert.IsType<UseCommand>(parser.Parse("ignite lamp"));
         Assert.Equal("lamp", use.ItemName);
     }

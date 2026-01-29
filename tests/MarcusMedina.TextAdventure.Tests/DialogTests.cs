@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Models;
 
 public class DialogTests
 {
@@ -24,7 +24,7 @@ public class DialogTests
         var node = new DialogNode("First line.")
             .AddOption("Continue", next);
 
-        Assert.Single(node.Options);
+        _ = Assert.Single(node.Options);
         Assert.Equal("Continue", node.Options[0].Text);
         Assert.Equal(next, node.Options[0].Next);
     }

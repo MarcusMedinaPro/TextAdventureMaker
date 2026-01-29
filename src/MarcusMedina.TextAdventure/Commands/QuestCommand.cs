@@ -2,12 +2,12 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-
-namespace MarcusMedina.TextAdventure.Commands;
 
 /// <summary>List active and completed quests.</summary>
 public sealed class QuestCommand : ICommand
@@ -24,27 +24,27 @@ public sealed class QuestCommand : ICommand
         var completed = log.GetByState(QuestState.Completed);
 
         var builder = new StringBuilder();
-        builder.Append(Language.QuestsLabel);
+        _ = builder.Append(Language.QuestsLabel);
 
         if (active.Count > 0)
         {
-            builder.Append("\n");
-            builder.Append(Language.ActiveQuestsLabel);
+            _ = builder.Append("\n");
+            _ = builder.Append(Language.ActiveQuestsLabel);
             foreach (var quest in active)
             {
-                builder.Append("\n");
-                builder.Append(Language.QuestEntry(quest.Title));
+                _ = builder.Append("\n");
+                _ = builder.Append(Language.QuestEntry(quest.Title));
             }
         }
 
         if (completed.Count > 0)
         {
-            builder.Append("\n");
-            builder.Append(Language.CompletedQuestsLabel);
+            _ = builder.Append("\n");
+            _ = builder.Append(Language.CompletedQuestsLabel);
             foreach (var quest in completed)
             {
-                builder.Append("\n");
-                builder.Append(Language.QuestEntry(quest.Title));
+                _ = builder.Append("\n");
+                _ = builder.Append(Language.QuestEntry(quest.Title));
             }
         }
 

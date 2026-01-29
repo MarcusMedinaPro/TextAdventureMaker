@@ -2,23 +2,19 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public class Item : IItem
 {
-    private readonly List<string> _aliases = new();
-    private readonly Dictionary<ItemAction, string> _reactions = new();
+    private readonly List<string> _aliases = [];
+    private readonly Dictionary<ItemAction, string> _reactions = [];
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private string? _readText;
-    private bool _readable;
-    private bool _requiresTakeToRead;
-    private int _readingCost;
     private Func<IGameState, bool>? _readCondition;
-    private bool _hiddenFromItemList;
     private string _description = "";
 
     public string Id { get; }
@@ -28,10 +24,10 @@ public class Item : IItem
     public bool Takeable { get; private set; }
     public float Weight { get; private set; }
     public IReadOnlyList<string> Aliases => _aliases;
-    public bool Readable => _readable;
-    public bool RequiresTakeToRead => _requiresTakeToRead;
-    public int ReadingCost => _readingCost;
-    public bool HiddenFromItemList => _hiddenFromItemList;
+    public bool Readable { get; private set; }
+    public bool RequiresTakeToRead { get; private set; }
+    public int ReadingCost { get; private set; }
+    public bool HiddenFromItemList { get; private set; }
 
     public event Action<IItem>? OnTake;
     public event Action<IItem>? OnDrop;
@@ -49,10 +45,7 @@ public class Item : IItem
         Weight = 0f;
     }
 
-    public Item(string id, string name, string description) : this(id, name)
-    {
-        _description = description ?? "";
-    }
+    public Item(string id, string name, string description) : this(id, name) => _description = description ?? "";
 
     public Item SetTakeable(bool takeable)
     {
@@ -87,17 +80,14 @@ public class Item : IItem
 
     public bool Matches(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) return false;
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
         var token = name.Trim();
 
-        if (Name.TextCompare(token)) return true;
-        return _aliases.Any(a => a.TextCompare(token));
+        return Name.TextCompare(token) || _aliases.Any(a => a.TextCompare(token));
     }
 
-    public string? GetReaction(ItemAction action)
-    {
-        return _reactions.TryGetValue(action, out var reaction) ? reaction : null;
-    }
+    public string? GetReaction(ItemAction action) => _reactions.TryGetValue(action, out var reaction) ? reaction : null;
 
     public IItem SetReaction(ItemAction action, string text)
     {
@@ -105,21 +95,18 @@ public class Item : IItem
         return this;
     }
 
-    public bool CanRead(IGameState state)
-    {
-        return _readCondition == null || _readCondition(state);
-    }
+    public bool CanRead(IGameState state) => _readCondition == null || _readCondition(state);
 
     public IItem SetReadable(bool readable = true)
     {
-        _readable = readable;
+        Readable = readable;
         return this;
     }
 
     public IItem SetReadText(string text)
     {
         _readText = text;
-        _readable = true;
+        Readable = true;
         return this;
     }
 
@@ -127,19 +114,19 @@ public class Item : IItem
 
     public IItem RequireTakeToRead()
     {
-        _requiresTakeToRead = true;
+        RequiresTakeToRead = true;
         return this;
     }
 
     public IItem SetReadingCost(int turns)
     {
-        _readingCost = Math.Max(0, turns);
+        ReadingCost = Math.Max(0, turns);
         return this;
     }
 
     public IItem HideFromItemList(bool hidden = true)
     {
-        _hiddenFromItemList = hidden;
+        HiddenFromItemList = hidden;
         return this;
     }
 
@@ -154,33 +141,33 @@ public class Item : IItem
         var copy = new Item(Id, Name, _description)
             .SetTakeable(Takeable)
             .SetWeight(Weight)
-            .SetReadable(_readable)
-            .SetReadingCost(_readingCost)
-            .HideFromItemList(_hiddenFromItemList);
+            .SetReadable(Readable)
+            .SetReadingCost(ReadingCost)
+            .HideFromItemList(HiddenFromItemList);
 
         if (_aliases.Count > 0)
         {
-            copy.AddAliases(_aliases.ToArray());
+            _ = copy.AddAliases(_aliases.ToArray());
         }
 
         if (_readText != null)
         {
-            copy.SetReadText(_readText);
+            _ = copy.SetReadText(_readText);
         }
 
-        if (_requiresTakeToRead)
+        if (RequiresTakeToRead)
         {
-            copy.RequireTakeToRead();
+            _ = copy.RequireTakeToRead();
         }
 
         if (_readCondition != null)
         {
-            copy.RequiresToRead(_readCondition);
+            _ = copy.RequiresToRead(_readCondition);
         }
 
         foreach (var reaction in _reactions)
         {
-            copy.SetReaction(reaction.Key, reaction.Value);
+            _ = copy.SetReaction(reaction.Key, reaction.Value);
         }
 
         foreach (var entry in _properties)
@@ -195,30 +182,15 @@ public class Item : IItem
     IItem IItem.SetWeight(float weight) => SetWeight(weight);
     IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
 
-    public void Take()
-    {
-        OnTake?.Invoke(this);
-    }
+    public void Take() => OnTake?.Invoke(this);
 
-    public void Drop()
-    {
-        OnDrop?.Invoke(this);
-    }
+    public void Drop() => OnDrop?.Invoke(this);
 
-    public void Use()
-    {
-        OnUse?.Invoke(this);
-    }
+    public void Use() => OnUse?.Invoke(this);
 
-    public void Move()
-    {
-        OnMove?.Invoke(this);
-    }
+    public void Move() => OnMove?.Invoke(this);
 
-    public void Destroy()
-    {
-        OnDestroy?.Invoke(this);
-    }
+    public void Destroy() => OnDestroy?.Invoke(this);
 
     public static implicit operator Item(string name) =>
         new(name.ToId(), name);

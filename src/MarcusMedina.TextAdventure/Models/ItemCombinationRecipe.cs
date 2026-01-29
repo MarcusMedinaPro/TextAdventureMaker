@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class ItemCombinationRecipe
 {
@@ -21,8 +21,5 @@ public class ItemCombinationRecipe
         RightId = rightId;
     }
 
-    public bool Matches(IItem a, IItem b)
-    {
-        return (a.Id == LeftId && b.Id == RightId) || (a.Id == RightId && b.Id == LeftId);
-    }
+    public bool Matches(IItem a, IItem b) => (a.Id == LeftId && b.Id == RightId) || (a.Id == RightId && b.Id == LeftId);
 }

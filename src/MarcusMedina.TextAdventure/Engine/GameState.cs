@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Engine;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Engine;
 
 public class GameState : IGameState
 {
@@ -76,35 +76,41 @@ public class GameState : IGameState
 
     public void RegisterLocations(IEnumerable<ILocation> locations)
     {
-        if (locations == null) return;
+        if (locations == null)
+            return;
         foreach (var location in locations)
         {
-            if (location == null) continue;
+            if (location == null)
+                continue;
             _locations[location.Id] = location;
         }
     }
 
     public void SetTimeSystem(ITimeSystem timeSystem)
     {
-        if (timeSystem == null) return;
+        if (timeSystem == null)
+            return;
         TimeSystem = timeSystem;
     }
 
     public void SetFactionSystem(IFactionSystem factionSystem)
     {
-        if (factionSystem == null) return;
+        if (factionSystem == null)
+            return;
         Factions = factionSystem;
     }
 
     public void SetRandomEventPool(IRandomEventPool randomEventPool)
     {
-        if (randomEventPool == null) return;
+        if (randomEventPool == null)
+            return;
         RandomEvents = randomEventPool;
     }
 
     public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)
     {
-        if (locationDiscovery == null) return;
+        if (locationDiscovery == null)
+            return;
         LocationDiscovery = locationDiscovery;
         if (locationDiscovery is LocationDiscoverySystem discovery)
         {
@@ -155,10 +161,11 @@ public class GameState : IGameState
         foreach (var itemId in memento.InventoryItemIds)
         {
             var item = FindItemById(itemId, allLocations);
-            if (item == null) continue;
+            if (item == null)
+                continue;
             var itemLocation = allLocations.FirstOrDefault(l => l.Items.Contains(item));
-            itemLocation?.RemoveItem(item);
-            Inventory.Add(item);
+            _ = (itemLocation?.RemoveItem(item));
+            _ = Inventory.Add(item);
         }
 
         if (WorldState is WorldState worldState)
@@ -172,8 +179,10 @@ public class GameState : IGameState
         foreach (var location in locations)
         {
             var item = location.Items.FirstOrDefault(i => i.Id.TextCompare(id));
-            if (item != null) return item;
+            if (item != null)
+                return item;
         }
+
         return null;
     }
 
@@ -202,6 +211,7 @@ public class GameState : IGameState
                 LastMoveError = Language.DoorClosed(exit.Door!.Name);
                 LastMoveErrorCode = GameError.DoorIsClosed;
             }
+
             return false;
         }
 
@@ -212,9 +222,5 @@ public class GameState : IGameState
         return true;
     }
 
-    public bool IsCurrentRoomId(string id)
-    {
-        if (string.IsNullOrWhiteSpace(id)) return false;
-        return CurrentLocation.Id.TextCompare(id);
-    }
+    public bool IsCurrentRoomId(string id) => !string.IsNullOrWhiteSpace(id) && CurrentLocation.Id.TextCompare(id);
 }

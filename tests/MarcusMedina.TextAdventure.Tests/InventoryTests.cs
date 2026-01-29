@@ -2,10 +2,10 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class InventoryTests
 {
@@ -13,8 +13,8 @@ public class InventoryTests
     public void Inventory_TotalWeight_SumsItems()
     {
         var inventory = new Inventory();
-        inventory.Add(new Item("rock", "Rock").SetWeight(1.5f));
-        inventory.Add(new Item("coin", "Coin").SetWeight(0.5f));
+        _ = inventory.Add(new Item("rock", "Rock").SetWeight(1.5f));
+        _ = inventory.Add(new Item("coin", "Coin").SetWeight(0.5f));
 
         Assert.Equal(2.0f, inventory.TotalWeight);
     }
@@ -46,7 +46,7 @@ public class InventoryTests
     {
         var inventory = new Inventory();
         var item = new Item("sword", "Sword").AddAliases("blade");
-        inventory.Add(item);
+        _ = inventory.Add(item);
 
         Assert.Equal(item, inventory.FindItem("blade"));
     }

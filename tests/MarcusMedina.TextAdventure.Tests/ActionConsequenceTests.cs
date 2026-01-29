@@ -3,10 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class ActionConsequenceTests
 {
@@ -16,13 +16,13 @@ public class ActionConsequenceTests
         var glass = new Item("glass", "wine glass", "A delicate wine glass.");
         var brokenGlass = new Item("broken_glass", "broken glass", "Sharp glass shards.");
 
-        glass.SetDropConsequence(ActionConsequence.Break("The glass shatters!", brokenGlass));
+        _ = glass.SetDropConsequence(ActionConsequence.Break("The glass shatters!", brokenGlass));
 
         Assert.True(glass.HasConsequence(ItemAction.Drop));
         var consequence = glass.GetConsequence(ItemAction.Drop);
         Assert.NotNull(consequence);
         Assert.True(consequence.DestroyItem);
-        Assert.Single(consequence.CreatedItems);
+        _ = Assert.Single(consequence.CreatedItems);
         Assert.Equal("The glass shatters!", consequence.Message);
     }
 
@@ -31,7 +31,7 @@ public class ActionConsequenceTests
     {
         var potion = new Item("potion", "health potion", "A red potion.");
 
-        potion.SetUseConsequence(ActionConsequence.Destroy("You drink the potion. It tastes like cherries."));
+        _ = potion.SetUseConsequence(ActionConsequence.Destroy("You drink the potion. It tastes like cherries."));
 
         Assert.True(potion.HasConsequence(ItemAction.Use));
         var consequence = potion.GetConsequence(ItemAction.Use);
@@ -44,7 +44,7 @@ public class ActionConsequenceTests
     {
         var trap = new Item("trap", "bear trap", "A rusty bear trap.");
 
-        trap.SetTakeConsequence(new ActionConsequence
+        _ = trap.SetTakeConsequence(new ActionConsequence
         {
             Message = "SNAP! The trap springs shut!",
             SetFlag = "injured"
@@ -59,13 +59,13 @@ public class ActionConsequenceTests
         var vase = new Item("vase", "ming vase", "An ancient vase.");
         var shards = new Item("shards", "ceramic shards", "Broken pieces of the vase.");
 
-        vase.MakeFragile("The vase shatters into a thousand pieces!", shards);
+        _ = vase.MakeFragile("The vase shatters into a thousand pieces!", shards);
 
         Assert.True(vase.HasConsequence(ItemAction.Drop));
         var consequence = vase.GetConsequence(ItemAction.Drop);
         Assert.NotNull(consequence);
         Assert.True(consequence.DestroyItem);
-        Assert.Single(consequence.CreatedItems);
+        _ = Assert.Single(consequence.CreatedItems);
         Assert.Equal("shards", consequence.CreatedItems[0].Id);
     }
 
@@ -74,7 +74,7 @@ public class ActionConsequenceTests
     {
         var apple = new Item("apple", "red apple", "A juicy red apple.");
 
-        apple.MakeConsumable("You eat the apple. Delicious!");
+        _ = apple.MakeConsumable("You eat the apple. Delicious!");
 
         Assert.True(apple.HasConsequence(ItemAction.Use));
         var consequence = apple.GetConsequence(ItemAction.Use);
@@ -112,7 +112,7 @@ public class ActionConsequenceTests
         var consequence = ActionConsequence.Transform(butterfly, "The caterpillar transforms into a butterfly!");
 
         Assert.True(consequence.DestroyItem);
-        Assert.Single(consequence.CreatedItems);
+        _ = Assert.Single(consequence.CreatedItems);
         Assert.Equal("butterfly", consequence.CreatedItems[0].Id);
         Assert.Equal("The caterpillar transforms into a butterfly!", consequence.Message);
     }

@@ -2,6 +2,8 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
@@ -9,16 +11,11 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
 public class TalkCommand : ICommand
 {
     public string? Target { get; }
 
-    public TalkCommand(string? target)
-    {
-        Target = target;
-    }
+    public TalkCommand(string? target) => Target = target;
 
     public CommandResult Execute(CommandContext context)
     {
@@ -39,6 +36,7 @@ public class TalkCommand : ICommand
                 suggestion = best.Name;
             }
         }
+
         if (npc == null)
         {
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
@@ -61,19 +59,19 @@ public class TalkCommand : ICommand
         }
 
         var builder = new StringBuilder();
-        builder.Append(dialog.Text);
+        _ = builder.Append(dialog.Text);
 
         if (dialog.Options.Count > 0)
         {
-            builder.Append("\n");
-            builder.Append(Language.DialogOptionsLabel);
-            builder.Append("\n");
+            _ = builder.Append("\n");
+            _ = builder.Append(Language.DialogOptionsLabel);
+            _ = builder.Append("\n");
             for (var i = 0; i < dialog.Options.Count; i++)
             {
-                builder.Append(Language.DialogOption(i + 1, dialog.Options[i].Text));
+                _ = builder.Append(Language.DialogOption(i + 1, dialog.Options[i].Text));
                 if (i < dialog.Options.Count - 1)
                 {
-                    builder.Append("\n");
+                    _ = builder.Append("\n");
                 }
             }
         }

@@ -2,9 +2,9 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Models;
 
 public class ExitTests
 {
@@ -32,15 +32,12 @@ public class ExitTests
     {
         var target = new Location("target");
         var door = new Door("door1", "gate");
-        door.Destroy();
+        _ = door.Destroy();
         var exit = new Exit(target, door);
 
         Assert.True(exit.IsPassable);
     }
 
     [Fact]
-    public void Exit_NullTarget_Throws()
-    {
-        Assert.Throws<ArgumentNullException>(() => new Exit(null!));
-    }
+    public void Exit_NullTarget_Throws() => Assert.Throws<ArgumentNullException>(() => new Exit(null!));
 }

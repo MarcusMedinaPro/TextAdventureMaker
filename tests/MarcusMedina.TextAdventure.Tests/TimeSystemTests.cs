@@ -1,9 +1,9 @@
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
 using Xunit;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class TimeSystemTests
 {
@@ -28,7 +28,7 @@ public class TimeSystemTests
 
         var state = new GameState(new Location("start"), timeSystem: time);
         var fired = false;
-        time.OnPhase(TimeOfDay.Night, _ => fired = true);
+        _ = time.OnPhase(TimeOfDay.Night, _ => fired = true);
 
         time.Tick(state);
         time.Tick(state);
@@ -48,8 +48,8 @@ public class TimeSystemTests
         var remainingFired = false;
         var exhaustedFired = false;
 
-        time.OnMovesRemaining(1, _ => remainingFired = true);
-        time.OnMovesExhausted(_ => exhaustedFired = true);
+        _ = time.OnMovesRemaining(1, _ => remainingFired = true);
+        _ = time.OnMovesExhausted(_ => exhaustedFired = true);
 
         time.Tick(state);
         time.Tick(state);

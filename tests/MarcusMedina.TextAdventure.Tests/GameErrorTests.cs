@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
-using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class GameErrorTests
 {
@@ -29,7 +29,7 @@ public class GameErrorTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "gate", DoorState.Locked);
-        start.AddExit(Direction.North, next, door);
+        _ = start.AddExit(Direction.North, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new GoCommand(Direction.North));
@@ -43,7 +43,7 @@ public class GameErrorTests
     {
         var start = new Location("start");
         var next = new Location("next");
-        start.AddExit(Direction.East, next);
+        _ = start.AddExit(Direction.East, next);
         var state = new GameState(start);
 
         var result = state.Execute(new OpenCommand());
@@ -58,7 +58,7 @@ public class GameErrorTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door", DoorState.Locked);
-        start.AddExit(Direction.East, next, door);
+        _ = start.AddExit(Direction.East, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new OpenCommand());
@@ -73,7 +73,7 @@ public class GameErrorTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door", DoorState.Open);
-        start.AddExit(Direction.East, next, door);
+        _ = start.AddExit(Direction.East, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new OpenCommand());
@@ -88,7 +88,7 @@ public class GameErrorTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door", DoorState.Closed);
-        start.AddExit(Direction.East, next, door);
+        _ = start.AddExit(Direction.East, next, door);
         var state = new GameState(start);
 
         var result = state.Execute(new UnlockCommand());
@@ -105,9 +105,9 @@ public class GameErrorTests
         var start = new Location("start");
         var next = new Location("next");
         var door = new Door("door1", "iron door").RequiresKey(correct);
-        start.AddExit(Direction.East, next, door);
+        _ = start.AddExit(Direction.East, next, door);
         var state = new GameState(start);
-        state.Inventory.Add(wrong);
+        _ = state.Inventory.Add(wrong);
 
         var result = state.Execute(new UnlockCommand());
 

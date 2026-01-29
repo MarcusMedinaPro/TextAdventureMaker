@@ -2,12 +2,12 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-
-namespace MarcusMedina.TextAdventure.Commands;
 
 public class CombineCommand : ICommand
 {
@@ -61,12 +61,12 @@ public class CombineCommand : ICommand
             return CommandResult.Fail(Language.CannotCombineItems, GameError.ItemNotUsable);
         }
 
-        inventory.Remove(leftItem);
-        inventory.Remove(rightItem);
+        _ = inventory.Remove(leftItem);
+        _ = inventory.Remove(rightItem);
 
         foreach (var created in result.Created)
         {
-            inventory.Add(created);
+            _ = inventory.Add(created);
         }
 
         var ok = CommandResult.Ok(Language.CombineResult(leftItem.Name, rightItem.Name));

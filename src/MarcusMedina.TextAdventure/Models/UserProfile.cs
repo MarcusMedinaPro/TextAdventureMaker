@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using System.Text.Json;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using System.Text.Json;
 
 /// <summary>
 /// Represents the player's persistent profile across all games.
@@ -83,7 +83,8 @@ public class UserProfile
     /// </summary>
     public bool IsBirthday()
     {
-        if (Birthdate == null) return false;
+        if (Birthdate == null)
+            return false;
         var today = DateOnly.FromDateTime(DateTime.Today);
         return Birthdate.Value.Month == today.Month && Birthdate.Value.Day == today.Day;
     }
@@ -93,10 +94,12 @@ public class UserProfile
     /// </summary>
     public int? GetCalculatedAge()
     {
-        if (Birthdate == null) return Age;
+        if (Birthdate == null)
+            return Age;
         var today = DateOnly.FromDateTime(DateTime.Today);
         var age = today.Year - Birthdate.Value.Year;
-        if (Birthdate.Value > today.AddYears(-age)) age--;
+        if (Birthdate.Value > today.AddYears(-age))
+            age--;
         return age;
     }
 
@@ -143,7 +146,7 @@ public class UserProfile
         var directory = Path.GetDirectoryName(defaultPath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
-            Directory.CreateDirectory(directory);
+            _ = Directory.CreateDirectory(directory);
         }
 
         Save(defaultPath);

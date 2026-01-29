@@ -2,11 +2,11 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Models;
+
+using System.Linq;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
-using System.Linq;
-
-namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class GameList<T> where T : IGameEntity
 {
@@ -15,10 +15,7 @@ public sealed class GameList<T> where T : IGameEntity
 
     public IReadOnlyCollection<T> Items => _items.Values;
 
-    public GameList(Func<string, T> factoryFromName)
-    {
-        _factoryFromName = factoryFromName ?? throw new ArgumentNullException(nameof(factoryFromName));
-    }
+    public GameList(Func<string, T> factoryFromName) => _factoryFromName = factoryFromName ?? throw new ArgumentNullException(nameof(factoryFromName));
 
     public T Add(string name)
     {
@@ -35,58 +32,57 @@ public sealed class GameList<T> where T : IGameEntity
 
     public GameList<T> AddMany(params string[] names)
     {
-        if (names == null) return this;
+        if (names == null)
+            return this;
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Add(name);
+                _ = Add(name);
             }
         }
+
         return this;
     }
 
     public GameList<T> AddMany(IEnumerable<string> names)
     {
-        if (names == null) return this;
+        if (names == null)
+            return this;
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                Add(name);
+                _ = Add(name);
             }
         }
+
         return this;
     }
 
     public GameList<T> AddMany(IEnumerable<T> items)
     {
-        if (items == null) return this;
+        if (items == null)
+            return this;
         foreach (var item in items)
         {
             if (item != null)
             {
-                Add(item);
+                _ = Add(item);
             }
         }
+
         return this;
     }
 
-    public T? Find(string token)
-    {
-        if (string.IsNullOrWhiteSpace(token)) return default;
-        if (_items.TryGetValue(token, out var item)) return item;
-        return _items.Values.FirstOrDefault(i => Matches(i, token));
-    }
+    public T? Find(string token) => string.IsNullOrWhiteSpace(token)
+            ? default
+            : _items.TryGetValue(token, out var item) ? item : _items.Values.FirstOrDefault(i => Matches(i, token));
 
     public T Get(string token)
     {
         var item = Find(token);
-        if (item == null)
-        {
-            throw new KeyNotFoundException($"No item found for '{token}'.");
-        }
-        return item;
+        return item == null ? throw new KeyNotFoundException($"No item found for '{token}'.") : item;
     }
 
     public bool TryGet(string token, out T item)
@@ -98,8 +94,7 @@ public sealed class GameList<T> where T : IGameEntity
     public bool Remove(string token)
     {
         var item = Find(token);
-        if (item == null) return false;
-        return _items.Remove(item.Id);
+        return item != null && _items.Remove(item.Id);
     }
 
     public void Clear() => _items.Clear();
@@ -108,18 +103,7 @@ public sealed class GameList<T> where T : IGameEntity
 
     public T Call(string token) => Get(token);
 
-    private static bool Matches(T item, string token)
-    {
-        if (item is IItem itemWithAliases)
-        {
-            return itemWithAliases.Matches(token);
-        }
-
-        if (item is IDoor doorWithAliases)
-        {
-            return doorWithAliases.Matches(token);
-        }
-
-        return item.Id.TextCompare(token) || item.Name.TextCompare(token);
-    }
+    private static bool Matches(T item, string token) => item is IItem itemWithAliases
+            ? itemWithAliases.Matches(token)
+            : item is IDoor doorWithAliases ? doorWithAliases.Matches(token) : item.Id.TextCompare(token) || item.Name.TextCompare(token);
 }

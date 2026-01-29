@@ -2,13 +2,13 @@
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+namespace MarcusMedina.TextAdventure.Engine;
+
 using System.Text;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-
-namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class TurnBasedCombat : ICombatSystem
 {
@@ -34,35 +34,32 @@ public sealed class TurnBasedCombat : ICombatSystem
         }
 
         var builder = new StringBuilder();
-        builder.Append(Language.AttackTarget(target.Name));
-        builder.Append("\n");
-        builder.Append(Language.AttackDamage(_playerDamage));
+        _ = builder.Append(Language.AttackTarget(target.Name));
+        _ = builder.Append("\n");
+        _ = builder.Append(Language.AttackDamage(_playerDamage));
 
         target.Stats.Damage(_playerDamage);
         if (target.Stats.Health <= 0)
         {
-            target.SetState(NpcState.Dead);
-            builder.Append("\n");
-            builder.Append(Language.TargetDefeated(target.Name));
+            _ = target.SetState(NpcState.Dead);
+            _ = builder.Append("\n");
+            _ = builder.Append(Language.TargetDefeated(target.Name));
             return CommandResult.Ok(builder.ToString());
         }
 
         state.Stats.Damage(_npcDamage);
-        builder.Append("\n");
-        builder.Append(Language.EnemyAttack(target.Name, _npcDamage));
+        _ = builder.Append("\n");
+        _ = builder.Append(Language.EnemyAttack(target.Name, _npcDamage));
 
         if (state.Stats.Health <= 0)
         {
-            builder.Append("\n");
-            builder.Append(Language.PlayerDefeated);
+            _ = builder.Append("\n");
+            _ = builder.Append(Language.PlayerDefeated);
             return CommandResult.Fail(builder.ToString(), GameError.AlreadyDead);
         }
 
         return CommandResult.Ok(builder.ToString());
     }
 
-    public CommandResult Flee(IGameState state, INpc? target = null)
-    {
-        return CommandResult.Ok(Language.FleeSuccess);
-    }
+    public CommandResult Flee(IGameState state, INpc? target = null) => CommandResult.Ok(Language.FleeSuccess);
 }

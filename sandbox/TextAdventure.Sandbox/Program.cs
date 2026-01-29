@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -42,7 +39,7 @@ var brokenDummy = new Item("broken_dummy", "broken dummy", "You exhibited excell
 attic.AddNpc(storm);
 attic.AddNpc(dummy);
 
-var state = new GameState(attic, worldLocations: new[] { attic })
+var state = new GameState(attic, worldLocations: [attic])
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
@@ -55,7 +52,7 @@ bucket.OnMove += _ =>
 {
     if (bucketPlaced)
     {
-        bucket.SetReaction(ItemAction.Move, "The bucket is already stationed beneath the leak, performing its quiet, devoted duty.");
+        _ = bucket.SetReaction(ItemAction.Move, "The bucket is already stationed beneath the leak, performing its quiet, devoted duty.");
         return;
     }
 
@@ -228,10 +225,10 @@ void ShowRoom()
     var items = location.Items.CommaJoinNames(properCase: true);
     Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
 
-    var people = location.Npcs.Count > 0
-        ? $"People present: {location.Npcs.Count} ({location.Npcs.Select(npc => npc.Name).CommaJoin()})"
-        : "People present: None";
-    Console.WriteLine(people);
+    var entityLine = location.Npcs.Count > 0
+        ? $"You see: {location.Npcs.Select(npc => npc.Name).CommaJoin()}"
+        : "You see: no one in particular.";
+    Console.WriteLine(entityLine);
 
     var exits = location.Exits
         .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())

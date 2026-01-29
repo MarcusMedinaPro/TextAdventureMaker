@@ -279,10 +279,10 @@ void ShowRoom()
     var items = location.Items.CommaJoinNames(properCase: true);
     Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
 
-    var people = location.Npcs.Count > 0
-        ? $"People present: {location.Npcs.Count} ({location.Npcs.Select(npc => npc.Name).CommaJoin()})"
-        : "People present: None";
-    Console.WriteLine(people);
+    var entityLine = location.Npcs.Count > 0
+        ? $"You see: {location.Npcs.Select(npc => npc.Name).CommaJoin()}"
+        : "You see: no one in particular.";
+    Console.WriteLine(entityLine);
 
     var exits = location.Exits
         .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())

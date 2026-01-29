@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -5,99 +8,113 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
-// Slice 6: The Key Under the Stone
-// Tests: event subscriptions, hidden key reveal, door unlock, auto-look after go.
+// Slice 7: Rain upon the Roof
+// Tests: MoveCommand + bucket state, AttackCommand, FleeCommand, NPC states, auto-look after go.
 
-var garden = new Location("garden", "A quiet garden with a weathered gate and patient silence.");
-var courtyard = new Location("courtyard", "A sheltered courtyard beyond the gate, lit by moonlight.");
+var attic = new Location(
+    "attic",
+    "Rain caresses the roof with silver fingers. A steady leak taps scandalously intimate rhythms on the floorboards.");
 
-var stone = new Item("stone", "stone", "A heavy flat stone with moss on one edge.")
-    .AddAliases("slab", "stoned")
+var rain = new Item("rain", "rain", "Cold drops sting the eyes; you can hardly see.")
     .SetTakeable(false)
-    .SetReaction(ItemAction.TakeFailed, "Duuuuude! That is so groovy.")
-    .SetReaction(ItemAction.Move, "The stone scrapes across the soil and tilts.");
-var key = new Key("garden_key", "iron key", "A cold iron key hidden beneath the stone.")
-    .AddAliases("key", "iron")
-    .SetWeight(0.02f);
+    .HideFromItemList();
 
-var gate = new Door("garden_gate", "garden gate", "A barred gate choked with ivy.", DoorState.Locked)
-    .RequiresKey(key)
-    .SetReaction(DoorAction.Unlock, "The lock gives way with a croak of rust.")
-    .SetReaction(DoorAction.Open, "The gate swings open in a creak of metal.")
-    .SetReaction(DoorAction.OpenFailed, "The gate resists while the lock refuses to budge.");
+var bucket = new Item(
+        "bucket",
+        "bucket",
+        "A dented metal bucket, too heavy to lift but perfectly suited to slide beneath the leak.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.TakeFailed, "It is far too substantial to be carried, darling, but you could certainly persuade it to slide into place.")
+    .SetReaction(ItemAction.Move, "You draw the bucket beneath the leak with deliberate grace. The dripping finally finds a worthy accomplice.");
 
-garden.AddItem(stone);
-garden.AddExit(Direction.North, courtyard, gate);
-courtyard.AddExit(Direction.South, garden, gate);
+attic.AddItem(rain);
+attic.AddItem(bucket);
 
-var state = new GameState(garden, worldLocations: [garden, courtyard])
+var storm = new Npc("storm", "storm", NpcState.Hostile, stats: new Stats(18))
+    .Description("A relentless downpour that demands endurance rather than defiance.");
+var dummy = new Npc("dummy", "training dummy", NpcState.Neutral, stats: new Stats(12))
+    .Description("A crash-test dummy slumped in the corner, patient and uncomplaining.");
+var brokenDummy = new Item("broken_dummy", "broken dummy", "You exhibited excellent form. The dummy cannot be taken.")
+    .AddAliases("dummy", "training dummy")
+    .SetTakeable(false);
+
+attic.AddNpc(storm);
+attic.AddNpc(dummy);
+
+var state = new GameState(attic, worldLocations: new[] { attic })
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
 };
 
-var keyRevealed = false;
-state.Events.Subscribe(GameEventType.PickupItem, e =>
-{
-    if (keyRevealed)
-        return;
-    if (e.Detail != "stone_move")
-        return;
-    if (e.Item?.Id.Is("stone") != true)
-        return;
+var bucketPlaced = false;
+var brokenDummyPlaced = false;
 
-    keyRevealed = true;
-    garden.AddItem(key);
-    Console.WriteLine("> As you move the stone, a rusted key glints free of the earth.");
-});
-state.Events.Subscribe(GameEventType.UnlockDoor, e =>
+bucket.OnMove += _ =>
 {
-    if (e.Door?.Id.Is("garden_gate") == true)
+    if (bucketPlaced)
     {
-        Console.WriteLine("> The gate rattles as the lock gives up.");
+        bucket.SetReaction(ItemAction.Move, "The bucket is already stationed beneath the leak, performing its quiet, devoted duty.");
+        return;
     }
-});
+
+    bucketPlaced = true;
+    storm.Stats.Damage(storm.Stats.Health);
+    storm.SetState(NpcState.Dead);
+};
 
 var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
-    .WithExamine("examine", "x")
-    .WithMove("move", "push", "shift", "slide")
-    .WithTake("take", "grab", "get")
-    .WithOpen("open", "pull")
-    .WithUnlock("unlock", "unseal")
-    .WithGo("go", "travel")
+    .WithExamine("examine", "exam", "x")
+    .WithMove("move", "push", "slide")
+    .WithAttack("attack", "fight", "strike")
+    .WithFlee("flee", "run")
     .WithInventory("inventory", "inv", "i")
+    .WithGo("go", "travel")
     .WithUse("use")
     .WithFuzzyMatching(true, 1)
+    .WithIgnoreItemTokens("on", "off", "at", "the")
     .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
     {
-        ["n"] = Direction.North,
-        ["north"] = Direction.North,
-        ["s"] = Direction.South,
-        ["south"] = Direction.South
+        ["south"] = Direction.South,
+        ["s"] = Direction.South
     })
     .Build());
 
-Console.WriteLine("=== THE KEY UNDER THE STONE (Slice 6) ===");
-Console.WriteLine("Goal: reveal the hidden key, unlock the gate, and step into the courtyard.");
-Console.WriteLine("Commands: look, examine, move stone, take key, unlock gate, open gate, go north/south, inventory, quit.");
+Console.WriteLine("=== RAIN UPON THE ROOF (Slice 7) ===");
+Console.WriteLine("Goal: shepherd the bucket beneath the leak, calm the storm, tease the dummy, and keep listening to the patter.");
+Console.WriteLine("Commands: look, examine, move bucket, attack dummy, flee, inventory, go south, quit.");
 ShowRoom();
+
+var random = new Random();
 
 while (true)
 {
+    MaybeWhisper(dummy, random);
+
     Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
     if (string.IsNullOrWhiteSpace(input))
+    {
         continue;
+    }
+
+    if (HandlePlayfulInput(input))
+    {
+        continue;
+    }
 
     var command = parser.Parse(input);
     var result = state.Execute(command);
-    PrintResult(result);
 
-    var movedStone = command is MoveCommand { Target: var moveTarget } && moveTarget.Is("stone") && result.Success;
-    if (movedStone)
+    switch (command)
     {
-        state.Events.Publish(new GameEvent(GameEventType.PickupItem, state, state.CurrentLocation, item: stone, detail: "stone_move"));
+        case LookCommand:
+            ShowLookResult(result);
+            break;
+        default:
+            WriteResult(result);
+            break;
     }
 
     if (command is GoCommand && result.Success && !result.ShouldQuit)
@@ -105,11 +122,79 @@ while (true)
         ShowRoom();
     }
 
-    if (result.ShouldQuit)
+    if (!dummy.IsAlive && !brokenDummyPlaced)
+    {
+        attic.RemoveNpc(dummy);
+        attic.AddItem(brokenDummy);
+        brokenDummyPlaced = true;
+    }
+
+    if (!storm.IsAlive)
+    {
+        Console.WriteLine("The bucket receives the final, obedient drops. The storm, at last, withdraws.");
         break;
+    }
+
+    if (result.ShouldQuit)
+    {
+        break;
+    }
 }
 
-void PrintResult(CommandResult result)
+void MaybeWhisper(INpc npc, Random random)
+{
+    if (!npc.IsAlive) return;
+    if (random.Next(100) <= 70) return;
+
+    var whispers = new[]
+    {
+        "For a fleeting instant, you are sure the dummy is watching you.",
+        "A faint creak comes from the corner, though you cannot locate its source.",
+        "You swear the dummy tipped its head.",
+        "The attic groans as though the dummy stretches.",
+    };
+
+    Console.WriteLine(whispers[random.Next(whispers.Length)]);
+}
+
+bool HandlePlayfulInput(string input)
+{
+    var lower = input.Lower();
+
+    if (lower is "help" or "halp" or "?")
+    {
+        Console.WriteLine("Commands: look, examine, move bucket, attack dummy, flee, inventory, go south, quit");
+        return true;
+    }
+
+    if (lower is "kick bucket" or "kick the bucket")
+    {
+        Console.WriteLine("You promptly expire, in the purely figurative and strictly humorous manner.");
+        return true;
+    }
+
+    if (lower is "kiss dummy" or lower is "kiss the dummy")
+    {
+        Console.WriteLine("Eeew! No!");
+        return true;
+    }
+
+    if (lower is "hug dummy" or lower is "hug the dummy")
+    {
+        Console.WriteLine("The dummy pushes you away and shakes its head, muttering 'Eeew no, I am a married spooky dummy.'");
+        return true;
+    }
+
+    if (lower.StartsWith("listen") && (lower.Contains("rain") || lower.Contains("rhythm")))
+    {
+        Console.WriteLine("The rhythm soothes you.");
+        return true;
+    }
+
+    return false;
+}
+
+void WriteResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
@@ -135,8 +220,19 @@ void ShowRoom()
     var items = location.Items.CommaJoinNames(properCase: true);
     Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
 
+    var people = location.Npcs.Count > 0
+        ? $"People present: {location.Npcs.Count} ({location.Npcs.Select(npc => npc.Name).CommaJoin()})"
+        : "People present: None";
+    Console.WriteLine(people);
+
     var exits = location.Exits
         .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())
         .ToList();
     Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+}
+
+void ShowLookResult(CommandResult result)
+{
+    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    WriteResult(result);
 }

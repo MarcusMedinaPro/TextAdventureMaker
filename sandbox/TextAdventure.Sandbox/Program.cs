@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
@@ -91,7 +87,7 @@ breakRoom.AddExit(Direction.South, office);
 office.AddExit(Direction.East, serverRoom, serverDoor);
 serverRoom.AddExit(Direction.West, office, serverDoor);
 
-var state = new GameState(office, worldLocations: new[] { office, breakRoom, serverRoom })
+var state = new GameState(office, worldLocations: [office, breakRoom, serverRoom])
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1,
@@ -104,14 +100,14 @@ var questFindNote = new Quest("find_note", "Find the note", "Locate the password
     .Start();
 
 var questLogIn = new Quest("log_in", "Log in to the terminal", "Enter the password and access the system.")
-    .AddCondition(new AllOfCondition(new IQuestCondition[]
-    {
+    .AddCondition(new AllOfCondition(
+    [
         new WorldFlagCondition("knows_password"),
         new WorldFlagCondition("logged_in")
-    }))
+    ]))
     .Start();
 
-state.Quests.AddRange(new[] { questFindNote, questLogIn });
+state.Quests.AddRange([questFindNote, questLogIn]);
 
 var questStates = state.Quests.Quests
     .ToDictionary(quest => quest.Id, quest => quest.State, StringComparer.OrdinalIgnoreCase);
@@ -122,7 +118,7 @@ chair.OnMove += _ =>
 {
     if (noteRevealed)
     {
-        chair.SetReaction(ItemAction.Move, "The chair is already out of the way.");
+        _ = chair.SetReaction(ItemAction.Move, "The chair is already out of the way.");
         return;
     }
 
@@ -157,7 +153,8 @@ while (true)
 {
     Console.Write("\n> ");
     var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input)) continue;
+    if (string.IsNullOrWhiteSpace(input))
+        continue;
 
     if (IsHelp(input))
     {
@@ -177,6 +174,7 @@ while (true)
         {
             Console.WriteLine("You are in. The terminal hums to life, grudgingly impressed.");
         }
+
         continue;
     }
 
@@ -323,7 +321,8 @@ bool TryHandleSit(string input, GameState gameState)
 {
     var normalized = input.Lower();
     var wantsSit = normalized is "sit" or "sit down" or "sit on chair" or "sit on the chair" or "sit in chair" or "sit in the chair";
-    if (!wantsSit) return false;
+    if (!wantsSit)
+        return false;
 
     if (!gameState.IsCurrentRoomId(office.Id))
     {

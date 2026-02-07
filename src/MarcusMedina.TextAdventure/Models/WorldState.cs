@@ -89,9 +89,9 @@ public sealed class WorldState : IWorldState
     }
 
     public void Apply(
-        IDictionary<string, bool>? flags,
-        IDictionary<string, int>? counters,
-        IDictionary<string, int>? relationships,
+        IReadOnlyDictionary<string, bool>? flags,
+        IReadOnlyDictionary<string, int>? counters,
+        IReadOnlyDictionary<string, int>? relationships,
         IEnumerable<string>? timeline)
     {
         _flags.Clear();

@@ -26,7 +26,7 @@ public class ActionConsequence
     /// <summary>
     /// Items to create when the action occurs (replaces the original if destroyed).
     /// </summary>
-    public List<Item> CreatedItems { get; set; } = [];
+    public IReadOnlyList<Item> CreatedItems { get; init; } = [];
 
     /// <summary>
     /// Flag to set when the action occurs.
@@ -148,13 +148,9 @@ public static class ItemConsequenceExtensions
         ActionConsequence consequence = new()
         {
             DestroyItem = true,
-            Message = breakMessage
+            Message = breakMessage,
+            CreatedItems = brokenVersion != null ? [brokenVersion] : []
         };
-
-        if (brokenVersion != null)
-        {
-            consequence.CreatedItems.Add(brokenVersion);
-        }
 
         Consequences[(item.Id, ItemAction.Drop)] = consequence;
         return item;

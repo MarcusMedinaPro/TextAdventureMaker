@@ -15,11 +15,10 @@ public static class ItemFactory
     /// </summary>
     public static Item NewItem(string name, float weight = 0f, params string[] aliases)
     {
-        Item item = new Item(name.ToId(), name).SetWeight(weight);
+        var item = new Item(name.ToId(), name);
+        item.SetWeight(weight);
         if (aliases.Length > 0)
-        {
-            _ = item.AddAliases(aliases);
-        }
+            item.AddAliases(aliases);
 
         return item;
     }

@@ -9,15 +9,15 @@ namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class GameMemento : IMemento
 {
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public string CurrentLocationId { get; set; } = "";
-    public List<string> InventoryItemIds { get; set; } = [];
-    public int Health { get; set; }
-    public int MaxHealth { get; set; }
-    public Dictionary<string, bool> Flags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-    public Dictionary<string, int> Counters { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-    public Dictionary<string, int> Relationships { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-    public List<string> Timeline { get; set; } = [];
+    public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
+    public string CurrentLocationId { get; init; } = "";
+    public IReadOnlyList<string> InventoryItemIds { get; init; } = [];
+    public int Health { get; init; }
+    public int MaxHealth { get; init; }
+    public IReadOnlyDictionary<string, bool> Flags { get; init; } = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+    public IReadOnlyDictionary<string, int> Counters { get; init; } = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+    public IReadOnlyDictionary<string, int> Relationships { get; init; } = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+    public IReadOnlyList<string> Timeline { get; init; } = [];
 
     public GameMemento()
     {
@@ -28,10 +28,10 @@ public sealed class GameMemento : IMemento
         IEnumerable<string> inventoryItemIds,
         int health,
         int maxHealth,
-        Dictionary<string, bool> flags,
-        Dictionary<string, int> counters,
-        Dictionary<string, int> relationships,
-        List<string> timeline)
+        IReadOnlyDictionary<string, bool> flags,
+        IReadOnlyDictionary<string, int> counters,
+        IReadOnlyDictionary<string, int> relationships,
+        IReadOnlyList<string> timeline)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(currentLocationId);
         CurrentLocationId = currentLocationId;

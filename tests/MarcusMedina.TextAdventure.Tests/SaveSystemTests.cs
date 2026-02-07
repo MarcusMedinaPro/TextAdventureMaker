@@ -56,10 +56,11 @@ public class SaveSystemTests
             inventoryItemIds: new[] { "sword" },
             health: 80,
             maxHealth: 100,
-            flags: [],
-            counters: [],
-            relationships: [],
-            timeline: []);
+            flags: new Dictionary<string, bool>(),
+            counters: new Dictionary<string, int>(),
+            relationships: new Dictionary<string, int>(),
+            timeline: Array.Empty<string>()
+            );
 
         state.ApplyMemento(memento);
 

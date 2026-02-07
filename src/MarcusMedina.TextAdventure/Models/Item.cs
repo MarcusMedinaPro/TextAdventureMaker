@@ -67,7 +67,7 @@ public class Item : IItem
         return this;
     }
 
-    public IItem Description(string text)
+    public Item Description(string text)
     {
         _description = text;
         return this;
@@ -85,6 +85,12 @@ public class Item : IItem
 
         return this;
     }
+
+    // Explicit interface implementations for IItem fluent methods
+    IItem IItem.SetTakeable(bool takeable) => SetTakeable(takeable);
+    IItem IItem.SetWeight(float weight) => SetWeight(weight);
+    IItem IItem.Description(string text) => Description(text);
+    IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
 
     public bool Matches(string name)
     {
@@ -196,21 +202,6 @@ public class Item : IItem
         }
 
         return copy;
-    }
-
-    IItem IItem.SetTakeable(bool takeable)
-    {
-        return SetTakeable(takeable);
-    }
-
-    IItem IItem.SetWeight(float weight)
-    {
-        return SetWeight(weight);
-    }
-
-    IItem IItem.AddAliases(params string[] aliases)
-    {
-        return AddAliases(aliases);
     }
 
     public void Take()

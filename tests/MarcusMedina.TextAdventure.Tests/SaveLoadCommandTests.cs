@@ -31,9 +31,9 @@ public class SaveLoadCommandTests
                 Array.Empty<string>(),
                 100,
                 100,
-                [],
-                [],
-                [],
+                new Dictionary<string, bool>(),
+                new Dictionary<string, int>(),
+                new Dictionary<string, int>(),
                 []);
         }
     }

@@ -38,7 +38,7 @@ public class LookCommand : ICommand
 
         IEnumerable<string> exits = exitsSource
             .Select(e => e.Value.Door != null
-                ? $"{e.Key} ({e.Value.Door.Name}: {e.Value.Door.State})"
+                ? $"{e.Key} ({Language.EntityName(e.Value.Door)}: {e.Value.Door.State})"
                 : e.Key.ToString());
 
         StringBuilder builder = new();
@@ -52,7 +52,7 @@ public class LookCommand : ICommand
         _ = builder.Append("\n");
         List<string> items = location.Items
             .Where(i => !i.HiddenFromItemList)
-            .Select(i => Language.ItemWithWeight(i.Name, i.Weight))
+            .Select(i => Language.ItemWithWeight(Language.EntityName(i), i.Weight))
             .ToList();
         if (!context.State.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith || items.Count > 0)
         {
@@ -83,7 +83,7 @@ public class LookCommand : ICommand
             if (best != null)
             {
                 item = best;
-                suggestion = best.Name;
+                suggestion = Language.EntityName(best);
             }
         }
 
@@ -91,7 +91,7 @@ public class LookCommand : ICommand
         {
             string description = item.GetDescription();
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(item.Name)
+                ? Language.ItemDescription(Language.EntityName(item))
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
@@ -106,7 +106,7 @@ public class LookCommand : ICommand
             door = FuzzyMatcher.FindBestDoor(doors, target, context.State.FuzzyMaxDistance);
             if (door != null)
             {
-                suggestion = door.Name;
+                suggestion = Language.EntityName(door);
             }
         }
 
@@ -114,7 +114,7 @@ public class LookCommand : ICommand
         {
             string description = door.GetDescription();
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(door.Name)
+                ? Language.ItemDescription(Language.EntityName(door))
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
@@ -132,7 +132,7 @@ public class LookCommand : ICommand
             key = FuzzyMatcher.FindBestItem(keys, target, context.State.FuzzyMaxDistance) as IKey;
             if (key != null)
             {
-                suggestion = key.Name;
+                suggestion = Language.EntityName(key);
             }
         }
 
@@ -140,7 +140,7 @@ public class LookCommand : ICommand
         {
             string description = key.GetDescription();
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(key.Name)
+                ? Language.ItemDescription(Language.EntityName(key))
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }

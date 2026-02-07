@@ -22,6 +22,7 @@ public class UnlockCommand : ICommand
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
         }
 
+        string doorName = Language.EntityName(exitWithDoor.Door);
         if (exitWithDoor.Door.RequiredKey == null)
         {
             return CommandResult.Fail(Language.NoKeyRequired, GameError.NoKeyRequired);
@@ -40,8 +41,8 @@ public class UnlockCommand : ICommand
                 context.State.Events.Publish(new GameEvent(GameEventType.UnlockDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
                 string? reaction = exitWithDoor.Door.GetReaction(DoorAction.Unlock);
                 return reaction != null
-                    ? CommandResult.Ok(Language.DoorUnlocked(exitWithDoor.Door.Name), reaction)
-                    : CommandResult.Ok(Language.DoorUnlocked(exitWithDoor.Door.Name));
+                    ? CommandResult.Ok(Language.DoorUnlocked(doorName), reaction)
+                    : CommandResult.Ok(Language.DoorUnlocked(doorName));
             }
         }
 

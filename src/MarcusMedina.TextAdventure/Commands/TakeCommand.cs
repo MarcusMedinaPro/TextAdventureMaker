@@ -60,10 +60,11 @@ public class TakeCommand : ICommand
         item.Take();
         context.State.Events.Publish(new GameEvent(GameEventType.PickupItem, context.State, location, item));
 
+        string displayName = Language.EntityName(item);
         string? onTake = item.GetReaction(ItemAction.Take);
         CommandResult result = onTake != null
-            ? CommandResult.Ok(Language.TakeItem(item.Name), onTake)
-            : CommandResult.Ok(Language.TakeItem(item.Name));
+            ? CommandResult.Ok(Language.TakeItem(displayName), onTake)
+            : CommandResult.Ok(Language.TakeItem(displayName));
 
         return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }

@@ -39,10 +39,11 @@ public class UseCommand : ICommand
         }
 
         item.Use();
+        string displayName = Language.EntityName(item);
         string? onUse = item.GetReaction(ItemAction.Use);
         CommandResult result = onUse != null
-            ? CommandResult.Ok(Language.UseItem(item.Name), onUse)
-            : CommandResult.Ok(Language.UseItem(item.Name));
+            ? CommandResult.Ok(Language.UseItem(displayName), onUse)
+            : CommandResult.Ok(Language.UseItem(displayName));
 
         return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }

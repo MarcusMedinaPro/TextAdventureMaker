@@ -206,7 +206,8 @@ Consider whether a better architectural approach exists and propose improvements
 
 ### Language System
 
-* One language loaded at runtime from file (e.g. `gamelang.en.txt`, `gamelang.sv.txt`)
+* One language loaded at runtime from file (e.g. `gamelang.en.json`, `gamelang.sv.json`)
+* `.txt` language files are deprecated
 * Default: English
 * All player-visible text comes from the language file
 

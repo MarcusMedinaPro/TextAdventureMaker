@@ -38,7 +38,7 @@ public class DropAllCommand : ICommand
             }
         }
 
-        string list = items.Select(i => i.Name).CommaJoin();
+        string list = items.Select(Language.EntityName).CommaJoin();
         return reactions.Count > 0
             ? CommandResult.Ok(Language.DropAll(list), reactions.ToArray())
             : CommandResult.Ok(Language.DropAll(list));

@@ -3,12 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Enums;
-using MarcusMedina.TextAdventure.Localization;
 using System.Globalization;
 using System.Text.Json;
+using MarcusMedina.TextAdventure.Enums;
 
-namespace TextAdventure.Sandbox;
+namespace MarcusMedina.TextAdventure.Localization;
 
 public sealed class JsonLanguageProvider : ILanguageProvider
 {
@@ -38,34 +37,28 @@ public sealed class JsonLanguageProvider : ILanguageProvider
             return "";
         }
 
-        // Normalize key: remove "Template" suffix and convert to camelCase
         string normalizedKey = NormalizeKey(key);
 
-        // Try labels first
         if (_data.Labels?.TryGetValue(normalizedKey, out string? label) == true)
         {
             return label;
         }
 
-        // Then messages
         if (_data.Messages?.TryGetValue(normalizedKey, out string? message) == true)
         {
             return message;
         }
 
-        // Then templates
         return _data.Templates?.TryGetValue(normalizedKey, out string? template) == true ? template : $"[[{key}]]";
     }
 
     private static string NormalizeKey(string key)
     {
-        // Remove "Template" suffix if present
         if (key.EndsWith("Template", StringComparison.Ordinal))
         {
             key = key[..^8];
         }
 
-        // Convert PascalCase to camelCase
         return key.Length > 0 && char.IsUpper(key[0]) ? char.ToLowerInvariant(key[0]) + key[1..] : key;
     }
 

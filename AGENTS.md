@@ -23,21 +23,17 @@ PURPOSE: You MUST use these throughout your code
 OUTPUT: List each extension file and its key methods
 ```
 
-### STEP 3: COPY TO SANDBOX
+### STEP 3: COPY TO SANDBOX (SCRIPT)
 ```
-ACTION: Copy code from the slice markdown file
+ACTION: Use script to copy code from the slice markdown file to sandbox
+SCRIPT: python3 scripts/example_to_sandbox.py <example name or slice number>
 DESTINATION: sandbox/TextAdventure.Sandbox/Program.cs
-TRANSFORM: Refactor while copying (see CODE STYLE below)
 ```
 
-### STEP 4: REFACTOR
+### STEP 4: ADD TEST COMMENTS + REFACTOR
 ```
-ACTION: Apply these transformations to the code:
-- Replace repeated patterns with existing extensions
-- Convert verbose code to expression-bodied members (=>)
-- Convert if/else chains to switch expressions
-- Convert nested ifs to early returns
-- Use pattern matching where applicable
+ACTION: Add comments in sandbox describing what is being tested
+THEN: Refactor the code (see CODE STYLE below)
 ```
 
 ### STEP 5: BUILD AND TEST
@@ -54,15 +50,16 @@ RESPONSE: Fix any issues he reports
 REPEAT: Steps 5-6 until Marcus approves
 ```
 
-### STEP 7: UPDATE DOCUMENTATION
+### STEP 7: UPDATE DOCUMENTATION (SCRIPT)
 ```
-ACTION: Copy improved code FROM sandbox BACK TO documentation
+ACTION: Use script to copy improved code from sandbox back to documentation
+SCRIPT: python3 scripts/sandbox_to_example.py <example name or slice number>
 DESTINATION: The same markdown file from Step 1
 ```
 
 ### STEP 8: COMMIT
 ```
-ACTION: Commit changes with descriptive message
+ACTION: Commit the latest verified slice with descriptive message
 FORMAT: <type>: <description>
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>

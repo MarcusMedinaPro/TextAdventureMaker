@@ -71,7 +71,7 @@ public class CombineCommand : ICommand
             _ = inventory.Add(created);
         }
 
-        CommandResult ok = CommandResult.Ok(Language.CombineResult(leftItem.Name, rightItem.Name));
+        CommandResult ok = CommandResult.Ok(Language.CombineResult(Language.EntityName(leftItem), Language.EntityName(rightItem)));
         return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

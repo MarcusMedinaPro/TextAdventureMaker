@@ -7,6 +7,7 @@ using System.Globalization;
 
 namespace MarcusMedina.TextAdventure.Localization;
 
+[Obsolete("Text-based language files are deprecated. Use JsonLanguageProvider with .json language files instead.")]
 public sealed class FileLanguageProvider : ILanguageProvider
 {
     private readonly Dictionary<string, string> _entries = new(StringComparer.OrdinalIgnoreCase);

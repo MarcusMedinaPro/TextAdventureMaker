@@ -28,6 +28,21 @@
 
 **Mål:** Samla upp generella förbättringar som dyker upp under verifiering.
 
+### Task 45.3: Custom Commands via Language Files (Override + Extend)
+
+**Mål:** Tillåt användare att definiera egna kommandon i språkfiler utan att skriva C#‑kod, och även kunna ersätta/överskugga inbyggda kommandon om de vill.
+
+**Exempel:**
+- `"pull rubber chicken"` (Monkey Island‑stil)
+- `"shoot ant"` (spel från öknen)
+- Egna verb som inte finns i core
+
+**Krav:**
+- Kommando‑ord och alias ska kunna definieras helt i språkkonfigurationen.
+- Användare ska kunna **override** inbyggda kommandon (t.ex. byta ut standardverb).
+- Parsern ska kunna ruta custom commands till en registrerad handler‑callback.
+- Ska fungera i sandbox utan extra kod per kommando (data‑drivet).
+
 ### Förslag på funktioner
 
 - `IItem.Amount` (nullable int) + `Item.SetAmount(int amount)`

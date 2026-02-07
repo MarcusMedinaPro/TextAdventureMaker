@@ -55,12 +55,12 @@ public class TakeAllCommand : ICommand
                 : CommandResult.Fail(Language.TooHeavy, GameError.ItemTooHeavy);
         }
 
-        string takenList = taken.Select(i => i.Name).CommaJoin();
+        string takenList = taken.Select(Language.EntityName).CommaJoin();
         string message = Language.TakeAll(takenList);
 
         if (skipped.Count > 0)
         {
-            string skippedList = skipped.Select(i => i.Name).CommaJoin();
+            string skippedList = skipped.Select(Language.EntityName).CommaJoin();
             message = $"{message}\n{Language.TakeAllSkipped(skippedList)}";
         }
 

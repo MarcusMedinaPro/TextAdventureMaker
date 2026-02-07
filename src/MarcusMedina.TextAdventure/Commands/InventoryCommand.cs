@@ -26,7 +26,7 @@ public class InventoryCommand : ICommand
         }
 
         IEnumerable<string> items = inventory.Items
-            .Select(i => Language.ItemWithWeight(i.Name, i.Weight));
+            .Select(i => Language.ItemWithWeight(Language.EntityName(i), i.Weight));
 
         string message = $"{Language.InventoryLabel}{items.CommaJoin()}";
         if (inventory.TotalWeight > 0)

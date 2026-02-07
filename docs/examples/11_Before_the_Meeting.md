@@ -10,28 +10,21 @@ _Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swappin
 
 ## Example (swap language at runtime)
 ```csharp
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-var localizedDescriptions = new List<(Action<string> Apply, string Key)>();
-
-var state = BuildGameState(localizedDescriptions);
-
-var languagePath = Language.GetLanguageFilePath(Language.DefaultLanguageCode);
-Language.SetProvider(new FileLanguageProvider(languagePath));
-RefreshLocalization(localizedDescriptions);
-
-var parser = new KeywordParser(KeywordParserConfig.Default);
+GameState state = BuildGameState();
+JsonLanguageProvider jsonProvider = LoadLanguage(Language.DefaultLanguageCode);
+Language.SetProvider(jsonProvider);
+KeywordParser parser = BuildParser(jsonProvider);
 
 // Console setup for C64 aesthetics
 Console.BackgroundColor = ConsoleColor.DarkBlue;
@@ -40,16 +33,29 @@ Console.Title = "BEFORE THE MEETING (Slice 11) - Text Adventure Sandbox";
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 Console.Clear();
 // End console setup
-Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
-Console.WriteLine($"{Language.GoalLabel} {Language.GoalIntro}");
-Console.WriteLine($"Language file: {Path.GetFileName(languagePath)}");
-Console.WriteLine(Language.LanguageHint);
-ShowRoom();
 
+WriteLineC64("=== BEFORE THE MEETING (Slice 11) ===");
+WriteLineC64($"{Language.GoalLabel} {Language.GoalIntro}");
+WriteLineC64("Test: swap language at runtime and confirm room/item text updates.");
+WriteLineC64($"Language file: {Path.GetFileName(Language.GetLanguageFilePath(jsonProvider.Code))}");
+WriteLineC64(Language.LanguageHint);
+int hour = 8;
+int minutes = 30;
+
+ShowRoom();
 while (true)
 {
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim();
+    Tick_Tock();
+
+    WriteLineC64();
+    WritePromptC64("> ");
+    string? input = Console.ReadLine();
+    if (input is null)
+    {
+        break;
+    }
+
+    input = input.Trim();
     if (string.IsNullOrWhiteSpace(input))
     {
         continue;
@@ -61,13 +67,26 @@ while (true)
         continue;
     }
 
-    if (TryHandleLanguageSwitch(input, localizedDescriptions))
+    if (TryHandleLocalActions(input))
     {
         continue;
     }
 
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
+    if (TryHandleLanguageSwitch(input))
+    {
+        continue;
+    }
+
+    ICommand command = parser.Parse(input);
+
+    if (command is LookCommand look && string.IsNullOrWhiteSpace(look.Target))
+    {
+        Tick_Tock_reverse();
+        ShowRoom();
+        continue;
+    }
+
+    CommandResult result = state.Execute(command);
 
     DisplayResult(result);
     if (ShouldShowRoom(command, result))
@@ -77,140 +96,345 @@ while (true)
 
     if (result.ShouldQuit)
     {
-        Console.WriteLine(Language.ThanksForPlaying);
+        WriteLineC64(Language.ThanksForPlaying);
         break;
     }
 }
 
-static GameState BuildGameState(List<(Action<string> Apply, string Key)> localizedDescriptions)
+void Tick_Tock()
 {
-    var bedroom = new Location("bedroom");
-    var hallway = new Location("hallway");
+    minutes += 1;
+    if (minutes >= 60)
+    {
+        minutes = 0;
+        hour = (hour + 1) % 24;
+    }
+}
 
-    localizedDescriptions.Add((text => bedroom.Description(text), "BedroomDescription"));
-    localizedDescriptions.Add((text => hallway.Description(text), "HallwayDescription"));
+void Tick_Tock_reverse()
+{
+    minutes -= 1;
+    if (minutes < 0)
+    {
+        minutes = 59;
+        hour = (hour + 23) % 24;
+    }
+}
 
-    var coffee = new Item("coffee", "coffee");
-    localizedDescriptions.Add((text => coffee.Description(text), "CoffeeDescription"));
+static GameState BuildGameState()
+{
+    Location bedroom = new("bedroom");
+    Location hallway = new("hallway");
 
+    Item coffee = new Item("coffee", "coffee");
+    Item coat = new Item("coat", "coat", "An old coat. Best donated to a thrift shop.");
+    _ = coat
+        .HideFromItemList()
+        .SetTakeable(false)
+        .SetReaction(ItemAction.TakeFailed, "The coat is hopelessly out of fashion.");
+    Item mirror = new Item("mirror", "mirror", "You see yourself reflected.");
+    _ = mirror
+        .HideFromItemList()
+        .SetTakeable(false)
+        .SetReaction(ItemAction.TakeFailed, "It is far too large to carry.")
+        .SetReaction(ItemAction.Destroy, "A terrible idea. Seven years of bad luck await. Better not do it!");
     bedroom.AddItem(coffee);
+    bedroom.AddItem(coat);
+    hallway.AddItem(mirror);
 
-    bedroom.AddExit(Direction.East, hallway);
-    hallway.AddExit(Direction.West, bedroom);
+    _ = bedroom.AddExit(Direction.East, hallway);
+    _ = hallway.AddExit(Direction.West, bedroom);
 
     return new GameState(bedroom, worldLocations: new[] { bedroom, hallway });
 }
 
-static void DisplayResult(CommandResult result)
+JsonLanguageProvider LoadLanguage(string code)
+{
+    string langPath = Path.Combine(AppContext.BaseDirectory, "lang", $"gamelang.{code}.json");
+    JsonLanguageProvider provider = new(langPath);
+
+    foreach (Location loc in state.Locations.OfType<Location>())
+    {
+        string desc = provider.GetDescription(loc.Id);
+        if (!string.IsNullOrWhiteSpace(desc))
+        {
+            _ = loc.Description(desc);
+        }
+
+        foreach (Item item in loc.Items.OfType<Item>())
+        {
+            string itemDesc = provider.GetDescription(item.Id);
+            if (!string.IsNullOrWhiteSpace(itemDesc))
+            {
+                _ = item.Description(itemDesc);
+            }
+
+            string translatedName = provider.GetName(item.Id);
+            if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                _ = item.AddAliases(translatedName);
+            }
+        }
+    }
+
+    foreach (Item item in state.Inventory.Items.OfType<Item>())
+    {
+        string itemDesc = provider.GetDescription(item.Id);
+        if (!string.IsNullOrWhiteSpace(itemDesc))
+        {
+            _ = item.Description(itemDesc);
+        }
+
+        string translatedName = provider.GetName(item.Id);
+        if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            _ = item.AddAliases(translatedName);
+        }
+    }
+
+    ApplyReaction("coat", ItemAction.TakeFailed, provider.Get("coatTakeFailed"));
+    ApplyReaction("mirror", ItemAction.TakeFailed, provider.Get("mirrorTakeFailed"));
+    ApplyReaction("mirror", ItemAction.Destroy, provider.Get("mirrorDestroy"));
+
+    return provider;
+}
+
+void ApplyReaction(string itemId, ItemAction action, string reaction)
+{
+    if (string.IsNullOrWhiteSpace(reaction))
+    {
+        return;
+    }
+
+    Item? item = state.Locations
+        .SelectMany(location => location.Items)
+        .OfType<Item>()
+        .FirstOrDefault(candidate => candidate.Id.TextCompare(itemId));
+    if (item != null)
+    {
+        _ = item.SetReaction(action, reaction);
+    }
+}
+
+static KeywordParser BuildParser(JsonLanguageProvider provider)
+{
+    KeywordParserConfig config = new(
+        quit: provider.GetAllCommandAliases("quit"),
+        look: provider.GetAllCommandAliases("look"),
+        examine: provider.GetAllCommandAliases("examine"),
+        inventory: provider.GetAllCommandAliases("inventory"),
+        stats: provider.GetAllCommandAliases("stats"),
+        open: provider.GetAllCommandAliases("open"),
+        unlock: provider.GetAllCommandAliases("unlock"),
+        take: provider.GetAllCommandAliases("take"),
+        drop: provider.GetAllCommandAliases("drop"),
+        use: provider.GetAllCommandAliases("use"),
+        combine: provider.GetAllCommandAliases("combine"),
+        pour: provider.GetAllCommandAliases("pour"),
+        move: provider.GetAllCommandAliases("move"),
+        go: provider.GetAllCommandAliases("go"),
+        read: provider.GetAllCommandAliases("read"),
+        talk: provider.GetAllCommandAliases("talk"),
+        attack: provider.GetAllCommandAliases("attack"),
+        flee: provider.GetAllCommandAliases("flee"),
+        save: provider.GetAllCommandAliases("save"),
+        load: provider.GetAllCommandAliases("load"),
+        quest: provider.GetAllCommandAliases("quest"),
+        all: provider.GetAllCommandAliases("all"),
+        ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a", "på", "till", "en", "ett"),
+        combineSeparators: CommandHelper.NewCommands("and", "+", "och", "med"),
+        pourPrepositions: CommandHelper.NewCommands("into", "in", "i"),
+        directionAliases: provider.GetDirectionAliases(),
+        allowDirectionEnumNames: true);
+
+    return new KeywordParser(config);
+}
+
+void DisplayResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
-        Console.WriteLine(result.Message);
+        WriteLineC64(TranslateDirectionsInMessage(result.Message));
     }
 
-    foreach (var reaction in result.ReactionsList)
+    foreach (string reaction in result.ReactionsList)
     {
         if (!string.IsNullOrWhiteSpace(reaction))
         {
-            Console.WriteLine($"> {reaction}");
+            WriteLineC64($"> {reaction}");
         }
     }
 }
 
-void ShowRoom()
+string TranslateDirectionsInMessage(string message)
 {
-    var location = state.CurrentLocation;
-    Console.WriteLine();
-    Console.WriteLine($"{Language.RoomLabel} {location.Id.ToProperCase()}");
-    Console.WriteLine($"{Language.RoomDescriptionLabel} {location.GetDescription()}");
-
-    var items = location.Items.CommaJoinNames(properCase: true);
-    Console.WriteLine(string.IsNullOrWhiteSpace(items)
-        ? FormatLabel(Language.ItemsHereLabel, Language.None)
-        : FormatLabel(Language.ItemsHereLabel, items));
-
-    var exits = location.Exits.Keys
-        .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase())
-        .ToList();
-    Console.WriteLine(exits.Count > 0
-        ? FormatLabel(Language.ExitsLabel, exits.CommaJoin())
-        : FormatLabel(Language.ExitsLabel, Language.None));
+    foreach (Direction dir in Enum.GetValues<Direction>())
+    {
+        string englishName = dir.ToString();
+        string translatedName = jsonProvider.GetDirectionName(dir);
+        if (!englishName.Equals(translatedName, StringComparison.OrdinalIgnoreCase))
+        {
+            message = message.Replace(englishName, translatedName, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+    return message;
 }
 
-static string FormatLabel(string label, string value) => $"{label.TrimEnd()} {value}";
-
-static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, language <code>, quit");
-
-static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?";
-
-bool TryHandleLanguageSwitch(string input, List<(Action<string> Apply, string Key)> localizedDescriptions)
+void ShowRoom()
 {
-    var tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-    if (tokens.Length == 0 || !tokens[0].TextCompare("language"))
+    ILocation location = state.CurrentLocation;
+    WriteLineC64();
+    WriteLineC64($"{Language.RoomLabel} {jsonProvider.GetName(location.Id)}");
+    string desc = string.Format(location.GetDescription(), hour, minutes);
+    WriteLineC64($"{Language.RoomDescriptionLabel} {desc}");
+
+    List<string> items = location.GetRoomItems(showAll: false);
+    string itemsLabel = Language.ItemsHereLabel.TrimEnd();
+    WriteLineC64(items.Count > 0
+        ? $"{itemsLabel} {items.CommaJoin()}"
+        : $"{itemsLabel} {Language.None}");
+
+    List<string> exits = location.GetRoomExits();
+    string exitsLabel = Language.ExitsLabel.TrimEnd();
+    WriteLineC64(exits.Count > 0
+        ? $"{exitsLabel} {exits.CommaJoin()}"
+        : $"{exitsLabel} {Language.None}");
+}
+
+
+static void ShowHelp()
+{
+    WriteLineC64("Commands: look, take, go <direction>, inventory, save, load, language/lang <code>, quit");
+}
+
+static bool IsHelp(string input)
+{
+    return input.Lower() is "help" or "halp" or "?";
+}
+
+
+bool TryHandleLanguageSwitch(string input)
+{
+    string[] tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+    if (tokens.Length == 0 || !IsLanguageCommand(tokens[0]))
     {
         return false;
     }
 
-    var supportedCodes = string.Join(", ", Language.SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
+    string supportedCodes = string.Join(", ", Language.SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
     if (tokens.Length == 1)
     {
-        Console.WriteLine($"Usage: language <code> (supported: {supportedCodes}).");
+        WriteLineC64($"Usage: language <code> (supported: {supportedCodes}).");
         return true;
     }
 
-    var chosen = tokens[1].ToLowerInvariant();
-    if (!Language.SupportedLanguages.TryGetValue(chosen, out var info))
+    string chosen = tokens[1].ToLowerInvariant();
+    if (!Language.SupportedLanguages.TryGetValue(chosen, out (string File, string DisplayName) info))
     {
-        Console.WriteLine($"Unsupported language code '{chosen}'. Supported: {supportedCodes}.");
+        WriteLineC64($"Unsupported language code '{chosen}'. Supported: {supportedCodes}.");
         return true;
     }
 
-    var path = Language.GetLanguageFilePath(chosen);
+    string path = Language.GetLanguageFilePath(chosen);
     if (!File.Exists(path))
     {
-        Console.WriteLine($"Language file '{info.File}' is missing.");
+        WriteLineC64($"Language file '{info.File}' is missing.");
         return true;
     }
 
-    Language.SetProvider(new FileLanguageProvider(path));
-    RefreshLocalization(localizedDescriptions);
-    Console.WriteLine(Language.LanguageLoaded(info.DisplayName, chosen.ToUpperInvariant()));
+    jsonProvider = LoadLanguage(chosen);
+    Language.SetProvider(jsonProvider);
+    parser = BuildParser(jsonProvider);
+
+    WriteLineC64(Language.Provider.Format("LanguageLoadedTemplate", jsonProvider.Name, jsonProvider.Code.ToUpperInvariant()));
+    Tick_Tock_reverse();
     ShowRoom();
     return true;
 }
 
-static bool ShouldShowRoom(ICommand command, CommandResult result) =>
-    result.Success && !result.ShouldQuit && (command is GoCommand or MoveCommand or LoadCommand);
-
-static void RefreshLocalization(List<(Action<string> Apply, string Key)> localizedDescriptions)
+bool TryHandleLocalActions(string input)
 {
-    foreach (var (apply, key) in localizedDescriptions)
+    string trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
     {
-        apply(Language.Provider.Get(key));
+        return false;
     }
+
+    string lower = trimmed.Lower();
+    if (!IsDestroyCommand(lower))
+    {
+        return false;
+    }
+
+    string[] parts = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+    if (parts.Length < 2)
+    {
+        WriteLineC64(Language.NothingToLookAt);
+        return true;
+    }
+
+    string target = parts[1];
+    IItem? item = state.CurrentLocation.FindItem(target) ?? state.Inventory.FindItem(target);
+    if (item == null)
+    {
+        WriteLineC64(Language.NoSuchItemHere);
+        return true;
+    }
+
+    string? reaction = item.GetReaction(ItemAction.Destroy);
+    WriteLineC64(string.IsNullOrWhiteSpace(reaction)
+        ? "You can't bring yourself to do that."
+        : reaction);
+    return true;
 }
 
+static bool IsDestroyCommand(string input)
+{
+    return input.StartsWith("destroy ")
+        || input.StartsWith("smash ")
+        || input.StartsWith("krossa ")
+        || input.StartsWith("förstör ")
+        || input.StartsWith("sla ")
+        || input.StartsWith("slå ");
+}
+
+static bool IsLanguageCommand(string token)
+{
+    return token.TextCompare("language") || token.TextCompare("lang") || token.TextCompare("språk");
+}
+
+static bool ShouldShowRoom(ICommand command, CommandResult result)
+{
+    return result.Success && !result.ShouldQuit && command is GoCommand or MoveCommand or LoadCommand;
+}
 ```
 
-## Language file format (key=value)
-```text
-# English file highlights (same keys exist for Swedish)
-BedroomDescription=Your alarm blinks 08:57. A coat hangs by the door.
-HallwayDescription=A quiet hallway with a mirror.
-CoffeeDescription=A hot cup of coffee.
-GoalLabel=Goal:
-GoalIntro=Load whichever language provider you prefer before heading to the meeting.
-LanguageHint=Type "language <code>" to switch languages.
-RoomLabel=Room:
-RoomDescriptionLabel=Description:
-
-# Swedish file equivalents
-BedroomDescription=Sovrummet doftar av kall luft och möblerad disciplin.
-HallwayDescription=En stilla hall med ett spegelliknande tyst sinne.
-CoffeeDescription=En rykande kopp kaffe som väntar på din uppmärksamhet.
-GoalLabel=Mål:
-GoalIntro=Ladda det språk du föredrar innan du går till mötet.
-LanguageHint=Skriv "language <kod>" för att byta språk.
-RoomLabel=Rum:
-RoomDescriptionLabel=Beskrivning:
+## Language file format (JSON)
+```json
+{
+  "meta": { "code": "sv", "name": "Svenska" },
+  "labels": {
+    "roomLabel": "Rum:",
+    "descriptionLabel": "Beskrivning:",
+    "itemsHereLabel": "Föremål här:",
+    "exitsLabel": "Utgångar:",
+    "goalLabel": "Mål:"
+  },
+  "messages": {
+    "goalIntro": "Ladda den språkleverantör du föredrar innan du går till mötet.",
+    "languageHint": "Skriv \"language <code>\" för att byta språk."
+  },
+  "names": {
+    "bedroom": "Sovrum",
+    "hallway": "Korridor",
+    "coffee": "Kaffe"
+  },
+  "descriptions": {
+    "bedroom": "Ditt alarm blinkar 08:57. En kappa hänger vid dörren.",
+    "hallway": "En tyst korridor med en spegel.",
+    "coffee": "En het kopp kaffe."
+  }
+}
 ```
+
+_Note: `.txt` language files are deprecated. Use `.json` going forward._

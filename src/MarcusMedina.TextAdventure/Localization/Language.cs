@@ -4,6 +4,7 @@
 // </copyright>
 
 using System.Globalization;
+using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Localization;
 
@@ -20,8 +21,8 @@ public static class Language
 
     public static IReadOnlyDictionary<string, (string File, string DisplayName)> SupportedLanguages { get; } = new Dictionary<string, (string File, string DisplayName)>(StringComparer.OrdinalIgnoreCase)
     {
-        ["en"] = ("gamelang.en.txt", "English"),
-        ["sv"] = ("gamelang.sv.txt", "Swedish")
+        ["en"] = ("gamelang.en.json", "English"),
+        ["sv"] = ("gamelang.sv.json", "Swedish")
     };
 
     public static string GetLanguageFilePath(string code)
@@ -197,6 +198,17 @@ public static class Language
     public static string PourResult(string fluid, string container)
     {
         return Provider.Format("PourResultTemplate", fluid, container);
+    }
+
+    public static string EntityName(IGameEntity entity)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        return Provider is JsonLanguageProvider json ? json.GetName(entity.Id) : entity.Name;
+    }
+
+    public static string EntityName(string id, string name)
+    {
+        return Provider is JsonLanguageProvider json ? json.GetName(id) : name;
     }
 
     public static string ReadingCost(int turns, string text)

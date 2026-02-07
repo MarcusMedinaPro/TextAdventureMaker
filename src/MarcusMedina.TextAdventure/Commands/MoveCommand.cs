@@ -52,17 +52,18 @@ public class MoveCommand : ICommand
             return suggestion != null ? failed.WithSuggestion(suggestion) : failed;
         }
 
+        string displayName = Language.EntityName(item);
         if (item.Takeable && item.GetReaction(ItemAction.Move) == null)
         {
-            CommandResult failed = CommandResult.Fail(Language.CanTakeInstead(item.Name), GameError.ItemNotUsable);
+            CommandResult failed = CommandResult.Fail(Language.CanTakeInstead(displayName), GameError.ItemNotUsable);
             return suggestion != null ? failed.WithSuggestion(suggestion) : failed;
         }
 
         item.Move();
         string? onMove = item.GetReaction(ItemAction.Move);
         CommandResult ok = onMove != null
-            ? CommandResult.Ok(Language.MoveItem(item.Name), onMove)
-            : CommandResult.Ok(Language.MoveItem(item.Name));
+            ? CommandResult.Ok(Language.MoveItem(displayName), onMove)
+            : CommandResult.Ok(Language.MoveItem(displayName));
 
         return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }

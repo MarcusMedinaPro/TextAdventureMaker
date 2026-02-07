@@ -22,9 +22,10 @@ public class OpenCommand : ICommand
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
         }
 
+        string doorName = Language.EntityName(exitWithDoor.Door);
         if (exitWithDoor.Door.State == DoorState.Open)
         {
-            return CommandResult.Fail(Language.DoorAlreadyOpenMessage(exitWithDoor.Door.Name), GameError.DoorAlreadyOpen);
+            return CommandResult.Fail(Language.DoorAlreadyOpenMessage(doorName), GameError.DoorAlreadyOpen);
         }
 
         if (exitWithDoor.Door.Open())
@@ -32,13 +33,13 @@ public class OpenCommand : ICommand
             context.State.Events.Publish(new GameEvent(GameEventType.OpenDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
             string? reaction = exitWithDoor.Door.GetReaction(DoorAction.Open);
             return reaction != null
-                ? CommandResult.Ok(Language.DoorOpened(exitWithDoor.Door.Name), reaction)
-                : CommandResult.Ok(Language.DoorOpened(exitWithDoor.Door.Name));
+                ? CommandResult.Ok(Language.DoorOpened(doorName), reaction)
+                : CommandResult.Ok(Language.DoorOpened(doorName));
         }
 
         string message = exitWithDoor.Door.State == DoorState.Locked
-            ? Language.DoorLocked(exitWithDoor.Door.Name)
-            : Language.DoorWontBudge(exitWithDoor.Door.Name);
+            ? Language.DoorLocked(doorName)
+            : Language.DoorWontBudge(doorName);
 
         GameError error = exitWithDoor.Door.State == DoorState.Locked
             ? GameError.DoorIsLocked

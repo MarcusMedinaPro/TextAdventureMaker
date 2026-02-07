@@ -44,6 +44,7 @@
   "labels": {
     "roomLabel": "Room:",
     "descriptionLabel": "Description:",
+    "roomDescriptionLabel": "Description:",
     "itemsHereLabel": "Items here:",
     "exitsLabel": "Exits:",
     "inventoryLabel": "Inventory:",
@@ -127,17 +128,24 @@
     "loadSuccess": "Game loaded from {0}.",
     "loadFailed": "Failed to load game from {0}.",
     "languageLoaded": "Loaded {0} ({1}) language file.",
+    "coatTakeFailed": "The coat is hopelessly out of fashion.",
+    "mirrorTakeFailed": "It is far too large to carry.",
+    "mirrorDestroy": "A terrible idea. Seven years of bad luck await. Better not do it!",
     "didYouMean": "I think you mean \"{0}\".",
     "questEntry": "- {0}"
   },
   "names": {
     "bedroom": "Bedroom",
     "hallway": "Hallway",
-    "coffee": "Coffee"
+    "coffee": "Coffee",
+    "coat": "Coat",
+    "mirror": "Mirror"
   },
   "descriptions": {
-    "bedroom": "Your alarm blinks 08:57. A coat hangs by the door.",
+    "bedroom": "Your alarm blinks {0:D2}:{1:D2}. A coat hangs by the door.",
     "hallway": "A quiet hallway with a mirror.",
-    "coffee": "A hot cup of coffee."
+    "coffee": "A hot cup of coffee.",
+    "coat": "An old coat. Best donated to a thrift shop.",
+    "mirror": "You see yourself reflected."
   }
 }

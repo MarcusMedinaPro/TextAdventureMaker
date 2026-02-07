@@ -4,8 +4,8 @@
     "name": "Svenska"
   },
   "commands": {
-    "quit": ["avsluta", "sluta", "q"],
-    "look": ["titta", "se", "l", "kolla"],
+    "quit": ["avsluta", "stäng ner", "sluta", "q"],
+    "look": ["look", "titta", "se", "l", "kolla"],
     "examine": ["undersök", "granska", "x"],
     "inventory": ["inventering", "inv", "i", "väska"],
     "stats": ["statistik", "hälsa", "hp"],
@@ -44,6 +44,7 @@
   "labels": {
     "roomLabel": "Rum:",
     "descriptionLabel": "Beskrivning:",
+    "roomDescriptionLabel": "Beskrivning:",
     "itemsHereLabel": "Föremål här:",
     "exitsLabel": "Utgångar:",
     "inventoryLabel": "Inventering:",
@@ -91,8 +92,8 @@
     "noOneToFight": "Det finns ingen här att slåss mot.",
     "noOneToFlee": "Det finns ingen här att fly från.",
     "noQuests": "Du har inga uppdrag.",
-    "goalIntro": "Ladda det språk du föredrar innan du går till mötet.",
-    "languageHint": "Skriv \"language <kod>\" för att byta språk."
+    "goalIntro": "Ladda den språkleverantör du föredrar innan du går till mötet.",
+    "languageHint": "Skriv \"language <code>\" för att byta språk."
   },
   "templates": {
     "healthStatus": "Hälsa: {0}/{1}",
@@ -126,18 +127,25 @@
     "saveFailed": "Misslyckades att spara spelet till {0}.",
     "loadSuccess": "Spelet laddades från {0}.",
     "loadFailed": "Misslyckades att ladda spelet från {0}.",
-    "languageLoaded": "Laddade {0} ({1}) språkfil.",
+    "languageLoaded": "Laddade språkfil {0} ({1}).",
+    "coatTakeFailed": "Kappan är hopplöst omodern.",
+    "mirrorTakeFailed": "Den är alldeles för stor att bära.",
+    "mirrorDestroy": "En fruktansvärd idé. Sju år av otur väntar. Bättre att låta bli!",
     "didYouMean": "Menade du \"{0}\"?",
     "questEntry": "- {0}"
   },
   "names": {
     "bedroom": "Sovrum",
-    "hallway": "Hall",
-    "coffee": "Kaffe"
+    "hallway": "Korridor",
+    "coffee": "Kaffe",
+    "coat": "Kappa",
+    "mirror": "Spegel"
   },
   "descriptions": {
-    "bedroom": "Din väckarklocka blinkar 08:57. En rock hänger vid dörren.",
-    "hallway": "En tyst hall med en spegel.",
-    "coffee": "En varm kopp kaffe."
+    "bedroom": "Ditt alarm blinkar {0:D2}:{1:D2}. En kappa hänger vid dörren.",
+    "hallway": "En tyst korridor med en spegel.",
+    "coffee": "En het kopp kaffe.",
+    "coat": "En gammal kappa. Bäst att skänka den till en second hand-butik.",
+    "mirror": "Du ser din spegelbild."
   }
 }

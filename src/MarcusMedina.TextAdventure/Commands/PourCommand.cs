@@ -62,7 +62,9 @@ public class PourCommand : ICommand
         }
 
         _ = inventory.Remove((IItem)fluidItem);
-        CommandResult ok = CommandResult.Ok(Language.PourResult(fluidItem.Name, containerItem.Name));
+        string fluidName = Language.EntityName(fluidItem.Id, fluidItem.Name);
+        string containerName = Language.EntityName(containerItem);
+        CommandResult ok = CommandResult.Ok(Language.PourResult(fluidName, containerName));
         return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

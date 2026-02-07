@@ -44,10 +44,11 @@ public class DropCommand : ICommand
         item.Drop();
         context.State.Events.Publish(new GameEvent(GameEventType.DropItem, context.State, context.State.CurrentLocation, item));
 
+        string displayName = Language.EntityName(item);
         string? onDrop = item.GetReaction(ItemAction.Drop);
         CommandResult result = onDrop != null
-            ? CommandResult.Ok(Language.DropItem(item.Name), onDrop)
-            : CommandResult.Ok(Language.DropItem(item.Name));
+            ? CommandResult.Ok(Language.DropItem(displayName), onDrop)
+            : CommandResult.Ok(Language.DropItem(displayName));
 
         return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }

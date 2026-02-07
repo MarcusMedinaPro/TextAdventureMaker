@@ -2,22 +2,23 @@ using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
-using TextAdventure.Sandbox;
 
 GameState state = BuildGameState();
-JsonLanguageProvider jsonProvider = LoadLanguage("en");
-Language.SetProvider(jsonProvider);
-KeywordParser parser = BuildParser(jsonProvider);
+KeywordParser parser = BuildParser();
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "The Warm Library - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 
-Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
-Console.WriteLine($"{jsonProvider.Get("goalLabel")} {jsonProvider.Get("goalIntro")}");
-Console.WriteLine($"Language: {jsonProvider.Name} ({jsonProvider.Code.ToUpperInvariant()})");
-Console.WriteLine(jsonProvider.Get("languageHint"));
+Console.WriteLine("=== THE WARM LIBRARY (Slice 10) ===");
+Console.WriteLine("Goal: unlock the library door, save your progress, quit, then load and continue.");
+Console.WriteLine("Type 'help' for the commands you can use.");
 ShowRoom();
 
 while (true)
@@ -35,23 +36,11 @@ while (true)
         continue;
     }
 
-    if (TryHandleLanguageSwitch(input))
-    {
-        continue;
-    }
-
     ICommand command = parser.Parse(input);
-
-    // Handle look without target locally for proper localization
-    if (command is LookCommand look && string.IsNullOrWhiteSpace(look.Target))
-    {
-        ShowRoom();
-        continue;
-    }
-
     CommandResult result = state.Execute(command);
 
     DisplayResult(result);
+
     if (ShouldShowRoom(command, result))
     {
         ShowRoom();
@@ -59,115 +48,78 @@ while (true)
 
     if (result.ShouldQuit)
     {
-        Console.WriteLine(jsonProvider.Get("thanksForPlaying"));
         break;
     }
 }
 
 static GameState BuildGameState()
 {
-    Location bedroom = new("bedroom");
-    Location hallway = new("hallway");
+    Location outside = new Location("outside", "Snow falls quietly outside a locked library.");
+    Location library = new Location("library", "Warm light and quiet pages surround you.");
 
-    _ = bedroom.AddExit(Direction.East, hallway);
-    _ = hallway.AddExit(Direction.West, bedroom);
+    Key key = new Key("library_key", "library key", "Cold metal in your hand.")
+        .AddAliases("key", "brass key")
+        .SetReaction(ItemAction.Take, "You pocket the key. It chills your palm and your resolve.");
 
-    Item coffee = new("coffee", "coffee");
-    bedroom.AddItem(coffee);
+    Item snow = new Item("snow", "snow", "Soft, patient snowflakes that refuse to melt for your convenience.");
+    _ = snow.SetTakeable(false)
+        .AddAliases("snowfall", "flakes")
+        .SetReaction(ItemAction.Move, "You brush the snow aside. It drifts back with quiet dignity.")
+        .SetReaction(ItemAction.TakeFailed, "You attempt to gather the snow. It slips away, disinterested.");
 
-    return new GameState(bedroom, worldLocations: [bedroom, hallway]);
+    Item book = new Item("book", "old book", "An old book, warm from long companionship.");
+    _ = book.AddAliases("book", "volume")
+        .SetReaction(ItemAction.Use, "You open it at random and immediately feel better about the world.");
+
+    outside.AddItem(key);
+    outside.AddItem(snow);
+    library.AddItem(book);
+
+    Door door = new Door("library_door", "library door", "A heavy wooden door with iron fittings.")
+        .AddAliases("door", "library")
+        .RequiresKey(key)
+        .SetReaction(DoorAction.Unlock, "The library door unlocks with a polite click.")
+        .SetReaction(DoorAction.Open, "The door swings inward, warm air rolling out to greet you.")
+        .SetReaction(DoorAction.UnlockFailed, "The lock refuses to concede.");
+
+    outside.AddExit(Direction.In, library, door);
+    library.AddExit(Direction.Out, outside, door);
+
+    return new GameState(outside, worldLocations: [outside, library])
+    {
+        EnableFuzzyMatching = true,
+        FuzzyMaxDistance = 1
+    };
 }
 
-JsonLanguageProvider LoadLanguage(string code)
+static KeywordParser BuildParser()
 {
-    string langPath = Path.Combine(AppContext.BaseDirectory, "lang", $"gamelang.{code}.json");
-    JsonLanguageProvider provider = new(langPath);
-
-    // Update descriptions and aliases from language file
-    foreach (Location loc in state.Locations.OfType<Location>())
-    {
-        string desc = provider.GetDescription(loc.Id);
-        if (!string.IsNullOrWhiteSpace(desc))
-        {
-            _ = loc.Description(desc);
-        }
-
-        foreach (Item item in loc.Items.OfType<Item>())
-        {
-            string desc2 = provider.GetDescription(item.Id);
-            if (!string.IsNullOrWhiteSpace(desc2))
-            {
-                _ = item.Description(desc2);
-            }
-
-            // Add translated name as alias so "ta kaffe" works
-            string translatedName = provider.GetName(item.Id);
-            if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-            {
-                _ = item.AddAliases(translatedName);
-            }
-        }
-    }
-
-    // Also update inventory items
-    foreach (Item item in state.Inventory.Items.OfType<Item>())
-    {
-        string desc = provider.GetDescription(item.Id);
-        if (!string.IsNullOrWhiteSpace(desc))
-        {
-            _ = item.Description(desc);
-        }
-
-        string translatedName = provider.GetName(item.Id);
-        if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-        {
-            _ = item.AddAliases(translatedName);
-        }
-    }
-
-    return provider;
-}
-
-KeywordParser BuildParser(JsonLanguageProvider provider)
-{
-    KeywordParserConfig config = new(
-        quit: provider.GetAllCommandAliases("quit"),
-        look: provider.GetAllCommandAliases("look"),
-        examine: provider.GetAllCommandAliases("examine"),
-        inventory: provider.GetAllCommandAliases("inventory"),
-        stats: provider.GetAllCommandAliases("stats"),
-        open: provider.GetAllCommandAliases("open"),
-        unlock: provider.GetAllCommandAliases("unlock"),
-        take: provider.GetAllCommandAliases("take"),
-        drop: provider.GetAllCommandAliases("drop"),
-        use: provider.GetAllCommandAliases("use"),
-        combine: provider.GetAllCommandAliases("combine"),
-        pour: provider.GetAllCommandAliases("pour"),
-        move: provider.GetAllCommandAliases("move"),
-        go: provider.GetAllCommandAliases("go"),
-        read: provider.GetAllCommandAliases("read"),
-        talk: provider.GetAllCommandAliases("talk"),
-        attack: provider.GetAllCommandAliases("attack"),
-        flee: provider.GetAllCommandAliases("flee"),
-        save: provider.GetAllCommandAliases("save"),
-        load: provider.GetAllCommandAliases("load"),
-        quest: provider.GetAllCommandAliases("quest"),
-        all: provider.GetAllCommandAliases("all"),
-        ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a", "på", "till", "en", "ett"),
-        combineSeparators: CommandHelper.NewCommands("and", "+", "och", "med"),
-        pourPrepositions: CommandHelper.NewCommands("into", "in", "i"),
-        directionAliases: provider.GetDirectionAliases(),
-        allowDirectionEnumNames: true);
+    KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+        .WithLook("look", "l")
+        .WithExamine("examine", "exam", "x", "inspect", "check")
+        .WithInventory("inventory", "inv", "i")
+        .WithTake("take", "get")
+        .WithDrop("drop")
+        .WithUse("use")
+        .WithMove("move", "push", "shift", "slide")
+        .WithGo("go")
+        .WithOpen("open")
+        .WithUnlock("unlock")
+        .WithSave("save")
+        .WithLoad("load")
+        .WithQuit("quit", "exit")
+        .WithIgnoreItemTokens("on", "off", "at", "the", "a")
+        .WithFuzzyMatching(true, 1)
+        .Build();
 
     return new KeywordParser(config);
 }
 
-void DisplayResult(CommandResult result)
+static void DisplayResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
-        string message = TranslateDirectionsInMessage(result.Message);
-        Console.WriteLine(message);
+        Console.WriteLine(result.Message);
     }
 
     foreach (string reaction in result.ReactionsList)
@@ -179,84 +131,41 @@ void DisplayResult(CommandResult result)
     }
 }
 
-string TranslateDirectionsInMessage(string message)
-{
-    // Replace English direction names with translated ones
-    foreach (Direction dir in Enum.GetValues<Direction>())
-    {
-        string englishName = dir.ToString();
-        string translatedName = jsonProvider.GetDirectionName(dir);
-        if (!englishName.Equals(translatedName, StringComparison.OrdinalIgnoreCase))
-        {
-            message = message.Replace(englishName, translatedName, StringComparison.OrdinalIgnoreCase);
-        }
-    }
-    return message;
-}
-
 void ShowRoom()
 {
     ILocation location = state.CurrentLocation;
     Console.WriteLine();
-    Console.WriteLine($"{jsonProvider.Get("roomLabel")} {jsonProvider.GetName(location.Id)}");
-    Console.WriteLine($"{jsonProvider.Get("descriptionLabel")} {location.GetDescription()}");
+    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
+    Console.WriteLine(location.GetDescription());
 
-    List<string> items = [.. location.Items.Select(item => jsonProvider.GetName(item.Id))];
-    string itemsLabel = jsonProvider.Get("itemsHereLabel").TrimEnd();
-    Console.WriteLine(items.Count > 0
-        ? $"{itemsLabel} {items.CommaJoin()}"
-        : $"{itemsLabel} {jsonProvider.Get("none")}");
+    string items = location.Items.CommaJoinNames(properCase: true);
+    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items: None" : $"Items: {items}");
 
-    List<string> exits = [.. location.Exits.Keys.Select(dir => jsonProvider.GetDirectionName(dir))];
-    string exitsLabel = jsonProvider.Get("exitsLabel").TrimEnd();
-    Console.WriteLine(exits.Count > 0
-        ? $"{exitsLabel} {exits.CommaJoin()}"
-        : $"{exitsLabel} {jsonProvider.Get("none")}");
+    List<string> exits = [.. location.Exits.Keys
+        .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase())];
+    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 
 static void ShowHelp()
 {
-    Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, language <code>, quit");
+    Console.WriteLine("Commands: look, examine/check <item>, take <item>, use <item>, move <item>, unlock/open door, go <direction>, inventory, quit");
+    Console.WriteLine("Save/Load: save [file], load [file] (defaults to savegame.json)");
 }
 
-static bool IsHelp(string input)
-{
-    return input.Lower() is "help" or "halp" or "?" or "hjälp";
-}
+static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?";
 
-bool TryHandleLanguageSwitch(string input)
+static bool ShouldShowRoom(ICommand command, CommandResult result)
 {
-    string[] tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-    if (tokens.Length == 0 || (!tokens[0].TextCompare("language") && !tokens[0].TextCompare("språk")))
+    if (!result.Success || result.ShouldQuit)
     {
         return false;
     }
 
-    if (tokens.Length == 1)
+    return command switch
     {
-        Console.WriteLine("Usage: language <code> (supported: EN, SV).");
-        return true;
-    }
-
-    string chosen = tokens[1].ToLowerInvariant();
-    string langPath = Path.Combine(AppContext.BaseDirectory, "lang", $"gamelang.{chosen}.json");
-
-    if (!File.Exists(langPath))
-    {
-        Console.WriteLine($"Language file for '{chosen}' not found.");
-        return true;
-    }
-
-    jsonProvider = LoadLanguage(chosen);
-    Language.SetProvider(jsonProvider);
-    parser = BuildParser(jsonProvider);
-
-    Console.WriteLine(jsonProvider.Format("languageLoaded", jsonProvider.Name, jsonProvider.Code.ToUpperInvariant()));
-    ShowRoom();
-    return true;
-}
-
-static bool ShouldShowRoom(ICommand command, CommandResult result)
-{
-    return result.Success && !result.ShouldQuit && command is GoCommand or MoveCommand or LoadCommand;
+        GoCommand => true,
+        MoveCommand => true,
+        LoadCommand => true,
+        _ => false
+    };
 }

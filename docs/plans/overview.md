@@ -111,6 +111,21 @@ BEFORE writing any code:
 3. Never duplicate logic that exists in extensions
 ```
 
+#### REFACTOR RULES (MANDATORY)
+```
+1. Extensions first: always use existing extensions when applicable.
+2. Prefer fluent, readable APIs over cleverness.
+3. Use standard helpers for clarity (e.g. string.StartsWith/EndsWith, array/list helpers, LINQ) when intent is clearer.
+4. Prefer primary constructors for classes where it improves readability.
+5. Use modern null controls: ?, ??, ??=, ! where appropriate.
+6. Prefer smaller methods to keep complexity low and code readable.
+7. Prefer expression-bodied members for simple returns.
+8. Prefer switch expressions over switch statements for mappings.
+9. Prefer early returns over nested if blocks.
+10. Use pattern matching over casts.
+11. If code repeats 2+ times, propose a new extension method.
+```
+
 #### EXPRESSION SYNTAX
 ```csharp
 // PREFER: Expression-bodied

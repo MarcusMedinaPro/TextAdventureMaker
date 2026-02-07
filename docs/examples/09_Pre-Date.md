@@ -221,6 +221,13 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithFuzzyMatching(true, 1)
     .Build());
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "PRE-DATE (Slice 9) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== PRE-DATE (Slice 9) ===");
 Console.WriteLine("Goal: prepare for the date. Choose wisely, then check the mirror.");
 Console.WriteLine("Type 'stay home' to end the night early.");

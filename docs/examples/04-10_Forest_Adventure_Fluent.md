@@ -279,6 +279,14 @@ var parserConfig = new KeywordParserConfig(
 
 var parser = new KeywordParser(parserConfig);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "FOREST ADVENTURE (FLUENT) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
+
 while (true)
 {
     Console.Write("\n> ");

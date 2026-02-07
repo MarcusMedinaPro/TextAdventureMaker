@@ -121,6 +121,13 @@ var state = new GameState(hallway, worldLocations: [hallway, study])
     FuzzyMaxDistance = 1
 };
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE LOCKED STUDY (Slice 2) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE LOCKED STUDY (Slice 2) ===");
 Console.WriteLine("Goal: unlock the door, enter the study, and explore.");
 Console.WriteLine("Type 'look' to recheck your surroundings.");

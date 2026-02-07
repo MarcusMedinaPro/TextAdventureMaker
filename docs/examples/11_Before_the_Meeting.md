@@ -33,6 +33,13 @@ RefreshLocalization(localizedDescriptions);
 
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "BEFORE THE MEETING (Slice 11) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
 Console.WriteLine($"{Language.GoalLabel} {Language.GoalIntro}");
 Console.WriteLine($"Language file: {Path.GetFileName(languagePath)}");

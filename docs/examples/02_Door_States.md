@@ -86,6 +86,13 @@ var state = new GameState(hallway, worldLocations: new[] { hallway, study })
     FuzzyMaxDistance = 1
 };
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE DOOR STATES (Slice 2.1) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE DOOR STATES (Slice 2.1) ===");
 Console.WriteLine("Goal: unlock the door, enter the study, and experiment with the door states.");
 ShowRoom();

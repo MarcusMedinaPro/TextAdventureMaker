@@ -68,6 +68,13 @@ var world = BuildWorld();
 ConfigureQuests(world);
 ConfigureNoteReveal(world);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE FORGOTTEN PASSWORD (Slice 8) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE FORGOTTEN PASSWORD (Slice 8) ===");
 Console.WriteLine("Goal: reveal the note, learn the password, fetch the server key, and log in.");
 Console.WriteLine("Commands: look, examine, move chair, take/read note, unlock/open door, go north/east, quest, inventory, log in, quit.");

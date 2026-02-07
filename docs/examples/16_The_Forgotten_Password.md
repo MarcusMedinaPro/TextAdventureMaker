@@ -33,6 +33,13 @@ var quest = new Quest("login", "Access the Terminal", "Find the hint and log in.
 
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "The Forgotten Password - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 while (true)
 {
     Console.Write("\n> ");

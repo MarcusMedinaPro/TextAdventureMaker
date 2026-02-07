@@ -98,6 +98,13 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithFuzzyMatching(true, 1)
     .Build());
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE SILENT CLASSROOM (Slice 5) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE SILENT CLASSROOM (Slice 5) ===");
 Console.WriteLine("Goal: reach the classroom, speak with the student, and return with fresh whispers.");
 Console.WriteLine("Commands: look, examine, talk student, 1-3 in dialog, go east/west, leave, quit.");

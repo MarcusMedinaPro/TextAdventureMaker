@@ -118,6 +118,13 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .Build();
 var parser = new KeywordParser(parserConfig);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE LAST TRAIN HOME (Slice 4) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
 Console.WriteLine("Goal: find the ticket, board the train, or stay on the platform.");
 Console.WriteLine("Commands: look, examine <item>, take <item>, inventory, move <item>, use/drink/sip <item>, go in/out, board, sit, stay, quit.");

@@ -52,6 +52,13 @@ var adventure = parser.ParseFile("clockwork.adventure");
 var state = adventure.State;
 var commandParser = new KeywordParser(KeywordParserConfig.Default);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "Clockwork Dock - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 while (true)
 {
     Console.Write("\n> ");

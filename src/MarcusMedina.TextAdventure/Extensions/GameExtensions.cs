@@ -147,4 +147,23 @@ public static class GameExtensions
         game.State.ActionTriggers.OnItemPickup(itemId, handler);
         return game;
     }
+
+    public static GameValidator CreateValidator(this Game game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        return new GameValidator(game);
+    }
+
+    public static GameExplorer CreateExplorer(this Game game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        return new GameExplorer(game);
+    }
+
+    public static Game EnableTestingMode(this Game game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        game.State.TestingModeEnabled = true;
+        return game;
+    }
 }

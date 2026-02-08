@@ -44,4 +44,5 @@ public interface IGameState
     /// <summary>Maximum edit distance for fuzzy matching.</summary>
     int FuzzyMaxDistance { get; set; }
     IReadOnlyCollection<ILocation> Locations { get; }
+    bool TestingModeEnabled { get; set; }
 }

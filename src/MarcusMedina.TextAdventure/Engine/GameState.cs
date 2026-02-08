@@ -48,6 +48,7 @@ public class GameState : IGameState
     /// <summary>Maximum edit distance for fuzzy matching.</summary>
     public int FuzzyMaxDistance { get; set; } = 1;
     public IReadOnlyCollection<ILocation> Locations => _locations.Values;
+    public bool TestingModeEnabled { get; set; }
 
     public GameState(
         ILocation startLocation,

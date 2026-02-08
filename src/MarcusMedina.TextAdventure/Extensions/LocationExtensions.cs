@@ -6,6 +6,7 @@
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Extensions;
 
@@ -27,6 +28,18 @@ public static class LocationExtensions
         provider ??= Language.Provider;
 
         return [.. location.Exits.Keys.Select(direction => GetDirectionName(provider, direction))];
+    }
+
+    public static FlashbackLocationBuilder TriggerFlashback(this ILocation location, string memoryId)
+    {
+        ArgumentNullException.ThrowIfNull(location);
+        if (location is not Location concrete)
+        {
+            throw new InvalidOperationException("Flashbacks require a concrete Location instance.");
+        }
+
+        FlashbackTrigger trigger = concrete.AddFlashbackTrigger(memoryId);
+        return new FlashbackLocationBuilder(trigger);
     }
 
     private static string GetName(ILanguageProvider provider, IGameEntity entity)

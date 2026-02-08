@@ -32,6 +32,7 @@ public class GameState : IGameState
     public INarrativeVoiceSystem NarrativeVoice { get; private set; }
     public IAgencyTracker Agency { get; private set; }
     public IDramaticIronySystem DramaticIrony { get; private set; }
+    public IFlashbackSystem Flashbacks { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IQuestLog Quests { get; }
@@ -61,6 +62,7 @@ public class GameState : IGameState
         INarrativeVoiceSystem? narrativeVoiceSystem = null,
         IAgencyTracker? agencyTracker = null,
         IDramaticIronySystem? dramaticIronySystem = null,
+        IFlashbackSystem? flashbackSystem = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
         IEnumerable<ILocation>? worldLocations = null)
@@ -81,6 +83,7 @@ public class GameState : IGameState
         NarrativeVoice = narrativeVoiceSystem ?? new NarrativeVoiceSystem();
         Agency = agencyTracker ?? new AgencyTracker();
         DramaticIrony = dramaticIronySystem ?? new DramaticIronySystem();
+        Flashbacks = flashbackSystem ?? new FlashbackSystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
@@ -209,6 +212,16 @@ public class GameState : IGameState
         }
 
         DramaticIrony = dramaticIronySystem;
+    }
+
+    public void SetFlashbackSystem(IFlashbackSystem flashbackSystem)
+    {
+        if (flashbackSystem == null)
+        {
+            return;
+        }
+
+        Flashbacks = flashbackSystem;
     }
 
     public GameMemento CreateMemento()

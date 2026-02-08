@@ -23,6 +23,8 @@ public interface INpc : IGameEntity
     IReadOnlyList<NpcTrigger> Triggers { get; }
     IReadOnlyDictionary<string, ICharacterArc> Arcs { get; }
     IReadOnlyDictionary<string, IBond> Bonds { get; }
+    CharacterArchetype? Archetype { get; }
+    JourneyStage? FateStage { get; }
 
     INpc Description(string text);
     INpc SetState(NpcState state);
@@ -36,5 +38,7 @@ public interface INpc : IGameEntity
     NpcTrigger OnHear(string target);
     ICharacterArc DefineArc(string id);
     IBond CreateBond(string id);
+    INpc SetArchetype(CharacterArchetype archetype);
+    INpc DiesAt(JourneyStage stage);
     string? GetRuleBasedDialog(IGameState state);
 }

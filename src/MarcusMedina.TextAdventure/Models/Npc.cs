@@ -29,6 +29,8 @@ public class Npc : INpc
     public IReadOnlyList<NpcTrigger> Triggers => _triggers;
     public IReadOnlyDictionary<string, ICharacterArc> Arcs => _arcs;
     public IReadOnlyDictionary<string, IBond> Bonds => _bonds;
+    public CharacterArchetype? Archetype { get; private set; }
+    public JourneyStage? FateStage { get; private set; }
     public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
 
     public Npc(string id, string name, NpcState state = NpcState.Friendly, IStats? stats = null)
@@ -124,6 +126,18 @@ public class Npc : INpc
         Bond bond = new(id);
         _bonds[id] = bond;
         return bond;
+    }
+
+    public INpc SetArchetype(CharacterArchetype archetype)
+    {
+        Archetype = archetype;
+        return this;
+    }
+
+    public INpc DiesAt(JourneyStage stage)
+    {
+        FateStage = stage;
+        return this;
     }
 
     public string? GetRuleBasedDialog(IGameState state)

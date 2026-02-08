@@ -19,11 +19,14 @@ public class Location : ILocation
     private readonly List<IItem> _items = [];
     private readonly List<INpc> _npcs = [];
     private DynamicDescription? _dynamicDescription;
-    private bool _hasVisited;
+    private LayeredDescription? _layeredDescription;
+    private int _visitCount;
+    private readonly List<FlashbackTrigger> _flashbackTriggers = [];
 
     public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
     public IReadOnlyList<IItem> Items => _items;
     public IReadOnlyList<INpc> Npcs => _npcs;
+    public IReadOnlyList<FlashbackTrigger> FlashbackTriggers => _flashbackTriggers;
 
     public Location(string id)
     {
@@ -55,13 +58,17 @@ public class Location : ILocation
 
     public string GetDescription(IGameState state)
     {
-        if (_dynamicDescription == null || state == null)
+        if (state == null)
         {
             return GetDescription();
         }
 
-        string text = _dynamicDescription.Resolve(state, !_hasVisited);
-        _hasVisited = true;
+        bool firstVisit = _visitCount == 0;
+        string text = _layeredDescription != null
+            ? _layeredDescription.Resolve(state, _visitCount)
+            : _dynamicDescription?.Resolve(state, firstVisit) ?? GetDescription();
+
+        _visitCount++;
         return text;
     }
 
@@ -69,6 +76,25 @@ public class Location : ILocation
     {
         _dynamicDescription = description;
         return this;
+    }
+
+    public LayeredDescription SetLayeredDescription()
+    {
+        _layeredDescription = new LayeredDescription();
+        return _layeredDescription;
+    }
+
+    public Location SetLayeredDescription(LayeredDescription description)
+    {
+        _layeredDescription = description;
+        return this;
+    }
+
+    public FlashbackTrigger AddFlashbackTrigger(string memoryId)
+    {
+        FlashbackTrigger trigger = new(memoryId);
+        _flashbackTriggers.Add(trigger);
+        return trigger;
     }
 
     public Location AddExit(Direction direction, ILocation target, bool oneWay = false)

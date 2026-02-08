@@ -23,6 +23,7 @@ public sealed class GameBuilder
     private INarrativeVoiceSystem? _narrativeVoiceSystem;
     private IAgencyTracker? _agencyTracker;
     private IDramaticIronySystem? _dramaticIronySystem;
+    private IFlashbackSystem? _flashbackSystem;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -102,6 +103,12 @@ public sealed class GameBuilder
     public GameBuilder UseDramaticIronySystem(IDramaticIronySystem dramaticIronySystem)
     {
         _dramaticIronySystem = dramaticIronySystem ?? throw new ArgumentNullException(nameof(dramaticIronySystem));
+        return this;
+    }
+
+    public GameBuilder UseFlashbackSystem(IFlashbackSystem flashbackSystem)
+    {
+        _flashbackSystem = flashbackSystem ?? throw new ArgumentNullException(nameof(flashbackSystem));
         return this;
     }
 
@@ -203,6 +210,11 @@ public sealed class GameBuilder
             state.SetDramaticIronySystem(_dramaticIronySystem);
         }
 
+        if (_flashbackSystem != null)
+        {
+            state.SetFlashbackSystem(_flashbackSystem);
+        }
+
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
         foreach (Action<Game> handler in _turnStartHandlers)
@@ -249,6 +261,7 @@ public sealed class GameBuilder
             narrativeVoiceSystem: _narrativeVoiceSystem,
             agencyTracker: _agencyTracker,
             dramaticIronySystem: _dramaticIronySystem,
+            flashbackSystem: _flashbackSystem,
             worldLocations: allLocations);
     }
 }

@@ -9,3 +9,11 @@
 ### Task 15.3: Sandbox — pathfinder visar vägen
 
 ---
+
+## Implementation checklist (engine)
+- [ ] `IPathfinder`
+- [ ] `AStarPathfinder`
+- [ ] `HintCommand`
+
+## Example checklist (docs/examples)
+- [ ] Pathfinder demo

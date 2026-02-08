@@ -115,6 +115,17 @@ schedule {
 
 ---
 
+## Implementation checklist (engine)
+- [ ] `ITimedSpawn`
+- [ ] `ITimedDoor`
+- [ ] Action-triggered spawns
+- [ ] Conditional permanent changes
+- [ ] Scheduled events queue
+- [ ] DSL for timed objects
+
+## Example checklist (docs/examples)
+- [ ] Timed spawns/doors demo
+
 ---
 
 ## Future Roadmap (v2+)

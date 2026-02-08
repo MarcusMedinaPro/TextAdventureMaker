@@ -198,6 +198,16 @@ MarcusMedina.TextAdventure
 | Unika         | `Distinct()`              | `WithoutDuplicates()`     | `visited.WithoutDuplicates()`      |
 | Unika på prop | `DistinctBy(i => i.Type)` | `UniqueByType()`          | `items.UniqueByType()`             |
 | Union         | `Union(other)`            | `CombinedWith(other)`     | `myItems.CombinedWith(foundItems)` |
+
+---
+
+## Implementation checklist (engine)
+- [ ] `MarcusMedina.TextAdventure.Linq` query extensions
+- [ ] `MarcusMedina.TextAdventure.Story` narrative extensions
+- [ ] Mapping coverage between LINQ and story style
+
+## Example checklist (docs/examples)
+- [ ] LINQ/Story fluent extension demos
 | Snitt         | `Intersect(other)`        | `InCommonWith(other)`     | `needs.InCommonWith(available)`    |
 | Differens     | `Except(other)`           | `ExcludingThoseIn(other)` | `all.ExcludingThoseIn(taken)`      |
 | Konkatenera   | `Concat(other)`           | `FollowedBy(other)`       | `path.FollowedBy(returnPath)`      |

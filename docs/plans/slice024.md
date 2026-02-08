@@ -18,3 +18,14 @@ location.AddHiddenExit(Direction.East, secretCave)
 ### Task 24.4: Sandbox — hemlig grotta kräver karta eller NPC-hint
 
 ---
+
+## Implementation checklist (engine)
+- [x] `ILocationDiscoverySystem` + `LocationDiscoverySystem`
+- [x] Track discovered locations via events
+- [ ] Hidden exits with discovery conditions
+- [ ] Perception checks
+- [ ] Fog of war
+
+## Example checklist (docs/examples)
+- [x] Discovery tracking demo (`24_Missed_Train.md`)
+- [ ] Hidden exit discovery demo

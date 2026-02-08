@@ -11,3 +11,12 @@
 ### Task 12.4: Sandbox — ladda spel från .adventure-fil
 
 ---
+
+## Implementation checklist (engine)
+- [x] DSL syntax + parser (`AdventureDslParser`)
+- [x] `IDslParser`
+- [x] Keyword registration/extension hooks
+- [x] `.adventure` runner helper (`DslRunner`)
+
+## Example checklist (docs/examples)
+- [x] Load from `.adventure` file (`12_Clockwork_Dock.md`)

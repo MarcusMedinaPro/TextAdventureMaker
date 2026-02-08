@@ -17,3 +17,12 @@ game.AddRandomEventPool("forest_encounters")
 ### Task 23.3: Sandbox — random encounters i skogen
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IRandomEventPool`
+- [x] Weighted events
+- [x] Cooldowns
+- [x] Conditional triggers (context-aware)
+
+## Example checklist (docs/examples)
+- [x] Random events demo (`23_Job_Interview.md`)

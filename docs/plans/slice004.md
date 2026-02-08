@@ -74,3 +74,23 @@ var letter = new Item("letter", "Sealed Letter")
 ### Task 4.8: Sandbox — plocka upp svärd, häll vatten i glas, kombinera items, läs skylt/tidning ✅
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IItem` + `Item` (prototype + factory helpers)
+- [x] Item reactions: `OnTake`, `OnDrop`, `OnUse`, `OnDestroy`
+- [x] Item aliases/synonyms support
+- [x] `IInventory` + `Inventory` (limits by weight/count/unlimited)
+- [x] `TakeAll()` on inventory
+- [x] Item decorators (`RustyModifier`, `EnchantedModifier`)
+- [x] `IContainer<T>` + `Glass` + `Chest`
+- [x] Item combinations with `RecipeBook` + `ItemCombinationRecipe`
+- [x] Commands: `TakeCommand`, `TakeAllCommand`, `DropCommand`, `InventoryCommand`, `UseCommand`
+- [x] Readable items + conditions + `ReadCommand`
+
+## Example checklist (docs/examples)
+- [x] Pick up items + inventory view (`04_The_Last_Train_Home.md`)
+- [x] Use item reactions (`04_The_Last_Train_Home.md`)
+- [x] Containers (glass) (`04-10_Forest_Adventure_Core.md`)
+- [x] Item combinations/recipes (`04-10_Forest_Adventure_Core.md`)
+- [x] Readable items + read costs/requirements (`04-10_Forest_Adventure_Core.md`)
+- [ ] `TakeAll` demonstrated explicitly

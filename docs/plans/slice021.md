@@ -55,3 +55,14 @@ if (bombPuzzle.IsActive && bombPuzzle.MovesRemaining < 5) { ... }
 ### Task 21.5: Sandbox — butik stängd på natten, monster spawnar, bomb puzzle med 30 drag
 
 ---
+
+## Implementation checklist (engine)
+- [x] `ITimeSystem` + `TimeSystem`
+- [x] `TimeOfDay` phases (Dawn/Day/Dusk/Night)
+- [x] Phase handlers (`OnPhase`)
+- [x] Global move limits + warnings (`OnMovesRemaining`, `OnMovesExhausted`)
+- [x] `TimedChallenge` (local move limit)
+
+## Example checklist (docs/examples)
+- [x] Time phases + move warnings (`21_The_Bank_Errand.md`)
+- [ ] Timed challenge (bomb/puzzle) demo

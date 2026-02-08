@@ -22,3 +22,12 @@ quest.AddStage("find_sword")
 ### Task 19.5: Sandbox — quest med 3 stages, optional hints
 
 ---
+
+## Implementation checklist (engine)
+- [ ] `IQuestStage`
+- [ ] Optional vs required objectives
+- [ ] Alternative completion paths
+- [ ] Failure consequences / hidden objectives
+
+## Example checklist (docs/examples)
+- [ ] Multi-stage quest demo

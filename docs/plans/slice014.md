@@ -9,3 +9,12 @@
 ### Task 14.3: Sandbox — saga.txt genereras medan man spelar
 
 ---
+
+## Implementation checklist (engine)
+- [ ] `IStoryLogger`
+- [ ] `IDevLogger`
+- [ ] Story log writer (saga output)
+- [ ] Dev/debug logger (position/state)
+
+## Example checklist (docs/examples)
+- [ ] Story logger demo

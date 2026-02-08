@@ -11,3 +11,11 @@
 **Notis:** Använder `Random.Shared`.
 
 ---
+
+## Implementation checklist (engine)
+- [x] `string.ToProperCase()`
+- [x] `string.ToSentenceCase()`
+- [x] `string.ToCrazyCaps()`
+
+## Example checklist (docs/examples)
+- [ ] String case helpers demo

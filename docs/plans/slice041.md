@@ -141,3 +141,15 @@ var achievable = validator.ValidateTargetStories();
 ```
 
 ---
+
+## Implementation checklist (engine/tools)
+- [ ] Reachability validator
+- [ ] Command coverage report
+- [ ] Automated playthrough/explorer
+- [ ] Dead-end detection
+- [ ] Testing mode commands
+- [ ] Puzzle dependency graph export
+- [ ] Story snippet validation
+
+## Example checklist (docs/examples)
+- [ ] Validation/testing tools demo

@@ -12,3 +12,14 @@
 ### Task 11.4: Sandbox — ladda svenskt språk
 
 ---
+
+## Implementation checklist (engine)
+- [x] `ILanguageProvider`
+- [x] `JsonLanguageProvider` for `.json` language files
+- [x] Default language provider fallback (English)
+- [x] System messages routed through `Language`
+- [x] `.txt` language provider deprecated (`FileLanguageProvider` marked obsolete)
+
+## Example checklist (docs/examples)
+- [x] Runtime language swap (`11_Before_the_Meeting.md`)
+- [x] Language command aliases (`language`/`lang`) shown (`11_Before_the_Meeting.md`)

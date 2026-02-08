@@ -205,6 +205,24 @@ public static class ConditionalExtensions
     }
 }
 
+---
+
+## Implementation checklist (engine)
+- [ ] `Description` property + `SetDescription(...)` on `Item`
+- [ ] `Items.CreateMany(...)` helpers
+- [ ] Inline DSL for items (`AddDSLItems`)
+- [ ] Implicit `AddItems("Sword", ...)` helpers
+- [ ] Random extensions
+- [ ] Probability extensions
+- [ ] Collection extensions
+- [ ] Time extensions
+- [ ] Console extensions (typewriter)
+- [ ] Range/Clamp extensions
+- [ ] Conditional fluent extensions
+
+## Example checklist (docs/examples)
+- [ ] Fluent API showcase for these helpers
+
 public class ConditionalResult<T>
 {
     private readonly bool _condition;

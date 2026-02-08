@@ -30,3 +30,12 @@ boss.OnDefeat(ctx => {
 ### Task 30.5: Sandbox — mystiska runer som får mening senare
 
 ---
+
+## Implementation checklist (engine)
+- [ ] `IForeshadowingSystem`
+- [ ] Tagging/links between details
+- [ ] Payoff detection + warnings
+- [ ] Optional callbacks for missed hints
+
+## Example checklist (docs/examples)
+- [ ] Foreshadowing demo

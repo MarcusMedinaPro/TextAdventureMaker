@@ -26,3 +26,12 @@ story.DefineTension()
 ### Task 29.6: Sandbox — tension bygger mot dragon fight
 
 ---
+
+## Implementation checklist (engine)
+- [ ] `ITensionMeter`
+- [ ] Tension modifiers + pacing rules
+- [ ] Tension-driven encounter frequency/music/actions
+- [ ] Rest periods / safe zones
+
+## Example checklist (docs/examples)
+- [ ] Tension/pacing demo

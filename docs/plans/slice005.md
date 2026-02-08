@@ -92,3 +92,20 @@ parser.EnableSuggestions(true);
 ```
 
 ---
+
+## Implementation checklist (engine)
+- [x] `INpc` + `Npc` with state (Friendly/Hostile/Dead)
+- [x] `DialogNode` + `DialogOption` (dialog tree)
+- [x] `TalkCommand`
+- [x] NPC movement strategies: `NoNpcMovement`, `RandomNpcMovement`, `PatrolNpcMovement`, `FollowNpcMovement`
+- [x] Rule-based dialog rules (`DialogRule` + `Npc.AddDialogRule`)
+- [x] Parser synonyms via `KeywordParserConfigBuilder.AddSynonyms(...)`
+- [ ] Parser "did you mean" suggestions for command typos
+- [ ] Automatic NPC triggers (OnSee/OnHear)
+
+## Example checklist (docs/examples)
+- [x] NPCs in rooms + talk to NPC (`05_The_Silent_Classroom.md`, `05_The_Late_Platform.md`)
+- [x] Dialog tree with options (`05_The_Silent_Classroom.md`, `05_The_Late_Platform.md`)
+- [x] NPC movement shown in demo loop (`05_The_Late_Platform.md`)
+- [x] Synonym mapping in parser (`05_Synonym_Studio.md`)
+- [ ] Rule-based dialog system demonstrated

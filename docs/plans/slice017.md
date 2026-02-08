@@ -11,9 +11,9 @@
 ---
 
 ## Implementation checklist (packaging)
-- [ ] NuGet metadata in `.csproj` / `.nuspec`
+- [x] NuGet metadata in `.csproj` / `.nuspec`
 - [ ] `dotnet pack` / publish pipeline
-- [ ] README/docs for packages
+- [x] README/docs for packages
 
 ## Example checklist (docs/examples)
 - [ ] Not applicable (packaging)

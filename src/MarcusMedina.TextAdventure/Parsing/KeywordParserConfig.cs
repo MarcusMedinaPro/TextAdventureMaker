@@ -36,6 +36,7 @@ public sealed class KeywordParserConfig
         save: CommandHelper.NewCommands("save"),
         load: CommandHelper.NewCommands("load"),
         quest: CommandHelper.NewCommands("quests", "quest", "journal"),
+        hint: CommandHelper.NewCommands("hint", "path"),
         all: CommandHelper.NewCommands("all"),
         ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a"),
         combineSeparators: CommandHelper.NewCommands("and", "+"),
@@ -105,6 +106,8 @@ public sealed class KeywordParserConfig
     public ISet<string> Load { get; }
     /// <summary>Keywords used to show quest log.</summary>
     public ISet<string> Quest { get; }
+    /// <summary>Keywords used to request a path hint.</summary>
+    public ISet<string> Hint { get; }
     /// <summary>Synonym map for command keywords.</summary>
     public IReadOnlyDictionary<string, string> Synonyms { get; }
 
@@ -151,6 +154,7 @@ public sealed class KeywordParserConfig
         ISet<string> save,
         ISet<string> load,
         ISet<string> quest,
+        ISet<string> hint,
         ISet<string> all,
         ISet<string> ignoreItemTokens,
         ISet<string> combineSeparators,
@@ -185,6 +189,7 @@ public sealed class KeywordParserConfig
         Save = save ?? throw new ArgumentNullException(nameof(save));
         Load = load ?? throw new ArgumentNullException(nameof(load));
         Quest = quest ?? throw new ArgumentNullException(nameof(quest));
+        Hint = hint ?? throw new ArgumentNullException(nameof(hint));
         Synonyms = synonyms ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         All = all ?? throw new ArgumentNullException(nameof(all));
         IgnoreItemTokens = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
@@ -218,6 +223,7 @@ public sealed class KeywordParserConfig
         ISet<string> save,
         ISet<string> load,
         ISet<string> quest,
+        ISet<string> hint,
         ISet<string> all,
         ISet<string> ignoreItemTokens,
         ISet<string> combineSeparators,
@@ -252,6 +258,7 @@ public sealed class KeywordParserConfig
             save,
             load,
             quest,
+            hint,
             all,
             ignoreItemTokens,
             combineSeparators,

@@ -28,6 +28,7 @@
     "save": ["save"],
     "load": ["load"],
     "quest": ["quests", "quest", "journal"],
+    "hint": ["hint", "path"],
     "all": ["all", "everything"]
   },
   "directions": {
@@ -96,6 +97,9 @@
     "noOneToFlee": "There's no one here to flee from.",
     "noQuests": "You have no quests.",
     "nothingToDestroy": "There's nothing to destroy.",
+    "hintWhat": "Hint to where?",
+    "unknownLocation": "I don't know that place.",
+    "noPathFound": "No path found.",
     "goalIntro": "Load whichever language provider you prefer before heading to the meeting.",
     "languageHint": "Type \"language <code>\" to switch languages.",
     "youNeedAKeyToLockDoor": "You need a key to lock the door."
@@ -128,6 +132,7 @@
     "moveItem": "You move the {0}.",
     "destroyItem": "You destroy the {0}.",
     "canTakeInstead": "You can just take the {0}.",
+    "hintPath": "Path: {0}",
     "combineResult": "You combine {0} and {1}.",
     "pourResult": "You pour the {0} into the {1}.",
     "readingCost": "You spend {0} turns reading...\n{1}",

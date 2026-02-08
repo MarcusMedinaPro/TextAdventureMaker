@@ -11,9 +11,9 @@
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IPathfinder`
-- [ ] `AStarPathfinder`
-- [ ] `HintCommand`
+- [x] `IPathfinder`
+- [x] `AStarPathfinder`
+- [x] `HintCommand`
 
 ## Example checklist (docs/examples)
 - [ ] Pathfinder demo

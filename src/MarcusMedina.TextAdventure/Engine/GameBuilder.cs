@@ -18,6 +18,7 @@ public sealed class GameBuilder
     private readonly List<ILocation> _locations = [];
     private ILocation? _startLocation;
     private ITimeSystem? _timeSystem;
+    private IPathfinder? _pathfinder;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -67,6 +68,12 @@ public sealed class GameBuilder
     public GameBuilder UseTimeSystem(ITimeSystem timeSystem)
     {
         _timeSystem = timeSystem ?? throw new ArgumentNullException(nameof(timeSystem));
+        return this;
+    }
+
+    public GameBuilder UsePathfinder(IPathfinder pathfinder)
+    {
+        _pathfinder = pathfinder ?? throw new ArgumentNullException(nameof(pathfinder));
         return this;
     }
 
@@ -143,6 +150,11 @@ public sealed class GameBuilder
             state.SetTimeSystem(_timeSystem);
         }
 
+        if (_pathfinder != null)
+        {
+            state.SetPathfinder(_pathfinder);
+        }
+
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
         foreach (Action<Game> handler in _turnStartHandlers)
@@ -181,6 +193,6 @@ public sealed class GameBuilder
 .. _locations,             start
         ];
 
-        return new GameState(start, timeSystem: _timeSystem, worldLocations: allLocations);
+        return new GameState(start, timeSystem: _timeSystem, pathfinder: _pathfinder, worldLocations: allLocations);
     }
 }

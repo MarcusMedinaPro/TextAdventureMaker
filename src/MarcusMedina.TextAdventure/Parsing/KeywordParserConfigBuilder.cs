@@ -34,6 +34,7 @@ public sealed class KeywordParserConfigBuilder
     private ISet<string> _save;
     private ISet<string> _load;
     private ISet<string> _quest;
+    private ISet<string> _hint;
     private ISet<string> _all;
     private ISet<string> _ignoreItemTokens;
     private ISet<string> _combineSeparators;
@@ -70,6 +71,7 @@ public sealed class KeywordParserConfigBuilder
         _save = CommandHelper.NewCommands("save");
         _load = CommandHelper.NewCommands("load");
         _quest = CommandHelper.NewCommands("quests", "quest", "journal");
+        _hint = CommandHelper.NewCommands("hint", "path");
         _all = CommandHelper.NewCommands("all");
         _ignoreItemTokens = CommandHelper.NewCommands("up", "to", "on", "off", "at", "the", "a");
         _combineSeparators = CommandHelper.NewCommands("and", "+");
@@ -269,6 +271,13 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
+    /// <summary>Set keywords for hint/path.</summary>
+    public KeywordParserConfigBuilder WithHint(params string[] commands)
+    {
+        _hint = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
     /// <summary>Add synonyms that map to a canonical command keyword.</summary>
     public KeywordParserConfigBuilder AddSynonyms(string canonical, params string[] synonyms)
     {
@@ -371,6 +380,7 @@ public sealed class KeywordParserConfigBuilder
             save: _save,
             load: _load,
             quest: _quest,
+            hint: _hint,
             all: _all,
             ignoreItemTokens: _ignoreItemTokens,
             combineSeparators: _combineSeparators,

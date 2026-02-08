@@ -26,6 +26,7 @@ public class GameState : IGameState
     public ITimeSystem TimeSystem { get; private set; }
     public IFactionSystem Factions { get; private set; }
     public IRandomEventPool RandomEvents { get; private set; }
+    public IPathfinder Pathfinder { get; private set; }
     public ILocationDiscoverySystem LocationDiscovery { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
@@ -49,6 +50,7 @@ public class GameState : IGameState
         ITimeSystem? timeSystem = null,
         IFactionSystem? factionSystem = null,
         IRandomEventPool? randomEventPool = null,
+        IPathfinder? pathfinder = null,
         ILocationDiscoverySystem? locationDiscovery = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
@@ -64,6 +66,7 @@ public class GameState : IGameState
         TimeSystem = timeSystem ?? new TimeSystem();
         Factions = factionSystem ?? new FactionSystem();
         RandomEvents = randomEventPool ?? new RandomEventPool();
+        Pathfinder = pathfinder ?? new AStarPathfinder();
         LocationDiscovery = locationDiscovery ?? new LocationDiscoverySystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
@@ -123,6 +126,16 @@ public class GameState : IGameState
         }
 
         RandomEvents = randomEventPool;
+    }
+
+    public void SetPathfinder(IPathfinder pathfinder)
+    {
+        if (pathfinder == null)
+        {
+            return;
+        }
+
+        Pathfinder = pathfinder;
     }
 
     public void TickNpcTriggers()

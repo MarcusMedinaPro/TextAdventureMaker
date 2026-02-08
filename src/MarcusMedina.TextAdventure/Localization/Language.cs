@@ -87,6 +87,9 @@ public static class Language
     public static string NoQuests => Provider.Get("NoQuests");
     public static string NothingToDestroy => Provider.Get("NothingToDestroy");
     public static string YouNeedAKeyToLockDoor => Provider.Get("YouNeedAKeyToLockDoor");
+    public static string HintWhat => Provider.Get("HintWhat");
+    public static string UnknownLocation => Provider.Get("UnknownLocation");
+    public static string NoPathFound => Provider.Get("NoPathFound");
     public static string QuestsLabel => Provider.Get("QuestsLabel");
     public static string ActiveQuestsLabel => Provider.Get("ActiveQuestsLabel");
     public static string CompletedQuestsLabel => Provider.Get("CompletedQuestsLabel");
@@ -160,6 +163,11 @@ public static class Language
         return Provider.Format("GoDirectionTemplate", direction);
     }
 
+    public static string DirectionName(Direction direction)
+    {
+        return Provider is JsonLanguageProvider json ? json.GetDirectionName(direction) : direction.ToString();
+    }
+
     public static string HealthStatus(int current, int max)
     {
         return Provider.Format("HealthStatusTemplate", current, max);
@@ -220,6 +228,11 @@ public static class Language
     public static string DestroyedItem(string itemName)
     {
         return Provider.Format("DestroyItemTemplate", itemName);
+    }
+
+    public static string HintPath(string path)
+    {
+        return Provider.Format("HintPathTemplate", path);
     }
 
     public static string CanTakeInstead(string itemName)
@@ -365,6 +378,9 @@ public static class Language
             ["NoOneToFlee"] = "There's no one here to flee from.",
             ["NoQuests"] = "You have no quests.",
             ["NothingToDestroy"] = "There's nothing to destroy.",
+            ["HintWhat"] = "Hint to where?",
+            ["UnknownLocation"] = "I don't know that place.",
+            ["NoPathFound"] = "No path found.",
             ["QuestsLabel"] = "Quest log",
             ["ActiveQuestsLabel"] = "Active",
             ["CompletedQuestsLabel"] = "Completed",
@@ -401,6 +417,7 @@ public static class Language
             ["PourResultTemplate"] = "You pour the {0} into the {1}.",
             ["ReadingCostTemplate"] = "You spend {0} turns reading...\\n{1}",
             ["DialogOptionTemplate"] = "{0}. {1}",
+            ["HintPathTemplate"] = "Path: {0}",
             ["AttackTargetTemplate"] = "You attack the {0}.",
             ["AttackDamageTemplate"] = "You hit for {0} damage.",
             ["EnemyAttackTemplate"] = "The {0} hits you for {1} damage.",

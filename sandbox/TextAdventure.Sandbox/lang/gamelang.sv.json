@@ -28,6 +28,7 @@
     "save": ["spara"],
     "load": ["ladda"],
     "quest": ["uppdrag", "journal"],
+    "hint": ["tips", "väg"],
     "all": ["allt", "alla"]
   },
   "directions": {
@@ -96,6 +97,9 @@
     "noOneToFlee": "Det finns ingen här att fly från.",
     "noQuests": "Du har inga uppdrag.",
     "nothingToDestroy": "Det finns inget att förstöra.",
+    "hintWhat": "Tips till vart?",
+    "unknownLocation": "Jag känner inte till den platsen.",
+    "noPathFound": "Ingen väg hittades.",
     "goalIntro": "Ladda den språkleverantör du föredrar innan du går till mötet.",
     "languageHint": "Skriv \"language <code>\" för att byta språk.",
     "youNeedAKeyToLockDoor": "Du behöver en nyckel för att låsa dörren."
@@ -128,6 +132,7 @@
     "moveItem": "Du flyttar {0}.",
     "destroyItem": "Du förstör {0}.",
     "canTakeInstead": "Du kan bara ta {0}.",
+    "hintPath": "Väg: {0}",
     "combineResult": "Du kombinerar {0} och {1}.",
     "pourResult": "Du häller {0} i {1}.",
     "readingCost": "Du läser i {0} turer...\n{1}",

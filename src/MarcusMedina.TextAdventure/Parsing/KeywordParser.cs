@@ -172,6 +172,12 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             return new QuestCommand();
         }
 
+        if (_config.Hint.Contains(keyword))
+        {
+            string? target = ParseItemName(tokens, 1);
+            return new HintCommand(target);
+        }
+
         if (_config.Go.Contains(keyword))
         {
             return tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction direction)
@@ -353,6 +359,8 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             ? new LoadCommand(ParseItemName(tokens, 1))
             : _config.Quest.Contains(keyword)
             ? new QuestCommand()
+            : _config.Hint.Contains(keyword)
+            ? new HintCommand(ParseItemName(tokens, 1))
             : _config.Go.Contains(keyword)
             ? tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction direction)
                 ? new GoCommand(direction)
@@ -397,6 +405,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .Concat(_config.Save)
             .Concat(_config.Load)
             .Concat(_config.Quest)
+            .Concat(_config.Hint)
             .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 

@@ -22,6 +22,7 @@ public interface IGameState
     ITimeSystem TimeSystem { get; }
     IFactionSystem Factions { get; }
     IRandomEventPool RandomEvents { get; }
+    IPathfinder Pathfinder { get; }
     ILocationDiscoverySystem LocationDiscovery { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }

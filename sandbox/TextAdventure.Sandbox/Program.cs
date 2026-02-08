@@ -2,7 +2,6 @@ using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
@@ -114,13 +113,13 @@ static GameState BuildGameState()
     Location bedroom = new("bedroom");
     Location hallway = new("hallway");
 
-    Item coffee = new Item("coffee", "coffee");
-    Item coat = new Item("coat", "coat", "An old coat. Best donated to a thrift shop.");
+    Item coffee = new("coffee", "coffee");
+    Item coat = new("coat", "coat", "An old coat. Best donated to a thrift shop.");
     _ = coat
         .HideFromItemList()
         .SetTakeable(false)
         .SetReaction(ItemAction.TakeFailed, "The coat is hopelessly out of fashion.");
-    Item mirror = new Item("mirror", "mirror", "You see yourself reflected.");
+    Item mirror = new("mirror", "mirror", "You see yourself reflected.");
     _ = mirror
         .HideFromItemList()
         .SetTakeable(false)
@@ -133,7 +132,7 @@ static GameState BuildGameState()
     _ = bedroom.AddExit(Direction.East, hallway);
     _ = hallway.AddExit(Direction.West, bedroom);
 
-    return new GameState(bedroom, worldLocations: new[] { bedroom, hallway });
+    return new GameState(bedroom, worldLocations: [bedroom, hallway]);
 }
 
 JsonLanguageProvider LoadLanguage(string code)
@@ -154,7 +153,7 @@ JsonLanguageProvider LoadLanguage(string code)
             string itemDesc = provider.GetDescription(item.Id);
             if (!string.IsNullOrWhiteSpace(itemDesc))
             {
-                _ = item.Description(itemDesc);
+                _ = item.SetDescription(itemDesc);
             }
 
             string translatedName = provider.GetName(item.Id);
@@ -170,7 +169,7 @@ JsonLanguageProvider LoadLanguage(string code)
         string itemDesc = provider.GetDescription(item.Id);
         if (!string.IsNullOrWhiteSpace(itemDesc))
         {
-            _ = item.Description(itemDesc);
+            _ = item.SetDescription(itemDesc);
         }
 
         string translatedName = provider.GetName(item.Id);
@@ -206,34 +205,14 @@ void ApplyReaction(string itemId, ItemAction action, string reaction)
 
 static KeywordParser BuildParser(JsonLanguageProvider provider)
 {
-    KeywordParserConfig config = new(
-        quit: provider.GetAllCommandAliases("quit"),
-        look: provider.GetAllCommandAliases("look"),
-        examine: provider.GetAllCommandAliases("examine"),
-        inventory: provider.GetAllCommandAliases("inventory"),
-        stats: provider.GetAllCommandAliases("stats"),
-        open: provider.GetAllCommandAliases("open"),
-        unlock: provider.GetAllCommandAliases("unlock"),
-        take: provider.GetAllCommandAliases("take"),
-        drop: provider.GetAllCommandAliases("drop"),
-        use: provider.GetAllCommandAliases("use"),
-        combine: provider.GetAllCommandAliases("combine"),
-        pour: provider.GetAllCommandAliases("pour"),
-        move: provider.GetAllCommandAliases("move"),
-        go: provider.GetAllCommandAliases("go"),
-        read: provider.GetAllCommandAliases("read"),
-        talk: provider.GetAllCommandAliases("talk"),
-        attack: provider.GetAllCommandAliases("attack"),
-        flee: provider.GetAllCommandAliases("flee"),
-        save: provider.GetAllCommandAliases("save"),
-        load: provider.GetAllCommandAliases("load"),
-        quest: provider.GetAllCommandAliases("quest"),
-        all: provider.GetAllCommandAliases("all"),
-        ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a", "på", "till", "en", "ett"),
-        combineSeparators: CommandHelper.NewCommands("and", "+", "och", "med"),
-        pourPrepositions: CommandHelper.NewCommands("into", "in", "i"),
-        directionAliases: provider.GetDirectionAliases(),
-        allowDirectionEnumNames: true);
+    KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+        .WithLanguageProvider(provider)
+        .WithIgnoreItemTokens("up", "to", "at", "the", "a", "på", "till", "en", "ett")
+        .WithCombineSeparators("and", "+", "och", "med")
+        .WithPourPrepositions("into", "in", "i")
+        .WithDirectionAliases(provider.GetDirectionAliases())
+        .AllowDirectionEnumNames(true)
+        .Build();
 
     return new KeywordParser(config);
 }

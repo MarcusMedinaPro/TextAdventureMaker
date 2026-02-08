@@ -15,8 +15,8 @@
 ---
 
 ## Implementation checklist (engine)
-- [ ] `MapGenerator` (render from `GameState` or `ILocation`)
-- [ ] ASCII map rendering
+- [x] `MapGenerator` (render from `GameState` or `ILocation`)
+- [x] ASCII map rendering
 
 ## Example checklist (docs/examples)
 - [ ] Map generator demo

@@ -24,10 +24,10 @@ quest.AddStage("find_sword")
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IQuestStage`
-- [ ] Optional vs required objectives
-- [ ] Alternative completion paths
-- [ ] Failure consequences / hidden objectives
+- [x] `IQuestStage`
+- [x] Optional vs required objectives
+- [x] Alternative completion paths
+- [x] Failure consequences / hidden objectives
 
 ## Example checklist (docs/examples)
 - [ ] Multi-stage quest demo

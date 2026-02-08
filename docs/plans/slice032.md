@@ -26,9 +26,9 @@ npc.CreateBond("childhood_friend")
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IBond`
-- [ ] Bond investment moments + payoff
-- [ ] Warnings for unearned stakes
+- [x] `IBond`
+- [x] Bond investment moments + payoff
+- [x] Warnings for unearned stakes
 
 ## Example checklist (docs/examples)
 - [ ] Bond system demo

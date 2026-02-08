@@ -21,6 +21,7 @@ public sealed class GameBuilder
     private IPathfinder? _pathfinder;
     private IForeshadowingSystem? _foreshadowingSystem;
     private INarrativeVoiceSystem? _narrativeVoiceSystem;
+    private IAgencyTracker? _agencyTracker;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -88,6 +89,12 @@ public sealed class GameBuilder
     public GameBuilder UseNarrativeVoiceSystem(INarrativeVoiceSystem narrativeVoiceSystem)
     {
         _narrativeVoiceSystem = narrativeVoiceSystem ?? throw new ArgumentNullException(nameof(narrativeVoiceSystem));
+        return this;
+    }
+
+    public GameBuilder UseAgencyTracker(IAgencyTracker agencyTracker)
+    {
+        _agencyTracker = agencyTracker ?? throw new ArgumentNullException(nameof(agencyTracker));
         return this;
     }
 
@@ -179,6 +186,11 @@ public sealed class GameBuilder
             state.SetNarrativeVoiceSystem(_narrativeVoiceSystem);
         }
 
+        if (_agencyTracker != null)
+        {
+            state.SetAgencyTracker(_agencyTracker);
+        }
+
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
         foreach (Action<Game> handler in _turnStartHandlers)
@@ -223,6 +235,7 @@ public sealed class GameBuilder
             pathfinder: _pathfinder,
             foreshadowingSystem: _foreshadowingSystem,
             narrativeVoiceSystem: _narrativeVoiceSystem,
+            agencyTracker: _agencyTracker,
             worldLocations: allLocations);
     }
 }

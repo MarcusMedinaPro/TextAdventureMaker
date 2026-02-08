@@ -30,6 +30,7 @@ public class GameState : IGameState
     public ILocationDiscoverySystem LocationDiscovery { get; private set; }
     public IForeshadowingSystem Foreshadowing { get; private set; }
     public INarrativeVoiceSystem NarrativeVoice { get; private set; }
+    public IAgencyTracker Agency { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IQuestLog Quests { get; }
@@ -57,6 +58,7 @@ public class GameState : IGameState
         ILocationDiscoverySystem? locationDiscovery = null,
         IForeshadowingSystem? foreshadowingSystem = null,
         INarrativeVoiceSystem? narrativeVoiceSystem = null,
+        IAgencyTracker? agencyTracker = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
         IEnumerable<ILocation>? worldLocations = null)
@@ -75,6 +77,7 @@ public class GameState : IGameState
         LocationDiscovery = locationDiscovery ?? new LocationDiscoverySystem();
         Foreshadowing = foreshadowingSystem ?? new ForeshadowingSystem();
         NarrativeVoice = narrativeVoiceSystem ?? new NarrativeVoiceSystem();
+        Agency = agencyTracker ?? new AgencyTracker();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
@@ -183,6 +186,16 @@ public class GameState : IGameState
         }
 
         NarrativeVoice = narrativeVoiceSystem;
+    }
+
+    public void SetAgencyTracker(IAgencyTracker agencyTracker)
+    {
+        if (agencyTracker == null)
+        {
+            return;
+        }
+
+        Agency = agencyTracker;
     }
 
     public GameMemento CreateMemento()

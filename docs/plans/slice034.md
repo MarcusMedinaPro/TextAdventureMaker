@@ -24,9 +24,9 @@ else
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IAgencyTracker`
-- [ ] Agency score + weighted choices
-- [ ] Story path unlocks based on agency
+- [x] `IAgencyTracker`
+- [x] Agency score + weighted choices
+- [x] Story path unlocks based on agency
 
 ## Example checklist (docs/examples)
 - [ ] Agency tracking demo

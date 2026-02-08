@@ -26,6 +26,7 @@ public interface IGameState
     ILocationDiscoverySystem LocationDiscovery { get; }
     IForeshadowingSystem Foreshadowing { get; }
     INarrativeVoiceSystem NarrativeVoice { get; }
+    IAgencyTracker Agency { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }
     /// <summary>Quest log for tracking active and completed quests.</summary>

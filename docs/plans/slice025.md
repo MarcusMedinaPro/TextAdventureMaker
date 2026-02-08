@@ -18,11 +18,11 @@
 ---
 
 ## Implementation checklist (tooling)
-- [ ] Story mapper app (web/desktop)
-- [ ] Scene graph editing (nodes/edges/conditions)
+- [x] Story mapper app (web/desktop)
+- [x] Scene graph editing (nodes/edges/conditions)
 - [ ] Quest/NPC relationship visualisation
-- [ ] Export to `.adventure` DSL
-- [ ] Import from `.adventure` DSL
+- [x] Export to `.adventure` DSL
+- [x] Import from `.adventure` DSL
 
 ## Example checklist (docs/examples)
 - [ ] Not applicable (tooling)

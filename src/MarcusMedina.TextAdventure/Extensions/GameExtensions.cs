@@ -114,4 +114,10 @@ public static class GameExtensions
         ArgumentNullException.ThrowIfNull(game);
         return new LayeredNarrativeBuilder();
     }
+
+    public static ChapterBuilder DefineChapters(this Game game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        return new ChapterBuilder();
+    }
 }

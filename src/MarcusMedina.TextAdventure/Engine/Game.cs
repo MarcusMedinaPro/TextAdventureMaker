@@ -25,6 +25,7 @@ public sealed class Game(
     public TextReader Input { get; } = input ?? Console.In;
     public TextWriter Output { get; } = output ?? Console.Out;
     public string Prompt { get; set; } = prompt ?? "> ";
+    public IChapter? CurrentChapter => State.Chapters.CurrentChapter;
 
     public void AddTurnStartHandler(Action<Game> handler)
     {
@@ -41,6 +42,16 @@ public sealed class Game(
     public void RequestStop()
     {
         _stopRequested = true;
+    }
+
+    public void ActivateChapter(string id)
+    {
+        State.Chapters.ActivateChapter(id);
+    }
+
+    public void AdvanceChapter()
+    {
+        State.Chapters.AdvanceChapter();
     }
 
     public CommandResult Execute(string input)

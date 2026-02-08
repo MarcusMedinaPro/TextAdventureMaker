@@ -111,11 +111,11 @@ chapters {
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IChapter` + `ChapterState`
-- [ ] `ChapterBuilder`
-- [ ] Chapter transitions + branching
-- [ ] Chapter progress UI
-- [ ] DSL for chapters
+- [x] `IChapter` + `ChapterState`
+- [x] `ChapterBuilder`
+- [x] Chapter transitions + branching
+- [x] Chapter progress UI
+- [x] DSL for chapters
 
 ## Example checklist (docs/examples)
 - [ ] Chapter system demo

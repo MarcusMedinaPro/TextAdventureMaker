@@ -29,6 +29,7 @@ public interface IGameState
     IAgencyTracker Agency { get; }
     IDramaticIronySystem DramaticIrony { get; }
     IFlashbackSystem Flashbacks { get; }
+    IChapterSystem Chapters { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }
     /// <summary>Quest log for tracking active and completed quests.</summary>

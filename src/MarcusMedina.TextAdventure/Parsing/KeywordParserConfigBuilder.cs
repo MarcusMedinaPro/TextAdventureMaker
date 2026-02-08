@@ -5,6 +5,9 @@
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
+using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Localization;
+using System.Linq;
 
 namespace MarcusMedina.TextAdventure.Parsing;
 /// <summary>Fluent builder for <see cref="KeywordParserConfig"/>.</summary>
@@ -35,12 +38,16 @@ public sealed class KeywordParserConfigBuilder
     private ISet<string> _load;
     private ISet<string> _quest;
     private ISet<string> _hint;
+    private ISet<string> _again;
+    private ISet<string> _pronouns;
     private ISet<string> _all;
     private ISet<string> _ignoreItemTokens;
     private ISet<string> _combineSeparators;
     private ISet<string> _pourPrepositions;
     private IReadOnlyDictionary<string, Direction> _directionAliases;
     private readonly Dictionary<string, string> _synonyms;
+    private readonly Dictionary<string, string> _phraseAliases;
+    private readonly Dictionary<string, Func<string[], ICommand>> _customCommands;
     private bool _allowDirectionEnumNames;
     private bool _enableFuzzyMatching;
     private int _fuzzyMaxDistance;
@@ -72,6 +79,8 @@ public sealed class KeywordParserConfigBuilder
         _load = CommandHelper.NewCommands("load");
         _quest = CommandHelper.NewCommands("quests", "quest", "journal");
         _hint = CommandHelper.NewCommands("hint", "path");
+        _again = CommandHelper.NewCommands("again", "repeat");
+        _pronouns = CommandHelper.NewCommands("it", "them");
         _all = CommandHelper.NewCommands("all");
         _ignoreItemTokens = CommandHelper.NewCommands("up", "to", "on", "off", "at", "the", "a");
         _combineSeparators = CommandHelper.NewCommands("and", "+");
@@ -92,6 +101,8 @@ public sealed class KeywordParserConfigBuilder
             ["out"] = Direction.Out
         };
         _synonyms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        _phraseAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        _customCommands = new Dictionary<string, Func<string[], ICommand>>(StringComparer.OrdinalIgnoreCase);
         _allowDirectionEnumNames = true;
         _enableFuzzyMatching = false;
         _fuzzyMaxDistance = 1;
@@ -278,6 +289,113 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
+    /// <summary>Set keywords for repeating the last command.</summary>
+    public KeywordParserConfigBuilder WithAgain(params string[] commands)
+    {
+        _again = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set pronouns that should resolve to the last target.</summary>
+    public KeywordParserConfigBuilder WithPronouns(params string[] pronouns)
+    {
+        _pronouns = CommandHelper.NewCommands(pronouns);
+        return this;
+    }
+
+    /// <summary>Add a phrase alias that expands into a canonical phrase.</summary>
+    public KeywordParserConfigBuilder WithPhraseAlias(string phrase, string canonical)
+    {
+        if (!string.IsNullOrWhiteSpace(phrase) && !string.IsNullOrWhiteSpace(canonical))
+        {
+            _phraseAliases[phrase.Trim()] = canonical.Trim();
+        }
+
+        return this;
+    }
+
+    /// <summary>Register a custom command handler for a full phrase.</summary>
+    public KeywordParserConfigBuilder WithCustomCommand(string phrase, Func<string[], ICommand> handler)
+    {
+        if (!string.IsNullOrWhiteSpace(phrase) && handler != null)
+        {
+            _customCommands[phrase.Trim()] = handler;
+        }
+
+        return this;
+    }
+
+    /// <summary>Add a custom word that maps to the same keyword.</summary>
+    public KeywordParserConfigBuilder WithWord(string word)
+    {
+        if (!string.IsNullOrWhiteSpace(word))
+        {
+            _synonyms[word.Trim()] = word.Trim();
+        }
+
+        return this;
+    }
+
+    /// <summary>Override command keywords based on a language provider.</summary>
+    public KeywordParserConfigBuilder WithLanguageProvider(ICommandLanguageProvider provider, IDictionary<string, Func<string[], ICommand>>? customHandlers = null)
+    {
+        if (provider == null)
+        {
+            return this;
+        }
+
+        OverrideIfPresent(provider, "quit", WithQuit);
+        OverrideIfPresent(provider, "look", WithLook);
+        OverrideIfPresent(provider, "examine", WithExamine);
+        OverrideIfPresent(provider, "inventory", WithInventory);
+        OverrideIfPresent(provider, "stats", WithStats);
+        OverrideIfPresent(provider, "open", WithOpen);
+        OverrideIfPresent(provider, "unlock", WithUnlock);
+        OverrideIfPresent(provider, "close", WithClose);
+        OverrideIfPresent(provider, "lock", WithLock);
+        OverrideIfPresent(provider, "destroy", WithDestroy);
+        OverrideIfPresent(provider, "take", WithTake);
+        OverrideIfPresent(provider, "drop", WithDrop);
+        OverrideIfPresent(provider, "use", WithUse);
+        OverrideIfPresent(provider, "combine", WithCombine);
+        OverrideIfPresent(provider, "pour", WithPour);
+        OverrideIfPresent(provider, "move", WithMove);
+        OverrideIfPresent(provider, "go", WithGo);
+        OverrideIfPresent(provider, "read", WithRead);
+        OverrideIfPresent(provider, "talk", WithTalk);
+        OverrideIfPresent(provider, "attack", WithAttack);
+        OverrideIfPresent(provider, "flee", WithFlee);
+        OverrideIfPresent(provider, "save", WithSave);
+        OverrideIfPresent(provider, "load", WithLoad);
+        OverrideIfPresent(provider, "quest", WithQuest);
+        OverrideIfPresent(provider, "hint", WithHint);
+
+        if (customHandlers != null)
+        {
+            foreach ((string key, List<string> aliases) in provider.GetCommandMap())
+            {
+                if (customHandlers.TryGetValue(key, out Func<string[], ICommand>? handler))
+                {
+                    foreach (string alias in aliases)
+                    {
+                        _customCommands[alias] = handler;
+                    }
+                }
+            }
+        }
+
+        return this;
+    }
+
+    private void OverrideIfPresent(ICommandLanguageProvider provider, string command, Func<string[], KeywordParserConfigBuilder> setter)
+    {
+        IReadOnlyList<string> aliases = provider.GetCommandAliases(command);
+        if (aliases.Count > 0)
+        {
+            _ = setter(aliases.ToArray());
+        }
+    }
+
     /// <summary>Add synonyms that map to a canonical command keyword.</summary>
     public KeywordParserConfigBuilder AddSynonyms(string canonical, params string[] synonyms)
     {
@@ -381,12 +499,16 @@ public sealed class KeywordParserConfigBuilder
             load: _load,
             quest: _quest,
             hint: _hint,
+            again: _again,
+            pronouns: _pronouns,
             all: _all,
             ignoreItemTokens: _ignoreItemTokens,
             combineSeparators: _combineSeparators,
             pourPrepositions: _pourPrepositions,
             directionAliases: _directionAliases,
             synonyms: _synonyms,
+            phraseAliases: _phraseAliases,
+            customCommands: _customCommands,
             allowDirectionEnumNames: _allowDirectionEnumNames,
             enableFuzzyMatching: _enableFuzzyMatching,
             fuzzyMaxDistance: _fuzzyMaxDistance);

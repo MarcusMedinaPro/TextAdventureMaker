@@ -20,6 +20,12 @@ public abstract class ItemDecorator : IItem
     public virtual string Id => Inner.Id;
     public virtual string Name => Inner.Name;
     public virtual string? Description => Inner.Description;
+    public virtual int? Amount => Inner.Amount;
+    public virtual bool IsStackable => Inner.IsStackable;
+    public virtual string? PresenceDescription => Inner.PresenceDescription;
+    public virtual bool IsFood => Inner.IsFood;
+    public virtual bool IsPoisoned => Inner.IsPoisoned;
+    public virtual int HealAmount => Inner.HealAmount;
     public virtual IDictionary<string, string> Properties => Inner.Properties;
     public virtual bool Takeable => Inner.Takeable;
     public virtual float Weight => Inner.Weight;
@@ -89,6 +95,12 @@ public abstract class ItemDecorator : IItem
         remove => Inner.OnDestroy -= value;
     }
 
+    public event Action<IItem>? OnAmountEmpty
+    {
+        add => Inner.OnAmountEmpty += value;
+        remove => Inner.OnAmountEmpty -= value;
+    }
+
     public virtual bool Matches(string name)
     {
         return Inner.Matches(name);
@@ -102,6 +114,41 @@ public abstract class ItemDecorator : IItem
     public virtual IItem SetReaction(ItemAction action, string text)
     {
         return Inner.SetReaction(action, text);
+    }
+
+    public virtual IItem SetAmount(int amount)
+    {
+        return Inner.SetAmount(amount);
+    }
+
+    public virtual bool DecreaseAmount(int amount = 1)
+    {
+        return Inner.DecreaseAmount(amount);
+    }
+
+    public virtual IItem SetStackable(bool isStackable = true)
+    {
+        return Inner.SetStackable(isStackable);
+    }
+
+    public virtual IItem SetPresenceDescription(string text)
+    {
+        return Inner.SetPresenceDescription(text);
+    }
+
+    public virtual IItem SetFood(bool isFood = true)
+    {
+        return Inner.SetFood(isFood);
+    }
+
+    public virtual IItem SetPoisoned(bool isPoisoned = true)
+    {
+        return Inner.SetPoisoned(isPoisoned);
+    }
+
+    public virtual IItem SetHealAmount(int amount)
+    {
+        return Inner.SetHealAmount(amount);
     }
 
     public virtual bool CanRead(IGameState state)

@@ -39,6 +39,10 @@ public class UseCommand : ICommand
         }
 
         item.Use();
+        if (item.Amount.HasValue && item.Amount.Value == 0)
+        {
+            _ = context.State.Inventory.Remove(item);
+        }
         string displayName = Language.EntityName(item);
         string? onUse = item.GetReaction(ItemAction.Use);
         CommandResult result = onUse != null

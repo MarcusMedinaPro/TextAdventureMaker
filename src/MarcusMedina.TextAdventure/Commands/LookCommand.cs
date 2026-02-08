@@ -53,10 +53,20 @@ public class LookCommand : ICommand
         _ = builder.Append(builder.Length > 0 ? "\n" : string.Empty);
         _ = builder.Append(Language.HealthStatus(context.State.Stats.Health, context.State.Stats.MaxHealth));
         _ = builder.Append("\n");
-        List<string> items = location.Items
-            .Where(i => !i.HiddenFromItemList)
-            .Select(i => Language.ItemWithWeight(Language.EntityName(i), i.Weight))
+
+        List<string> presenceDescriptions = location.Items
+            .Select(i => i.PresenceDescription)
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Select(text => text!.Trim())
             .ToList();
+
+        foreach (string presence in presenceDescriptions)
+        {
+            _ = builder.Append(presence);
+            _ = builder.Append("\n");
+        }
+
+        List<string> items = FormatItems(location.Items.Where(i => !i.HiddenFromItemList)).ToList();
         if (!context.State.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith || items.Count > 0)
         {
             _ = builder.Append(Language.ItemsHereLabel);
@@ -157,5 +167,37 @@ public class LookCommand : ICommand
         }
 
         return CommandResult.Fail(Language.NothingToLookAt, GameError.ItemNotFound);
+    }
+
+    private static IEnumerable<string> FormatItems(IEnumerable<IItem> items)
+    {
+        List<IItem> materialised = items.ToList();
+        IEnumerable<IGrouping<string, IItem>> stacked = materialised
+            .Where(item => item.IsStackable)
+            .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase);
+
+        foreach (IGrouping<string, IItem> group in stacked)
+        {
+            IItem sample = group.First();
+            int amount = group.Sum(item => item.Amount ?? 1);
+            string name = Language.EntityName(sample);
+            if (amount > 1 || sample.Amount.HasValue)
+            {
+                name = $"{name} ({amount})";
+            }
+
+            yield return Language.ItemWithWeight(name, sample.Weight);
+        }
+
+        foreach (IItem item in materialised.Where(item => !item.IsStackable))
+        {
+            string name = Language.EntityName(item);
+            if (item.Amount.HasValue)
+            {
+                name = $"{name} ({item.Amount.Value})";
+            }
+
+            yield return Language.ItemWithWeight(name, item.Weight);
+        }
     }
 }

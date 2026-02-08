@@ -5,6 +5,7 @@
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
+using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Parsing;
 /// <summary>Configuration for the keyword-based command parser.</summary>
@@ -37,6 +38,8 @@ public sealed class KeywordParserConfig
         load: CommandHelper.NewCommands("load"),
         quest: CommandHelper.NewCommands("quests", "quest", "journal"),
         hint: CommandHelper.NewCommands("hint", "path"),
+        again: CommandHelper.NewCommands("again", "repeat"),
+        pronouns: CommandHelper.NewCommands("it", "them"),
         all: CommandHelper.NewCommands("all"),
         ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a"),
         combineSeparators: CommandHelper.NewCommands("and", "+"),
@@ -57,6 +60,8 @@ public sealed class KeywordParserConfig
             ["out"] = Direction.Out
         },
         synonyms: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+        phraseAliases: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+        customCommands: new Dictionary<string, Func<string[], ICommand>>(StringComparer.OrdinalIgnoreCase),
         allowDirectionEnumNames: true);
     /// <summary>Keywords used to quit the game.</summary>
     public ISet<string> Quit { get; }
@@ -108,8 +113,16 @@ public sealed class KeywordParserConfig
     public ISet<string> Quest { get; }
     /// <summary>Keywords used to request a path hint.</summary>
     public ISet<string> Hint { get; }
+    /// <summary>Keywords used to repeat the previous command.</summary>
+    public ISet<string> Again { get; }
+    /// <summary>Pronouns that can refer to the last target.</summary>
+    public ISet<string> Pronouns { get; }
     /// <summary>Synonym map for command keywords.</summary>
     public IReadOnlyDictionary<string, string> Synonyms { get; }
+    /// <summary>Multi-word phrase aliases mapped to canonical phrases.</summary>
+    public IReadOnlyDictionary<string, string> PhraseAliases { get; }
+    /// <summary>Custom command handlers keyed by full phrase.</summary>
+    public IReadOnlyDictionary<string, Func<string[], ICommand>> CustomCommands { get; }
 
     /// <summary>Keywords that indicate "all" in take/drop commands.</summary>
     public ISet<string> All { get; }
@@ -155,12 +168,16 @@ public sealed class KeywordParserConfig
         ISet<string> load,
         ISet<string> quest,
         ISet<string> hint,
+        ISet<string> again,
+        ISet<string> pronouns,
         ISet<string> all,
         ISet<string> ignoreItemTokens,
         ISet<string> combineSeparators,
         ISet<string> pourPrepositions,
         IReadOnlyDictionary<string, Direction> directionAliases,
         IReadOnlyDictionary<string, string>? synonyms = null,
+        IReadOnlyDictionary<string, string>? phraseAliases = null,
+        IReadOnlyDictionary<string, Func<string[], ICommand>>? customCommands = null,
         bool allowDirectionEnumNames = false,
         bool enableFuzzyMatching = false,
         int fuzzyMaxDistance = 1)
@@ -190,7 +207,11 @@ public sealed class KeywordParserConfig
         Load = load ?? throw new ArgumentNullException(nameof(load));
         Quest = quest ?? throw new ArgumentNullException(nameof(quest));
         Hint = hint ?? throw new ArgumentNullException(nameof(hint));
+        Again = again ?? throw new ArgumentNullException(nameof(again));
+        Pronouns = pronouns ?? throw new ArgumentNullException(nameof(pronouns));
         Synonyms = synonyms ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        PhraseAliases = phraseAliases ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        CustomCommands = customCommands ?? new Dictionary<string, Func<string[], ICommand>>(StringComparer.OrdinalIgnoreCase);
         All = all ?? throw new ArgumentNullException(nameof(all));
         IgnoreItemTokens = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
         CombineSeparators = combineSeparators ?? throw new ArgumentNullException(nameof(combineSeparators));

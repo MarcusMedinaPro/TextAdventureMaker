@@ -13,6 +13,12 @@ public interface IItem : IGameEntity
     new string Name { get; }
     string? Description { get; }
     string GetDescription();
+    int? Amount { get; }
+    bool IsStackable { get; }
+    string? PresenceDescription { get; }
+    bool IsFood { get; }
+    bool IsPoisoned { get; }
+    int HealAmount { get; }
     bool Takeable { get; }
     float Weight { get; }
     IReadOnlyList<string> Aliases { get; }
@@ -27,11 +33,19 @@ public interface IItem : IGameEntity
     /// <summary>Raised when the item is moved.</summary>
     event Action<IItem>? OnMove;
     event Action<IItem>? OnDestroy;
+    event Action<IItem>? OnAmountEmpty;
 
     bool Matches(string name);
     IItem SetTakeable(bool takeable);
     IItem SetWeight(float weight);
     IItem SetDescription(string description);
+    IItem SetAmount(int amount);
+    bool DecreaseAmount(int amount = 1);
+    IItem SetStackable(bool isStackable = true);
+    IItem SetPresenceDescription(string text);
+    IItem SetFood(bool isFood = true);
+    IItem SetPoisoned(bool isPoisoned = true);
+    IItem SetHealAmount(int amount);
     IItem AddAliases(params string[] aliases);
     string? GetReaction(ItemAction action);
     IItem SetReaction(ItemAction action, string text);

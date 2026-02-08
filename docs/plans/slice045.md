@@ -96,13 +96,13 @@
 ---
 
 ## Implementation checklist (engine)
-- [ ] Generic phrase/alias mapping for sandbox inputs
-- [ ] Pronoun carry-over (`it`/`them`) + `again`
-- [ ] Custom commands defined in language files (override/extend)
-- [ ] Item amount/stacking system
-- [ ] Presence description support
-- [ ] Parser config: generic word registration (`WithWord`)
-- [ ] Misc. QoL helpers listed above (phrases, vehicles, teleporters, weather, food/healing, economy, etc.)
+- [x] Generic phrase/alias mapping for sandbox inputs
+- [x] Pronoun carry-over (`it`/`them`) + `again`
+- [x] Custom commands defined in language files (override/extend)
+- [x] Item amount/stacking system
+- [x] Presence description support
+- [x] Parser config: generic word registration (`WithWord`)
+- [x] Misc. QoL helpers listed above (phrases, vehicles, teleporters, weather, food/healing, economy, etc.)
 
 ## Example checklist (docs/examples)
 - [ ] Sandbox demo for aliases + pronouns + custom commands

@@ -25,8 +25,7 @@ public class InventoryCommand : ICommand
             return CommandResult.Ok(emptyMessage);
         }
 
-        IEnumerable<string> items = inventory.Items
-            .Select(i => Language.ItemWithWeight(Language.EntityName(i), i.Weight));
+        IEnumerable<string> items = FormatItems(inventory.Items);
 
         string message = $"{Language.InventoryLabel}{items.CommaJoin()}";
         if (inventory.TotalWeight > 0)
@@ -35,5 +34,37 @@ public class InventoryCommand : ICommand
         }
 
         return CommandResult.Ok(message);
+    }
+
+    private static IEnumerable<string> FormatItems(IEnumerable<IItem> items)
+    {
+        List<IItem> materialised = items.ToList();
+        IEnumerable<IGrouping<string, IItem>> stacked = materialised
+            .Where(item => item.IsStackable)
+            .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase);
+
+        foreach (IGrouping<string, IItem> group in stacked)
+        {
+            IItem sample = group.First();
+            int amount = group.Sum(item => item.Amount ?? 1);
+            string name = Language.EntityName(sample);
+            if (amount > 1 || sample.Amount.HasValue)
+            {
+                name = $"{name} ({amount})";
+            }
+
+            yield return Language.ItemWithWeight(name, sample.Weight);
+        }
+
+        foreach (IItem item in materialised.Where(item => !item.IsStackable))
+        {
+            string name = Language.EntityName(item);
+            if (item.Amount.HasValue)
+            {
+                name = $"{name} ({item.Amount.Value})";
+            }
+
+            yield return Language.ItemWithWeight(name, item.Weight);
+        }
     }
 }

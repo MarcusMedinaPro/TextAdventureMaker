@@ -17,10 +17,22 @@ public class Item : IItem
     private string? _readText;
     private Func<IGameState, bool>? _readCondition;
     private string _description = "";
+    private int? _amount;
+    private bool _isStackable;
+    private string? _presenceDescription;
+    private bool _isFood;
+    private bool _isPoisoned;
+    private int _healAmount;
 
     public string Id { get; }
     public string Name { get; }
     public string? Description => _description;
+    public int? Amount => _amount;
+    public bool IsStackable => _isStackable;
+    public string? PresenceDescription => _presenceDescription;
+    public bool IsFood => _isFood;
+    public bool IsPoisoned => _isPoisoned;
+    public int HealAmount => _healAmount;
     public IDictionary<string, string> Properties => _properties;
     public string GetDescription()
     {
@@ -40,6 +52,7 @@ public class Item : IItem
     public event Action<IItem>? OnUse;
     public event Action<IItem>? OnMove;
     public event Action<IItem>? OnDestroy;
+    public event Action<IItem>? OnAmountEmpty;
 
     public Item(string id, string name)
     {
@@ -74,6 +87,61 @@ public class Item : IItem
         return this;
     }
 
+    public Item SetAmount(int amount)
+    {
+        _amount = Math.Max(0, amount);
+        return this;
+    }
+
+    public bool DecreaseAmount(int amount = 1)
+    {
+        if (!_amount.HasValue)
+        {
+            return true;
+        }
+
+        int next = Math.Max(0, _amount.Value - Math.Max(1, amount));
+        _amount = next;
+
+        if (next == 0)
+        {
+            OnAmountEmpty?.Invoke(this);
+            return false;
+        }
+
+        return true;
+    }
+
+    public Item SetStackable(bool isStackable = true)
+    {
+        _isStackable = isStackable;
+        return this;
+    }
+
+    public Item SetPresenceDescription(string text)
+    {
+        _presenceDescription = text;
+        return this;
+    }
+
+    public Item SetFood(bool isFood = true)
+    {
+        _isFood = isFood;
+        return this;
+    }
+
+    public Item SetPoisoned(bool isPoisoned = true)
+    {
+        _isPoisoned = isPoisoned;
+        return this;
+    }
+
+    public Item SetHealAmount(int amount)
+    {
+        _healAmount = Math.Max(0, amount);
+        return this;
+    }
+
     public Item AddAliases(params string[] aliases)
     {
         foreach (string alias in aliases)
@@ -91,6 +159,13 @@ public class Item : IItem
     IItem IItem.SetTakeable(bool takeable) => SetTakeable(takeable);
     IItem IItem.SetWeight(float weight) => SetWeight(weight);
     IItem IItem.SetDescription(string description) => SetDescription(description);
+    IItem IItem.SetAmount(int amount) => SetAmount(amount);
+    bool IItem.DecreaseAmount(int amount) => DecreaseAmount(amount);
+    IItem IItem.SetStackable(bool isStackable) => SetStackable(isStackable);
+    IItem IItem.SetPresenceDescription(string text) => SetPresenceDescription(text);
+    IItem IItem.SetFood(bool isFood) => SetFood(isFood);
+    IItem IItem.SetPoisoned(bool isPoisoned) => SetPoisoned(isPoisoned);
+    IItem IItem.SetHealAmount(int amount) => SetHealAmount(amount);
     IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
 
     public bool Matches(string name)
@@ -168,9 +243,15 @@ public class Item : IItem
         IItem copy = new Item(Id, Name, _description)
             .SetTakeable(Takeable)
             .SetWeight(Weight)
+            .SetStackable(_isStackable)
             .SetReadable(Readable)
             .SetReadingCost(ReadingCost)
             .HideFromItemList(HiddenFromItemList);
+
+        if (_amount.HasValue)
+        {
+            _ = copy.SetAmount(_amount.Value);
+        }
 
         if (_aliases.Count > 0)
         {
@@ -202,6 +283,26 @@ public class Item : IItem
             copy.Properties[entry.Key] = entry.Value;
         }
 
+        if (!string.IsNullOrWhiteSpace(_presenceDescription))
+        {
+            _ = copy.SetPresenceDescription(_presenceDescription);
+        }
+
+        if (_isFood)
+        {
+            _ = copy.SetFood();
+        }
+
+        if (_isPoisoned)
+        {
+            _ = copy.SetPoisoned();
+        }
+
+        if (_healAmount > 0)
+        {
+            _ = copy.SetHealAmount(_healAmount);
+        }
+
         return copy;
     }
 
@@ -218,6 +319,7 @@ public class Item : IItem
     public void Use()
     {
         OnUse?.Invoke(this);
+        _ = DecreaseAmount();
     }
 
     public void Move()

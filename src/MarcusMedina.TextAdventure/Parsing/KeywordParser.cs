@@ -8,12 +8,16 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
+using System.Linq;
 
 namespace MarcusMedina.TextAdventure.Parsing;
 
 public class KeywordParser(KeywordParserConfig config) : ICommandParser
 {
     private readonly KeywordParserConfig _config = config ?? throw new ArgumentNullException(nameof(config));
+    private string? _lastInput;
+    private string? _lastTarget;
+    private bool _pronounMissing;
 
     public ICommand Parse(string input)
     {
@@ -22,7 +26,31 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             return new UnknownCommand();
         }
 
-        string[] tokens = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        _pronounMissing = false;
+
+        string trimmed = input.Trim();
+        string lower = trimmed.ToLowerInvariant();
+
+        if (_config.Again.Contains(lower))
+        {
+            if (string.IsNullOrWhiteSpace(_lastInput))
+            {
+                return new ParserErrorCommand("Nothing to repeat.");
+            }
+
+            trimmed = _lastInput;
+        }
+
+        trimmed = ApplyPhraseAliases(trimmed);
+        _lastInput = trimmed;
+
+        ICommand? custom = TryParseCustomCommand(trimmed);
+        if (custom != null)
+        {
+            return GuardPronoun(custom);
+        }
+
+        string[] tokens = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length == 0)
         {
             return new UnknownCommand();
@@ -32,19 +60,19 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Quit.Contains(keyword))
         {
-            return new QuitCommand();
+            return GuardPronoun(new QuitCommand());
         }
 
         if (_config.Examine.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new ExamineCommand(target);
+            return GuardPronoun(new ExamineCommand(target));
         }
 
         if (_config.Look.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new LookCommand(target);
+            return GuardPronoun(new LookCommand(target));
         }
 
         if (_config.Inventory.Contains(keyword))
@@ -79,7 +107,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Destroy.Contains(keyword))
         {
-            return new DestroyCommand(ParseItemName(tokens, 1));
+            return GuardPronoun(new DestroyCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Take.Contains(keyword))
@@ -90,7 +118,8 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? itemName = ParseItemName(tokens, 1);
-            return itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Drop.Contains(keyword))
@@ -101,13 +130,15 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? itemName = ParseItemName(tokens, 1);
-            return itemName != null ? new DropCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new DropCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Use.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new UseCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Combine.Contains(keyword))
@@ -128,43 +159,45 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? target = ParseItemName(tokens, 1);
-            return target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
+            ICommand command = target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
+            return GuardPronoun(command);
         }
 
         if (_config.Read.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return target != null ? new ReadCommand(target) : new UnknownCommand();
+            ICommand command = target != null ? new ReadCommand(target) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Talk.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new TalkCommand(target);
+            return GuardPronoun(new TalkCommand(target));
         }
 
         if (_config.Attack.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new AttackCommand(target);
+            return GuardPronoun(new AttackCommand(target));
         }
 
         if (_config.Flee.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new FleeCommand(target);
+            return GuardPronoun(new FleeCommand(target));
         }
 
         if (_config.Save.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new SaveCommand(target);
+            return GuardPronoun(new SaveCommand(target));
         }
 
         if (_config.Load.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new LoadCommand(target);
+            return GuardPronoun(new LoadCommand(target));
         }
 
         if (_config.Quest.Contains(keyword))
@@ -175,7 +208,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (_config.Hint.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            return new HintCommand(target);
+            return GuardPronoun(new HintCommand(target));
         }
 
         if (_config.Go.Contains(keyword))
@@ -194,9 +227,11 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
         }
 
-        return TryParseDirection(keyword, out Direction directDirection)
+        ICommand finalCommand = TryParseDirection(keyword, out Direction directDirection)
             ? new GoCommand(directDirection)
             : new UnknownCommand();
+
+        return GuardPronoun(finalCommand);
     }
 
     private bool TryParseDirection(string token, out Direction direction)
@@ -249,12 +284,12 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Examine.Contains(keyword))
         {
-            return new ExamineCommand(ParseItemName(tokens, 1));
+            return GuardPronoun(new ExamineCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Look.Contains(keyword))
         {
-            return new LookCommand(ParseItemName(tokens, 1));
+            return GuardPronoun(new LookCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Inventory.Contains(keyword))
@@ -289,7 +324,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Destroy.Contains(keyword))
         {
-            return new DestroyCommand(ParseItemName(tokens, 1));
+            return GuardPronoun(new DestroyCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Take.Contains(keyword))
@@ -300,7 +335,8 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? itemName = ParseItemName(tokens, 1);
-            return itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Drop.Contains(keyword))
@@ -311,13 +347,15 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? itemName = ParseItemName(tokens, 1);
-            return itemName != null ? new DropCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new DropCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Use.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new UseCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Combine.Contains(keyword))
@@ -333,7 +371,8 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (_config.Read.Contains(keyword))
         {
             var target = ParseItemName(tokens, 1);
-            return target != null ? new ReadCommand(target) : new UnknownCommand();
+            ICommand command = target != null ? new ReadCommand(target) : new UnknownCommand();
+            return GuardPronoun(command);
         }
 
         if (_config.Move.Contains(keyword))
@@ -344,28 +383,53 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? target = ParseItemName(tokens, 1);
-            return target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
+            ICommand command = target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
+            return GuardPronoun(command);
         }
 
-        return _config.Talk.Contains(keyword)
-            ? new TalkCommand(ParseItemName(tokens, 1))
-            : _config.Attack.Contains(keyword)
-            ? new AttackCommand(ParseItemName(tokens, 1))
-            : _config.Flee.Contains(keyword)
-            ? new FleeCommand(ParseItemName(tokens, 1))
-            : _config.Save.Contains(keyword)
-            ? new SaveCommand(ParseItemName(tokens, 1))
-            : _config.Load.Contains(keyword)
-            ? new LoadCommand(ParseItemName(tokens, 1))
-            : _config.Quest.Contains(keyword)
-            ? new QuestCommand()
-            : _config.Hint.Contains(keyword)
-            ? new HintCommand(ParseItemName(tokens, 1))
-            : _config.Go.Contains(keyword)
-            ? tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction direction)
+        if (_config.Talk.Contains(keyword))
+        {
+            return GuardPronoun(new TalkCommand(ParseItemName(tokens, 1)));
+        }
+
+        if (_config.Attack.Contains(keyword))
+        {
+            return GuardPronoun(new AttackCommand(ParseItemName(tokens, 1)));
+        }
+
+        if (_config.Flee.Contains(keyword))
+        {
+            return GuardPronoun(new FleeCommand(ParseItemName(tokens, 1)));
+        }
+
+        if (_config.Save.Contains(keyword))
+        {
+            return GuardPronoun(new SaveCommand(ParseItemName(tokens, 1)));
+        }
+
+        if (_config.Load.Contains(keyword))
+        {
+            return GuardPronoun(new LoadCommand(ParseItemName(tokens, 1)));
+        }
+
+        if (_config.Quest.Contains(keyword))
+        {
+            return new QuestCommand();
+        }
+
+        if (_config.Hint.Contains(keyword))
+        {
+            return GuardPronoun(new HintCommand(ParseItemName(tokens, 1)));
+        }
+
+        if (_config.Go.Contains(keyword))
+        {
+            return tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction direction)
                 ? new GoCommand(direction)
-                : ParseGoTarget(tokens)
-            : null;
+                : ParseGoTarget(tokens);
+        }
+
+        return null;
     }
 
     private string NormalizeKeyword(string token)
@@ -420,13 +484,76 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .Where(t => !_config.IgnoreItemTokens.Contains(t))
             .ToList();
 
-        return parts.Count == 0 ? null : parts.SpaceJoin();
+        if (parts.Count == 0)
+        {
+            return null;
+        }
+
+        if (parts.Count == 1 && _config.Pronouns.Contains(parts[0]))
+        {
+            if (string.IsNullOrWhiteSpace(_lastTarget))
+            {
+                _pronounMissing = true;
+                return null;
+            }
+
+            return _lastTarget;
+        }
+
+        string target = parts.SpaceJoin();
+        if (!string.IsNullOrWhiteSpace(target))
+        {
+            _lastTarget = target;
+        }
+
+        return target;
+    }
+
+    private string ApplyPhraseAliases(string input)
+    {
+        foreach ((string phrase, string canonical) in _config.PhraseAliases)
+        {
+            if (input.StartsWith(phrase, StringComparison.OrdinalIgnoreCase))
+            {
+                string remainder = input[phrase.Length..].TrimStart();
+                return string.IsNullOrWhiteSpace(remainder) ? canonical : $"{canonical} {remainder}";
+            }
+        }
+
+        return input;
+    }
+
+    private ICommand? TryParseCustomCommand(string input)
+    {
+        string? match = _config.CustomCommands
+            .Keys
+            .OrderByDescending(key => key.Length)
+            .FirstOrDefault(key => input.StartsWith(key, StringComparison.OrdinalIgnoreCase));
+
+        if (match == null)
+        {
+            return null;
+        }
+
+        if (_config.CustomCommands.TryGetValue(match, out Func<string[], ICommand>? handler))
+        {
+            string[] tokens = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return handler(tokens);
+        }
+
+        return null;
+    }
+
+    private ICommand GuardPronoun(ICommand command)
+    {
+        return _pronounMissing ? new ParserErrorCommand("I do not know what that refers to.") : command;
     }
 
     private ICommand ParseGoTarget(string[] tokens)
     {
         string? target = ParseItemName(tokens, 1);
-        return target != null ? new GoToCommand(target) : new UnknownCommand();
+        ICommand command = target != null ? new GoToCommand(target) : new UnknownCommand();
+        return GuardPronoun(command);
     }
 
     private ICommand ParseCombine(string[] tokens)

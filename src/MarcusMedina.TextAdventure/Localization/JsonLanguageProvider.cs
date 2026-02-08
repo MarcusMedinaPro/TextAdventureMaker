@@ -9,7 +9,7 @@ using MarcusMedina.TextAdventure.Enums;
 
 namespace MarcusMedina.TextAdventure.Localization;
 
-public sealed class JsonLanguageProvider : ILanguageProvider
+public sealed class JsonLanguageProvider : ICommandLanguageProvider
 {
     private readonly JsonLanguageData _data;
 
@@ -87,6 +87,11 @@ public sealed class JsonLanguageProvider : ILanguageProvider
     public IReadOnlyList<string> GetCommandAliases(string command)
     {
         return _data.Commands?.TryGetValue(command, out List<string>? aliases) == true ? aliases : [];
+    }
+
+    public IReadOnlyDictionary<string, List<string>> GetCommandMap()
+    {
+        return _data.Commands ?? new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
     }
 
     public IReadOnlyDictionary<string, Direction> GetDirectionAliases()

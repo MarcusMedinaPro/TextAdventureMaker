@@ -21,7 +21,7 @@ game.AddEventChain("village_rescue")
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IEventChain` + `ICondition`
+- [x] `IEventChain` + `ICondition`
 - [ ] Time/location/state triggers for event chains
 - [x] Entity hints (`SetHint` / `GetHint`)
 - [x] Entity properties (`SetProperty` / `GetProperty`)

@@ -20,6 +20,7 @@ public class Item : IItem
 
     public string Id { get; }
     public string Name { get; }
+    public string? Description => _description;
     public IDictionary<string, string> Properties => _properties;
     public string GetDescription()
     {
@@ -67,7 +68,7 @@ public class Item : IItem
         return this;
     }
 
-    public Item Description(string text)
+    public Item SetDescription(string text)
     {
         _description = text;
         return this;
@@ -89,7 +90,7 @@ public class Item : IItem
     // Explicit interface implementations for IItem fluent methods
     IItem IItem.SetTakeable(bool takeable) => SetTakeable(takeable);
     IItem IItem.SetWeight(float weight) => SetWeight(weight);
-    IItem IItem.Description(string text) => Description(text);
+    IItem IItem.SetDescription(string description) => SetDescription(description);
     IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
 
     public bool Matches(string name)

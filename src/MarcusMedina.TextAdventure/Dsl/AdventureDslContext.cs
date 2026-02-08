@@ -76,7 +76,7 @@ public sealed class AdventureDslContext
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
-                _ = item.Description(description);
+                _ = item.SetDescription(description);
             }
 
             return item;
@@ -96,7 +96,7 @@ public sealed class AdventureDslContext
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
-                _ = key.Description(description);
+                _ = key.SetDescription(description);
             }
 
             return key;

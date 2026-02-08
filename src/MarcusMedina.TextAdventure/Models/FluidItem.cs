@@ -17,15 +17,15 @@ public class FluidItem : Item, IFluid
     {
     }
 
-    public new FluidItem Description(string text)
+    public new FluidItem SetDescription(string text)
     {
-        _ = base.Description(text);
+        _ = base.SetDescription(text);
         return this;
     }
 
-    IFluid IFluid.Description(string text)
+    IFluid IFluid.SetDescription(string text)
     {
-        return Description(text);
+        return SetDescription(text);
     }
 
     public static implicit operator FluidItem((string id, string name, string description) data)

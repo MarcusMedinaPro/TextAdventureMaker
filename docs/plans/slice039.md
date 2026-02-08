@@ -208,17 +208,17 @@ public static class ConditionalExtensions
 ---
 
 ## Implementation checklist (engine)
-- [ ] `Description` property + `SetDescription(...)` on `Item`
-- [ ] `Items.CreateMany(...)` helpers
-- [ ] Inline DSL for items (`AddDSLItems`)
-- [ ] Implicit `AddItems("Sword", ...)` helpers
-- [ ] Random extensions
-- [ ] Probability extensions
-- [ ] Collection extensions
-- [ ] Time extensions
-- [ ] Console extensions (typewriter)
-- [ ] Range/Clamp extensions
-- [ ] Conditional fluent extensions
+- [x] `Description` property + `SetDescription(...)` on `Item`
+- [x] `Items.CreateMany(...)` helpers
+- [x] Inline DSL for items (`AddDSLItems`)
+- [x] Implicit `AddItems("Sword", ...)` helpers
+- [x] Random extensions
+- [x] Probability extensions
+- [x] Collection extensions
+- [x] Time extensions
+- [x] Console extensions (typewriter)
+- [x] Range/Clamp extensions
+- [x] Conditional fluent extensions
 
 ## Example checklist (docs/examples)
 - [ ] Fluent API showcase for these helpers
@@ -255,8 +255,8 @@ isFirstVisit.Then(() => ShowIntro());
 
 ### Grammar Extensions (språkberoende - kräver ILanguage override!)
 
-- [ ] `Extensions/GrammarExtensions.cs`
-- [ ] `Interfaces/IGrammarProvider.cs`
+- [x] `Extensions/GrammarExtensions.cs`
+- [x] `Interfaces/IGrammarProvider.cs`
 
 ```csharp
 public interface IGrammarProvider

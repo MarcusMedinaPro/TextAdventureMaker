@@ -7,6 +7,27 @@ namespace MarcusMedina.TextAdventure.Extensions;
 
 public static class ConsoleExtensions
 {
+    /// <summary>
+    /// VIKTIGT: Dessa extensions fungerar ENDAST med Console.Write.
+    /// Om du använder egen output-hantering, implementera IGameOutput istället.
+    /// </summary>
+    public static void TypewriterPrint(this string text, int delayMs = 50)
+    {
+        if (text == null)
+        {
+            Console.WriteLine();
+            return;
+        }
+
+        foreach (char c in text)
+        {
+            Console.Write(c);
+            Thread.Sleep(delayMs);
+        }
+
+        Console.WriteLine();
+    }
+
     public static void WriteLineC64(string? text = "")
     {
         string line = text ?? string.Empty;

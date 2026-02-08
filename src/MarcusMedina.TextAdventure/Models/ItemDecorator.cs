@@ -19,6 +19,7 @@ public abstract class ItemDecorator : IItem
 
     public virtual string Id => Inner.Id;
     public virtual string Name => Inner.Name;
+    public virtual string? Description => Inner.Description;
     public virtual IDictionary<string, string> Properties => Inner.Properties;
     public virtual bool Takeable => Inner.Takeable;
     public virtual float Weight => Inner.Weight;
@@ -43,9 +44,9 @@ public abstract class ItemDecorator : IItem
         return Inner.SetWeight(weight);
     }
 
-    public virtual IItem Description(string text)
+    public virtual IItem SetDescription(string description)
     {
-        return Inner.Description(text);
+        return Inner.SetDescription(description);
     }
 
     public virtual IItem AddAliases(params string[] aliases)

@@ -11,6 +11,7 @@ public interface IItem : IGameEntity
 {
     new string Id { get; }
     new string Name { get; }
+    string? Description { get; }
     string GetDescription();
     bool Takeable { get; }
     float Weight { get; }
@@ -30,7 +31,7 @@ public interface IItem : IGameEntity
     bool Matches(string name);
     IItem SetTakeable(bool takeable);
     IItem SetWeight(float weight);
-    IItem Description(string text);
+    IItem SetDescription(string description);
     IItem AddAliases(params string[] aliases);
     string? GetReaction(ItemAction action);
     IItem SetReaction(ItemAction action, string text);

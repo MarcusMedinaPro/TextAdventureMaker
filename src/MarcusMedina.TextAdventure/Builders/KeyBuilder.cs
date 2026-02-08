@@ -26,9 +26,9 @@ public sealed class KeyBuilder
         return new KeyBuilder(key);
     }
 
-    public KeyBuilder Description(string text)
+    public KeyBuilder SetDescription(string text)
     {
-        _ = _key.Description(text);
+        _ = _key.SetDescription(text);
         return this;
     }
 

@@ -36,9 +36,9 @@ public class Key : Item, IKey
         return this;
     }
 
-    public new Key Description(string text)
+    public new Key SetDescription(string text)
     {
-        _ = base.Description(text);
+        _ = base.SetDescription(text);
         return this;
     }
 

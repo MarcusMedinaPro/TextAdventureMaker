@@ -160,7 +160,7 @@
     "mirror": "Mirror"
   },
   "descriptions": {
-    "bedroom": "Your alarm blinks {0:D2}:{1:D2}. A coat hangs by the door.",
+    "bedroom": "Your alarm clock shows {0:D2}:{1:D2}. A coat hangs by the door.",
     "hallway": "A quiet hallway with a mirror.",
     "coffee": "A hot cup of coffee.",
     "coat": "An old coat. Best donated to a thrift shop.",

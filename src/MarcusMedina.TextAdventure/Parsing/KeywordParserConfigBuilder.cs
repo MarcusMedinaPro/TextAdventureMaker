@@ -369,6 +369,7 @@ public sealed class KeywordParserConfigBuilder
         OverrideIfPresent(provider, "load", WithLoad);
         OverrideIfPresent(provider, "quest", WithQuest);
         OverrideIfPresent(provider, "hint", WithHint);
+        OverrideIfPresent(provider, "all", WithAll);
 
         if (customHandlers != null)
         {

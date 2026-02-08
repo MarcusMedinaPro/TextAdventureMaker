@@ -13,13 +13,7 @@ JsonLanguageProvider jsonProvider = LoadLanguage(Language.DefaultLanguageCode);
 Language.SetProvider(jsonProvider);
 KeywordParser parser = BuildParser(jsonProvider);
 
-// Console setup for C64 aesthetics
-Console.BackgroundColor = ConsoleColor.DarkBlue;
-Console.ForegroundColor = ConsoleColor.Cyan;
-Console.Title = "BEFORE THE MEETING (Slice 11) - Text Adventure Sandbox";
-Console.OutputEncoding = System.Text.Encoding.UTF8;
-Console.Clear();
-// End console setup
+SetupC64("BEFORE THE MEETING (Slice 11)");
 
 WriteLineC64("=== BEFORE THE MEETING (Slice 11) ===");
 WriteLineC64($"{Language.GoalLabel} {Language.GoalIntro}");
@@ -28,6 +22,7 @@ WriteLineC64($"Language file: {Path.GetFileName(Language.GetLanguageFilePath(jso
 WriteLineC64(Language.LanguageHint);
 int hour = 8;
 int minutes = 30;
+string[] destroyPrefixes = ["destroy ", "smash ", "krossa ", "förstör ", "sla ", "slå "];
 
 ShowRoom();
 while (true)
@@ -48,7 +43,7 @@ while (true)
         continue;
     }
 
-    if (IsHelp(input))
+    if (input.IsHelpRequest())
     {
         ShowHelp();
         continue;
@@ -66,7 +61,7 @@ while (true)
 
     ICommand command = parser.Parse(input);
 
-    if (command is LookCommand look && string.IsNullOrWhiteSpace(look.Target))
+    if (command is LookCommand { Target: null or "" })
     {
         Tick_Tock_reverse();
         ShowRoom();
@@ -91,21 +86,21 @@ while (true)
 void Tick_Tock()
 {
     minutes += 1;
-    if (minutes >= 60)
-    {
-        minutes = 0;
-        hour = (hour + 1) % 24;
-    }
+    if (minutes < 60)
+        return;
+
+    minutes = 0;
+    hour = (hour + 1) % 24;
 }
 
 void Tick_Tock_reverse()
 {
     minutes -= 1;
-    if (minutes < 0)
-    {
-        minutes = 59;
-        hour = (hour + 23) % 24;
-    }
+    if (minutes >= 0)
+        return;
+
+    minutes = 59;
+    hour = (hour + 23) % 24;
 }
 
 static GameState BuildGameState()
@@ -142,41 +137,14 @@ JsonLanguageProvider LoadLanguage(string code)
 
     foreach (Location loc in state.Locations.OfType<Location>())
     {
-        string desc = provider.GetDescription(loc.Id);
-        if (!string.IsNullOrWhiteSpace(desc))
-        {
-            _ = loc.Description(desc);
-        }
-
+        ApplyDescription(loc, provider.GetDescription(loc.Id));
         foreach (Item item in loc.Items.OfType<Item>())
-        {
-            string itemDesc = provider.GetDescription(item.Id);
-            if (!string.IsNullOrWhiteSpace(itemDesc))
-            {
-                _ = item.SetDescription(itemDesc);
-            }
-
-            string translatedName = provider.GetName(item.Id);
-            if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-            {
-                _ = item.AddAliases(translatedName);
-            }
-        }
+            ApplyTranslation(item, provider);
     }
 
     foreach (Item item in state.Inventory.Items.OfType<Item>())
     {
-        string itemDesc = provider.GetDescription(item.Id);
-        if (!string.IsNullOrWhiteSpace(itemDesc))
-        {
-            _ = item.SetDescription(itemDesc);
-        }
-
-        string translatedName = provider.GetName(item.Id);
-        if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-        {
-            _ = item.AddAliases(translatedName);
-        }
+        ApplyTranslation(item, provider);
     }
 
     ApplyReaction("coat", ItemAction.TakeFailed, provider.Get("coatTakeFailed"));
@@ -184,6 +152,30 @@ JsonLanguageProvider LoadLanguage(string code)
     ApplyReaction("mirror", ItemAction.Destroy, provider.Get("mirrorDestroy"));
 
     return provider;
+}
+
+static void ApplyDescription(Location location, string description)
+{
+    if (string.IsNullOrWhiteSpace(description))
+        return;
+
+    _ = location.Description(description);
+}
+
+static void ApplyTranslation(Item item, JsonLanguageProvider provider)
+{
+    string itemDesc = provider.GetDescription(item.Id);
+    if (!string.IsNullOrWhiteSpace(itemDesc))
+        _ = item.SetDescription(itemDesc);
+
+    string translatedName = provider.GetName(item.Id);
+    if (string.IsNullOrWhiteSpace(translatedName))
+        return;
+
+    if (translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+        return;
+
+    _ = item.AddAliases(translatedName);
 }
 
 void ApplyReaction(string itemId, ItemAction action, string reaction)
@@ -220,17 +212,10 @@ static KeywordParser BuildParser(JsonLanguageProvider provider)
 void DisplayResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
-    {
         WriteLineC64(TranslateDirectionsInMessage(result.Message));
-    }
 
-    foreach (string reaction in result.ReactionsList)
-    {
-        if (!string.IsNullOrWhiteSpace(reaction))
-        {
-            WriteLineC64($"> {reaction}");
-        }
-    }
+    foreach (string reaction in result.ReactionsList.Where(r => !string.IsNullOrWhiteSpace(r)))
+        WriteLineC64($"> {reaction}");
 }
 
 string TranslateDirectionsInMessage(string message)
@@ -252,32 +237,13 @@ void ShowRoom()
     ILocation location = state.CurrentLocation;
     WriteLineC64();
     WriteLineC64($"{Language.RoomLabel} {jsonProvider.GetName(location.Id)}");
-    string desc = string.Format(location.GetDescription(), hour, minutes);
-    WriteLineC64($"{Language.RoomDescriptionLabel} {desc}");
-
-    List<string> items = location.GetRoomItems(showAll: false);
-    string itemsLabel = Language.ItemsHereLabel.TrimEnd();
-    WriteLineC64(items.Count > 0
-        ? $"{itemsLabel} {items.CommaJoin()}"
-        : $"{itemsLabel} {Language.None}");
-
-    List<string> exits = location.GetRoomExits();
-    string exitsLabel = Language.ExitsLabel.TrimEnd();
-    WriteLineC64(exits.Count > 0
-        ? $"{exitsLabel} {exits.CommaJoin()}"
-        : $"{exitsLabel} {Language.None}");
+    WriteLineC64($"{Language.RoomDescriptionLabel} {string.Format(location.GetDescription(), hour, minutes)}");
+    WriteLineC64(FormatRoomLine(Language.ItemsHereLabel, location.GetRoomItems(showAll: false)));
+    WriteLineC64(FormatRoomLine(Language.ExitsLabel, location.GetRoomExits()));
 }
 
-
-static void ShowHelp()
-{
+static void ShowHelp() =>
     WriteLineC64("Commands: look, take, go <direction>, inventory, save, load, language/lang <code>, quit");
-}
-
-static bool IsHelp(string input)
-{
-    return input.Lower() is "help" or "halp" or "?";
-}
 
 
 bool TryHandleLanguageSwitch(string input)
@@ -323,30 +289,20 @@ bool TryHandleLocalActions(string input)
 {
     string trimmed = input.Trim();
     if (string.IsNullOrWhiteSpace(trimmed))
-    {
         return false;
-    }
 
     string lower = trimmed.Lower();
     if (!IsDestroyCommand(lower))
-    {
         return false;
-    }
 
     string[] parts = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
     if (parts.Length < 2)
-    {
-        WriteLineC64(Language.NothingToLookAt);
-        return true;
-    }
+        return HandleMissingTarget();
 
     string target = parts[1];
     IItem? item = state.CurrentLocation.FindItem(target) ?? state.Inventory.FindItem(target);
     if (item == null)
-    {
-        WriteLineC64(Language.NoSuchItemHere);
-        return true;
-    }
+        return HandleNoItemHere();
 
     string? reaction = item.GetReaction(ItemAction.Destroy);
     WriteLineC64(string.IsNullOrWhiteSpace(reaction)
@@ -355,14 +311,9 @@ bool TryHandleLocalActions(string input)
     return true;
 }
 
-static bool IsDestroyCommand(string input)
+bool IsDestroyCommand(string input)
 {
-    return input.StartsWith("destroy ")
-        || input.StartsWith("smash ")
-        || input.StartsWith("krossa ")
-        || input.StartsWith("förstör ")
-        || input.StartsWith("sla ")
-        || input.StartsWith("slå ");
+    return destroyPrefixes.Any(prefix => input.StartsWithIgnoreCase(prefix));
 }
 
 static bool IsLanguageCommand(string token)
@@ -373,4 +324,24 @@ static bool IsLanguageCommand(string token)
 static bool ShouldShowRoom(ICommand command, CommandResult result)
 {
     return result.Success && !result.ShouldQuit && command is GoCommand or MoveCommand or LoadCommand;
+}
+
+string FormatRoomLine(string label, IReadOnlyCollection<string> values)
+{
+    string trimmedLabel = label.TrimEnd();
+    return values.Count > 0
+        ? $"{trimmedLabel} {values.CommaJoin()}"
+        : $"{trimmedLabel} {Language.None}";
+}
+
+bool HandleMissingTarget()
+{
+    WriteLineC64(Language.NothingToLookAt);
+    return true;
+}
+
+bool HandleNoItemHere()
+{
+    WriteLineC64(Language.NoSuchItemHere);
+    return true;
 }

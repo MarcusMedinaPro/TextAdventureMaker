@@ -160,7 +160,7 @@
     "mirror": "Spegel"
   },
   "descriptions": {
-    "bedroom": "Ditt alarm blinkar {0:D2}:{1:D2}. En kappa hänger vid dörren.",
+    "bedroom": "Din väckarklocka visar {0:D2}:{1:D2}. En kappa hänger vid dörren.",
     "hallway": "En tyst korridor med en spegel.",
     "coffee": "En het kopp kaffe.",
     "coat": "En gammal kappa. Bäst att skänka den till en second hand-butik.",

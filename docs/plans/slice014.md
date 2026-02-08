@@ -11,10 +11,10 @@
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IStoryLogger`
-- [ ] `IDevLogger`
-- [ ] Story log writer (saga output)
-- [ ] Dev/debug logger (position/state)
+- [x] `IStoryLogger`
+- [x] `IDevLogger`
+- [x] Story log writer (saga output)
+- [x] Dev/debug logger (position/state)
 
 ## Example checklist (docs/examples)
 - [ ] Story logger demo

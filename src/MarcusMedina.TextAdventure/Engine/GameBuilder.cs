@@ -20,6 +20,8 @@ public sealed class GameBuilder
     private ITimeSystem? _timeSystem;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
+    private IStoryLogger? _storyLogger;
+    private IDevLogger? _devLogger;
 
     public static GameBuilder Create()
     {
@@ -114,6 +116,18 @@ public sealed class GameBuilder
         return this;
     }
 
+    public GameBuilder UseStoryLogger(IStoryLogger logger)
+    {
+        _storyLogger = logger ?? throw new ArgumentNullException(nameof(logger));
+        return this;
+    }
+
+    public GameBuilder UseDevLogger(IDevLogger logger)
+    {
+        _devLogger = logger ?? throw new ArgumentNullException(nameof(logger));
+        return this;
+    }
+
     public Game Build()
     {
         ICommandParser parser = _parser ?? throw new InvalidOperationException("Parser must be provided.");
@@ -139,6 +153,16 @@ public sealed class GameBuilder
         foreach (Action<Game, ICommand, CommandResult> handler in _turnEndHandlers)
         {
             game.AddTurnEndHandler(handler);
+        }
+
+        if (_storyLogger != null)
+        {
+            game.AddTurnEndHandler((g, command, result) => _storyLogger.LogTurn(g.State, command, result));
+        }
+
+        if (_devLogger != null)
+        {
+            game.AddTurnEndHandler((g, command, result) => _devLogger.LogTurn(g.State, command, result));
         }
 
         return game;

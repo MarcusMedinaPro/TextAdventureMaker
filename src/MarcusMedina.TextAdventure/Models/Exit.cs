@@ -15,6 +15,7 @@ public class Exit
     public bool IsHidden { get; private set; }
     public bool IsDiscovered { get; private set; } = true;
     public Func<IGameState, bool>? DiscoverCondition { get; private set; }
+    public int? PerceptionDifficulty { get; private set; }
 
     public bool IsPassable => Door == null || Door.IsPassable;
     public bool IsVisible => !IsHidden || IsDiscovered;
@@ -35,11 +36,31 @@ public class Exit
         return this;
     }
 
+    public Exit WithPerceptionCheck(int difficulty)
+    {
+        PerceptionDifficulty = Math.Clamp(difficulty, 1, 100);
+        return this;
+    }
+
     public bool TryDiscover(IGameState state)
     {
         if (!IsHidden || IsDiscovered)
         {
             return false;
+        }
+
+        if (DiscoverCondition != null && !DiscoverCondition(state))
+        {
+            return false;
+        }
+
+        if (PerceptionDifficulty.HasValue)
+        {
+            int roll = Random.Shared.Next(1, 101);
+            if (roll < PerceptionDifficulty.Value)
+            {
+                return false;
+            }
         }
 
         if (DiscoverCondition == null || DiscoverCondition(state))

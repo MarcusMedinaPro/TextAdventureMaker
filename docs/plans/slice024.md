@@ -23,8 +23,8 @@ location.AddHiddenExit(Direction.East, secretCave)
 - [x] `ILocationDiscoverySystem` + `LocationDiscoverySystem`
 - [x] Track discovered locations via events
 - [x] Hidden exits with discovery conditions
-- [ ] Perception checks
-- [ ] Fog of war
+- [x] Perception checks
+- [x] Fog of war
 
 ## Example checklist (docs/examples)
 - [x] Discovery tracking demo (`24_Missed_Train.md`)

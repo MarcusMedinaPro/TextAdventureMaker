@@ -28,9 +28,9 @@ scene.Play();  // All dialog/events körs automatiskt
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IScene`
-- [ ] Scene beats + scripted playback
-- [ ] Transitions based on player actions
+- [x] `IScene`
+- [x] Scene beats + scripted playback
+- [x] Transitions based on player actions
 
 ## Example checklist (docs/examples)
 - [ ] Scene transitions demo

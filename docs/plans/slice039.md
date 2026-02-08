@@ -221,7 +221,7 @@ public static class ConditionalExtensions
 - [x] Conditional fluent extensions
 
 ## Example checklist (docs/examples)
-- [ ] Fluent API showcase for these helpers
+- [x] Fluent API showcase for these helpers (`docs/examples/Extensions_Helper_Methods.md`)
 
 public class ConditionalResult<T>
 {

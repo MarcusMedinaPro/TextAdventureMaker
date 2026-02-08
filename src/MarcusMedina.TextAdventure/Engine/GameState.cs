@@ -29,6 +29,7 @@ public class GameState : IGameState
     public IPathfinder Pathfinder { get; private set; }
     public ILocationDiscoverySystem LocationDiscovery { get; private set; }
     public IForeshadowingSystem Foreshadowing { get; private set; }
+    public INarrativeVoiceSystem NarrativeVoice { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IQuestLog Quests { get; }
@@ -55,6 +56,7 @@ public class GameState : IGameState
         IPathfinder? pathfinder = null,
         ILocationDiscoverySystem? locationDiscovery = null,
         IForeshadowingSystem? foreshadowingSystem = null,
+        INarrativeVoiceSystem? narrativeVoiceSystem = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
         IEnumerable<ILocation>? worldLocations = null)
@@ -72,6 +74,7 @@ public class GameState : IGameState
         Pathfinder = pathfinder ?? new AStarPathfinder();
         LocationDiscovery = locationDiscovery ?? new LocationDiscoverySystem();
         Foreshadowing = foreshadowingSystem ?? new ForeshadowingSystem();
+        NarrativeVoice = narrativeVoiceSystem ?? new NarrativeVoiceSystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
@@ -170,6 +173,16 @@ public class GameState : IGameState
         }
 
         Foreshadowing = foreshadowingSystem;
+    }
+
+    public void SetNarrativeVoiceSystem(INarrativeVoiceSystem narrativeVoiceSystem)
+    {
+        if (narrativeVoiceSystem == null)
+        {
+            return;
+        }
+
+        NarrativeVoice = narrativeVoiceSystem;
     }
 
     public GameMemento CreateMemento()

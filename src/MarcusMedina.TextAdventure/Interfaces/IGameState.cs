@@ -25,6 +25,7 @@ public interface IGameState
     IPathfinder Pathfinder { get; }
     ILocationDiscoverySystem LocationDiscovery { get; }
     IForeshadowingSystem Foreshadowing { get; }
+    INarrativeVoiceSystem NarrativeVoice { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }
     /// <summary>Quest log for tracking active and completed quests.</summary>

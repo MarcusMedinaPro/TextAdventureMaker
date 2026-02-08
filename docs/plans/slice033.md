@@ -23,10 +23,10 @@ game.SetNarrativeVoice(Voice.SecondPerson)
 ---
 
 ## Implementation checklist (engine)
-- [ ] Narrative voice enum (1st/2nd/3rd)
-- [ ] Tense enum (past/present)
-- [ ] Voice/tense transforms for descriptions
-- [ ] Flashback support
+- [x] Narrative voice enum (1st/2nd/3rd)
+- [x] Tense enum (past/present)
+- [x] Voice/tense transforms for descriptions
+- [x] Flashback support
 
 ## Example checklist (docs/examples)
 - [ ] Narrative voice demo

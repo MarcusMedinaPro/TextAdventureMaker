@@ -20,6 +20,7 @@ public sealed class GameBuilder
     private ITimeSystem? _timeSystem;
     private IPathfinder? _pathfinder;
     private IForeshadowingSystem? _foreshadowingSystem;
+    private INarrativeVoiceSystem? _narrativeVoiceSystem;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -81,6 +82,12 @@ public sealed class GameBuilder
     public GameBuilder UseForeshadowingSystem(IForeshadowingSystem foreshadowingSystem)
     {
         _foreshadowingSystem = foreshadowingSystem ?? throw new ArgumentNullException(nameof(foreshadowingSystem));
+        return this;
+    }
+
+    public GameBuilder UseNarrativeVoiceSystem(INarrativeVoiceSystem narrativeVoiceSystem)
+    {
+        _narrativeVoiceSystem = narrativeVoiceSystem ?? throw new ArgumentNullException(nameof(narrativeVoiceSystem));
         return this;
     }
 
@@ -167,6 +174,11 @@ public sealed class GameBuilder
             state.SetForeshadowingSystem(_foreshadowingSystem);
         }
 
+        if (_narrativeVoiceSystem != null)
+        {
+            state.SetNarrativeVoiceSystem(_narrativeVoiceSystem);
+        }
+
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
         foreach (Action<Game> handler in _turnStartHandlers)
@@ -210,6 +222,7 @@ public sealed class GameBuilder
             timeSystem: _timeSystem,
             pathfinder: _pathfinder,
             foreshadowingSystem: _foreshadowingSystem,
+            narrativeVoiceSystem: _narrativeVoiceSystem,
             worldLocations: allLocations);
     }
 }

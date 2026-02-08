@@ -20,9 +20,9 @@ game.AddStoryBranch("dragon_path")
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IStoryBranch` + `IConsequence`
-- [ ] `StoryState` tracking active/completed branches
-- [ ] Branching conditions + consequences API
+- [x] `IStoryBranch` + `IConsequence`
+- [x] `StoryState` tracking active/completed branches
+- [x] Branching conditions + consequences API
 
 ## Example checklist (docs/examples)
 - [ ] Branching endings demo

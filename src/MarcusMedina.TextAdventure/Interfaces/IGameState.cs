@@ -28,6 +28,7 @@ public interface IGameState
     ISaveSystem SaveSystem { get; }
     /// <summary>Quest log for tracking active and completed quests.</summary>
     IQuestLog Quests { get; }
+    StoryState Story { get; }
     bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     /// <summary>Enable fuzzy matching for commands and targets.</summary>

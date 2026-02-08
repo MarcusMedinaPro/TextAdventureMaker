@@ -31,6 +31,7 @@ public class GameState : IGameState
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IQuestLog Quests { get; }
+    public StoryState Story { get; }
     private readonly NpcTriggerSystem _npcTriggers = new();
     public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
@@ -71,6 +72,7 @@ public class GameState : IGameState
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
+        Story = new StoryState();
 
         RegisterLocations(worldLocations ?? new[] { startLocation });
         if (LocationDiscovery is LocationDiscoverySystem discovery)

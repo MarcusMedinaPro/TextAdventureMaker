@@ -70,9 +70,43 @@ public class Location : ILocation
         return this;
     }
 
+    public Location AddHiddenExit(Direction direction, ILocation target, Func<IGameState, bool>? discoverCondition = null, bool oneWay = false)
+    {
+        Exit exit = new Exit(target, null, oneWay).MarkHidden(discoverCondition);
+        _exits[direction] = exit;
+
+        if (!oneWay && target is Location targetLoc)
+        {
+            Direction opposite = DirectionHelper.GetOpposite(direction);
+            Exit backExit = new Exit(this).MarkHidden(discoverCondition);
+            targetLoc._exits[opposite] = backExit;
+        }
+
+        return this;
+    }
+
     public Exit? GetExit(Direction direction)
     {
-        return _exits.TryGetValue(direction, out Exit? exit) ? exit : null;
+        if (!_exits.TryGetValue(direction, out Exit? exit))
+        {
+            return null;
+        }
+
+        return exit.IsVisible ? exit : null;
+    }
+
+    public bool DiscoverHiddenExits(IGameState state)
+    {
+        bool discoveredAny = false;
+        foreach (Exit exit in _exits.Values)
+        {
+            if (exit.TryDiscover(state))
+            {
+                discoveredAny = true;
+            }
+        }
+
+        return discoveredAny;
     }
 
     public void AddItem(IItem item)

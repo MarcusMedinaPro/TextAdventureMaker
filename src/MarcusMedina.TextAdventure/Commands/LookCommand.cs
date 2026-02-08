@@ -32,6 +32,7 @@ public class LookCommand : ICommand
 
         string description = location.GetDescription();
         IEnumerable<KeyValuePair<Direction, Exit>> exitsSource = location.Exits
+            .Where(e => e.Value.IsVisible)
             .Where(e => !context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly ||
                         e.Value.Door == null ||
                         e.Value.Door.State != DoorState.Locked);

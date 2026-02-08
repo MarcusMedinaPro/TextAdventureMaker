@@ -22,7 +22,7 @@ location.AddHiddenExit(Direction.East, secretCave)
 ## Implementation checklist (engine)
 - [x] `ILocationDiscoverySystem` + `LocationDiscoverySystem`
 - [x] Track discovered locations via events
-- [ ] Hidden exits with discovery conditions
+- [x] Hidden exits with discovery conditions
 - [ ] Perception checks
 - [ ] Fog of war
 

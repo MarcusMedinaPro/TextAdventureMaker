@@ -23,6 +23,48 @@ _Slice tag: Slice 36 — Hero Journey (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Glade    │
+└─────┬──────┘
+      │
+┌────────────┐
+│ Deep Wood  │
+│    Sh      │
+└─────┬──────┘
+      │
+┌────────────┐
+│ Threshold  │◀── Gate
+│    Rb      │
+└─────┬──────┘
+      │
+┌────────────┐
+│   Lane     │
+│    K       │
+└─────┬──────┘
+      │
+┌────────────┐
+│  Cottage   │
+│    L       │
+└────────────┘
+      │ (one-way)
+      ▼
+┌────────────┐
+│ ReturnRoad │
+└────────────┘
+
+L = Letter
+K = Iron key
+Rb = Ribbon
+Sh = Shard
+Gate = Iron gate (door)
+```
+
     ## Example (detailed setup)
 
 ```csharp

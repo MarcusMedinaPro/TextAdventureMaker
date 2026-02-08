@@ -21,6 +21,22 @@ _Slice tag: Slice 36 — Familiar to Foreign (Creepypasta style, British English
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐     ┌────────────┐
+│ HomeStreet │─────│  Passage   │─────│ ForeignSt  │
+│    T       │  E  │    M       │  E  │ Stranger   │
+└────────────┘     └────────────┘     └────────────┘
+
+T = Ticket
+M = Map
+Stranger = NPC
+```
+
     ## Example (detailed setup)
 
 ```csharp

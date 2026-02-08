@@ -8,6 +8,33 @@ _Slice tag: Slice 25 — Staged access, check-in, and results flow._
 3) Wait to be called.
 4) Receive results in the exam room.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Exam Room  │
+│    R       │
+└─────┬──────┘
+      │
+      │
+┌────────────┐     ┌────────────┐
+│ Reception  │─────│ WaitingRm  │
+│     F      │  E  │     M      │
+└─────┬──────┘     └────────────┘
+      │
+      │
+┌────────────┐
+│ Entrance   │
+└────────────┘
+
+F = Forms
+M = Magazine
+R = Results
+```
+
 ## Example (check-in flow)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

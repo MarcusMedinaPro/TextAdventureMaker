@@ -8,6 +8,27 @@ _Slice tag: Slice 23 — Structured dialog. Demo focuses on a formal interview f
 3) Answer questions.
 4) Handle nerves.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Interview  │
+│   Room     │
+│ Interviewer│
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Lobby    │
+│            │
+└────────────┘
+
+Interviewer = NPC
+```
+
 ## Example (dialog choices)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

@@ -8,6 +8,21 @@ _Slice tag: Slice 12 — DSL Parser (.adventure). Demo focuses on loading a worl
 3) Open the gate.
 4) Step onto the clockwork ferry.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│    Dock    │─────│   Ferry    │
+│   T, G     │  In │            │
+└────────────┘     └────────────┘
+
+T = Brass token
+G = Iron gate (door)
+```
+
 ## Example (.adventure)
 ```text
 world: Clockwork Dock

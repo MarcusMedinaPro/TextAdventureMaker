@@ -21,6 +21,34 @@ _Slice tag: Slice 36 — Caretaker Arc (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Landing   │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Hall     │─────┐
+│ Caretaker  │  N  │
+└────────────┘     │
+                   │
+               ┌────────────┐
+               │   Store    │
+               │ O, L, W, F │
+               └────────────┘
+
+O = Oil
+L = Lamp
+W = Wire
+F = Fuse
+Caretaker = NPC
+```
+
     ## Example (detailed setup)
 
 ```csharp

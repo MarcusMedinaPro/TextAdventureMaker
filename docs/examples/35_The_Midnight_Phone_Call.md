@@ -8,6 +8,21 @@ _Slice tag: Slice 35 — Remote dialog + branching response._
 3) Respond to the caller.
 4) End the call.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Bedroom   │
+│  Phone, C  │
+└────────────┘
+
+Phone = Landline
+C = Caller (NPC)
+```
+
 ## Example (midnight call)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

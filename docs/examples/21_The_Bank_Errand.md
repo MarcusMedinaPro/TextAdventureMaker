@@ -8,6 +8,27 @@ _Slice tag: Slice 21 — Transaction flow. Demo focuses on a small stateful inte
 3) Wait for your turn.
 4) Resolve a simple issue.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Counter   │
+│  Teller    │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Lobby    │
+│     T      │
+└────────────┘
+
+T = Ticket
+Teller = NPC
+```
+
 ## Example (dialog + state checks)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

@@ -21,6 +21,28 @@ _Slice tag: Slice 42 — Theme Arc Trust (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Porch    │
+│     N      │
+└─────┬──────┘
+      │
+┌────────────┐
+│  Hallway   │
+│   K  L     │
+└────────────┘
+
+K = Front key
+L = Letter
+N = Neighbour
+```
+
     ## Example (detailed setup)
 
 ```csharp

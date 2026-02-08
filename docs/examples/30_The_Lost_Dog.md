@@ -8,6 +8,21 @@ _Slice tag: Slice 30 — Multi-location follow + rescue + payoff._
 3) Approach the dog.
 4) Decide what to do next.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│    Park    │─────│ NightStreet│
+│  F, Dog    │  E  │            │
+└────────────┘     └────────────┘
+
+F = Flyer
+Dog = NPC
+```
+
 ## Example (lost dog)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

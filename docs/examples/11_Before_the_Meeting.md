@@ -8,6 +8,22 @@ _Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swappin
 3) Find your notes.
 4) Leave for the meeting.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Bedroom   │─────│  Hallway   │
+│  C, Co*    │     │   M*       │
+└────────────┘     └────────────┘
+
+C = Coffee
+Co* = Coat (hidden)
+M* = Mirror (hidden)
+```
+
 ## Example (swap language at runtime)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

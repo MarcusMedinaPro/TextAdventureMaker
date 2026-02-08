@@ -4,6 +4,44 @@ _Slice tag: Slice 4–10 — Foundation demo spanning items, inventory, reaction
 
 This version uses the core API and fluent methods, but **no implicit operators**, **no helper shortcuts**, and **no extensions**.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌──────────┐            ┌──────────┐
+│   Shed   │            │ DeepCave │
+│   Sh     │            │          │
+└────┬─────┘            └────┬─────┘
+     │                       │
+┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│  Cabin   │──│ Clearing │──│  Forest  │──│   Cave   │
+│  Np      │  │ Sw,G,Tm  │  │ A,F,L,SK │  │ K,Lt     │
+└──────────┘  └──────────┘  └────┬─────┘  └──────────┘
+                                │
+                                │
+                           ┌──────────┐
+                           │ Entrance │
+                           │ I,Sg,Mp  │
+                           └──────────┘
+
+I = Ice
+Sg = Sign
+Mp = Map
+A = Apple
+F = Fire
+L = Lantern
+SK = Shed key
+Sw = Sword
+G = Glass
+Tm = Tome
+K = Cabin key
+Lt = Letter
+Np = Newspaper
+Sh = Shovel
+```
+
 ```csharp
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;

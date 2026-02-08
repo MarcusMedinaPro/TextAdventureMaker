@@ -20,6 +20,25 @@ _Slice tag: Slice 36 — Framed Narrative (Me-Them-Me) (Creepypasta style, Briti
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Studio    │─────│  Gallery   │
+│            │  E  │  Critic    │
+└────────────┘     └─────┬──────┘
+                          │ (one-way)
+                          ▼
+                     ┌────────────┐
+                     │ StudioAgain│
+                     └────────────┘
+
+Critic = NPC
+```
+
     ## Example (detailed setup)
 
 ```csharp

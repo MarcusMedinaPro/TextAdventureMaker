@@ -22,6 +22,28 @@ _Slice tag: Slice 36 — Tragic Arc (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Sealed Room│
+│            │
+└─────┬──────┘
+      │
+┌────────────┐      ┌────────────┐
+│  Corridor  │──────│   Study    │
+│     W      │      │    K J     │
+└────────────┘      └────────────┘
+
+K = Brass key
+J = Journal
+W = Warden
+```
+
     ## Example (detailed setup)
 
 ```csharp

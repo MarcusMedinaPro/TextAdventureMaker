@@ -8,6 +8,21 @@ _Slice tag: Slice 19 — Dialog choices + small consequences. Demo focuses on co
 3) Order coffee.
 4) Decide whether to ask for a second date.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│    Café    │
+│  Date, M   │
+└────────────┘
+
+Date = NPC
+M = Menu
+```
+
 ## Example (NPC dialog)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

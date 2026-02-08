@@ -21,6 +21,32 @@ _Slice tag: Slice 36 — Layered Stories (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Hall     │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│  Parlour   │
+│    Wp      │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│  Cellar    │
+│    D       │
+└────────────┘
+
+Wp = Wallpaper strip
+D = Diary
+```
+
     ## Example (detailed setup)
 
 ```csharp

@@ -8,6 +8,21 @@ _Slice tag: Slice 15 — Combat as Struggle + Fluent setup. Demo focuses on a si
 3) The leak worsens.
 4) Endure until it passes.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Attic    │
+│  B, Storm  │
+└────────────┘
+
+B = Bucket
+Storm = NPC
+```
+
 ## Example (fluent combat loop)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

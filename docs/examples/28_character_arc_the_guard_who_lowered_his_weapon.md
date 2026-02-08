@@ -21,6 +21,27 @@ _Slice tag: Slice 28 — Character Arc (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Checkpoint │
+│     B G    │
+└─────┬──────┘
+      │
+┌────────────┐
+│    Yard    │
+│            │
+└────────────┘
+
+B = Old badge
+G = Guard
+```
+
     ## Example (detailed setup)
 
 ```csharp

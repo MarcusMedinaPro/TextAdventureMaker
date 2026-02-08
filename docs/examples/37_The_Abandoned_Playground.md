@@ -8,6 +8,22 @@ _Slice tag: Slice 37 — Atmosphere and delayed reveals._
 3) Find a lost toy.
 4) Decide whether to take it.
 
+## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Playground │
+│   S  T     │
+└────────────┘
+
+S = Swing (fixed)
+T = Stuffed toy
+```
+
 ## Example (playground)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

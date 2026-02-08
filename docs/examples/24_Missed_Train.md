@@ -8,6 +8,30 @@ _Slice tag: Slice 24 — Path choice + alternate routes. Demo focuses on choosin
 3) Choose an alternate route.
 4) Leave via bus or footbridge.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Platform  │
+└─────┬──────┘
+      │
+      │
+┌────────────┐     ┌────────────┐
+│   Hall     │─────│ Side Street│
+│     M      │  E  │            │
+└────────────┘     └─────┬──────┘
+                          │
+                          │
+                    ┌────────────┐
+                    │ Footbridge │
+                    └────────────┘
+
+M = Map
+```
+
 ## Example (route choice)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

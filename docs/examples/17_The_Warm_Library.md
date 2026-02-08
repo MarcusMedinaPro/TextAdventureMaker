@@ -8,6 +8,20 @@ _Slice tag: Slice 17 — Calm progression. Demo focuses on a locked door and a c
 3) Unlock the door.
 4) Step into the warmth.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Outside   │─────│  Library   │
+│     K      │  In │            │
+└────────────┘     └────────────┘
+
+K = Library key
+```
+
 ## Example (fluent, minimal loop)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

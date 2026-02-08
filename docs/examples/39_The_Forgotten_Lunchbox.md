@@ -8,6 +8,22 @@ _Slice tag: Slice 39 — Memory loop + retrieval._
 3) Spot the forgotten lunchbox.
 4) Decide what to do with it.
 
+## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Cafeteria  │
+│   L  J     │
+└────────────┘
+
+J = Janitor
+L = Lunchbox
+```
+
 ## Example (lunchbox)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

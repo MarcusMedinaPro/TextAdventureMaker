@@ -8,6 +8,21 @@ _Slice tag: Slice 31 — Navigation + alarm constraint._
 3) Get the classroom key.
 4) Unlock the classroom.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐     ┌────────────┐
+│  Security  │─────│  Hallway   │─────│ Classroom  │
+│     K      │  E  │   Guard    │  E  │   (Door)   │
+└────────────┘     └────────────┘     └────────────┘
+
+K = Classroom key
+Guard = NPC
+```
+
 ## Example (locked classroom)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

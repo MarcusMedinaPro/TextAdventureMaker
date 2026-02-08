@@ -8,6 +8,28 @@ _Slice tag: Slice 18 — Quiet prep scene. Demo focuses on small actions and atm
 3) Check yourself in the mirror.
 4) Head into the meeting.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Meeting   │
+│     M      │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Office   │
+│   C, P     │
+└────────────┘
+
+C = Coffee
+P = Papers
+M = Mirror
+```
+
 ## Example (fluent setup)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

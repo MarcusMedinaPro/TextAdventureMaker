@@ -8,6 +8,28 @@ _Slice tag: Slice 34 — Light/dark gating + sequential fixes._
 3) Reach the utility room.
 4) Flip the breaker.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Dark Hall  │─────┐
+│    F       │  E  │
+└─────┬──────┘     │
+      │            │
+      │            │
+┌────────────┐  ┌────────────┐
+│Maintenance │  │ UtilityRm  │
+│            │  │  Br, Tech  │
+└────────────┘  └────────────┘
+
+F = Flashlight
+Br = Breaker box
+Tech = Technician (NPC)
+```
+
 ## Example (power restore)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

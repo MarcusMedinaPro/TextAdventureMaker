@@ -8,6 +8,21 @@ _Slice tag: Slice 16 — Quest System + Fluent flow. Demo focuses on a short que
 3) Recall the password.
 4) Log in.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Office   │
+│  N, T      │
+└────────────┘
+
+N = Note
+T = Terminal
+```
+
 ## Example (quest + custom input)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

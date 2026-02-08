@@ -8,6 +8,21 @@ _Slice tag: Slice 20 — Extra Properties on Entities. Demo focuses on attaching
 3) After unlocking, the hint changes.
 4) A coffee cup's hint changes when used.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│    Room    │─────│   Hall     │
+│  K, C      │  Out│            │
+└────────────┘     └────────────┘
+
+K = Key
+C = Coffee cup
+```
+
 ## Example (properties + dynamic hints)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

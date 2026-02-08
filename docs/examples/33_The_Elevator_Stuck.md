@@ -8,6 +8,26 @@ _Slice tag: Slice 33 — Limited space, stress, and communication._
 3) Use the intercom.
 4) Wait for help.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Elevator   │─────┐
+│  Btn, Op   │  E  │
+└─────┬──────┘     │
+      │            │
+      │            │
+┌────────────┐  ┌────────────┐
+│   Lobby    │  │Maintenance │
+└────────────┘  └────────────┘
+
+Btn = Emergency button
+Op = Operator (NPC)
+```
+
 ## Example (stuck elevator)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

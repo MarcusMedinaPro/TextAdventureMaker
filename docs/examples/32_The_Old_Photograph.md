@@ -8,6 +8,28 @@ _Slice tag: Slice 32 — Clue chain to meaning._
 3) Discover an old photograph.
 4) Follow the clue to a family room.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Archive   │─────┐
+│  Photo, Ar │     │
+└─────┬──────┘     │
+      │            │
+      │            │
+┌────────────┐  ┌────────────┐
+│ Classroom  │  │ FamilyRoom │
+│            │  │     Al     │
+└────────────┘  └────────────┘
+
+Photo = Photograph
+Ar = Archivist (NPC)
+Al = Album
+```
+
 ## Example (photograph clue)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

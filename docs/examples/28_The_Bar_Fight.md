@@ -8,6 +8,29 @@ _Slice tag: Slice 28 — Escalation + de-escalation choice._
 3) Choose to calm things down or escalate.
 4) Leave the bar.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│    Bar     │
+│  St, G     │
+│  Bnc, Brw  │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Alley    │
+└────────────┘
+
+St = Stool
+G = Glass
+Bnc = Bouncer (NPC)
+Brw = Brawler (NPC)
+```
+
 ## Example (tension choice)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

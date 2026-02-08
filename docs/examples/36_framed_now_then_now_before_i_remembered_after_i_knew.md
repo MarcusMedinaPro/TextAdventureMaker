@@ -20,6 +20,30 @@ _Slice tag: Slice 36 — Framed Narrative (Now-Then-Now) (Creepypasta style, Bri
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Memory    │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│ Present    │
+│    P       │
+└─────┬──────┘
+      │ (one-way)
+      ▼
+┌────────────┐
+│  Return    │
+└────────────┘
+
+P = Photograph
+```
+
     ## Example (detailed setup)
 
 ```csharp

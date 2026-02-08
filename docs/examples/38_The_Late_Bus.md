@@ -8,6 +8,22 @@ _Slice tag: Slice 38 — Waiting loop + alternative decision._
 3) Decide to wait or leave.
 4) Choose another path.
 
+## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Bus Stop  │
+│   D  C     │
+└────────────┘
+
+C = Commuter
+D = Arrival display
+```
+
 ## Example (late bus)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

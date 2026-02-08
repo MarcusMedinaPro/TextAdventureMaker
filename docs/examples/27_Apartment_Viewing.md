@@ -8,6 +8,22 @@ _Slice tag: Slice 27 — Questions + reveal loop._
 3) Inspect the flat.
 4) Ask questions and decide.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐     ┌────────────┐
+│   Lobby    │─────│    Unit    │─────│  Balcony   │
+│     B      │  In │  I, Agent  │  E  │            │
+└────────────┘     └────────────┘     └────────────┘
+
+B = Brochure
+I = Inspection list
+Agent = NPC
+```
+
 ## Example (agent questions)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

@@ -8,6 +8,23 @@ _Slice tag: Slice 26 — Chain of dependencies (tools, phone, fix)._
 3) Get the right tools.
 4) Attempt the fix.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│ Roadside   │─────│ Gas Station│
+│    P       │  E  │  W, J, Mech│
+└────────────┘     └────────────┘
+
+P = Phone
+W = Wrench
+J = Jack
+Mech = Mechanic (NPC)
+```
+
 ## Example (tool chain)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

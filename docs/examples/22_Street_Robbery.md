@@ -7,6 +7,28 @@ _Slice tag: Slice 22 — Threat + branching response. Demo focuses on a simple c
 2) A threat blocks your path.
 3) Choose to flee, fight, or talk.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Street   │
+│ Passerby   │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Alley    │
+│  Coin, Mug │
+└────────────┘
+
+Coin = Coin
+Mug = Mugger (NPC)
+Passerby = NPC
+```
+
 ## Example (combat or talk)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

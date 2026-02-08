@@ -8,6 +8,27 @@ _Slice tag: Slice 29 — Tension + risk assessment beats._
 3) Decide how to handle the tension.
 4) Reach home.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+                    ┌────────────┐
+                    │ FrontPorch │
+                    └─────┬──────┘
+                          │
+                          │
+┌────────────┐     ┌────────────┐     ┌────────────┐
+│  Bar Alley │─────│ NightStreet│─────│ Underpass  │
+│            │  E  │  L, Str    │  E  │     W      │
+└────────────┘     └────────────┘     └────────────┘
+
+L = Streetlight
+W = Whistle
+Str = Stranger (NPC)
+```
+
 ## Example (night walk)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

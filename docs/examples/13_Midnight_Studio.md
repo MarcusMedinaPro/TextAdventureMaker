@@ -8,6 +8,20 @@ _Slice tag: Slice 13 — GameBuilder + Game loop (NPC ticks). Demo focuses on fl
 3) You find a sketchbook.
 4) You leave with a new idea.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Studio    │─────│  Hallway   │
+│    Cat     │  Out│            │
+└────────────┘     └────────────┘
+
+Cat = NPC (patrols)
+```
+
 ## Example (GameBuilder)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

@@ -21,6 +21,29 @@ _Slice tag: Slice 36 — Ensemble Journey (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Roof     │
+│    (Seal)  │
+└─────┬──────┘
+      │
+      │
+┌────────────┐     ┌────────────┐
+│  Council   │─────│  Archive   │
+│ Spk, Run   │  E  │  Key, Arc  │
+└────────────┘     └────────────┘
+
+Key = Seal key
+Spk = Speaker (NPC)
+Run = Runner (NPC)
+Arc = Archivist (NPC)
+```
+
     ## Example (detailed setup)
 
 ```csharp

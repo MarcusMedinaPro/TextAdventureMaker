@@ -8,6 +8,21 @@ _Slice tag: Slice 36 — Trust/choice with consequence._
 3) Decide whether to accept it.
 4) Ask a neighbour for context.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Doorstep   │
+│ Pkg, N     │
+└────────────┘
+
+Pkg = Package
+N = Neighbour (NPC)
+```
+
 ## Example (package choice)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

@@ -9,6 +9,21 @@ _Slice tag: Slice 14 — Events + Fluent setup. Demo focuses on a tiny trigger/r
 4) Find the hidden key.
 5) Unlock the gate.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Garden    │─────│ Courtyard  │
+│  S, K*     │  Out│            │
+└────────────┘     └────────────┘
+
+S = Stone
+K* = Gate key (revealed after lifting stone)
+```
+
 ## Example (fluent + events)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;

@@ -11,8 +11,8 @@
 ---
 
 ## Implementation checklist (engine/AI)
-- [ ] `OllamaCommandParser`
-- [ ] AI configuration fluent API
+- [x] `OllamaCommandParser`
+- [x] AI configuration fluent API
 - [ ] AI sandbox demo
 
 ## Example checklist (docs/examples)

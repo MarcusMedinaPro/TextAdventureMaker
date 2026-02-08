@@ -28,7 +28,7 @@ story.DefineTension()
 ---
 
 ## Implementation checklist (engine)
-- [ ] `ITensionMeter`
+- [x] `ITensionMeter`
 - [ ] Tension modifiers + pacing rules
 - [ ] Tension-driven encounter frequency/music/actions
 - [ ] Rest periods / safe zones

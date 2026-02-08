@@ -202,9 +202,9 @@ MarcusMedina.TextAdventure
 ---
 
 ## Implementation checklist (engine)
-- [ ] `MarcusMedina.TextAdventure.Linq` query extensions
-- [ ] `MarcusMedina.TextAdventure.Story` narrative extensions
-- [ ] Mapping coverage between LINQ and story style
+- [x] `MarcusMedina.TextAdventure.Linq` query extensions
+- [x] `MarcusMedina.TextAdventure.Story` narrative extensions
+- [x] Mapping coverage between LINQ and story style
 
 ## Example checklist (docs/examples)
 - [ ] LINQ/Story fluent extension demos

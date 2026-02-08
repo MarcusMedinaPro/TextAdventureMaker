@@ -201,11 +201,11 @@ kitchen.AddItem(spoon);
 ---
 
 ## Implementation checklist (docs)
-- [ ] GitHub wiki created (`../TextAdventure.wiki`)
-- [ ] Core wiki pages (Home, Getting Started, API Reference, Commands, DSL Guide, Examples)
-- [ ] Localization + Extending guides
-- [ ] Storytelling guides + narrative arcs
-- [ ] Testing guide + Fluent API guide
+- [x] GitHub wiki created (`../TextAdventure.wiki`)
+- [x] Core wiki pages (Home, Getting Started, API Reference, Commands, DSL Guide, Examples)
+- [x] Localization + Extending guides
+- [x] Storytelling guides + narrative arcs
+- [x] Testing guide + Fluent API guide
 
 ## Example checklist (docs/examples)
 - [ ] Not applicable (wiki)

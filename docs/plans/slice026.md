@@ -29,11 +29,11 @@ location.SetMood(Mood.Foreboding)
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IMoodSystem`
-- [ ] `Mood` enum
-- [ ] Environmental cues (lighting/sound/smell/temperature)
+- [x] `IMoodSystem`
+- [x] `Mood` enum
+- [x] Environmental cues (lighting/sound/smell/temperature)
 - [ ] Mood-modified descriptions
-- [ ] Mood propagation
+- [x] Mood propagation
 
 ## Example checklist (docs/examples)
 - [ ] Mood system demo

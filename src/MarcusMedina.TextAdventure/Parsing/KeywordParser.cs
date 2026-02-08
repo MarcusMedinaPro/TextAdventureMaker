@@ -67,6 +67,21 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             return new UnlockCommand();
         }
 
+        if (_config.Close.Contains(keyword))
+        {
+            return new CloseCommand();
+        }
+
+        if (_config.LockDoor.Contains(keyword))
+        {
+            return new LockCommand();
+        }
+
+        if (_config.Destroy.Contains(keyword))
+        {
+            return new DestroyCommand(ParseItemName(tokens, 1));
+        }
+
         if (_config.Take.Contains(keyword))
         {
             if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
@@ -256,6 +271,21 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             return new UnlockCommand();
         }
 
+        if (_config.Close.Contains(keyword))
+        {
+            return new CloseCommand();
+        }
+
+        if (_config.LockDoor.Contains(keyword))
+        {
+            return new LockCommand();
+        }
+
+        if (_config.Destroy.Contains(keyword))
+        {
+            return new DestroyCommand(ParseItemName(tokens, 1));
+        }
+
         if (_config.Take.Contains(keyword))
         {
             if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
@@ -350,6 +380,9 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .Concat(_config.Stats)
             .Concat(_config.Open)
             .Concat(_config.Unlock)
+            .Concat(_config.Close)
+            .Concat(_config.LockDoor)
+            .Concat(_config.Destroy)
             .Concat(_config.Take)
             .Concat(_config.Drop)
             .Concat(_config.Use)

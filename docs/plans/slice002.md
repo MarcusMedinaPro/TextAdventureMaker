@@ -23,7 +23,7 @@
 - [x] `Location.AddExit(direction, target, door, oneWay)`
 - [x] `OpenCommand` supports door open
 - [x] `UnlockCommand` supports door unlock with key
-- [ ] Commands for door `Close`, `Lock`, `Destroy`
+- [x] Commands for door `Close`, `Lock`, `Destroy`
 
 ## Example checklist (docs/examples)
 - [x] Locked door gating progress + key required (`02_The_Locked_Drawer.md`)

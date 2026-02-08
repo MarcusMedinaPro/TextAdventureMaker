@@ -19,6 +19,9 @@ public sealed class KeywordParserConfig
         stats: CommandHelper.NewCommands("stats", "stat", "hp", "health"),
         open: CommandHelper.NewCommands("open"),
         unlock: CommandHelper.NewCommands("unlock"),
+        close: CommandHelper.NewCommands("close"),
+        lockDoor: CommandHelper.NewCommands("lock"),
+        destroy: CommandHelper.NewCommands("destroy", "smash", "break"),
         take: CommandHelper.NewCommands("take", "get", "pickup", "pick"),
         drop: CommandHelper.NewCommands("drop"),
         use: CommandHelper.NewCommands("use"),
@@ -68,6 +71,12 @@ public sealed class KeywordParserConfig
     public ISet<string> Open { get; }
     /// <summary>Keywords used to unlock a door.</summary>
     public ISet<string> Unlock { get; }
+    /// <summary>Keywords used to close a door.</summary>
+    public ISet<string> Close { get; }
+    /// <summary>Keywords used to lock a door.</summary>
+    public ISet<string> LockDoor { get; }
+    /// <summary>Keywords used to destroy something.</summary>
+    public ISet<string> Destroy { get; }
     /// <summary>Keywords used to take items.</summary>
     public ISet<string> Take { get; }
     /// <summary>Keywords used to drop items.</summary>
@@ -125,6 +134,9 @@ public sealed class KeywordParserConfig
         ISet<string> stats,
         ISet<string> open,
         ISet<string> unlock,
+        ISet<string> close,
+        ISet<string> lockDoor,
+        ISet<string> destroy,
         ISet<string> take,
         ISet<string> drop,
         ISet<string> use,
@@ -156,6 +168,9 @@ public sealed class KeywordParserConfig
         Stats = stats ?? throw new ArgumentNullException(nameof(stats));
         Open = open ?? throw new ArgumentNullException(nameof(open));
         Unlock = unlock ?? throw new ArgumentNullException(nameof(unlock));
+        Close = close ?? throw new ArgumentNullException(nameof(close));
+        LockDoor = lockDoor ?? throw new ArgumentNullException(nameof(lockDoor));
+        Destroy = destroy ?? throw new ArgumentNullException(nameof(destroy));
         Take = take ?? throw new ArgumentNullException(nameof(take));
         Drop = drop ?? throw new ArgumentNullException(nameof(drop));
         Use = use ?? throw new ArgumentNullException(nameof(use));
@@ -179,5 +194,73 @@ public sealed class KeywordParserConfig
         AllowDirectionEnumNames = allowDirectionEnumNames;
         EnableFuzzyMatching = enableFuzzyMatching;
         FuzzyMaxDistance = Math.Max(0, fuzzyMaxDistance);
+    }
+
+    public KeywordParserConfig(
+        ISet<string> quit,
+        ISet<string> look,
+        ISet<string> examine,
+        ISet<string> inventory,
+        ISet<string> stats,
+        ISet<string> open,
+        ISet<string> unlock,
+        ISet<string> take,
+        ISet<string> drop,
+        ISet<string> use,
+        ISet<string> combine,
+        ISet<string> pour,
+        ISet<string> move,
+        ISet<string> go,
+        ISet<string> read,
+        ISet<string> talk,
+        ISet<string> attack,
+        ISet<string> flee,
+        ISet<string> save,
+        ISet<string> load,
+        ISet<string> quest,
+        ISet<string> all,
+        ISet<string> ignoreItemTokens,
+        ISet<string> combineSeparators,
+        ISet<string> pourPrepositions,
+        IReadOnlyDictionary<string, Direction> directionAliases,
+        IReadOnlyDictionary<string, string>? synonyms = null,
+        bool allowDirectionEnumNames = false,
+        bool enableFuzzyMatching = false,
+        int fuzzyMaxDistance = 1)
+        : this(
+            quit,
+            look,
+            examine,
+            inventory,
+            stats,
+            open,
+            unlock,
+            CommandHelper.NewCommands("close"),
+            CommandHelper.NewCommands("lock"),
+            CommandHelper.NewCommands("destroy", "smash", "break"),
+            take,
+            drop,
+            use,
+            combine,
+            pour,
+            move,
+            go,
+            read,
+            talk,
+            attack,
+            flee,
+            save,
+            load,
+            quest,
+            all,
+            ignoreItemTokens,
+            combineSeparators,
+            pourPrepositions,
+            directionAliases,
+            synonyms,
+            allowDirectionEnumNames,
+            enableFuzzyMatching,
+            fuzzyMaxDistance)
+    {
     }
 }

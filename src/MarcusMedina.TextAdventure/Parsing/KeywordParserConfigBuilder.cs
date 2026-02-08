@@ -17,6 +17,9 @@ public sealed class KeywordParserConfigBuilder
     private ISet<string> _stats;
     private ISet<string> _open;
     private ISet<string> _unlock;
+    private ISet<string> _close;
+    private ISet<string> _lock;
+    private ISet<string> _destroy;
     private ISet<string> _take;
     private ISet<string> _drop;
     private ISet<string> _use;
@@ -50,6 +53,9 @@ public sealed class KeywordParserConfigBuilder
         _stats = CommandHelper.NewCommands("stats", "stat", "hp", "health");
         _open = CommandHelper.NewCommands("open");
         _unlock = CommandHelper.NewCommands("unlock");
+        _close = CommandHelper.NewCommands("close");
+        _lock = CommandHelper.NewCommands("lock");
+        _destroy = CommandHelper.NewCommands("destroy", "smash", "break");
         _take = CommandHelper.NewCommands("take", "get", "pickup", "pick");
         _drop = CommandHelper.NewCommands("drop");
         _use = CommandHelper.NewCommands("use", "turn", "switch", "light", "torch");
@@ -141,6 +147,27 @@ public sealed class KeywordParserConfigBuilder
     public KeywordParserConfigBuilder WithUnlock(params string[] commands)
     {
         _unlock = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for close.</summary>
+    public KeywordParserConfigBuilder WithClose(params string[] commands)
+    {
+        _close = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for lock.</summary>
+    public KeywordParserConfigBuilder WithLock(params string[] commands)
+    {
+        _lock = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for destroy.</summary>
+    public KeywordParserConfigBuilder WithDestroy(params string[] commands)
+    {
+        _destroy = CommandHelper.NewCommands(commands);
         return this;
     }
 
@@ -327,6 +354,9 @@ public sealed class KeywordParserConfigBuilder
             stats: _stats,
             open: _open,
             unlock: _unlock,
+            close: _close,
+            lockDoor: _lock,
+            destroy: _destroy,
             take: _take,
             drop: _drop,
             use: _use,

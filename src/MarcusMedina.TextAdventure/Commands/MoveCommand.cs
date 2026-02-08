@@ -60,6 +60,7 @@ public class MoveCommand : ICommand
         }
 
         item.Move();
+        context.State.Events.Publish(new GameEvent(GameEventType.MoveItem, context.State, location, item));
         string? onMove = item.GetReaction(ItemAction.Move);
         CommandResult ok = onMove != null
             ? CommandResult.Ok(Language.MoveItem(displayName), onMove)

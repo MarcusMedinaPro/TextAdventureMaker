@@ -85,6 +85,8 @@ public static class Language
     public static string NoOneToFight => Provider.Get("NoOneToFight");
     public static string NoOneToFlee => Provider.Get("NoOneToFlee");
     public static string NoQuests => Provider.Get("NoQuests");
+    public static string NothingToDestroy => Provider.Get("NothingToDestroy");
+    public static string YouNeedAKeyToLockDoor => Provider.Get("YouNeedAKeyToLockDoor");
     public static string QuestsLabel => Provider.Get("QuestsLabel");
     public static string ActiveQuestsLabel => Provider.Get("ActiveQuestsLabel");
     public static string CompletedQuestsLabel => Provider.Get("CompletedQuestsLabel");
@@ -103,6 +105,21 @@ public static class Language
         return Provider.Format("DoorClosedTemplate", doorName);
     }
 
+    public static string DoorClosedByPlayer(string doorName)
+    {
+        return Provider.Format("DoorClosedByPlayerTemplate", doorName);
+    }
+
+    public static string DoorLockedByPlayer(string doorName)
+    {
+        return Provider.Format("DoorLockedByPlayerTemplate", doorName);
+    }
+
+    public static string DoorDestroyed(string doorName)
+    {
+        return Provider.Format("DoorDestroyedTemplate", doorName);
+    }
+
     public static string DoorWontBudge(string doorName)
     {
         return Provider.Format("DoorWontBudgeTemplate", doorName);
@@ -116,6 +133,26 @@ public static class Language
     public static string DoorUnlocked(string doorName)
     {
         return Provider.Format("DoorUnlockedTemplate", doorName);
+    }
+
+    public static string DoorAlreadyClosedMessage(string doorName)
+    {
+        return Provider.Format("DoorAlreadyClosed", doorName);
+    }
+
+    public static string DoorAlreadyLockedMessage(string doorName)
+    {
+        return Provider.Format("DoorAlreadyLocked", doorName);
+    }
+
+    public static string DoorAlreadyDestroyedMessage(string doorName)
+    {
+        return Provider.Format("DoorAlreadyDestroyed", doorName);
+    }
+
+    public static string DoorMustBeClosed(string doorName)
+    {
+        return Provider.Format("DoorMustBeClosedTemplate", doorName);
     }
 
     public static string GoDirection(string direction)
@@ -178,6 +215,11 @@ public static class Language
     public static string MoveItem(string itemName)
     {
         return Provider.Format("MoveItemTemplate", itemName);
+    }
+
+    public static string DestroyedItem(string itemName)
+    {
+        return Provider.Format("DestroyItemTemplate", itemName);
     }
 
     public static string CanTakeInstead(string itemName)
@@ -322,6 +364,7 @@ public static class Language
             ["NoOneToFight"] = "There's no one here to fight.",
             ["NoOneToFlee"] = "There's no one here to flee from.",
             ["NoQuests"] = "You have no quests.",
+            ["NothingToDestroy"] = "There's nothing to destroy.",
             ["QuestsLabel"] = "Quest log",
             ["ActiveQuestsLabel"] = "Active",
             ["CompletedQuestsLabel"] = "Completed",
@@ -332,9 +375,17 @@ public static class Language
             ["LoadFailedTemplate"] = "Failed to load game from {0}.",
             ["DoorLockedTemplate"] = "The {0} is locked.",
             ["DoorClosedTemplate"] = "The {0} is closed.",
+            ["DoorClosedByPlayerTemplate"] = "You close the {0}.",
+            ["DoorLockedByPlayerTemplate"] = "You lock the {0}.",
+            ["DoorDestroyedTemplate"] = "You destroy the {0}.",
             ["DoorWontBudgeTemplate"] = "The {0} won't budge.",
             ["DoorOpenedTemplate"] = "You open the {0}.",
             ["DoorUnlockedTemplate"] = "You unlock the {0}.",
+            ["DoorAlreadyClosed"] = "The {0} is already closed.",
+            ["DoorAlreadyLocked"] = "The {0} is already locked.",
+            ["DoorAlreadyDestroyed"] = "The {0} is already destroyed.",
+            ["DoorMustBeClosedTemplate"] = "The {0} must be closed first.",
+            ["YouNeedAKeyToLockDoor"] = "You need a key to lock the door.",
             ["GoDirectionTemplate"] = "You go {0}.",
             ["TotalWeightTemplate"] = "Total weight: {0}",
             ["TakeItemTemplate"] = "You take the {0}.",
@@ -345,6 +396,7 @@ public static class Language
             ["DropAllTemplate"] = "You drop: {0}.",
             ["ItemWithWeightTemplate"] = "{0} ({1})",
             ["ItemDescriptionTemplate"] = "It's a {0}.",
+            ["DestroyItemTemplate"] = "You destroy the {0}.",
             ["CombineResultTemplate"] = "You combine {0} and {1}.",
             ["PourResultTemplate"] = "You pour the {0} into the {1}.",
             ["ReadingCostTemplate"] = "You spend {0} turns reading...\\n{1}",

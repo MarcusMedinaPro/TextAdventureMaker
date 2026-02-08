@@ -15,8 +15,8 @@
 ## Implementation checklist (engine)
 - [x] `IEventSystem` + `EventSystem`
 - [x] `GameEvent` + `GameEventType`
-- [x] Built-in events: Enter/Exit location, Pickup/Drop item, Talk, CombatStart
-- [x] Door events published (Open/Unlock)
+- [x] Built-in events: Enter/Exit location, Pickup/Drop/Move item, Talk, CombatStart
+- [x] Door events published (Open/Unlock/Close/Lock/Destroy)
 - [x] Item/Door events wired into EventSystem
 
 ## Example checklist (docs/examples)

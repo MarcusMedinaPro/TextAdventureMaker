@@ -32,10 +32,10 @@ boss.OnDefeat(ctx => {
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IForeshadowingSystem`
-- [ ] Tagging/links between details
-- [ ] Payoff detection + warnings
-- [ ] Optional callbacks for missed hints
+- [x] `IForeshadowingSystem`
+- [x] Tagging/links between details
+- [x] Payoff detection + warnings
+- [x] Optional callbacks for missed hints
 
 ## Example checklist (docs/examples)
 - [ ] Foreshadowing demo

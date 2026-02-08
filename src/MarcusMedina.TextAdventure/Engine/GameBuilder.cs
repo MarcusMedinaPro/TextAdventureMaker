@@ -19,6 +19,7 @@ public sealed class GameBuilder
     private ILocation? _startLocation;
     private ITimeSystem? _timeSystem;
     private IPathfinder? _pathfinder;
+    private IForeshadowingSystem? _foreshadowingSystem;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -74,6 +75,12 @@ public sealed class GameBuilder
     public GameBuilder UsePathfinder(IPathfinder pathfinder)
     {
         _pathfinder = pathfinder ?? throw new ArgumentNullException(nameof(pathfinder));
+        return this;
+    }
+
+    public GameBuilder UseForeshadowingSystem(IForeshadowingSystem foreshadowingSystem)
+    {
+        _foreshadowingSystem = foreshadowingSystem ?? throw new ArgumentNullException(nameof(foreshadowingSystem));
         return this;
     }
 
@@ -155,6 +162,11 @@ public sealed class GameBuilder
             state.SetPathfinder(_pathfinder);
         }
 
+        if (_foreshadowingSystem != null)
+        {
+            state.SetForeshadowingSystem(_foreshadowingSystem);
+        }
+
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
         foreach (Action<Game> handler in _turnStartHandlers)
@@ -193,6 +205,11 @@ public sealed class GameBuilder
 .. _locations,             start
         ];
 
-        return new GameState(start, timeSystem: _timeSystem, pathfinder: _pathfinder, worldLocations: allLocations);
+        return new GameState(
+            start,
+            timeSystem: _timeSystem,
+            pathfinder: _pathfinder,
+            foreshadowingSystem: _foreshadowingSystem,
+            worldLocations: allLocations);
     }
 }

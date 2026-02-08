@@ -28,6 +28,7 @@ public class GameState : IGameState
     public IRandomEventPool RandomEvents { get; private set; }
     public IPathfinder Pathfinder { get; private set; }
     public ILocationDiscoverySystem LocationDiscovery { get; private set; }
+    public IForeshadowingSystem Foreshadowing { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IQuestLog Quests { get; }
@@ -53,6 +54,7 @@ public class GameState : IGameState
         IRandomEventPool? randomEventPool = null,
         IPathfinder? pathfinder = null,
         ILocationDiscoverySystem? locationDiscovery = null,
+        IForeshadowingSystem? foreshadowingSystem = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
         IEnumerable<ILocation>? worldLocations = null)
@@ -69,6 +71,7 @@ public class GameState : IGameState
         RandomEvents = randomEventPool ?? new RandomEventPool();
         Pathfinder = pathfinder ?? new AStarPathfinder();
         LocationDiscovery = locationDiscovery ?? new LocationDiscoverySystem();
+        Foreshadowing = foreshadowingSystem ?? new ForeshadowingSystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
@@ -157,6 +160,16 @@ public class GameState : IGameState
         {
             discovery.Attach(this, Events);
         }
+    }
+
+    public void SetForeshadowingSystem(IForeshadowingSystem foreshadowingSystem)
+    {
+        if (foreshadowingSystem == null)
+        {
+            return;
+        }
+
+        Foreshadowing = foreshadowingSystem;
     }
 
     public GameMemento CreateMemento()

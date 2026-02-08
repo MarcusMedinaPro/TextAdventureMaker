@@ -24,6 +24,7 @@ public interface IGameState
     IRandomEventPool RandomEvents { get; }
     IPathfinder Pathfinder { get; }
     ILocationDiscoverySystem LocationDiscovery { get; }
+    IForeshadowingSystem Foreshadowing { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }
     /// <summary>Quest log for tracking active and completed quests.</summary>

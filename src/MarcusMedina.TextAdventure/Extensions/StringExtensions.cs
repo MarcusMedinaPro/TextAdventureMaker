@@ -23,9 +23,31 @@ public static class StringExtensions
     }
 
     /// <summary>Fluent alias for case-insensitive comparison.</summary>
+    public static bool EqualsIgnoreCase(this string? text, string? other)
+    {
+        return text.TextCompare(other);
+    }
+
+    /// <summary>Fluent alias for case-insensitive comparison.</summary>
     public static bool Is(this string? text, string? other)
     {
         return text.TextCompare(other);
+    }
+
+    /// <summary>Case-insensitive StartsWith after trimming.</summary>
+    public static bool StartsWithIgnoreCase(this string? text, string? prefix)
+    {
+        return !string.IsNullOrWhiteSpace(text)
+            && !string.IsNullOrWhiteSpace(prefix)
+            && text.Trim().StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Case-insensitive EndsWith after trimming.</summary>
+    public static bool EndsWithIgnoreCase(this string? text, string? suffix)
+    {
+        return !string.IsNullOrWhiteSpace(text)
+            && !string.IsNullOrWhiteSpace(suffix)
+            && text.Trim().EndsWith(suffix.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Convert a string to a stable identifier (lowercase, underscores).</summary>

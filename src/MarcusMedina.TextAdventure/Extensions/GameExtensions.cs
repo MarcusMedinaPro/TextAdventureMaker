@@ -120,4 +120,31 @@ public static class GameExtensions
         ArgumentNullException.ThrowIfNull(game);
         return new ChapterBuilder();
     }
+
+    public static IScheduleQueue Schedule(this Game game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        return game.State.Schedule;
+    }
+
+    public static Game OnAction(this Game game, string actionId, Action<ActionTriggerContext> handler)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        game.State.ActionTriggers.OnAction(actionId, handler);
+        return game;
+    }
+
+    public static Game OnNpcDeath(this Game game, string npcId, Action<ActionTriggerContext> handler)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        game.State.ActionTriggers.OnNpcDeath(npcId, handler);
+        return game;
+    }
+
+    public static Game OnItemPickup(this Game game, string itemId, Action<ActionTriggerContext> handler)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        game.State.ActionTriggers.OnItemPickup(itemId, handler);
+        return game;
+    }
 }

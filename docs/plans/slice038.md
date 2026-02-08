@@ -116,11 +116,11 @@ schedule {
 ---
 
 ## Implementation checklist (engine)
-- [ ] `ITimedSpawn`
-- [ ] `ITimedDoor`
-- [ ] Action-triggered spawns
-- [ ] Conditional permanent changes
-- [ ] Scheduled events queue
+- [x] `ITimedSpawn`
+- [x] `ITimedDoor`
+- [x] Action-triggered spawns
+- [x] Conditional permanent changes
+- [x] Scheduled events queue
 - [ ] DSL for timed objects
 
 ## Example checklist (docs/examples)

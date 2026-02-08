@@ -25,6 +25,8 @@ public sealed class GameBuilder
     private IDramaticIronySystem? _dramaticIronySystem;
     private IFlashbackSystem? _flashbackSystem;
     private IChapterSystem? _chapterSystem;
+    private IScheduleQueue? _scheduleQueue;
+    private IActionTriggerSystem? _actionTriggerSystem;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -116,6 +118,18 @@ public sealed class GameBuilder
     public GameBuilder UseChapterSystem(IChapterSystem chapterSystem)
     {
         _chapterSystem = chapterSystem ?? throw new ArgumentNullException(nameof(chapterSystem));
+        return this;
+    }
+
+    public GameBuilder UseScheduleQueue(IScheduleQueue scheduleQueue)
+    {
+        _scheduleQueue = scheduleQueue ?? throw new ArgumentNullException(nameof(scheduleQueue));
+        return this;
+    }
+
+    public GameBuilder UseActionTriggerSystem(IActionTriggerSystem actionTriggerSystem)
+    {
+        _actionTriggerSystem = actionTriggerSystem ?? throw new ArgumentNullException(nameof(actionTriggerSystem));
         return this;
     }
 
@@ -227,6 +241,16 @@ public sealed class GameBuilder
             state.SetChapterSystem(_chapterSystem);
         }
 
+        if (_scheduleQueue != null)
+        {
+            state.SetScheduleQueue(_scheduleQueue);
+        }
+
+        if (_actionTriggerSystem != null)
+        {
+            state.SetActionTriggerSystem(_actionTriggerSystem);
+        }
+
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);
 
         foreach (Action<Game> handler in _turnStartHandlers)
@@ -275,6 +299,8 @@ public sealed class GameBuilder
             dramaticIronySystem: _dramaticIronySystem,
             flashbackSystem: _flashbackSystem,
             chapterSystem: _chapterSystem,
+            scheduleQueue: _scheduleQueue,
+            actionTriggerSystem: _actionTriggerSystem,
             worldLocations: allLocations);
     }
 }

@@ -22,11 +22,15 @@ public class Location : ILocation
     private LayeredDescription? _layeredDescription;
     private int _visitCount;
     private readonly List<FlashbackTrigger> _flashbackTriggers = [];
+    private readonly List<TimedSpawn> _timedSpawns = [];
+    private LocationTransform? _transform;
 
     public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
     public IReadOnlyList<IItem> Items => _items;
     public IReadOnlyList<INpc> Npcs => _npcs;
     public IReadOnlyList<FlashbackTrigger> FlashbackTriggers => _flashbackTriggers;
+    public IReadOnlyList<TimedSpawn> TimedSpawns => _timedSpawns;
+    public LocationTransform? Transform => _transform;
 
     public Location(string id)
     {
@@ -95,6 +99,19 @@ public class Location : ILocation
         FlashbackTrigger trigger = new(memoryId);
         _flashbackTriggers.Add(trigger);
         return trigger;
+    }
+
+    public TimedSpawn AddTimedSpawn(string itemId)
+    {
+        TimedSpawn spawn = new(itemId);
+        _timedSpawns.Add(spawn);
+        return spawn;
+    }
+
+    public LocationTransformBuilder TransformsInto(string locationId)
+    {
+        _transform = new LocationTransform(locationId);
+        return new LocationTransformBuilder(_transform);
     }
 
     public Location AddExit(Direction direction, ILocation target, bool oneWay = false)

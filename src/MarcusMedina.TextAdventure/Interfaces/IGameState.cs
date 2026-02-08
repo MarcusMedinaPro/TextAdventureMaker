@@ -30,6 +30,8 @@ public interface IGameState
     IDramaticIronySystem DramaticIrony { get; }
     IFlashbackSystem Flashbacks { get; }
     IChapterSystem Chapters { get; }
+    IScheduleQueue Schedule { get; }
+    IActionTriggerSystem ActionTriggers { get; }
     IWorldState WorldState { get; }
     ISaveSystem SaveSystem { get; }
     /// <summary>Quest log for tracking active and completed quests.</summary>

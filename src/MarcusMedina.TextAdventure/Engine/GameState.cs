@@ -34,6 +34,8 @@ public class GameState : IGameState
     public IDramaticIronySystem DramaticIrony { get; private set; }
     public IFlashbackSystem Flashbacks { get; private set; }
     public IChapterSystem Chapters { get; private set; }
+    public IScheduleQueue Schedule { get; private set; }
+    public IActionTriggerSystem ActionTriggers { get; private set; }
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IQuestLog Quests { get; }
@@ -65,6 +67,8 @@ public class GameState : IGameState
         IDramaticIronySystem? dramaticIronySystem = null,
         IFlashbackSystem? flashbackSystem = null,
         IChapterSystem? chapterSystem = null,
+        IScheduleQueue? scheduleQueue = null,
+        IActionTriggerSystem? actionTriggerSystem = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
         IEnumerable<ILocation>? worldLocations = null)
@@ -87,6 +91,8 @@ public class GameState : IGameState
         DramaticIrony = dramaticIronySystem ?? new DramaticIronySystem();
         Flashbacks = flashbackSystem ?? new FlashbackSystem();
         Chapters = chapterSystem ?? new ChapterSystem();
+        Schedule = scheduleQueue ?? new ScheduleQueue(this);
+        ActionTriggers = actionTriggerSystem ?? new ActionTriggerSystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
@@ -235,6 +241,26 @@ public class GameState : IGameState
         }
 
         Chapters = chapterSystem;
+    }
+
+    public void SetScheduleQueue(IScheduleQueue scheduleQueue)
+    {
+        if (scheduleQueue == null)
+        {
+            return;
+        }
+
+        Schedule = scheduleQueue;
+    }
+
+    public void SetActionTriggerSystem(IActionTriggerSystem actionTriggerSystem)
+    {
+        if (actionTriggerSystem == null)
+        {
+            return;
+        }
+
+        ActionTriggers = actionTriggerSystem;
     }
 
     public GameMemento CreateMemento()

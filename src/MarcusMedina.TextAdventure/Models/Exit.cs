@@ -16,6 +16,7 @@ public class Exit
     public bool IsDiscovered { get; private set; } = true;
     public Func<IGameState, bool>? DiscoverCondition { get; private set; }
     public int? PerceptionDifficulty { get; private set; }
+    public TimedDoor? TimedDoor { get; private set; }
 
     public bool IsPassable => Door == null || Door.IsPassable;
     public bool IsVisible => !IsHidden || IsDiscovered;
@@ -40,6 +41,12 @@ public class Exit
     {
         PerceptionDifficulty = Math.Clamp(difficulty, 1, 100);
         return this;
+    }
+
+    public TimedDoor WithTimedDoor(string doorId)
+    {
+        TimedDoor = new TimedDoor(doorId);
+        return TimedDoor;
     }
 
     public bool TryDiscover(IGameState state)

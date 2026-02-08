@@ -60,7 +60,7 @@ public sealed class ChapterDefinitionBuilder(ChapterBuilder root, Chapter chapte
         return this;
     }
 
-    public ChapterBuilder Chapter(string id, string title)
+    public ChapterDefinitionBuilder Chapter(string id, string title)
     {
         return root.Chapter(id, title);
     }

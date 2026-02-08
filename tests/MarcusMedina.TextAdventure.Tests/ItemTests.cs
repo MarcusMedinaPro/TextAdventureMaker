@@ -36,7 +36,7 @@ public class ItemTests
     public void Item_CanHaveDescription()
     {
         IItem item = new Item("coin", "Coin")
-            .Description("A shiny gold coin.");
+            .SetDescription("A shiny gold coin.");
 
         Assert.Equal("A shiny gold coin.", item.GetDescription());
     }
@@ -45,7 +45,7 @@ public class ItemTests
     public void Key_CanHaveDescription()
     {
         Key key = new Key("key1", "Brass Key")
-            .Description("A small brass key with a lion crest.");
+            .SetDescription("A small brass key with a lion crest.");
 
         Assert.Equal("A small brass key with a lion crest.", key.GetDescription());
     }

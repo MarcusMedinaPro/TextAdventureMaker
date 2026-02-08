@@ -55,7 +55,7 @@ public sealed class GameValidator(Game game)
         List<string> commands = ["look", "inventory"];
         foreach (Direction direction in location.Exits.Keys)
         {
-            commands.Add($"go {direction.ToString().LowerInvariant()}");
+            commands.Add($"go {direction.ToString().ToLowerInvariant()}");
         }
 
         foreach (IItem item in location.Items)

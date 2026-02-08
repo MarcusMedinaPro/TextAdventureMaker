@@ -13,7 +13,7 @@ public interface INarrativeVoiceSystem
     Tense Tense { get; }
     string SubjectName { get; }
     INarrativeVoiceSystem SetVoice(Voice voice);
-    INarrativeVoiceSystem Tense(Tense tense);
+    INarrativeVoiceSystem SetTense(Tense tense);
     INarrativeVoiceSystem Subject(string subjectName);
     string Transform(string text);
     string TransformFlashback(string text);

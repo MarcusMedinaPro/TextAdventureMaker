@@ -53,11 +53,11 @@ public sealed class LayeredDescription
     {
         if (state != null)
         {
-            foreach ((string itemId, string text) in _itemOverrides)
+            foreach ((string itemId, string overrideText) in _itemOverrides)
             {
                 if (state.Inventory.Items.Any(item => item.Id.Equals(itemId, StringComparison.OrdinalIgnoreCase)))
                 {
-                    return text;
+                    return overrideText;
                 }
             }
         }

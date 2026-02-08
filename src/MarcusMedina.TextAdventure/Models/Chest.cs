@@ -15,7 +15,7 @@ public class Chest : ContainerItem<IItem>
 
     public Chest(string id, string name, string description, int maxCount = 0) : base(id, name, maxCount)
     {
-        _ = Description(description);
+        _ = SetDescription(description);
     }
 
     public static implicit operator Chest((string id, string name, string description) data)

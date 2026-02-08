@@ -4,6 +4,7 @@
 // </copyright>
 
 using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Engine;
 

@@ -6,6 +6,7 @@
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Localization;
 
 namespace MarcusMedina.TextAdventure.Extensions;
 
@@ -49,5 +50,37 @@ public static class CommandExtensions
     public static CommandResult StatsView(this GameState state)
     {
         return state.Execute(new StatsCommand());
+    }
+
+    /// <summary>
+    /// Prints the current room: name, description, items, NPCs, and exits.
+    /// </summary>
+    public static void ShowRoom(this GameState state, ILanguageProvider? provider = null) =>
+        state.CurrentLocation.ShowRoom(provider: provider);
+
+    /// <summary>
+    /// Prints the room name header followed by the command result message and reactions.
+    /// Useful for displaying look results with a room title.
+    /// </summary>
+    public static void ShowLookResult(this GameState state, CommandResult result)
+    {
+        Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+        result.WriteToConsole();
+    }
+
+    /// <summary>
+    /// Displays a command result using context-aware formatting:
+    /// LookCommand shows room name + result, all others show result only.
+    /// Automatically refreshes room display after go/move/load commands.
+    /// </summary>
+    public static void DisplayResult(this GameState state, ICommand command, CommandResult result)
+    {
+        if (command is LookCommand)
+            state.ShowLookResult(result);
+        else
+            result.WriteToConsole();
+
+        if (result.ShouldAutoLook(command))
+            state.ShowRoom();
     }
 }

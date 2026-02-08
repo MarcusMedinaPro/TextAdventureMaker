@@ -240,6 +240,10 @@ public static class StringExtensions
         return !string.IsNullOrWhiteSpace(text) && !string.IsNullOrWhiteSpace(other) && text.SoundexKey().TextCompare(other.SoundexKey());
     }
 
+    /// <summary>Return true when the input is a help request ("help", "halp", "?").</summary>
+    public static bool IsHelpRequest(this string? text) =>
+        text?.Lower() is "help" or "halp" or "?";
+
     private static int LevenshteinDistanceCore(string a, string b, int maxDistance)
     {
         if (a.Length == 0)

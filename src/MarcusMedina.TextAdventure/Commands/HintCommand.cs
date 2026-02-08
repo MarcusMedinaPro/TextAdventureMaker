@@ -23,7 +23,7 @@ public sealed class HintCommand(string? target) : ICommand
 
         string token = Target.Trim();
         ILocation? goal = context.State.Locations
-            .FirstOrDefault(location => location.Id.TextCompare(token) || location.Name.TextCompare(token));
+            .FirstOrDefault(location => location.Id.TextCompare(token));
 
         if (goal == null)
         {

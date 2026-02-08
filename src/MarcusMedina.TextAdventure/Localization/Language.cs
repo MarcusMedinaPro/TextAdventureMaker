@@ -4,6 +4,7 @@
 // </copyright>
 
 using System.Globalization;
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Localization;

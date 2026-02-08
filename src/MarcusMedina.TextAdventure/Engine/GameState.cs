@@ -370,7 +370,10 @@ public class GameState : IGameState
         Events.Publish(new GameEvent(GameEventType.ExitLocation, this, previousLocation));
         CurrentLocation = exit.Target;
         Events.Publish(new GameEvent(GameEventType.EnterLocation, this, CurrentLocation));
-        _ = CurrentLocation.DiscoverHiddenExits(this);
+        if (CurrentLocation is Location location)
+        {
+            _ = location.DiscoverHiddenExits(this);
+        }
         return true;
     }
 

@@ -70,7 +70,7 @@ public class CommandTests
         Location start = new("start");
         Key key = new Key("key1", "Brass Key")
             .AddAliases("key")
-            .Description("A small brass key.");
+            .SetDescription("A small brass key.");
         start.AddItem(key);
         GameState state = new(start);
 
@@ -84,7 +84,7 @@ public class CommandTests
     public void LookCommand_CanLookAtItemInInventory()
     {
         Location start = new("start");
-        IItem coin = new Item("coin", "Coin").Description("A shiny coin.");
+        IItem coin = new Item("coin", "Coin").SetDescription("A shiny coin.");
         GameState state = new(start);
         _ = state.Inventory.Add(coin);
 

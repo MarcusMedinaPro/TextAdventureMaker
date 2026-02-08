@@ -20,7 +20,7 @@ public class SaveSystemTests
         {
             GameMemento memento = new(
                 currentLocationId: "cabin",
-                inventoryItemIds: new[] { "sword", "key" },
+                inventoryItemIds: ["sword", "key"],
                 health: 50,
                 maxHealth: 100,
                 flags: new Dictionary<string, bool> { ["dragon_defeated"] = true },
@@ -50,16 +50,16 @@ public class SaveSystemTests
         Item sword = new("sword", "sword");
         cabin.AddItem(sword);
 
-        GameState state = new(start, worldLocations: new[] { start, cabin });
+        GameState state = new(start, worldLocations: [start, cabin]);
         GameMemento memento = new(
             currentLocationId: "cabin",
-            inventoryItemIds: new[] { "sword" },
+            inventoryItemIds: ["sword"],
             health: 80,
             maxHealth: 100,
             flags: new Dictionary<string, bool>(),
             counters: new Dictionary<string, int>(),
             relationships: new Dictionary<string, int>(),
-            timeline: Array.Empty<string>()
+            timeline: []
             );
 
         state.ApplyMemento(memento);

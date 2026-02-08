@@ -13,7 +13,7 @@ public class ItemDecoratorTests
     [Fact]
     public void RustyModifier_PrefixesNameAndDescription()
     {
-        IItem item = new Item("sword", "sword").Description("A sharp blade.");
+        IItem item = new Item("sword", "sword").SetDescription("A sharp blade.");
         RustyModifier rusty = new(item);
 
         Assert.Equal("rusty sword", rusty.Name);
@@ -23,7 +23,7 @@ public class ItemDecoratorTests
     [Fact]
     public void EnchantedModifier_PrefixesNameAndDescription()
     {
-        IItem item = new Item("ring", "ring").Description("A silver ring.");
+        IItem item = new Item("ring", "ring").SetDescription("A silver ring.");
         EnchantedModifier enchanted = new(item);
 
         Assert.Equal("enchanted ring", enchanted.Name);

@@ -15,7 +15,7 @@ public interface IScene
     IReadOnlyList<SceneBeat> Beats { get; }
     IReadOnlyList<SceneTransition> Transitions { get; }
     IScene Location(string locationId);
-    IScene Participants(params string[] participants);
+    IScene SetParticipants(params string[] participants);
     IScene Beat(int order, string eventId);
     SceneTransitionBuilder Transition();
     IEnumerable<SceneBeat> Play();

@@ -20,7 +20,7 @@ public sealed class NarrativeVoiceSystem : INarrativeVoiceSystem
         return this;
     }
 
-    public INarrativeVoiceSystem Tense(Tense tense)
+    public INarrativeVoiceSystem SetTense(Tense tense)
     {
         Tense = tense;
         return this;

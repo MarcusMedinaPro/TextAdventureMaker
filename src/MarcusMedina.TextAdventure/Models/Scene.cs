@@ -25,7 +25,7 @@ public sealed class Scene(string id) : IScene
         return this;
     }
 
-    public IScene Participants(params string[] participants)
+    public IScene SetParticipants(params string[] participants)
     {
         if (participants == null)
         {

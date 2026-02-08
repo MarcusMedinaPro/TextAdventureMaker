@@ -37,6 +37,7 @@ public class KeywordParserTests
             save: CommandHelper.NewCommands("save"),
             load: CommandHelper.NewCommands("load"),
             quest: CommandHelper.NewCommands("quest", "quests", "journal"),
+            hint: CommandHelper.NewCommands("hint", "path"),
             all: CommandHelper.NewCommands("all"),
             ignoreItemTokens: CommandHelper.NewCommands("up", "to"),
             combineSeparators: CommandHelper.NewCommands("and", "+"),

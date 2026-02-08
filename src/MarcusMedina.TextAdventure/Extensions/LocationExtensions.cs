@@ -36,6 +36,60 @@ public static class LocationExtensions
         return [.. location.Exits.Keys.Select(direction => GetDirectionName(provider, direction))];
     }
 
+    /// <summary>
+    /// Returns exit names with door state info, e.g. "East (Cabin Door, Locked)".
+    /// </summary>
+    public static List<string> GetRoomExitsWithDoors(this ILocation location, ILanguageProvider? provider = null)
+    {
+        ArgumentNullException.ThrowIfNull(location);
+        provider ??= Language.Provider;
+
+        return [.. location.Exits.Select(exit =>
+        {
+            string direction = GetDirectionName(provider, exit.Key);
+            var door = exit.Value.Door;
+            if (door == null)
+                return direction;
+            string stateText = door.State.ToString().ToLowerInvariant().ToProperCase();
+            return $"{direction} ({door.Name.ToProperCase()}, {stateText})";
+        })];
+    }
+
+    /// <summary>
+    /// Returns NPC names in the location, or an empty list if none.
+    /// </summary>
+    public static List<string> GetRoomNpcs(this ILocation location, ILanguageProvider? provider = null)
+    {
+        ArgumentNullException.ThrowIfNull(location);
+        provider ??= Language.Provider;
+
+        return [.. location.Npcs.Select(npc => GetName(provider, npc))];
+    }
+
+    /// <summary>
+    /// Prints the full room display: name, description, items, NPCs, and exits.
+    /// Uses door-aware exit formatting when doors are present.
+    /// </summary>
+    public static void ShowRoom(this ILocation location, bool showAllItems = false, ILanguageProvider? provider = null)
+    {
+        ArgumentNullException.ThrowIfNull(location);
+        provider ??= Language.Provider;
+
+        Console.WriteLine();
+        Console.WriteLine($"Room: {location.Id.ToProperCase()}");
+        Console.WriteLine(location.GetDescription());
+
+        var items = location.GetRoomItems(showAllItems, provider);
+        Console.WriteLine(items.Count > 0 ? $"Items: {items.CommaJoin()}" : "Items: None");
+
+        var npcs = location.GetRoomNpcs(provider);
+        if (npcs.Count > 0)
+            Console.WriteLine($"You see: {npcs.CommaJoin()}");
+
+        var exits = location.GetRoomExitsWithDoors(provider);
+        Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+    }
+
     public static FlashbackLocationBuilder TriggerFlashback(this ILocation location, string memoryId)
     {
         ArgumentNullException.ThrowIfNull(location);

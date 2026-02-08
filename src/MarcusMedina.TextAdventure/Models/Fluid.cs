@@ -13,6 +13,7 @@ public class Fluid : IFluid
 
     public string Id { get; }
     public string Name { get; }
+    public string? Description => _description;
 
     public Fluid(string id, string name)
     {
@@ -27,14 +28,11 @@ public class Fluid : IFluid
         _description = description ?? "";
     }
 
-    public string GetDescription()
-    {
-        return _description;
-    }
+    public string GetDescription() => _description;
 
-    public IFluid Description(string text)
+    public IFluid SetDescription(string description)
     {
-        _description = text;
+        _description = description ?? "";
         return this;
     }
 

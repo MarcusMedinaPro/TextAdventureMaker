@@ -15,7 +15,7 @@ public class Glass : ContainerItem<IFluid>
 
     public Glass(string id, string name, string description, int maxCount = 1) : base(id, name, maxCount)
     {
-        _ = Description(description);
+        _ = SetDescription(description);
     }
 
     public static implicit operator Glass((string id, string name, string description) data)

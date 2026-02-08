@@ -30,7 +30,9 @@ public class LookCommand : ICommand
             return ExecuteTarget(context, Target);
         }
 
-        string description = location.GetDescription();
+        string description = location is Location loc
+            ? loc.GetDescription(context.State)
+            : location.GetDescription();
         IEnumerable<KeyValuePair<Direction, Exit>> exitsSource = location.Exits
             .Where(e => e.Value.IsVisible)
             .Where(e => !context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly ||

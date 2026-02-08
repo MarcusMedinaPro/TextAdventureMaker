@@ -22,8 +22,8 @@ location.Description()
 ---
 
 ## Implementation checklist (engine)
-- [ ] Context-aware location descriptions
-- [ ] Variable substitution in descriptions
+- [x] Context-aware location descriptions
+- [x] Variable substitution in descriptions
 - [ ] Dialog templates with parameters
 
 ## Example checklist (docs/examples)

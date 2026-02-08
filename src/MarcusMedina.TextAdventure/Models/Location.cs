@@ -13,10 +13,13 @@ namespace MarcusMedina.TextAdventure.Models;
 public class Location : ILocation
 {
     public string Id { get; }
+    public string Name { get; }
     private string _description = "";
     private readonly Dictionary<Direction, Exit> _exits = [];
     private readonly List<IItem> _items = [];
     private readonly List<INpc> _npcs = [];
+    private DynamicDescription? _dynamicDescription;
+    private bool _hasVisited;
 
     public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
     public IReadOnlyList<IItem> Items => _items;
@@ -26,11 +29,17 @@ public class Location : ILocation
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         Id = id;
+        Name = id;
     }
 
     public Location(string id, string description) : this(id)
     {
         _description = description ?? "";
+    }
+
+    public Location(string id, string name, string description) : this(id, description)
+    {
+        Name = name;
     }
 
     public Location Description(string text)
@@ -42,6 +51,24 @@ public class Location : ILocation
     public string GetDescription()
     {
         return _description;
+    }
+
+    public string GetDescription(IGameState state)
+    {
+        if (_dynamicDescription == null || state == null)
+        {
+            return GetDescription();
+        }
+
+        string text = _dynamicDescription.Resolve(state, !_hasVisited);
+        _hasVisited = true;
+        return text;
+    }
+
+    public Location SetDynamicDescription(DynamicDescription description)
+    {
+        _dynamicDescription = description;
+        return this;
     }
 
     public Location AddExit(Direction direction, ILocation target, bool oneWay = false)

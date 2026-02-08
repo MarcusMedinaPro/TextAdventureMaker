@@ -12,9 +12,10 @@ public sealed class DialogContext
     public IGameState State { get; }
     public INpc Npc { get; }
     public NpcMemory NpcMemory { get; }
+    public ILocation? Location { get; }
     public bool FirstMeeting { get; }
 
-    public DialogContext(IGameState state, INpc npc, NpcMemory npcMemory)
+    public DialogContext(IGameState state, INpc npc, NpcMemory npcMemory, ILocation? location = null)
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(npc);
@@ -22,6 +23,7 @@ public sealed class DialogContext
         State = state;
         Npc = npc;
         NpcMemory = npcMemory;
+        Location = location;
         FirstMeeting = !npcMemory.HasMet;
     }
 }

@@ -100,8 +100,8 @@ parser.EnableSuggestions(true);
 - [x] NPC movement strategies: `NoNpcMovement`, `RandomNpcMovement`, `PatrolNpcMovement`, `FollowNpcMovement`
 - [x] Rule-based dialog rules (`DialogRule` + `Npc.AddDialogRule`)
 - [x] Parser synonyms via `KeywordParserConfigBuilder.AddSynonyms(...)`
-- [ ] Parser "did you mean" suggestions for command typos
-- [ ] Automatic NPC triggers (OnSee/OnHear)
+- [x] Parser "did you mean" suggestions for command typos
+- [x] Automatic NPC triggers (OnSee/OnHear)
 
 ## Example checklist (docs/examples)
 - [x] NPCs in rooms + talk to NPC (`05_The_Silent_Classroom.md`, `05_The_Late_Platform.md`)

@@ -20,6 +20,7 @@ public interface INpc : IGameEntity
     IStats Stats { get; }
     NpcMemory Memory { get; }
     IReadOnlyList<DialogRule> DialogRules { get; }
+    IReadOnlyList<NpcTrigger> Triggers { get; }
 
     INpc Description(string text);
     INpc SetState(NpcState state);
@@ -29,5 +30,7 @@ public interface INpc : IGameEntity
     INpc SetDialog(IDialogNode? dialog);
     INpc SetStats(IStats stats);
     DialogRule AddDialogRule(string id);
+    NpcTrigger OnSee(string target);
+    NpcTrigger OnHear(string target);
     string? GetRuleBasedDialog(IGameState state);
 }

@@ -30,6 +30,7 @@ public class GameState : IGameState
     public IWorldState WorldState { get; }
     public ISaveSystem SaveSystem { get; }
     public IQuestLog Quests { get; }
+    private readonly NpcTriggerSystem _npcTriggers = new();
     public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     /// <summary>Enable fuzzy matching for commands and targets.</summary>
@@ -73,6 +74,7 @@ public class GameState : IGameState
         {
             discovery.Attach(this, Events);
         }
+        _npcTriggers.Attach(this, Events);
     }
 
     public void RegisterLocations(IEnumerable<ILocation> locations)
@@ -121,6 +123,11 @@ public class GameState : IGameState
         }
 
         RandomEvents = randomEventPool;
+    }
+
+    public void TickNpcTriggers()
+    {
+        _npcTriggers.Tick(this);
     }
 
     public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)

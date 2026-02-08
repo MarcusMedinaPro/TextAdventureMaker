@@ -13,6 +13,7 @@ public class Npc : INpc
     private string _description = "";
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<DialogRule> _dialogRules = [];
+    private readonly List<NpcTrigger> _triggers = [];
 
     public string Id { get; }
     public string Name { get; }
@@ -23,6 +24,7 @@ public class Npc : INpc
     public IStats Stats { get; private set; }
     public NpcMemory Memory { get; } = new();
     public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
+    public IReadOnlyList<NpcTrigger> Triggers => _triggers;
     public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
 
     public Npc(string id, string name, NpcState state = NpcState.Friendly, IStats? stats = null)
@@ -90,6 +92,20 @@ public class Npc : INpc
         DialogRule rule = new(id);
         _dialogRules.Add(rule);
         return rule;
+    }
+
+    public NpcTrigger OnSee(string target)
+    {
+        NpcTrigger trigger = new(NpcSense.See, target);
+        _triggers.Add(trigger);
+        return trigger;
+    }
+
+    public NpcTrigger OnHear(string target)
+    {
+        NpcTrigger trigger = new(NpcSense.Hear, target);
+        _triggers.Add(trigger);
+        return trigger;
     }
 
     public string? GetRuleBasedDialog(IGameState state)

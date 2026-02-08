@@ -17,5 +17,6 @@ public enum GameEventType
     MoveItem = 8,
     CloseDoor = 9,
     LockDoor = 10,
-    DestroyDoor = 11
+    DestroyDoor = 11,
+    NpcTriggered = 12
 }

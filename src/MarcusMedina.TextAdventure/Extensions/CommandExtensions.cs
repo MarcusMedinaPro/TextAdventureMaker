@@ -21,6 +21,7 @@ public static class CommandExtensions
         {
             state.TimeSystem.Tick(state);
             state.RandomEvents.Tick(state);
+            state.TickNpcTriggers();
         }
 
         return result;

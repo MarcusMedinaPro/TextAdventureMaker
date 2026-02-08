@@ -14,6 +14,7 @@ public class Npc : INpc
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<DialogRule> _dialogRules = [];
     private readonly List<NpcTrigger> _triggers = [];
+    private readonly Dictionary<string, ICharacterArc> _arcs = new(StringComparer.OrdinalIgnoreCase);
 
     public string Id { get; }
     public string Name { get; }
@@ -25,6 +26,7 @@ public class Npc : INpc
     public NpcMemory Memory { get; } = new();
     public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
     public IReadOnlyList<NpcTrigger> Triggers => _triggers;
+    public IReadOnlyDictionary<string, ICharacterArc> Arcs => _arcs;
     public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
 
     public Npc(string id, string name, NpcState state = NpcState.Friendly, IStats? stats = null)
@@ -106,6 +108,13 @@ public class Npc : INpc
         NpcTrigger trigger = new(NpcSense.Hear, target);
         _triggers.Add(trigger);
         return trigger;
+    }
+
+    public ICharacterArc DefineArc(string id)
+    {
+        CharacterArc arc = new(id);
+        _arcs[id] = arc;
+        return arc;
     }
 
     public string? GetRuleBasedDialog(IGameState state)

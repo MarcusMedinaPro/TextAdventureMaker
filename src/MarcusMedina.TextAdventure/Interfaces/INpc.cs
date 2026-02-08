@@ -21,6 +21,7 @@ public interface INpc : IGameEntity
     NpcMemory Memory { get; }
     IReadOnlyList<DialogRule> DialogRules { get; }
     IReadOnlyList<NpcTrigger> Triggers { get; }
+    IReadOnlyDictionary<string, ICharacterArc> Arcs { get; }
 
     INpc Description(string text);
     INpc SetState(NpcState state);
@@ -32,5 +33,6 @@ public interface INpc : IGameEntity
     DialogRule AddDialogRule(string id);
     NpcTrigger OnSee(string target);
     NpcTrigger OnHear(string target);
+    ICharacterArc DefineArc(string id);
     string? GetRuleBasedDialog(IGameState state);
 }

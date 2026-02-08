@@ -22,8 +22,8 @@ npc.DefineArc("CowardToHero")
 ---
 
 ## Implementation checklist (engine)
-- [ ] `ICharacterArc`
-- [ ] Arc milestones + trait unlocks
+- [x] `ICharacterArc`
+- [x] Arc milestones + trait unlocks
 - [ ] Dialog changes based on arc progress
 
 ## Example checklist (docs/examples)

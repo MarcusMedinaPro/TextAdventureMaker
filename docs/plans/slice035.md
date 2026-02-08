@@ -27,9 +27,9 @@ if (!player.WarnedKing())
 ---
 
 ## Implementation checklist (engine)
-- [ ] `IDramaticIronySystem`
-- [ ] Knowledge gap detection
-- [ ] Player actions based on secrets
+- [x] `IDramaticIronySystem`
+- [x] Knowledge gap detection
+- [x] Player actions based on secrets
 
 ## Example checklist (docs/examples)
 - [ ] Dramatic irony demo

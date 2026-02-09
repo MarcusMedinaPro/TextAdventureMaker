@@ -28,4 +28,4 @@ game.AddEventChain("village_rescue")
 
 ## Example checklist (docs/examples)
 - [x] Hints & properties demo (`20_Hints_and_Properties.md`)
-- [ ] Conditional event chain demo
+- [x] Conditional event chain demo (`20_Hints_and_Properties.md`)

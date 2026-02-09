@@ -32,6 +32,7 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
 Location room = (id: "room", description: "A quiet room with a locked door.");
 Location hall = (id: "hall", description: "A calm hallway beyond.");
@@ -53,6 +54,13 @@ room.AddExit(Direction.Out, hall, door);
 coffee.OnUse += _ => coffee.SetHint("Yum! Coffee good!");
 
 var state = new GameState(room, worldLocations: new[] { room, hall });
+EventChain chain = new();
+int turns = 0;
+
+_ = chain
+    .Step(s => s.IsCurrentRoomId("hall"), _ => Console.WriteLine("You feel a chill as you step into the hall."))
+    .Step(s => s.Inventory.FindItem("coffee") != null, _ => Console.WriteLine("The coffee steadies your hands."))
+    .Step(_ => turns >= 3, _ => Console.WriteLine("Time passes. The quiet grows heavier."));
 
 state.Events.Subscribe(GameEventType.UnlockDoor, e =>
 {
@@ -74,6 +82,9 @@ var game = GameBuilder.Create()
     })
     .AddTurnEnd((g, command, result) =>
     {
+        turns += 1;
+        _ = chain.Check(g.State);
+
         if (command is LookCommand)
         {
             g.Output.WriteLine($"Hint (door): {door.GetHint()}");
@@ -83,12 +94,6 @@ var game = GameBuilder.Create()
     })
     .Build();
 
-// Console setup for C64 aesthetics
-Console.BackgroundColor = ConsoleColor.DarkBlue;
-Console.ForegroundColor = ConsoleColor.Cyan;
-Console.Title = "Hints & Properties - Text Adventure Sandbox";
-Console.OutputEncoding = System.Text.Encoding.UTF8;
-Console.Clear();
-// End console setup
+SetupC64("Hints & Properties - Text Adventure Sandbox");
 game.Run();
 ```

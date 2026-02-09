@@ -12,7 +12,7 @@
 
 ## Implementation checklist (packaging)
 - [x] NuGet metadata in `.csproj` / `.nuspec`
-- [ ] `dotnet pack` / publish pipeline
+- [x] `dotnet pack` / publish pipeline (`scripts/pack.sh`, `scripts/pack.ps1`)
 - [x] README/docs for packages
 
 ## Example checklist (docs/examples)

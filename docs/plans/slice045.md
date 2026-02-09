@@ -105,4 +105,4 @@
 - [x] Misc. QoL helpers listed above (phrases, vehicles, teleporters, weather, food/healing, economy, etc.)
 
 ## Example checklist (docs/examples)
-- [ ] Sandbox demo for aliases + pronouns + custom commands
+- [x] Sandbox demo for aliases + pronouns + custom commands (`45_Custom_Commands.md`)

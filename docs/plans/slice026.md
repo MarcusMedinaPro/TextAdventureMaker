@@ -32,8 +32,8 @@ location.SetMood(Mood.Foreboding)
 - [x] `IMoodSystem`
 - [x] `Mood` enum
 - [x] Environmental cues (lighting/sound/smell/temperature)
-- [ ] Mood-modified descriptions
+- [x] Mood-modified descriptions (`26_The_Broken_Car.md`)
 - [x] Mood propagation
 
 ## Example checklist (docs/examples)
-- [ ] Mood system demo
+- [x] Mood system demo (`26_The_Broken_Car.md`)

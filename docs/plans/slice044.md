@@ -18,4 +18,4 @@
 - [x] `string.ToCrazyCaps()`
 
 ## Example checklist (docs/examples)
-- [ ] String case helpers demo
+- [x] String case helpers demo (`44_String_Case_Helpers.md`)

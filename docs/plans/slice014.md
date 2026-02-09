@@ -17,4 +17,4 @@
 - [x] Dev/debug logger (position/state)
 
 ## Example checklist (docs/examples)
-- [ ] Story logger demo
+- [x] Story logger demo (`14_The_Key_Under_the_Stone.md`)

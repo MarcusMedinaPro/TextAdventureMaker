@@ -48,7 +48,7 @@ location.AddItems("Sword", "Shield", "Torch");
 
 ### Random Extensions (int)
 
-- [ ] `Extensions/RandomExtensions.cs`
+- [x] `Extensions/RandomExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class RandomExtensions
@@ -87,7 +87,7 @@ var enemyCount = 5.Random(2);    // 2-5
 
 ### Probability Extensions
 
-- [ ] `Extensions/ProbabilityExtensions.cs`
+- [x] `Extensions/ProbabilityExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class ProbabilityExtensions
@@ -106,7 +106,7 @@ public static class ProbabilityExtensions
 
 ### Collection Extensions
 
-- [ ] `Extensions/CollectionExtensions.cs`
+- [x] `Extensions/CollectionExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class CollectionExtensions
@@ -137,7 +137,7 @@ public static class CollectionExtensions
 
 ### Time Extensions
 
-- [ ] `Extensions/TimeExtensions.cs`
+- [x] `Extensions/TimeExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class TimeExtensions
@@ -150,7 +150,7 @@ public static class TimeExtensions
 
 ### Console Extensions (OBS: Endast för Console.Write!)
 
-- [ ] `Extensions/ConsoleExtensions.cs`
+- [x] `Extensions/ConsoleExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 /// <summary>
@@ -173,7 +173,7 @@ public static class ConsoleExtensions
 
 ### Range/Clamp Extensions
 
-- [ ] `Extensions/RangeExtensions.cs`
+- [x] `Extensions/RangeExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class RangeExtensions
@@ -188,7 +188,7 @@ public static class RangeExtensions
 
 ### Conditional Fluent Extensions
 
-- [ ] `Extensions/ConditionalExtensions.cs`
+- [x] `Extensions/ConditionalExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class ConditionalExtensions

@@ -152,4 +152,4 @@ var achievable = validator.ValidateTargetStories();
 - [x] Story snippet validation
 
 ## Example checklist (docs/examples)
-- [ ] Validation/testing tools demo
+- [x] Validation/testing tools demo (`41_Validation_Tools.md`)

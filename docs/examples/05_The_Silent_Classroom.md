@@ -64,9 +64,15 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-var hallway = new Location("hallway", "A narrow corridor lined with lockers and a closed classroom door.");
-var classroom = new Location("classroom", "A quiet classroom with polished desks and a chalkboard half-erased.");
+// Slice 5 — Rule-Based Dialog
+// Tests:
+// - Dialog tree options
+// - Rule-based dialog selection (first meeting, memory, priority)
+
+Location hallway = new("hallway", "A narrow corridor lined with lockers and a closed classroom door.");
+Location classroom = new("classroom", "A quiet classroom with polished desks and a chalkboard half-erased.");
 
 var curiosityNode = new DialogNode("The student nods once and whispers about footsteps in the corridor.")
     .AddOption("Ask what they heard.", new DialogNode("Slow footsteps, then a door sighing open, then silence again."))
@@ -74,23 +80,34 @@ var curiosityNode = new DialogNode("The student nods once and whispers about foo
 var offerComfortNode = new DialogNode("They crack a small smile and say the silence feels like a warm drink.")
     .AddOption("Offer to share a joke.", new DialogNode("The smile lingers, and they murmur, 'Keep the jokes coming.'"));
 
-var student = new Npc("student", "silent student")
+Npc student = new("student", "silent student")
     .Description("A student sits in the back, voice barely above a breath.")
     .SetDialog(new DialogNode("They raise their eyes when you enter and gesture for you to speak.")
         .AddOption("Ask what keeps them here.", curiosityNode)
         .AddOption("Offer some company.", offerComfortNode));
 
+student.AddDialogRule("first_greeting")
+    .When(ctx => !ctx.NpcMemory.HasSaid("first_greeting"))
+    .Say("The student nods once. \"You are early,\" they say.")
+    .Then(ctx => ctx.NpcMemory.MarkSaid("first_greeting"));
+
+student.AddDialogRule("promise_memory")
+    .When(ctx => ctx.NpcMemory.HasSaid("first_greeting"))
+    .When(ctx => ctx.NpcMemory.GetCounter("promise") < 1)
+    .Say("They glance at the floor. \"Promises live down there.\"")
+    .Then(ctx => ctx.NpcMemory.Increment("promise"));
+
 classroom.AddNpc(student);
 hallway.AddExit(Direction.East, classroom);
 classroom.AddExit(Direction.West, hallway);
 
-var state = new GameState(hallway, worldLocations: new[] { hallway, classroom })
+GameState state = new(hallway, worldLocations: [hallway, classroom])
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
 };
 
-var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
+KeywordParser parser = new(KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "x")
     .WithGo("go", "move")
@@ -98,39 +115,43 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithFuzzyMatching(true, 1)
     .Build());
 
-// Console setup for C64 aesthetics
-Console.BackgroundColor = ConsoleColor.DarkBlue;
-Console.ForegroundColor = ConsoleColor.Cyan;
-Console.Title = "THE SILENT CLASSROOM (Slice 5) - Text Adventure Sandbox";
-Console.OutputEncoding = System.Text.Encoding.UTF8;
-Console.Clear();
-// End console setup
-Console.WriteLine("=== THE SILENT CLASSROOM (Slice 5) ===");
-Console.WriteLine("Goal: reach the classroom, speak with the student, and return with fresh whispers.");
-Console.WriteLine("Commands: look, examine, talk student, 1-3 in dialog, go east/west, leave, quit.");
+SetupC64("THE SILENT CLASSROOM (Slice 5) - Text Adventure Sandbox");
+WriteLineC64("=== THE SILENT CLASSROOM (Slice 5) ===");
+WriteLineC64("Goal: reach the classroom, speak with the student, and return with fresh whispers.");
+WriteLineC64("Test: first talk triggers rule-based dialog, later talks show the dialog tree.");
+WriteLineC64("Commands: look, examine, talk student, 1-3 in dialog, go east/west, leave, quit.");
 ShowRoom();
 
 while (true)
 {
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input)) continue;
+    WriteLineC64();
+    WritePromptC64("> ");
+    string? input = Console.ReadLine();
+    if (input is null)
+        break;
 
-    if (input.Is("leave"))
+    string trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
+        continue;
+
+    if (trimmed.Is("leave"))
     {
-        Console.WriteLine("You leave the whispers for another day.");
+        WriteLineC64("You leave the whispers for another day.");
         break;
     }
 
-    var command = parser.Parse(input);
+    ICommand command = parser.Parse(trimmed);
 
-    if (command is TalkCommand { Target: var target } && TryFindNpc(target, out var npc))
+    if (command is TalkCommand { Target: var target } && TryFindNpc(target, out INpc npc))
     {
+        if (TryRunRuleDialog(npc))
+            continue;
+
         RunDialog(npc);
         continue;
     }
 
-    var result = state.Execute(command);
+    CommandResult result = state.Execute(command);
 
     switch (command)
     {
@@ -157,38 +178,38 @@ void WriteResult(CommandResult result)
 {
     if (!string.IsNullOrWhiteSpace(result.Message))
     {
-        Console.WriteLine(result.Message);
+        WriteLineC64(result.Message);
     }
 
     foreach (var reaction in result.ReactionsList)
     {
         if (!string.IsNullOrWhiteSpace(reaction))
         {
-            Console.WriteLine($"> {reaction}");
+            WriteLineC64($"> {reaction}");
         }
     }
 }
 
 void ShowRoom()
 {
-    var location = state.CurrentLocation;
-    Console.WriteLine();
-    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
-    Console.WriteLine(location.GetDescription());
+    ILocation location = state.CurrentLocation;
+    WriteLineC64();
+    WriteLineC64($"Room: {location.Id.ToProperCase()}");
+    WriteLineC64(location.GetDescription());
 
-    var exits = location.Exits
+    List<string> exits = location.Exits
         .Select(exit => exit.Key.ToString().ToLowerInvariant().ToProperCase())
         .ToList();
 
-    Console.WriteLine(location.Npcs.Count > 0
+    WriteLineC64(location.Npcs.Count > 0
         ? $"People present: {location.Npcs.Count}"
         : "People present: None");
-    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+    WriteLineC64(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 
 void ShowLookResult(CommandResult result)
 {
-    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    WriteLineC64($"Room: {state.CurrentLocation.Id.ToProperCase()}");
     WriteResult(result);
 }
 
@@ -215,53 +236,63 @@ void RunDialog(INpc npc)
     var node = npc.DialogRoot;
     if (node == null)
     {
-        Console.WriteLine("They have nothing to say.");
+        WriteLineC64("They have nothing to say.");
         return;
     }
 
     while (true)
     {
-        Console.WriteLine();
-        Console.WriteLine(node.Text);
+        WriteLineC64();
+        WriteLineC64(node.Text);
 
         if (node.Options.Count == 0)
         {
-            Console.WriteLine("There is nothing more to ask.");
+            WriteLineC64("There is nothing more to ask.");
             break;
         }
 
         for (var i = 0; i < node.Options.Count; i++)
         {
-            Console.WriteLine($"{i + 1}) {node.Options[i].Text}");
+            WriteLineC64($"{i + 1}) {node.Options[i].Text}");
         }
 
-        Console.WriteLine($"{node.Options.Count + 1}) Politely step away.");
-        Console.Write("> ");
-        var choice = Console.ReadLine()?.Trim();
+        WriteLineC64($"{node.Options.Count + 1}) Politely step away.");
+        WritePromptC64("> ");
+        string? choice = Console.ReadLine()?.Trim();
         if (!int.TryParse(choice, out var selection))
         {
-            Console.WriteLine("Pick one of the numbers.");
+            WriteLineC64("Pick one of the numbers.");
             continue;
         }
 
         if (selection == node.Options.Count + 1)
         {
-            Console.WriteLine("You step back and let the silence settle.");
+            WriteLineC64("You step back and let the silence settle.");
             break;
         }
 
         if (selection < 1 || selection > node.Options.Count)
         {
-            Console.WriteLine("That is not a valid option.");
+            WriteLineC64("That is not a valid option.");
             continue;
         }
 
         node = node.Options[selection - 1].Next;
         if (node == null)
         {
-            Console.WriteLine("They do not answer further.");
+            WriteLineC64("They do not answer further.");
             break;
         }
     }
+}
+
+bool TryRunRuleDialog(INpc npc)
+{
+    string? ruleText = npc.GetRuleBasedDialog(state);
+    if (string.IsNullOrWhiteSpace(ruleText))
+        return false;
+
+    WriteLineC64(ruleText);
+    return true;
 }
 ```

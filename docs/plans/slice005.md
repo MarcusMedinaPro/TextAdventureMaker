@@ -108,4 +108,4 @@ parser.EnableSuggestions(true);
 - [x] Dialog tree with options (`05_The_Silent_Classroom.md`, `05_The_Late_Platform.md`)
 - [x] NPC movement shown in demo loop (`05_The_Late_Platform.md`)
 - [x] Synonym mapping in parser (`05_Synonym_Studio.md`)
-- [ ] Rule-based dialog system demonstrated
+- [x] Rule-based dialog system demonstrated (`05_The_Silent_Classroom.md`)

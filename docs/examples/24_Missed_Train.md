@@ -34,21 +34,25 @@ M = Map
 
 ## Example (route choice)
 ```csharp
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
 var hall = new Location("station_hall", "A quiet station hall with a flickering departure board.");
 var platform = new Location("platform", "The last train's lights disappear into the night.");
 var sideStreet = new Location("side_street", "A side street with rain-slick pavement.");
 var footbridge = new Location("footbridge", "A narrow footbridge over the tracks.");
+var hiddenAlley = new Location("hidden_alley", "A narrow alley the map insisted was here.");
 
 hall.AddExit(Direction.North, platform);
 hall.AddExit(Direction.East, sideStreet);
 sideStreet.AddExit(Direction.North, footbridge);
+hall.AddHiddenExit(Direction.West, hiddenAlley, state => state.Inventory.FindItem("map") != null);
 
 var map = new Item("map", "folded map", "A map of nearby streets with pencil marks.")
     .SetReadText("The footbridge leads to a shortcut.")
@@ -56,7 +60,7 @@ var map = new Item("map", "folded map", "A map of nearby streets with pencil mar
 
 hall.AddItem(map);
 
-var state = new GameState(hall, worldLocations: new[] { hall, platform, sideStreet, footbridge });
+var state = new GameState(hall, worldLocations: new[] { hall, platform, sideStreet, footbridge, hiddenAlley });
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
 var game = GameBuilder.Create()
@@ -75,8 +79,17 @@ var game = GameBuilder.Create()
             var discovered = string.Join(", ", g.State.LocationDiscovery.DiscoveredLocations.OrderBy(x => x));
             g.Output.WriteLine($"Map notes: {discovered}");
         }
+
+        if (command is ReadCommand && g.State.Inventory.FindItem("map") != null)
+        {
+            if (g.State.CurrentLocation.DiscoverHiddenExits(g.State))
+            {
+                g.Output.WriteLine("You notice a hidden alley on the map.");
+            }
+        }
     })
     .Build();
 
+SetupC64("Missed Train - Text Adventure Sandbox");
 game.Run();
 ```

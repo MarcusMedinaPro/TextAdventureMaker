@@ -28,4 +28,4 @@ location.AddHiddenExit(Direction.East, secretCave)
 
 ## Example checklist (docs/examples)
 - [x] Discovery tracking demo (`24_Missed_Train.md`)
-- [ ] Hidden exit discovery demo
+- [x] Hidden exit discovery demo (`24_Missed_Train.md`)

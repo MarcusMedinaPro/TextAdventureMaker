@@ -25,70 +25,88 @@ T = Terminal
 
 ## Example (quest + custom input)
 ```csharp
+using MarcusMedina.TextAdventure.AI;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+
+// Slice 16 — AI Parser
+// Tests:
+// - Ollama command parser builder + fallback parser
+// - "Go somewhere dark" resolved by fallback (AI parser stub)
 
 Location office = (id: "office", description: "A quiet office with a locked terminal.");
+Location serverRoom = (id: "server_room", description: "A humming, dark server room.");
 Item note = (id: "note", name: "post-it note", description: "A hint: 0420.");
 Item terminal = (id: "terminal", name: "terminal", description: "A password prompt waits.");
 
 office.AddItem(note);
-
 office.AddItem(terminal);
+office.AddExit(Direction.Down, serverRoom);
+serverRoom.AddExit(Direction.Up, office);
 
-var state = new GameState(office, worldLocations: new[] { office });
-var quest = new Quest("login", "Access the Terminal", "Find the hint and log in.")
+GameState state = new(office, worldLocations: [office, serverRoom]);
+Quest quest = new("login", "Access the Terminal", "Find the hint and log in.")
     .AddCondition(new HasItemCondition("note"))
     .Start();
 
-var parser = new KeywordParser(KeywordParserConfig.Default);
+KeywordParser fallback = new(KeywordParserConfigBuilder.BritishDefaults()
+    .WithGo("go", "move")
+    .WithLook("look", "l")
+    .Build());
 
-// Console setup for C64 aesthetics
-Console.BackgroundColor = ConsoleColor.DarkBlue;
-Console.ForegroundColor = ConsoleColor.Cyan;
-Console.Title = "The Forgotten Password - Text Adventure Sandbox";
-Console.OutputEncoding = System.Text.Encoding.UTF8;
-Console.Clear();
-// End console setup
+ICommandParser parser = new OllamaCommandParserBuilder()
+    .WithEndpoint("http://localhost:11434")
+    .WithModel("llama3")
+    .WithSystemPrompt("Translate natural language into adventure commands.")
+    .WithFallback(fallback)
+    .Build();
+
+SetupC64("The Forgotten Password - Text Adventure Sandbox");
+WriteLineC64("=== THE FORGOTTEN PASSWORD (Slice 16) ===");
+WriteLineC64("Goal: find the note, then login. Try: go somewhere dark.");
+WriteLineC64("Commands: look, take note, go down, login, quit.");
+
 while (true)
 {
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input)) continue;
+    WriteLineC64();
+    WritePromptC64("> ");
+    string? input = Console.ReadLine();
+    if (input is null)
+        break;
 
-    if (input.TextCompare("login"))
+    string trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
+        continue;
+
+    if (trimmed.TextCompare("login"))
     {
         if (quest.CheckProgress(state))
         {
-            Console.WriteLine("Access granted.");
+            WriteLineC64("Access granted.");
             break;
         }
 
-        Console.WriteLine("You don't remember the password yet.");
+        WriteLineC64("You don't remember the password yet.");
         continue;
     }
 
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
+    ICommand command = parser.Parse(trimmed);
+    CommandResult result = state.Execute(command);
 
     if (!string.IsNullOrWhiteSpace(result.Message))
-    {
-        Console.WriteLine(result.Message);
-    }
+        WriteLineC64(result.Message);
 
-    foreach (var reaction in result.ReactionsList)
-    {
-        if (!string.IsNullOrWhiteSpace(reaction))
-        {
-            Console.WriteLine($"> {reaction}");
-        }
-    }
+    foreach (string reaction in result.ReactionsList.Where(r => !string.IsNullOrWhiteSpace(r)))
+        WriteLineC64($"> {reaction}");
 
-    if (result.ShouldQuit) break;
+    if (result.ShouldQuit)
+        break;
 }
 ```

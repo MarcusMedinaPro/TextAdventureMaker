@@ -13,7 +13,7 @@
 ## Implementation checklist (engine/AI)
 - [x] `OllamaCommandParser`
 - [x] AI configuration fluent API
-- [ ] AI sandbox demo
+- [x] AI sandbox demo (`16_The_Forgotten_Password.md`)
 
 ## Example checklist (docs/examples)
-- [ ] AI parser demo
+- [x] AI parser demo (`16_The_Forgotten_Password.md`)

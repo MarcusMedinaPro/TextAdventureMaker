@@ -37,11 +37,19 @@ R = Results
 
 ## Example (check-in flow)
 ```csharp
+using System.Linq;
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+
+// Slice 25 — Story Mapper (Relationship Visualisation)
+// Tests:
+// - WorldState relationship tracking
+// - Simple relationship "map" output in console
 
 Location entrance = (id: "hospital_entrance", description: "Automatic doors slide open to a bright lobby.");
 Location reception = (id: "reception", description: "A reception desk with a stack of forms.");
@@ -75,7 +83,36 @@ var game = GameBuilder.Create()
         var look = g.State.Look();
         g.Output.WriteLine($"\n{look.Message}");
     })
+    .AddTurnEnd((g, command, result) =>
+    {
+        if (command is TalkCommand)
+        {
+            g.State.WorldState.SetRelationship("receptionist", g.State.WorldState.GetRelationship("receptionist") + 1);
+        }
+
+        if (command is LookCommand)
+        {
+            ShowRelationshipMap(g.State);
+        }
+    })
     .Build();
 
+SetupC64("The Hospital Visit - Text Adventure Sandbox");
 game.Run();
+
+static void ShowRelationshipMap(GameState state)
+{
+    var relationships = state.WorldState.GetRelationshipsSnapshot();
+    if (relationships.Count == 0)
+    {
+        WriteLineC64("Relationship map: (no entries yet).");
+        return;
+    }
+
+    WriteLineC64("Relationship map:");
+    foreach (var entry in relationships.OrderBy(pair => pair.Key))
+    {
+        WriteLineC64($"- {entry.Key.ToProperCase()}: {entry.Value}");
+    }
+}
 ```

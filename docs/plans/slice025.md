@@ -20,9 +20,9 @@
 ## Implementation checklist (tooling)
 - [x] Story mapper app (web/desktop)
 - [x] Scene graph editing (nodes/edges/conditions)
-- [ ] Quest/NPC relationship visualisation
+- [x] Quest/NPC relationship visualisation (`25_The_Hospital_Visit.md`)
 - [x] Export to `.adventure` DSL
 - [x] Import from `.adventure` DSL
 
 ## Example checklist (docs/examples)
-- [ ] Not applicable (tooling)
+- [x] Relationship visualisation demo (`25_The_Hospital_Visit.md`)

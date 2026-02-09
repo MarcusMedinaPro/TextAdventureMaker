@@ -31,4 +31,4 @@ npc.CreateBond("childhood_friend")
 - [x] Warnings for unearned stakes
 
 ## Example checklist (docs/examples)
-- [ ] Bond system demo
+- [x] Bond system demo (`32_The_Old_Photograph.md`)

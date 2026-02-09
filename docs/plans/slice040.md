@@ -208,7 +208,7 @@ kitchen.AddItem(spoon);
 - [x] Testing guide + Fluent API guide
 
 ## Example checklist (docs/examples)
-- [ ] Not applicable (wiki)
+- [x] Not applicable (wiki)
 
 ```tads
 kitchen: Room 'Kitchen'

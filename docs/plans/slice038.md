@@ -121,7 +121,7 @@ schedule {
 - [x] Action-triggered spawns
 - [x] Conditional permanent changes
 - [x] Scheduled events queue
-- [ ] DSL for timed objects
+- [x] DSL for timed objects (`TimedObjectDslParser`)
 
 ## Example checklist (docs/examples)
 - [x] Timed spawns/doors demo (`38_The_Late_Bus.md`)

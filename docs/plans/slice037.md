@@ -118,4 +118,4 @@ chapters {
 - [x] DSL for chapters
 
 ## Example checklist (docs/examples)
-- [ ] Chapter system demo
+- [x] Chapter system demo (`37_The_Abandoned_Playground.md`)

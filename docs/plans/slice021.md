@@ -65,4 +65,4 @@ if (bombPuzzle.IsActive && bombPuzzle.MovesRemaining < 5) { ... }
 
 ## Example checklist (docs/examples)
 - [x] Time phases + move warnings (`21_The_Bank_Errand.md`)
-- [ ] Timed challenge (bomb/puzzle) demo
+- [x] Timed challenge (bomb/puzzle) demo (`21_The_Bank_Errand.md`)

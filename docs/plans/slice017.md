@@ -16,4 +16,4 @@
 - [x] README/docs for packages
 
 ## Example checklist (docs/examples)
-- [ ] Not applicable (packaging)
+- [x] Not applicable (packaging)

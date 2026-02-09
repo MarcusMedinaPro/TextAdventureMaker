@@ -207,7 +207,7 @@ MarcusMedina.TextAdventure
 - [x] Mapping coverage between LINQ and story style
 
 ## Example checklist (docs/examples)
-- [ ] LINQ/Story fluent extension demos
+- [x] LINQ/Story fluent extension demos (`42_Fluent_Queries.md`)
 | Snitt         | `Intersect(other)`        | `InCommonWith(other)`     | `needs.InCommonWith(available)`    |
 | Differens     | `Except(other)`           | `ExcludingThoseIn(other)` | `all.ExcludingThoseIn(taken)`      |
 | Konkatenera   | `Concat(other)`           | `FollowedBy(other)`       | `path.FollowedBy(returnPath)`      |

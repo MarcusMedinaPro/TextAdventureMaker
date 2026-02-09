@@ -30,4 +30,4 @@ quest.AddStage("find_sword")
 - [x] Failure consequences / hidden objectives
 
 ## Example checklist (docs/examples)
-- [ ] Multi-stage quest demo
+- [x] Multi-stage quest demo (`19_First_Date_at_the_Cafe.md`)

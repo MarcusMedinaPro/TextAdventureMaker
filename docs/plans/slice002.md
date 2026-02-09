@@ -29,4 +29,4 @@
 - [x] Locked door gating progress + key required (`02_The_Locked_Drawer.md`)
 - [x] Door state transitions (open/close/lock/unlock/destroy) (`02_Door_States.md`)
 - [x] Door reactions for success/failure (`02_The_Locked_Drawer.md`, `02_Door_States.md`)
-- [ ] Door events demonstrated (OnOpen/OnClose/OnLock/OnUnlock/OnDestroy)
+- [x] Door events demonstrated (OnOpen/OnClose/OnLock/OnUnlock/OnDestroy) (`02_Door_States.md`)

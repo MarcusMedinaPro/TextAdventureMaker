@@ -33,4 +33,4 @@ scene.Play();  // All dialog/events körs automatiskt
 - [x] Transitions based on player actions
 
 ## Example checklist (docs/examples)
-- [ ] Scene transitions demo
+- [x] Scene transitions demo (`31_The_Locked_Classroom.md`)

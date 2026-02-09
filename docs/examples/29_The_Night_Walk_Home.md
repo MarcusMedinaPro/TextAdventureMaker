@@ -31,11 +31,20 @@ Str = Stranger (NPC)
 
 ## Example (night walk)
 ```csharp
+using System;
+using System.Linq;
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+
+// Slice 29 — Tension Meter
+// Tests:
+// - Tension meter adjustments
+// - Simple safe zone lowers tension
 
 Location barAlley = (id: "bar_alley", description: "A narrow alley behind the bar.");
 Location nightStreet = (id: "night_street", description: "A long street with patchy streetlights.");
@@ -62,16 +71,71 @@ nightStreet.AddNpc(stranger);
 
 var state = new GameState(barAlley, worldLocations: new[] { barAlley, nightStreet, underpass, frontPorch });
 var parser = new KeywordParser(KeywordParserConfig.Default);
+var tension = new TensionMeter().Set(0.2f);
 
-var game = GameBuilder.Create()
-    .UseState(state)
-    .UseParser(parser)
-    .AddTurnStart(g =>
+SetupC64("The Night Walk Home - Text Adventure Sandbox");
+WriteLineC64("=== THE NIGHT WALK HOME (Slice 29) ===");
+WriteLineC64("Goal: reach the front porch while managing rising tension.");
+WriteLineC64("Commands: look, go east, go north, take whistle, quit.");
+ShowRoom();
+
+while (true)
+{
+    WriteLineC64();
+    WritePromptC64("> ");
+    var input = Console.ReadLine();
+    if (input is null)
+        break;
+
+    var trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
+        continue;
+
+    if (trimmed.Is("quit") || trimmed.Is("exit"))
+        break;
+
+    var command = parser.Parse(trimmed);
+    var result = state.Execute(command);
+
+    if (!string.IsNullOrWhiteSpace(result.Message))
+        WriteLineC64(result.Message);
+
+    foreach (var reaction in result.ReactionsList.Where(r => !string.IsNullOrWhiteSpace(r)))
+        WriteLineC64($"> {reaction}");
+
+    if (command is GoCommand && result.Success)
     {
-        var look = g.State.Look();
-        g.Output.WriteLine($"\n{look.Message}");
-    })
-    .Build();
+        AdjustTension();
+        ShowRoom();
+    }
+}
 
-game.Run();
+void AdjustTension()
+{
+    if (state.IsCurrentRoomId("underpass"))
+    {
+        _ = tension.Modify(0.2f);
+        return;
+    }
+
+    if (state.IsCurrentRoomId("front_porch"))
+    {
+        _ = tension.Modify(-0.3f);
+        return;
+    }
+
+    _ = tension.Modify(0.05f);
+}
+
+void ShowRoom()
+{
+    WriteLineC64();
+    WriteLineC64($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    WriteLineC64(state.CurrentLocation.GetDescription());
+    WriteLineC64($"Tension: {tension.Current:0.00}");
+    var exits = state.CurrentLocation.Exits.Keys
+        .Select(dir => dir.ToString().ToLowerInvariant().ToProperCase())
+        .ToList();
+    WriteLineC64(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+}
 ```

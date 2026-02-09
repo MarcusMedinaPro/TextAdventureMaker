@@ -34,4 +34,4 @@ story.DefineTension()
 - [ ] Rest periods / safe zones
 
 ## Example checklist (docs/examples)
-- [ ] Tension/pacing demo
+- [x] Tension/pacing demo (`29_The_Night_Walk_Home.md`)

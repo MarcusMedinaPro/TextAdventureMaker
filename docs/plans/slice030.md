@@ -38,4 +38,4 @@ boss.OnDefeat(ctx => {
 - [x] Optional callbacks for missed hints
 
 ## Example checklist (docs/examples)
-- [ ] Foreshadowing demo
+- [x] Foreshadowing demo (`30_The_Lost_Dog.md`)

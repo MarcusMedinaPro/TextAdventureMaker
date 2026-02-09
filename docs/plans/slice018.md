@@ -25,4 +25,4 @@ game.AddStoryBranch("dragon_path")
 - [x] Branching conditions + consequences API
 
 ## Example checklist (docs/examples)
-- [ ] Branching endings demo
+- [x] Branching endings demo (`18_Before_the_Meeting.md`)

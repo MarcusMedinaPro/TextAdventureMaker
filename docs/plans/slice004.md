@@ -93,4 +93,4 @@ var letter = new Item("letter", "Sealed Letter")
 - [x] Containers (glass) (`04-10_Forest_Adventure_Core.md`)
 - [x] Item combinations/recipes (`04-10_Forest_Adventure_Core.md`)
 - [x] Readable items + read costs/requirements (`04-10_Forest_Adventure_Core.md`)
-- [ ] `TakeAll` demonstrated explicitly
+- [x] `TakeAll` demonstrated explicitly (`04_The_Last_Train_Home.md`)

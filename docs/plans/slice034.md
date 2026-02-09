@@ -29,4 +29,4 @@ else
 - [x] Story path unlocks based on agency
 
 ## Example checklist (docs/examples)
-- [ ] Agency tracking demo
+- [x] Agency tracking demo (`34_The_Power_Outage.md`)

@@ -32,4 +32,4 @@ if (!player.WarnedKing())
 - [x] Player actions based on secrets
 
 ## Example checklist (docs/examples)
-- [ ] Dramatic irony demo
+- [x] Dramatic irony demo (`35_The_Midnight_Phone_Call.md`)

@@ -124,7 +124,7 @@ schedule {
 - [ ] DSL for timed objects
 
 ## Example checklist (docs/examples)
-- [ ] Timed spawns/doors demo
+- [x] Timed spawns/doors demo (`38_The_Late_Bus.md`)
 
 ---
 

@@ -23,6 +23,7 @@ public sealed class GameBuilder
     private INarrativeVoiceSystem? _narrativeVoiceSystem;
     private IAgencyTracker? _agencyTracker;
     private IDramaticIronySystem? _dramaticIronySystem;
+    private ITensionSystem? _tensionSystem;
     private IFlashbackSystem? _flashbackSystem;
     private IChapterSystem? _chapterSystem;
     private IScheduleQueue? _scheduleQueue;
@@ -106,6 +107,12 @@ public sealed class GameBuilder
     public GameBuilder UseDramaticIronySystem(IDramaticIronySystem dramaticIronySystem)
     {
         _dramaticIronySystem = dramaticIronySystem ?? throw new ArgumentNullException(nameof(dramaticIronySystem));
+        return this;
+    }
+
+    public GameBuilder UseTensionSystem(ITensionSystem tensionSystem)
+    {
+        _tensionSystem = tensionSystem ?? throw new ArgumentNullException(nameof(tensionSystem));
         return this;
     }
 
@@ -231,6 +238,11 @@ public sealed class GameBuilder
             state.SetDramaticIronySystem(_dramaticIronySystem);
         }
 
+        if (_tensionSystem != null)
+        {
+            state.SetTensionSystem(_tensionSystem);
+        }
+
         if (_flashbackSystem != null)
         {
             state.SetFlashbackSystem(_flashbackSystem);
@@ -297,6 +309,7 @@ public sealed class GameBuilder
             narrativeVoiceSystem: _narrativeVoiceSystem,
             agencyTracker: _agencyTracker,
             dramaticIronySystem: _dramaticIronySystem,
+            tensionSystem: _tensionSystem,
             flashbackSystem: _flashbackSystem,
             chapterSystem: _chapterSystem,
             scheduleQueue: _scheduleQueue,

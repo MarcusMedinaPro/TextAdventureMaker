@@ -28,6 +28,7 @@ public interface IGameState
     INarrativeVoiceSystem NarrativeVoice { get; }
     IAgencyTracker Agency { get; }
     IDramaticIronySystem DramaticIrony { get; }
+    ITensionSystem Tension { get; }
     IFlashbackSystem Flashbacks { get; }
     IChapterSystem Chapters { get; }
     IScheduleQueue Schedule { get; }

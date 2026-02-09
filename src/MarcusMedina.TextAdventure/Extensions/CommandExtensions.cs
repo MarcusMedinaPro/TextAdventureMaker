@@ -23,6 +23,7 @@ public static class CommandExtensions
             state.TimeSystem.Tick(state);
             state.RandomEvents.Tick(state);
             state.TickNpcTriggers();
+            state.Tension.Tick(state);
         }
 
         return result;

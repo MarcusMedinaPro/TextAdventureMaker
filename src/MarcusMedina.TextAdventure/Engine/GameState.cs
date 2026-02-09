@@ -32,6 +32,7 @@ public class GameState : IGameState
     public INarrativeVoiceSystem NarrativeVoice { get; private set; }
     public IAgencyTracker Agency { get; private set; }
     public IDramaticIronySystem DramaticIrony { get; private set; }
+    public ITensionSystem Tension { get; private set; }
     public IFlashbackSystem Flashbacks { get; private set; }
     public IChapterSystem Chapters { get; private set; }
     public IScheduleQueue Schedule { get; private set; }
@@ -66,6 +67,7 @@ public class GameState : IGameState
         INarrativeVoiceSystem? narrativeVoiceSystem = null,
         IAgencyTracker? agencyTracker = null,
         IDramaticIronySystem? dramaticIronySystem = null,
+        ITensionSystem? tensionSystem = null,
         IFlashbackSystem? flashbackSystem = null,
         IChapterSystem? chapterSystem = null,
         IScheduleQueue? scheduleQueue = null,
@@ -90,6 +92,7 @@ public class GameState : IGameState
         NarrativeVoice = narrativeVoiceSystem ?? new NarrativeVoiceSystem();
         Agency = agencyTracker ?? new AgencyTracker();
         DramaticIrony = dramaticIronySystem ?? new DramaticIronySystem();
+        Tension = tensionSystem ?? new TensionSystem();
         Flashbacks = flashbackSystem ?? new FlashbackSystem();
         Chapters = chapterSystem ?? new ChapterSystem();
         Schedule = scheduleQueue ?? new ScheduleQueue(this);
@@ -222,6 +225,16 @@ public class GameState : IGameState
         }
 
         DramaticIrony = dramaticIronySystem;
+    }
+
+    public void SetTensionSystem(ITensionSystem tensionSystem)
+    {
+        if (tensionSystem == null)
+        {
+            return;
+        }
+
+        Tension = tensionSystem;
     }
 
     public void SetFlashbackSystem(IFlashbackSystem flashbackSystem)

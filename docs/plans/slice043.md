@@ -19,4 +19,4 @@
 - [x] ASCII map rendering
 
 ## Example checklist (docs/examples)
-- [ ] Map generator demo
+- [x] Map generator demo (`43_Map_Generator.md`)

@@ -24,7 +24,7 @@ location.Description()
 ## Implementation checklist (engine)
 - [x] Context-aware location descriptions
 - [x] Variable substitution in descriptions
-- [ ] Dialog templates with parameters
+- [x] Dialog templates with parameters (`27_Apartment_Viewing.md`)
 
 ## Example checklist (docs/examples)
-- [ ] Dynamic description demo
+- [x] Dynamic description demo (`27_Apartment_Viewing.md`)

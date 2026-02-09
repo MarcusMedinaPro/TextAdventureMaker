@@ -16,4 +16,4 @@
 - [x] `HintCommand`
 
 ## Example checklist (docs/examples)
-- [ ] Pathfinder demo
+- [x] Pathfinder demo (`15_Rain_on_the_Roof.md`)

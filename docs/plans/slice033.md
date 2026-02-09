@@ -29,4 +29,4 @@ game.SetNarrativeVoice(Voice.SecondPerson)
 - [x] Flashback support
 
 ## Example checklist (docs/examples)
-- [ ] Narrative voice demo
+- [x] Narrative voice demo (`33_The_Elevator_Stuck.md`)

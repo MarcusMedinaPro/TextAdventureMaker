@@ -44,6 +44,8 @@ public class GameState : IGameState
     private readonly NpcTriggerSystem _npcTriggers = new();
     public MementoCaretaker History { get; }
     public IWeatherSystem? Weather { get; private set; }
+    public IAccessibilitySystem? Accessibility { get; private set; }
+    public IMoodSystem? MoodSystem { get; private set; }
     public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     /// <summary>Enable fuzzy matching for commands and targets.</summary>
@@ -105,6 +107,8 @@ public class GameState : IGameState
         Quests = new QuestLog();
         Story = new StoryState();
         History = new MementoCaretaker();
+        Accessibility = new AccessibilitySystem();
+        MoodSystem = new MoodSystem();
 
         RegisterLocations(worldLocations ?? new[] { startLocation });
         if (LocationDiscovery is LocationDiscoverySystem discovery)
@@ -284,6 +288,16 @@ public class GameState : IGameState
     public void SetWeatherSystem(IWeatherSystem? weatherSystem)
     {
         Weather = weatherSystem;
+    }
+
+    public void SetAccessibilitySystem(IAccessibilitySystem? accessibilitySystem)
+    {
+        Accessibility = accessibilitySystem;
+    }
+
+    public void SetMoodSystem(IMoodSystem? moodSystem)
+    {
+        MoodSystem = moodSystem;
     }
 
     public GameMemento CreateMemento()

@@ -61,6 +61,7 @@ public sealed class Game(
         if (!result.ShouldQuit)
         {
             TickNpcs();
+            EvaluateStoryBranches();
         }
 
         return result;
@@ -87,6 +88,12 @@ public sealed class Game(
             _ = from.RemoveNpc(npc);
             to.AddNpc(npc);
         }
+    }
+
+    public void EvaluateStoryBranches()
+    {
+        // Check triggers story branch consequences if their conditions are met
+        _ = State.Story.Check(State).Count();
     }
 
     public void Run()
@@ -133,6 +140,7 @@ public sealed class Game(
             }
 
             TickNpcs();
+            EvaluateStoryBranches();
 
             foreach (Action<Game, ICommand, CommandResult> handler in _turnEndHandlers)
             {

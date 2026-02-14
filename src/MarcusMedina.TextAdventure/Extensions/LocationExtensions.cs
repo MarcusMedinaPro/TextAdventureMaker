@@ -69,25 +69,81 @@ public static class LocationExtensions
     /// <summary>
     /// Prints the full room display: name, description, items, NPCs, and exits.
     /// Uses door-aware exit formatting when doors are present.
+    /// Respects accessibility settings if provided (verbosity, screen reader mode).
     /// </summary>
-    public static void ShowRoom(this ILocation location, bool showAllItems = false, ILanguageProvider? provider = null)
+    public static void ShowRoom(this ILocation location, bool showAllItems = false, ILanguageProvider? provider = null, IAccessibilitySystem? accessibility = null)
     {
         ArgumentNullException.ThrowIfNull(location);
         provider ??= Language.Provider;
 
         Console.WriteLine();
         Console.WriteLine($"Room: {location.Id.ToProperCase()}");
-        Console.WriteLine(location.GetDescription());
+
+        string description = location.GetDescription();
+        if (accessibility?.ScreenReaderEnabled == true)
+        {
+            // Add alternative text descriptions for screen readers
+            Console.WriteLine($"Location: {location.Id}. {description}");
+        }
+        else
+        {
+            Console.WriteLine(description);
+        }
 
         var items = location.GetRoomItems(showAllItems, provider);
-        Console.WriteLine(items.Count > 0 ? $"Items: {items.CommaJoin()}" : "Items: None");
+        if (accessibility?.Verbosity == VerbosityLevel.Brief)
+        {
+            Console.WriteLine(items.Count > 0 ? $"Items: {items.CommaJoin()}" : "");
+        }
+        else if (accessibility?.Verbosity == VerbosityLevel.Verbose)
+        {
+            if (items.Count > 0)
+            {
+                Console.WriteLine($"Items available here:");
+                foreach (var item in items)
+                    Console.WriteLine($"  - {item}");
+            }
+            else
+                Console.WriteLine("Items: None");
+        }
+        else
+        {
+            Console.WriteLine(items.Count > 0 ? $"Items: {items.CommaJoin()}" : "Items: None");
+        }
 
         var npcs = location.GetRoomNpcs(provider);
         if (npcs.Count > 0)
-            Console.WriteLine($"You see: {npcs.CommaJoin()}");
+        {
+            if (accessibility?.Verbosity == VerbosityLevel.Verbose)
+            {
+                Console.WriteLine("Characters here:");
+                foreach (var npc in npcs)
+                    Console.WriteLine($"  - {npc}");
+            }
+            else
+                Console.WriteLine($"You see: {npcs.CommaJoin()}");
+        }
 
         var exits = location.GetRoomExitsWithDoors(provider);
-        Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+        if (accessibility?.Verbosity == VerbosityLevel.Brief)
+        {
+            Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "");
+        }
+        else if (accessibility?.Verbosity == VerbosityLevel.Verbose)
+        {
+            if (exits.Count > 0)
+            {
+                Console.WriteLine("Exits from this location:");
+                foreach (var exit in exits)
+                    Console.WriteLine($"  - {exit}");
+            }
+            else
+                Console.WriteLine("Exits: None");
+        }
+        else
+        {
+            Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+        }
     }
 
     public static FlashbackLocationBuilder TriggerFlashback(this ILocation location, string memoryId)

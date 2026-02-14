@@ -29,6 +29,9 @@ public sealed class GameBuilder
     private IScheduleQueue? _scheduleQueue;
     private IActionTriggerSystem? _actionTriggerSystem;
     private IWeatherSystem? _weatherSystem;
+    private IAccessibilitySystem? _accessibilitySystem;
+    private IMoodSystem? _moodSystem;
+    private readonly List<IStoryBranch> _storyBranches = [];
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -205,6 +208,25 @@ public sealed class GameBuilder
         return this;
     }
 
+    public GameBuilder UseAccessibility(IAccessibilitySystem accessibilitySystem)
+    {
+        _accessibilitySystem = accessibilitySystem ?? throw new ArgumentNullException(nameof(accessibilitySystem));
+        return this;
+    }
+
+    public GameBuilder UseMoodSystem(IMoodSystem moodSystem)
+    {
+        _moodSystem = moodSystem ?? throw new ArgumentNullException(nameof(moodSystem));
+        return this;
+    }
+
+    public GameBuilder DefineStoryBranch(IStoryBranch branch)
+    {
+        ArgumentNullException.ThrowIfNull(branch);
+        _storyBranches.Add(branch);
+        return this;
+    }
+
     public Game Build()
     {
         ICommandParser parser = _parser ?? throw new InvalidOperationException("Parser must be provided.");
@@ -273,6 +295,21 @@ public sealed class GameBuilder
         if (_weatherSystem != null)
         {
             state.SetWeatherSystem(_weatherSystem);
+        }
+
+        if (_accessibilitySystem != null)
+        {
+            state.SetAccessibilitySystem(_accessibilitySystem);
+        }
+
+        if (_moodSystem != null)
+        {
+            state.SetMoodSystem(_moodSystem);
+        }
+
+        foreach (IStoryBranch branch in _storyBranches)
+        {
+            state.Story.AddBranch(branch);
         }
 
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);

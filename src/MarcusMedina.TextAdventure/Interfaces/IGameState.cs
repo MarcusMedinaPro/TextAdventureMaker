@@ -38,6 +38,9 @@ public interface IGameState
     /// <summary>Quest log for tracking active and completed quests.</summary>
     IQuestLog Quests { get; }
     StoryState Story { get; }
+    IWeatherSystem? Weather { get; }
+    IAccessibilitySystem? Accessibility { get; }
+    IMoodSystem? MoodSystem { get; }
     bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     /// <summary>Enable fuzzy matching for commands and targets.</summary>

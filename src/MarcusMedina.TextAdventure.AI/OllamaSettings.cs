@@ -5,9 +5,12 @@
 
 namespace MarcusMedina.TextAdventure.AI;
 
-public sealed class OllamaSettings
+public sealed class OllamaSettings(string endpoint = "http://localhost:11434", string model = "llama2", string systemPrompt = "You are a helpful text adventure game command parser. Respond with only the command name and arguments. Examples: look, go north, take sword, talk to guard")
 {
-    public string Endpoint { get; set; } = "http://localhost:11434";
-    public string Model { get; set; } = "llama3";
-    public string SystemPrompt { get; set; } = "You are a text adventure parser.";
+    public string Endpoint { get; set; } = endpoint;
+    public string Model { get; set; } = model;
+    public string SystemPrompt { get; set; } = systemPrompt;
+    public double Temperature { get; set; } = 0.3;
+    public int TimeoutMs { get; set; } = 5000;
+    public bool Enabled { get; set; } = true;
 }

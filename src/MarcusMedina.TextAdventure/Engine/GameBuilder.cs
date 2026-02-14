@@ -28,6 +28,7 @@ public sealed class GameBuilder
     private IChapterSystem? _chapterSystem;
     private IScheduleQueue? _scheduleQueue;
     private IActionTriggerSystem? _actionTriggerSystem;
+    private IWeatherSystem? _weatherSystem;
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
@@ -198,6 +199,12 @@ public sealed class GameBuilder
         return this;
     }
 
+    public GameBuilder UseWeather(IWeatherSystem weatherSystem)
+    {
+        _weatherSystem = weatherSystem ?? throw new ArgumentNullException(nameof(weatherSystem));
+        return this;
+    }
+
     public Game Build()
     {
         ICommandParser parser = _parser ?? throw new InvalidOperationException("Parser must be provided.");
@@ -261,6 +268,11 @@ public sealed class GameBuilder
         if (_actionTriggerSystem != null)
         {
             state.SetActionTriggerSystem(_actionTriggerSystem);
+        }
+
+        if (_weatherSystem != null)
+        {
+            state.SetWeatherSystem(_weatherSystem);
         }
 
         Game game = new(state, parser, _input ?? Console.In, _output ?? Console.Out, _prompt);

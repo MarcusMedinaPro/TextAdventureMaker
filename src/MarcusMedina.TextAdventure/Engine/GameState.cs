@@ -43,6 +43,7 @@ public class GameState : IGameState
     public StoryState Story { get; }
     private readonly NpcTriggerSystem _npcTriggers = new();
     public MementoCaretaker History { get; }
+    public IWeatherSystem? Weather { get; private set; }
     public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     /// <summary>Enable fuzzy matching for commands and targets.</summary>
@@ -278,6 +279,11 @@ public class GameState : IGameState
         }
 
         ActionTriggers = actionTriggerSystem;
+    }
+
+    public void SetWeatherSystem(IWeatherSystem? weatherSystem)
+    {
+        Weather = weatherSystem;
     }
 
     public GameMemento CreateMemento()

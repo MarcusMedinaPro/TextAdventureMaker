@@ -4,14 +4,15 @@
 // </copyright>
 
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Engine;
 
-public sealed class WeatherSystem
+public sealed class WeatherSystem : IWeatherSystem
 {
     public WeatherState Current { get; private set; } = WeatherState.Clear;
 
-    public WeatherSystem SetWeather(WeatherState state)
+    public IWeatherSystem SetWeather(WeatherState state)
     {
         Current = state;
         return this;

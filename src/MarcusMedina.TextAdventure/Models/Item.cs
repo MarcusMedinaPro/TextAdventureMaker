@@ -9,14 +9,14 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public class Item : IItem
+public class Item(string id, string name, string description = "") : IItem
 {
     private readonly List<string> _aliases = [];
     private readonly Dictionary<ItemAction, string> _reactions = [];
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private string? _readText;
     private Func<IGameState, bool>? _readCondition;
-    private string _description = "";
+    private string _description = description ?? "";
     private int? _amount;
     private bool _isStackable;
     private string? _presenceDescription;
@@ -24,8 +24,8 @@ public class Item : IItem
     private bool _isPoisoned;
     private int _healAmount;
 
-    public string Id { get; }
-    public string Name { get; }
+    public string Id { get; } = id ?? throw new ArgumentNullException(nameof(id));
+    public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
     public string? Description => _description;
     public int? Amount => _amount;
     public bool IsStackable => _isStackable;
@@ -34,13 +34,10 @@ public class Item : IItem
     public bool IsPoisoned => _isPoisoned;
     public int HealAmount => _healAmount;
     public IDictionary<string, string> Properties => _properties;
-    public string GetDescription()
-    {
-        return _description;
-    }
+    public string GetDescription() => _description;
 
-    public bool Takeable { get; private set; }
-    public float Weight { get; private set; }
+    public bool Takeable { get; private set; } = true;
+    public float Weight { get; private set; } = 0f;
     public IReadOnlyList<string> Aliases => _aliases;
     public bool Readable { get; private set; }
     public bool RequiresTakeToRead { get; private set; }
@@ -53,21 +50,6 @@ public class Item : IItem
     public event Action<IItem>? OnMove;
     public event Action<IItem>? OnDestroy;
     public event Action<IItem>? OnAmountEmpty;
-
-    public Item(string id, string name)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Id = id;
-        Name = name;
-        Takeable = true;
-        Weight = 0f;
-    }
-
-    public Item(string id, string name, string description) : this(id, name)
-    {
-        _description = description ?? "";
-    }
 
     public Item SetTakeable(bool takeable)
     {

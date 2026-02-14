@@ -42,6 +42,7 @@ public class GameState : IGameState
     public IQuestLog Quests { get; }
     public StoryState Story { get; }
     private readonly NpcTriggerSystem _npcTriggers = new();
+    public MementoCaretaker History { get; }
     public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
     public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
     /// <summary>Enable fuzzy matching for commands and targets.</summary>
@@ -50,6 +51,7 @@ public class GameState : IGameState
     public int FuzzyMaxDistance { get; set; } = 1;
     public IReadOnlyCollection<ILocation> Locations => _locations.Values;
     public bool TestingModeEnabled { get; set; }
+    public bool DebugMode { get; set; }
 
     public GameState(
         ILocation startLocation,
@@ -101,6 +103,7 @@ public class GameState : IGameState
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
         Story = new StoryState();
+        History = new MementoCaretaker();
 
         RegisterLocations(worldLocations ?? new[] { startLocation });
         if (LocationDiscovery is LocationDiscoverySystem discovery)

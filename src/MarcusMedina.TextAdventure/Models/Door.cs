@@ -9,23 +9,19 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public class Door : IDoor
+public class Door(string id, string name, DoorState initialState = DoorState.Closed) : IDoor
 {
+    public string Id { get; } = ValidateId(id);
+    public string Name { get; } = ValidateName(name);
+    public IDictionary<string, string> Properties => _properties;
+    public IReadOnlyList<string> Aliases => _aliases;
+    public DoorState State { get; private set; } = initialState;
+    public IKey? RequiredKey { get; private set; }
+
     private string _description = "";
     private readonly Dictionary<DoorAction, string> _reactions = [];
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> _aliases = [];
-    public string Id { get; }
-    public string Name { get; }
-    public IDictionary<string, string> Properties => _properties;
-    public IReadOnlyList<string> Aliases => _aliases;
-    public string GetDescription()
-    {
-        return _description;
-    }
-
-    public DoorState State { get; private set; }
-    public IKey? RequiredKey { get; private set; }
 
     public event Action<IDoor>? OnOpen;
     public event Action<IDoor>? OnClose;
@@ -35,19 +31,22 @@ public class Door : IDoor
 
     public bool IsPassable => State is DoorState.Open or DoorState.Destroyed;
 
-    public Door(string id, string name, DoorState initialState = DoorState.Closed)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Id = id;
-        Name = name;
-        State = initialState;
-    }
-
     public Door(string id, string name, string description, DoorState initialState = DoorState.Closed)
         : this(id, name, initialState)
     {
         _description = description ?? "";
+    }
+
+    private static string ValidateId(string id)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        return id;
+    }
+
+    private static string ValidateName(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return name;
     }
 
     public Door Description(string text)
@@ -56,10 +55,10 @@ public class Door : IDoor
         return this;
     }
 
-    public string? GetReaction(DoorAction action)
-    {
-        return _reactions.TryGetValue(action, out string? reaction) ? reaction : null;
-    }
+    public string GetDescription() => _description;
+
+    public string? GetReaction(DoorAction action) =>
+        _reactions.TryGetValue(action, out string? reaction) ? reaction : null;
 
     public Door AddAliases(params string[] aliases)
     {
@@ -77,12 +76,9 @@ public class Door : IDoor
     public bool Matches(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-        {
             return false;
-        }
 
         string token = name.Trim();
-
         return Name.TextCompare(token) || _aliases.Any(a => a.TextCompare(token));
     }
 
@@ -99,134 +95,65 @@ public class Door : IDoor
         return this;
     }
 
-    public bool Open()
+    public bool Open() => State switch
     {
-        if (State == DoorState.Locked)
-        {
-            return false;
-        }
+        DoorState.Locked => false,
+        DoorState.Destroyed or DoorState.Open => true,
+        _ => ChangeState(DoorState.Open, OnOpen)
+    };
 
-        if (State == DoorState.Destroyed)
-        {
-            return true;
-        }
-
-        if (State == DoorState.Open)
-        {
-            return true;
-        }
-
-        State = DoorState.Open;
-        OnOpen?.Invoke(this);
+    private bool ChangeState(DoorState newState, Action<IDoor>? onStateChange)
+    {
+        State = newState;
+        onStateChange?.Invoke(this);
         return true;
     }
 
-    public bool Close()
+    public bool Close() => State switch
     {
-        if (State == DoorState.Destroyed)
-        {
-            return false;
-        }
-
-        if (State == DoorState.Locked)
-        {
-            return false;
-        }
-
-        if (State == DoorState.Closed)
-        {
-            return true;
-        }
-
-        State = DoorState.Closed;
-        OnClose?.Invoke(this);
-        return true;
-    }
+        DoorState.Destroyed or DoorState.Locked => false,
+        DoorState.Closed => true,
+        _ => ChangeState(DoorState.Closed, OnClose)
+    };
 
     public bool Lock(IKey key)
     {
-        if (State == DoorState.Destroyed)
-        {
+        if (State == DoorState.Destroyed || State == DoorState.Open)
             return false;
-        }
-
-        if (State == DoorState.Open)
-        {
-            return false;
-        }
 
         if (RequiredKey != null && RequiredKey.Id != key.Id)
-        {
             return false;
-        }
 
-        if (State == DoorState.Locked && RequiredKey != null && RequiredKey.Id == key.Id)
-        {
+        if (State == DoorState.Locked && RequiredKey?.Id == key.Id)
             return true;
-        }
 
         RequiredKey = key;
-        State = DoorState.Locked;
-        OnLock?.Invoke(this);
-        return true;
+        return ChangeState(DoorState.Locked, OnLock);
     }
 
     public bool Unlock(IKey key)
     {
         if (State != DoorState.Locked)
-        {
             return false;
-        }
 
         if (RequiredKey == null || RequiredKey.Id != key.Id)
-        {
             return false;
-        }
 
-        State = DoorState.Closed;
-        OnUnlock?.Invoke(this);
-        return true;
+        return ChangeState(DoorState.Closed, OnUnlock);
     }
 
-    public bool Destroy()
-    {
-        if (State == DoorState.Destroyed)
-        {
-            return true;
-        }
+    public bool Destroy() => State == DoorState.Destroyed ? true : ChangeState(DoorState.Destroyed, OnDestroy);
 
-        State = DoorState.Destroyed;
-        OnDestroy?.Invoke(this);
-        return true;
-    }
+    public static implicit operator Door(string name) => new(name.ToId(), name);
 
-    public static implicit operator Door(string name)
-    {
-        return new(name.ToId(), name);
-    }
+    public static implicit operator Door((string id, string name, string description) data) =>
+        new(data.id, data.name, data.description);
 
-    IDoor IDoor.Description(string text)
-    {
-        return Description(text);
-    }
+    IDoor IDoor.Description(string text) => Description(text);
 
-    IDoor IDoor.AddAliases(params string[] aliases)
-    {
-        return AddAliases(aliases);
-    }
+    IDoor IDoor.AddAliases(params string[] aliases) => AddAliases(aliases);
 
-    bool IDoor.Matches(string name)
-    {
-        return Matches(name);
-    }
+    bool IDoor.Matches(string name) => Matches(name);
 
-    IDoor IDoor.SetReaction(DoorAction action, string text)
-    {
-        return SetReaction(action, text);
-    }
-
-    public static implicit operator Door((string id, string name, string description) data)
-    {
-        return new(data.id, data.name, data.description);
-    }
+    IDoor IDoor.SetReaction(DoorAction action, string text) => SetReaction(action, text);
 }

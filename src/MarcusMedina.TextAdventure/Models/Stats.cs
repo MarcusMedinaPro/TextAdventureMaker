@@ -7,60 +7,42 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public class Stats : IStats
+public class Stats(int maxHealth, int? currentHealth = null) : IStats
 {
-    public int Health { get; private set; }
-    public int MaxHealth { get; private set; }
+    public int MaxHealth { get; private set; } = ValidateMaxHealth(maxHealth);
+    public int Health { get; private set; } = Clamp(currentHealth ?? maxHealth, 0, maxHealth);
 
-    public Stats(int maxHealth, int? currentHealth = null)
+    private static int ValidateMaxHealth(int maxHealth)
     {
         if (maxHealth <= 0)
-        {
             throw new ArgumentOutOfRangeException(nameof(maxHealth));
-        }
-
-        MaxHealth = maxHealth;
-        Health = Clamp(currentHealth ?? maxHealth, 0, MaxHealth);
+        return maxHealth;
     }
 
     public void Damage(int amount)
     {
         if (amount <= 0)
-        {
             return;
-        }
-
         Health = Clamp(Health - amount, 0, MaxHealth);
     }
 
     public void Heal(int amount)
     {
         if (amount <= 0)
-        {
             return;
-        }
-
         Health = Clamp(Health + amount, 0, MaxHealth);
     }
 
-    public void SetMaxHealth(int maxHealth)
+    public void SetMaxHealth(int newMaxHealth)
     {
-        if (maxHealth <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxHealth));
-        }
-
-        MaxHealth = maxHealth;
+        if (newMaxHealth <= 0)
+            throw new ArgumentOutOfRangeException(nameof(newMaxHealth));
+        MaxHealth = newMaxHealth;
         Health = Clamp(Health, 0, MaxHealth);
     }
 
-    public void SetHealth(int health)
-    {
-        Health = Clamp(health, 0, MaxHealth);
-    }
+    public void SetHealth(int health) => Health = Clamp(health, 0, MaxHealth);
 
-    private static int Clamp(int value, int min, int max)
-    {
-        return value < min ? min : value > max ? max : value;
-    }
+    private static int Clamp(int value, int min, int max) =>
+        value < min ? min : value > max ? max : value;
 }

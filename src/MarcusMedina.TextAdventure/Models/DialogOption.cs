@@ -7,15 +7,14 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public sealed class DialogOption
+public sealed class DialogOption(string text, IDialogNode? next = null)
 {
-    public string Text { get; }
-    public IDialogNode? Next { get; }
+    public string Text { get; } = ValidateText(text);
+    public IDialogNode? Next { get; } = next;
 
-    public DialogOption(string text, IDialogNode? next = null)
+    private static string ValidateText(string text)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(text);
-        Text = text;
-        Next = next;
+        return text;
     }
 }

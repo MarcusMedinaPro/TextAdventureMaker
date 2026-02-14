@@ -8,58 +8,39 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public class Inventory : IInventory
+public class Inventory(InventoryLimitType limitType = InventoryLimitType.Unlimited, int maxCount = 0, float maxWeight = 0f) : IInventory
 {
     private readonly List<IItem> _items = [];
 
-    public InventoryLimitType LimitType { get; private set; }
-    public int MaxCount { get; private set; }
-    public float MaxWeight { get; private set; }
+    public InventoryLimitType LimitType { get; private set; } = limitType;
+    public int MaxCount { get; private set; } = maxCount;
+    public float MaxWeight { get; private set; } = maxWeight;
     public int Count => _items.Count;
     public float TotalWeight => _items.Sum(i => i.Weight);
     public IReadOnlyList<IItem> Items => _items;
 
-    public Inventory(InventoryLimitType limitType = InventoryLimitType.Unlimited, int maxCount = 0, float maxWeight = 0f)
-    {
-        LimitType = limitType;
-        MaxCount = maxCount;
-        MaxWeight = maxWeight;
-    }
-
-    public bool CanAdd(IItem item)
-    {
-        return LimitType switch
+    public bool CanAdd(IItem item) =>
+        LimitType switch
         {
             InventoryLimitType.Unlimited => true,
             InventoryLimitType.ByCount => Count + 1 <= MaxCount,
             InventoryLimitType.ByWeight => TotalWeight + item.Weight <= MaxWeight,
             _ => true
         };
-    }
 
     public bool Add(IItem item)
     {
         if (!CanAdd(item))
-        {
             return false;
-        }
 
         _items.Add(item);
         return true;
     }
 
-    public bool Remove(IItem item)
-    {
-        return _items.Remove(item);
-    }
+    public bool Remove(IItem item) => _items.Remove(item);
 
-    public IItem? FindItem(string name)
-    {
-        return string.IsNullOrWhiteSpace(name) ? null : _items.FirstOrDefault(i => i.Matches(name));
-    }
+    public IItem? FindItem(string name) =>
+        string.IsNullOrWhiteSpace(name) ? null : _items.FirstOrDefault(i => i.Matches(name));
 
-    public void Clear()
-    {
-        _items.Clear();
-    }
+    public void Clear() => _items.Clear();
 }

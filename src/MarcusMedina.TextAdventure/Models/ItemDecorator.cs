@@ -34,6 +34,8 @@ public abstract class ItemDecorator : IItem
     public virtual bool RequiresTakeToRead => Inner.RequiresTakeToRead;
     public virtual int ReadingCost => Inner.ReadingCost;
     public virtual bool HiddenFromItemList => Inner.HiddenFromItemList;
+    public virtual int? Durability => Inner.Durability;
+    public virtual int? MaxDurability => Inner.MaxDurability;
 
     public virtual string GetDescription()
     {
@@ -214,5 +216,20 @@ public abstract class ItemDecorator : IItem
     public virtual void Destroy()
     {
         Inner.Destroy();
+    }
+
+    public virtual IItem SetDurability(int current, int max)
+    {
+        return Inner.SetDurability(current, max);
+    }
+
+    public virtual bool DecreaseDurability(int amount = 1)
+    {
+        return Inner.DecreaseDurability(amount);
+    }
+
+    public virtual string GetCondition()
+    {
+        return Inner.GetCondition();
     }
 }

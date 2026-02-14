@@ -25,6 +25,8 @@ public class Item(string id, string name, string description = "") : IItem
     private bool _isFood;
     private bool _isPoisoned;
     private int _healAmount;
+    private int? _durability;
+    private int? _maxDurability;
 
     private static string ValidateId(string id)
     {
@@ -54,6 +56,8 @@ public class Item(string id, string name, string description = "") : IItem
     public bool RequiresTakeToRead { get; private set; }
     public int ReadingCost { get; private set; }
     public bool HiddenFromItemList { get; private set; }
+    public int? Durability => _durability;
+    public int? MaxDurability => _maxDurability;
 
     public event Action<IItem>? OnTake;
     public event Action<IItem>? OnDrop;
@@ -296,6 +300,11 @@ public class Item(string id, string name, string description = "") : IItem
             _ = copy.SetHealAmount(_healAmount);
         }
 
+        if (_durability.HasValue && _maxDurability.HasValue)
+        {
+            _ = copy.SetDurability(_durability.Value, _maxDurability.Value);
+        }
+
         return copy;
     }
 
@@ -313,6 +322,7 @@ public class Item(string id, string name, string description = "") : IItem
     {
         OnUse?.Invoke(this);
         _ = DecreaseAmount();
+        _ = DecreaseDurability();
     }
 
     public void Move()
@@ -323,6 +333,40 @@ public class Item(string id, string name, string description = "") : IItem
     public void Destroy()
     {
         OnDestroy?.Invoke(this);
+    }
+
+    public IItem SetDurability(int current, int max)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(max, 0);
+        _maxDurability = max;
+        _durability = Math.Min(current, max);
+        return this;
+    }
+
+    public bool DecreaseDurability(int amount = 1)
+    {
+        if (!_durability.HasValue)
+            return true;
+
+        int next = Math.Max(0, _durability.Value - Math.Max(1, amount));
+        _durability = next;
+        return next > 0;
+    }
+
+    public string GetCondition()
+    {
+        if (!_durability.HasValue || !_maxDurability.HasValue)
+            return "";
+
+        int percent = (_durability.Value * 100) / _maxDurability.Value;
+        return percent switch
+        {
+            >= 90 => "pristine",
+            >= 60 => "good",
+            >= 30 => "worn",
+            >= 10 => "damaged",
+            _ => "broken"
+        };
     }
 
     public static implicit operator Item(string name)

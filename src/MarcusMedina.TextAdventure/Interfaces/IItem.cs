@@ -26,6 +26,8 @@ public interface IItem : IGameEntity
     bool RequiresTakeToRead { get; }
     int ReadingCost { get; }
     string? GetReadText();
+    int? Durability { get; }
+    int? MaxDurability { get; }
 
     event Action<IItem>? OnTake;
     event Action<IItem>? OnDrop;
@@ -64,4 +66,7 @@ public interface IItem : IGameEntity
     /// <summary>Trigger the move event for this item.</summary>
     void Move();
     void Destroy();
+    IItem SetDurability(int current, int max);
+    bool DecreaseDurability(int amount = 1);
+    string GetCondition();
 }

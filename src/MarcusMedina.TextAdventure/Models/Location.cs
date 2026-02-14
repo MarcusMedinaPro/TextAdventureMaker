@@ -10,10 +10,10 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public class Location : ILocation
+public class Location(string id) : ILocation
 {
-    public string Id { get; }
-    public string Name { get; }
+    public string Id { get; } = ValidateId(id);
+    public string Name { get; set; } = id;
     private string _description = "";
     private readonly Dictionary<Direction, Exit> _exits = [];
     private readonly List<IItem> _items = [];
@@ -32,13 +32,6 @@ public class Location : ILocation
     public IReadOnlyList<TimedSpawn> TimedSpawns => _timedSpawns;
     public LocationTransform? Transform => _transform;
 
-    public Location(string id)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        Id = id;
-        Name = id;
-    }
-
     public Location(string id, string description) : this(id)
     {
         _description = description ?? "";
@@ -49,23 +42,24 @@ public class Location : ILocation
         Name = name;
     }
 
+    private static string ValidateId(string id)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        return id;
+    }
+
     public Location Description(string text)
     {
         _description = text;
         return this;
     }
 
-    public string GetDescription()
-    {
-        return _description;
-    }
+    public string GetDescription() => _description;
 
     public string GetDescription(IGameState state)
     {
         if (state == null)
-        {
             return GetDescription();
-        }
 
         bool firstVisit = _visitCount == 0;
         string text = _layeredDescription != null
@@ -158,9 +152,7 @@ public class Location : ILocation
     public Exit? GetExit(Direction direction)
     {
         if (!_exits.TryGetValue(direction, out Exit? exit))
-        {
             return null;
-        }
 
         return exit.IsVisible ? exit : null;
     }
@@ -179,43 +171,22 @@ public class Location : ILocation
         return discoveredAny;
     }
 
-    public void AddItem(IItem item)
-    {
-        _items.Add(item);
-    }
+    public void AddItem(IItem item) => _items.Add(item);
 
-    public bool RemoveItem(IItem item)
-    {
-        return _items.Remove(item);
-    }
+    public bool RemoveItem(IItem item) => _items.Remove(item);
 
-    public IItem? FindItem(string name)
-    {
-        return string.IsNullOrWhiteSpace(name) ? null : _items.FirstOrDefault(i => i.Matches(name));
-    }
+    public IItem? FindItem(string name) =>
+        string.IsNullOrWhiteSpace(name) ? null : _items.FirstOrDefault(i => i.Matches(name));
 
-    public void AddNpc(INpc npc)
-    {
-        _npcs.Add(npc);
-    }
+    public void AddNpc(INpc npc) => _npcs.Add(npc);
 
-    public bool RemoveNpc(INpc npc)
-    {
-        return _npcs.Remove(npc);
-    }
+    public bool RemoveNpc(INpc npc) => _npcs.Remove(npc);
 
-    public INpc? FindNpc(string name)
-    {
-        return string.IsNullOrWhiteSpace(name) ? null : _npcs.FirstOrDefault(n => n.Name.TextCompare(name));
-    }
+    public INpc? FindNpc(string name) =>
+        string.IsNullOrWhiteSpace(name) ? null : _npcs.FirstOrDefault(n => n.Name.TextCompare(name));
 
-    public static implicit operator Location(string id)
-    {
-        return new(id);
-    }
+    public static implicit operator Location(string id) => new(id);
 
-    public static implicit operator Location((string id, string description) data)
-    {
-        return new(data.id, data.description);
-    }
+    public static implicit operator Location((string id, string description) data) =>
+        new(data.id, "", data.description);
 }

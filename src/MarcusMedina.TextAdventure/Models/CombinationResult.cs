@@ -12,13 +12,7 @@ public class CombinationResult(bool success, IReadOnlyList<IItem> created)
     public bool Success { get; } = success;
     public IReadOnlyList<IItem> Created { get; } = created;
 
-    public static CombinationResult Fail()
-    {
-        return new(false, Array.Empty<IItem>());
-    }
+    public static CombinationResult Fail() => new(false, []);
 
-    public static CombinationResult Ok(params IItem[] created)
-    {
-        return new(true, created);
-    }
+    public static CombinationResult Ok(params IItem[] created) => new(true, created);
 }

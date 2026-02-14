@@ -15,9 +15,7 @@ public sealed class NarrativeTemplate(string name)
     public NarrativeTemplate AddStep(string step)
     {
         if (!string.IsNullOrWhiteSpace(step))
-        {
             _steps.Add(step);
-        }
 
         return this;
     }

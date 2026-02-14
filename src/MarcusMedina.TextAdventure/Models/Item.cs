@@ -11,6 +11,8 @@ namespace MarcusMedina.TextAdventure.Models;
 
 public class Item(string id, string name, string description = "") : IItem
 {
+    public string Id { get; } = ValidateId(id);
+    public string Name { get; } = ValidateName(name);
     private readonly List<string> _aliases = [];
     private readonly Dictionary<ItemAction, string> _reactions = [];
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
@@ -24,8 +26,17 @@ public class Item(string id, string name, string description = "") : IItem
     private bool _isPoisoned;
     private int _healAmount;
 
-    public string Id { get; } = id ?? throw new ArgumentNullException(nameof(id));
-    public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
+    private static string ValidateId(string id)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        return id;
+    }
+
+    private static string ValidateName(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return name;
+    }
     public string? Description => _description;
     public int? Amount => _amount;
     public bool IsStackable => _isStackable;

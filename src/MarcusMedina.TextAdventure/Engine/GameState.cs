@@ -403,4 +403,11 @@ public class GameState : IGameState
     {
         return !string.IsNullOrWhiteSpace(id) && CurrentLocation.Id.TextCompare(id);
     }
+
+    /// <summary>Debug method to teleport directly to a location.</summary>
+    public void Teleport(ILocation location)
+    {
+        ArgumentNullException.ThrowIfNull(location);
+        CurrentLocation = location;
+    }
 }

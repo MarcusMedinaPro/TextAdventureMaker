@@ -5,21 +5,15 @@
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public sealed class DialogRule
+public sealed class DialogRule(string id)
 {
     private readonly List<Func<DialogContext, bool>> _conditions = [];
     private Func<DialogContext, string>? _say;
     private Action<DialogContext>? _then;
 
-    public string Id { get; }
+    public string Id { get; } = !string.IsNullOrWhiteSpace(id) ? id : throw new ArgumentException(null, nameof(id));
     public int PriorityValue { get; private set; }
     public int CriteriaCount => _conditions.Count;
-
-    public DialogRule(string id)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        Id = id;
-    }
 
     public DialogRule When(Func<DialogContext, bool> predicate)
     {

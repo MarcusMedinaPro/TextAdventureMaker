@@ -22,18 +22,12 @@ public sealed class Bond(string id) : IBond
 
     public IBond InvestmentMoments(params string[] moments)
     {
-        if (moments == null)
-        {
+        if (moments is null)
             return this;
-        }
 
-        foreach (string moment in moments)
-        {
+        foreach (var moment in moments)
             if (!string.IsNullOrWhiteSpace(moment))
-            {
                 _required.Add(moment);
-            }
-        }
 
         return this;
     }
@@ -41,9 +35,7 @@ public sealed class Bond(string id) : IBond
     public IBond RecordInvestment(string moment)
     {
         if (!string.IsNullOrWhiteSpace(moment))
-        {
             _completed.Add(moment);
-        }
 
         return this;
     }
@@ -56,12 +48,10 @@ public sealed class Bond(string id) : IBond
 
     public BondContext? TriggerPayoff(IGameState state, INpc npc)
     {
-        if (_payoff == null)
-        {
+        if (_payoff is null)
             return null;
-        }
 
-        BondContext context = new(state, npc, this);
+        var context = new BondContext(state, npc, this);
         _payoff(context);
         return context;
     }

@@ -53,15 +53,11 @@ public sealed class CharacterArc : ICharacterArc
     public bool Advance(string milestoneId, IGameState state)
     {
         if (_currentIndex >= _milestones.Count)
-        {
             return false;
-        }
 
-        (int index, string id, Trait unlocks) = _milestones[_currentIndex];
+        var (index, id, unlocks) = _milestones[_currentIndex];
         if (!id.Equals(milestoneId, StringComparison.OrdinalIgnoreCase))
-        {
             return false;
-        }
 
         CurrentTrait = unlocks;
         _currentIndex++;

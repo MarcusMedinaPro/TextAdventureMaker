@@ -8,7 +8,7 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public class Npc : INpc
+public class Npc(string id, string name, NpcState state = NpcState.Friendly, IStats? stats = null) : INpc
 {
     private string _description = "";
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
@@ -17,13 +17,13 @@ public class Npc : INpc
     private readonly Dictionary<string, ICharacterArc> _arcs = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, IBond> _bonds = new(StringComparer.OrdinalIgnoreCase);
 
-    public string Id { get; }
-    public string Name { get; }
+    public string Id { get; } = id ?? throw new ArgumentException(null, nameof(id));
+    public string Name { get; } = name ?? throw new ArgumentException(null, nameof(name));
     public IDictionary<string, string> Properties => _properties;
-    public NpcState State { get; private set; }
+    public NpcState State { get; private set; } = state;
     public INpcMovement Movement { get; private set; } = new NoNpcMovement();
     public IDialogNode? DialogRoot { get; private set; }
-    public IStats Stats { get; private set; }
+    public IStats Stats { get; private set; } = stats ?? new Stats(20);
     public NpcMemory Memory { get; } = new();
     public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
     public IReadOnlyList<NpcTrigger> Triggers => _triggers;
@@ -33,20 +33,7 @@ public class Npc : INpc
     public JourneyStage? FateStage { get; private set; }
     public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
 
-    public Npc(string id, string name, NpcState state = NpcState.Friendly, IStats? stats = null)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Id = id;
-        Name = name;
-        State = state;
-        Stats = stats ?? new Stats(20);
-    }
-
-    public string GetDescription()
-    {
-        return _description;
-    }
+    public string GetDescription() => _description;
 
     public INpc Description(string text)
     {
@@ -62,17 +49,14 @@ public class Npc : INpc
 
     public INpc SetMovement(INpcMovement movement)
     {
-        ArgumentNullException.ThrowIfNull(movement);
-        Movement = movement;
+        Movement = movement ?? throw new ArgumentNullException(nameof(movement));
         return this;
     }
 
-    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
-    {
-        ArgumentNullException.ThrowIfNull(currentLocation);
-        ArgumentNullException.ThrowIfNull(state);
-        return Movement.GetNextLocation(currentLocation, state);
-    }
+    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state) =>
+        Movement.GetNextLocation(
+            currentLocation ?? throw new ArgumentNullException(nameof(currentLocation)),
+            state ?? throw new ArgumentNullException(nameof(state)));
 
     public INpc Dialog(string text)
     {
@@ -95,35 +79,35 @@ public class Npc : INpc
 
     public DialogRule AddDialogRule(string id)
     {
-        DialogRule rule = new(id);
+        var rule = new DialogRule(id);
         _dialogRules.Add(rule);
         return rule;
     }
 
     public NpcTrigger OnSee(string target)
     {
-        NpcTrigger trigger = new(NpcSense.See, target);
+        var trigger = new NpcTrigger(NpcSense.See, target);
         _triggers.Add(trigger);
         return trigger;
     }
 
     public NpcTrigger OnHear(string target)
     {
-        NpcTrigger trigger = new(NpcSense.Hear, target);
+        var trigger = new NpcTrigger(NpcSense.Hear, target);
         _triggers.Add(trigger);
         return trigger;
     }
 
     public ICharacterArc DefineArc(string id)
     {
-        CharacterArc arc = new(id);
+        var arc = new CharacterArc(id);
         _arcs[id] = arc;
         return arc;
     }
 
     public IBond CreateBond(string id)
     {
-        Bond bond = new(id);
+        var bond = new Bond(id);
         _bonds[id] = bond;
         return bond;
     }
@@ -143,31 +127,26 @@ public class Npc : INpc
     public string? GetRuleBasedDialog(IGameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
-        if (_dialogRules.Count == 0)
-        {
-            return null;
-        }
 
-        DialogContext context = new(state, this, Memory);
-        List<DialogRule> matching = _dialogRules
+        if (_dialogRules.Count == 0)
+            return null;
+
+        var context = new DialogContext(state, this, Memory);
+        var matching = _dialogRules
             .Where(rule => rule.Matches(context) && rule.GetText(context) != null)
             .ToList();
 
         if (matching.Count == 0)
-        {
             return null;
-        }
 
-        DialogRule selected = matching
+        var selected = matching
             .OrderByDescending(rule => rule.CriteriaCount)
             .ThenByDescending(rule => rule.PriorityValue)
             .First();
 
-        string? text = selected.GetText(context);
+        var text = selected.GetText(context);
         if (string.IsNullOrWhiteSpace(text))
-        {
             return null;
-        }
 
         selected.Apply(context);
         Memory.MarkMet();

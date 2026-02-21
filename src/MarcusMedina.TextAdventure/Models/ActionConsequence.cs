@@ -46,40 +46,31 @@ public class ActionConsequence
     /// <summary>
     /// Creates a consequence that destroys the item.
     /// </summary>
-    public static ActionConsequence Destroy(string? message = null)
+    public static ActionConsequence Destroy(string? message = null) => new()
     {
-        return new()
-        {
-            DestroyItem = true,
-            Message = message
-        };
-    }
+        DestroyItem = true,
+        Message = message
+    };
 
     /// <summary>
     /// Creates a consequence that transforms the item into something else.
     /// </summary>
-    public static ActionConsequence Transform(Item newItem, string? message = null)
+    public static ActionConsequence Transform(Item newItem, string? message = null) => new()
     {
-        return new()
-        {
-            DestroyItem = true,
-            CreatedItems = [newItem],
-            Message = message
-        };
-    }
+        DestroyItem = true,
+        CreatedItems = [newItem],
+        Message = message
+    };
 
     /// <summary>
     /// Creates a consequence that breaks the item into pieces.
     /// </summary>
-    public static ActionConsequence Break(string message, params Item[] pieces)
+    public static ActionConsequence Break(string message, params Item[] pieces) => new()
     {
-        return new()
-        {
-            DestroyItem = true,
-            CreatedItems = pieces.ToList(),
-            Message = message
-        };
-    }
+        DestroyItem = true,
+        CreatedItems = [..pieces],
+        Message = message
+    };
 }
 
 /// <summary>
@@ -125,18 +116,14 @@ public static class ItemConsequenceExtensions
     /// <summary>
     /// Gets the consequence for an action on an item.
     /// </summary>
-    public static ActionConsequence? GetConsequence(this Item item, ItemAction action)
-    {
-        return Consequences.TryGetValue((item.Id, action), out ActionConsequence? consequence) ? consequence : null;
-    }
+    public static ActionConsequence? GetConsequence(this Item item, ItemAction action) =>
+        Consequences.TryGetValue((item.Id, action), out var consequence) ? consequence : null;
 
     /// <summary>
     /// Checks if an item has a consequence for the given action.
     /// </summary>
-    public static bool HasConsequence(this Item item, ItemAction action)
-    {
-        return Consequences.ContainsKey((item.Id, action));
-    }
+    public static bool HasConsequence(this Item item, ItemAction action) =>
+        Consequences.ContainsKey((item.Id, action));
 
     /// <summary>
     /// Makes the item fragile - it breaks when dropped.
@@ -145,11 +132,11 @@ public static class ItemConsequenceExtensions
     {
         ArgumentNullException.ThrowIfNull(item);
 
-        ActionConsequence consequence = new()
+        var consequence = new ActionConsequence
         {
             DestroyItem = true,
             Message = breakMessage,
-            CreatedItems = brokenVersion != null ? [brokenVersion] : []
+            CreatedItems = brokenVersion is not null ? [brokenVersion] : []
         };
 
         Consequences[(item.Id, ItemAction.Drop)] = consequence;
@@ -162,7 +149,6 @@ public static class ItemConsequenceExtensions
     public static Item MakeConsumable(this Item item, string consumeMessage)
     {
         ArgumentNullException.ThrowIfNull(item);
-
         Consequences[(item.Id, ItemAction.Use)] = ActionConsequence.Destroy(consumeMessage);
         return item;
     }

@@ -120,17 +120,13 @@ public class GameState : IGameState
 
     public void RegisterLocations(IEnumerable<ILocation> locations)
     {
-        if (locations == null)
-        {
+        if (locations is null)
             return;
-        }
 
-        foreach (ILocation location in locations)
+        foreach (var location in locations)
         {
-            if (location == null)
-            {
+            if (location is null)
                 continue;
-            }
 
             _locations[location.Id] = location;
         }

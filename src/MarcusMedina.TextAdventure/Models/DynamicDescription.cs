@@ -36,33 +36,27 @@ public sealed class DynamicDescription
     public DynamicDescription WithVariable(string key, string value)
     {
         if (!string.IsNullOrWhiteSpace(key))
-        {
             _variables[key] = value ?? "";
-        }
 
         return this;
     }
 
     public string Resolve(IGameState state, bool firstVisit)
     {
-        string? text = firstVisit && !string.IsNullOrWhiteSpace(_firstVisit)
+        var text = firstVisit && !string.IsNullOrWhiteSpace(_firstVisit)
             ? _firstVisit
             : _conditions.FirstOrDefault(c => c.Condition(state)).Text ?? _default;
 
         if (string.IsNullOrWhiteSpace(text))
-        {
             text = _default;
-        }
 
         return ApplyVariables(text ?? "");
     }
 
     private string ApplyVariables(string text)
     {
-        foreach ((string key, string value) in _variables)
-        {
+        foreach (var (key, value) in _variables)
             text = text.Replace("{" + key + "}", value, StringComparison.OrdinalIgnoreCase);
-        }
 
         return text;
     }

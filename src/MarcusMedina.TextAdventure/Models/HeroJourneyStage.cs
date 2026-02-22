@@ -41,9 +41,7 @@ public sealed class HeroJourneyStage(JourneyStage stage)
     public HeroJourneyStage AddNote(string note)
     {
         if (!string.IsNullOrWhiteSpace(note))
-        {
             _notes.Add(note);
-        }
 
         return this;
     }
@@ -51,9 +49,7 @@ public sealed class HeroJourneyStage(JourneyStage stage)
     public HeroJourneyStage SetData(string key, string value)
     {
         if (!string.IsNullOrWhiteSpace(key))
-        {
             _data[key] = value ?? "";
-        }
 
         return this;
     }

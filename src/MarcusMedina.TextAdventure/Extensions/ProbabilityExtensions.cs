@@ -7,15 +7,9 @@ namespace MarcusMedina.TextAdventure.Extensions;
 
 public static class ProbabilityExtensions
 {
-    private static readonly Random Rng = new();
+    public static bool PercentChance(this int percent) =>
+        Random.Shared.Next(100) < percent;
 
-    public static bool PercentChance(this int percent)
-    {
-        return Rng.Next(100) < percent;
-    }
-
-    public static bool Chance(this double probability)
-    {
-        return Rng.NextDouble() < probability;
-    }
+    public static bool Chance(this double probability) =>
+        Random.Shared.NextDouble() < probability;
 }

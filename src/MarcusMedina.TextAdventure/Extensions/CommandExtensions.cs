@@ -32,32 +32,27 @@ public static class CommandExtensions
     /// <summary>
     /// Executes the built-in LookCommand for the current state.
     /// </summary>
-    public static CommandResult Look(this GameState state)
-    {
-        return state.Execute(new LookCommand());
-    }
+    public static CommandResult Look(this GameState state) =>
+        state.Execute(new LookCommand());
 
     /// <summary>
     /// Executes the built-in InventoryCommand for the current state.
     /// </summary>
-    public static CommandResult InventoryView(this GameState state)
-    {
-        return state.Execute(new InventoryCommand());
-    }
+    public static CommandResult InventoryView(this GameState state) =>
+        state.Execute(new InventoryCommand());
 
     /// <summary>
     /// Executes the built-in StatsCommand for the current state.
     /// </summary>
-    public static CommandResult StatsView(this GameState state)
-    {
-        return state.Execute(new StatsCommand());
-    }
+    public static CommandResult StatsView(this GameState state) =>
+        state.Execute(new StatsCommand());
 
     /// <summary>
     /// Prints the current room: name, description, items, NPCs, and exits.
+    /// Forwards accessibility settings from the game state.
     /// </summary>
     public static void ShowRoom(this GameState state, ILanguageProvider? provider = null) =>
-        state.CurrentLocation.ShowRoom(provider: provider);
+        state.CurrentLocation.ShowRoom(provider: provider, accessibility: state.Accessibility);
 
     /// <summary>
     /// Prints the room name header followed by the command result message and reactions.

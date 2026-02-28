@@ -80,69 +80,42 @@ public static class LocationExtensions
         Console.WriteLine($"Room: {location.Id.ToProperCase()}");
 
         string description = location.GetDescription();
-        if (accessibility?.ScreenReaderEnabled == true)
-        {
-            // Add alternative text descriptions for screen readers
-            Console.WriteLine($"Location: {location.Id}. {description}");
-        }
-        else
-        {
-            Console.WriteLine(description);
-        }
+        Console.WriteLine(accessibility?.ScreenReaderEnabled == true
+            ? $"Location: {location.Id}. {description}"
+            : description);
 
         var items = location.GetRoomItems(showAllItems, provider);
-        if (accessibility?.Verbosity == VerbosityLevel.Brief)
-        {
-            Console.WriteLine(items.Count > 0 ? $"Items: {items.CommaJoin()}" : "");
-        }
-        else if (accessibility?.Verbosity == VerbosityLevel.Verbose)
-        {
-            if (items.Count > 0)
-            {
-                Console.WriteLine($"Items available here:");
-                foreach (var item in items)
-                    Console.WriteLine($"  - {item}");
-            }
-            else
-                Console.WriteLine("Items: None");
-        }
-        else
-        {
-            Console.WriteLine(items.Count > 0 ? $"Items: {items.CommaJoin()}" : "Items: None");
-        }
+        WriteSection("Items", items, accessibility);
 
         var npcs = location.GetRoomNpcs(provider);
         if (npcs.Count > 0)
-        {
-            if (accessibility?.Verbosity == VerbosityLevel.Verbose)
-            {
-                Console.WriteLine("Characters here:");
-                foreach (var npc in npcs)
-                    Console.WriteLine($"  - {npc}");
-            }
-            else
-                Console.WriteLine($"You see: {npcs.CommaJoin()}");
-        }
+            WriteSection("You see", npcs, accessibility, hideWhenEmpty: true);
 
         var exits = location.GetRoomExitsWithDoors(provider);
-        if (accessibility?.Verbosity == VerbosityLevel.Brief)
+        WriteSection("Exits", exits, accessibility);
+    }
+
+    private static void WriteSection(string label, List<string> entries, IAccessibilitySystem? accessibility, bool hideWhenEmpty = false)
+    {
+        if (entries.Count == 0)
         {
-            Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "");
+            if (!hideWhenEmpty && accessibility?.Verbosity != VerbosityLevel.Brief)
+                Console.WriteLine($"{label}: None");
+            else if (accessibility?.Verbosity == VerbosityLevel.Brief)
+                Console.WriteLine("");
+
+            return;
         }
-        else if (accessibility?.Verbosity == VerbosityLevel.Verbose)
+
+        if (accessibility?.Verbosity == VerbosityLevel.Verbose)
         {
-            if (exits.Count > 0)
-            {
-                Console.WriteLine("Exits from this location:");
-                foreach (var exit in exits)
-                    Console.WriteLine($"  - {exit}");
-            }
-            else
-                Console.WriteLine("Exits: None");
+            Console.WriteLine($"{label}:");
+            foreach (var entry in entries)
+                Console.WriteLine($"  - {entry}");
         }
         else
         {
-            Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+            Console.WriteLine($"{label}: {entries.CommaJoin()}");
         }
     }
 
@@ -262,13 +235,9 @@ public static class LocationExtensions
         return item;
     }
 
-    private static string GetName(ILanguageProvider provider, IGameEntity entity)
-    {
-        return provider is JsonLanguageProvider json ? json.GetName(entity.Id) : entity.Name;
-    }
+    private static string GetName(ILanguageProvider provider, IGameEntity entity) =>
+        provider is JsonLanguageProvider json ? json.GetName(entity.Id) : entity.Name;
 
-    private static string GetDirectionName(ILanguageProvider provider, Direction direction)
-    {
-        return provider is JsonLanguageProvider json ? json.GetDirectionName(direction) : direction.ToString();
-    }
+    private static string GetDirectionName(ILanguageProvider provider, Direction direction) =>
+        provider is JsonLanguageProvider json ? json.GetDirectionName(direction) : direction.ToString();
 }

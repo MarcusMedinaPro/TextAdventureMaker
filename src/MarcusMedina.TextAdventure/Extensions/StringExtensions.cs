@@ -11,44 +11,36 @@ namespace MarcusMedina.TextAdventure.Extensions;
 public static class StringExtensions
 {
     /// <summary>Return the lower-cased, trimmed string or an empty string if null/whitespace.</summary>
-    public static string Lower(this string? text)
-    {
-        return string.IsNullOrWhiteSpace(text) ? string.Empty : text.Trim().ToLowerInvariant();
-    }
+    public static string Lower(this string? text) =>
+        string.IsNullOrWhiteSpace(text) ? string.Empty : text.Trim().ToLowerInvariant();
 
     /// <summary>Case-insensitive comparison after trimming.</summary>
-    public static bool TextCompare(this string? text, string? other)
-    {
-        return !string.IsNullOrWhiteSpace(text) && !string.IsNullOrWhiteSpace(other) && string.Equals(text.Trim(), other.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
+    public static bool TextCompare(this string? text, string? other) =>
+        !string.IsNullOrWhiteSpace(text)
+        && !string.IsNullOrWhiteSpace(other)
+        && string.Equals(text.Trim(), other.Trim(), StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>Fluent alias for case-insensitive comparison.</summary>
-    public static bool EqualsIgnoreCase(this string? text, string? other)
-    {
-        return text.TextCompare(other);
-    }
+    /// <summary>Case-insensitive comparison after trimming. Use <see cref="TextCompare"/> instead.</summary>
+    [Obsolete("Use TextCompare instead.")]
+    public static bool EqualsIgnoreCase(this string? text, string? other) =>
+        text.TextCompare(other);
 
-    /// <summary>Fluent alias for case-insensitive comparison.</summary>
-    public static bool Is(this string? text, string? other)
-    {
-        return text.TextCompare(other);
-    }
+    /// <summary>Case-insensitive comparison after trimming. Use <see cref="TextCompare"/> instead.</summary>
+    [Obsolete("Use TextCompare instead.")]
+    public static bool Is(this string? text, string? other) =>
+        text.TextCompare(other);
 
     /// <summary>Case-insensitive StartsWith after trimming.</summary>
-    public static bool StartsWithIgnoreCase(this string? text, string? prefix)
-    {
-        return !string.IsNullOrWhiteSpace(text)
-            && !string.IsNullOrWhiteSpace(prefix)
-            && text.Trim().StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
+    public static bool StartsWithIgnoreCase(this string? text, string? prefix) =>
+        !string.IsNullOrWhiteSpace(text)
+        && !string.IsNullOrWhiteSpace(prefix)
+        && text.Trim().StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Case-insensitive EndsWith after trimming.</summary>
-    public static bool EndsWithIgnoreCase(this string? text, string? suffix)
-    {
-        return !string.IsNullOrWhiteSpace(text)
-            && !string.IsNullOrWhiteSpace(suffix)
-            && text.Trim().EndsWith(suffix.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
+    public static bool EndsWithIgnoreCase(this string? text, string? suffix) =>
+        !string.IsNullOrWhiteSpace(text)
+        && !string.IsNullOrWhiteSpace(suffix)
+        && text.Trim().EndsWith(suffix.Trim(), StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Convert a string to a stable identifier (lowercase, underscores).</summary>
     public static string ToId(this string? text)

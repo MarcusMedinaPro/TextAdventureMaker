@@ -7,22 +7,14 @@ namespace MarcusMedina.TextAdventure.Extensions;
 
 public static class RandomExtensions
 {
-    private static readonly Random Rng = new();
+    public static int Random(this int max) =>
+        System.Random.Shared.Next(max + 1);
 
-    public static int Random(this int max)
-    {
-        return Rng.Next(max + 1);
-    }
+    public static int Random(this int max, int min) =>
+        System.Random.Shared.Next(min, max + 1);
 
-    public static int Random(this int max, int min)
-    {
-        return Rng.Next(min, max + 1);
-    }
-
-    public static int Dice(this int sides)
-    {
-        return Rng.Next(1, sides + 1);
-    }
+    public static int Dice(this int sides) =>
+        System.Random.Shared.Next(1, sides + 1);
 
     public static int Dice(this int sides, int count)
     {

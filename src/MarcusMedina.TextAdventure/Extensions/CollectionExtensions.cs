@@ -7,18 +7,14 @@ namespace MarcusMedina.TextAdventure.Extensions;
 
 public static class CollectionExtensions
 {
-    private static readonly Random Rng = new();
-
     public static T PickRandom<T>(this IList<T> list)
     {
         ArgumentNullException.ThrowIfNull(list);
-        return list[Rng.Next(list.Count)];
+        return list[Random.Shared.Next(list.Count)];
     }
 
-    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
-    {
-        return source.OrderBy(_ => Rng.Next());
-    }
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source) =>
+        source.OrderBy(_ => Random.Shared.Next());
 
     public static T WeightedRandom<T>(this IEnumerable<T> source, Func<T, int> weightSelector)
     {
@@ -27,7 +23,7 @@ public static class CollectionExtensions
 
         List<T> items = source.ToList();
         int totalWeight = items.Sum(weightSelector);
-        int roll = Rng.Next(totalWeight);
+        int roll = Random.Shared.Next(totalWeight);
         int cumulative = 0;
         foreach (T item in items)
         {

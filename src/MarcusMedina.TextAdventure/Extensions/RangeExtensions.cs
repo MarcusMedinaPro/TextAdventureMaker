@@ -7,13 +7,9 @@ namespace MarcusMedina.TextAdventure.Extensions;
 
 public static class RangeExtensions
 {
-    public static int Clamp(this int value, int min, int max)
-    {
-        return Math.Max(min, Math.Min(max, value));
-    }
+    public static int Clamp(this int value, int min, int max) =>
+        Math.Clamp(value, min, max);
 
-    public static bool IsBetween(this int value, int min, int max)
-    {
-        return value >= min && value <= max;
-    }
+    public static bool IsBetween(this int value, int min, int max) =>
+        value >= min && value <= max;
 }

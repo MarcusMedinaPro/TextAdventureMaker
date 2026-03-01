@@ -20,3 +20,14 @@
 - Proposal with invalid location is rejected.
 - Valid proposal can be converted into event chain action.
 - Story progression remains deterministic when AI disabled.
+
+## Implementation Checklist (engine/AI)
+
+- [x] `IStoryDirectorAiService`
+- [x] `StoryDirectorContext` built from map/state data
+- [x] Structured event proposal parsing and validation
+- [x] Deterministic behaviour maintained when AI is disabled/unavailable
+
+## Validation Notes (2026-03-01)
+
+- Story director service and runtime plugin hooks are present with legal-state guardrails before timeline application.

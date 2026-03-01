@@ -46,3 +46,7 @@
 
 - OpenAI can be primary or fallback provider through router.
 - No behavioural regression for non-AI parser flow.
+
+## Validation Notes (2026-03-01)
+
+- OpenAI adapter, builder wiring, and mocked HTTP mapping tests are present and passing.

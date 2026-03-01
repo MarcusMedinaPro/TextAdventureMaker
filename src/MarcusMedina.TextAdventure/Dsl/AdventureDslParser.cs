@@ -298,30 +298,18 @@ public class AdventureDslParser : IDslParser
         if (!TryParseDirection(directionText, out Direction direction))
             return;
 
-        if (!context.CurrentLocation!.Exits.TryGetValue(direction, out Exit? exit))
-            return;
-
-        string doorId = $"timed_{context.CurrentLocation.Id}_{directionText}".ToLowerInvariant();
-        TimedDoor timedDoor = exit.WithTimedDoor(doorId);
-
+        Dictionary<string, string> options = new(StringComparer.OrdinalIgnoreCase);
         for (int i = 1; i < parts.Count; i++)
         {
             KeyValuePair<string, string>? option = ParseOption(parts[i]);
-            if (option == null)
-                continue;
-
-            string key = option.Value.Key;
-            string val = option.Value.Value;
-
-            if (key.TextCompare("opens_at"))
-                ApplyTickOrPhase(val, tick => timedDoor.OpensAt(tick), phase => timedDoor.OpensAt(phase));
-            else if (key.TextCompare("closes_at"))
-                ApplyTickOrPhase(val, tick => timedDoor.ClosesAt(tick), phase => timedDoor.ClosesAt(phase));
-            else if (key.TextCompare("message"))
-                _ = timedDoor.Message(val);
-            else if (key.TextCompare("closed_message"))
-                _ = timedDoor.ClosedMessage(val);
+            if (option != null)
+                options[option.Value.Key] = option.Value.Value;
         }
+
+        context.PendingTimedDoors.Add(new PendingTimedDoor(
+            context.CurrentLocation!.Id,
+            direction,
+            options));
     }
 
     private static void ApplyTickOrPhase(string value, Action<int> onTick, Action<TimePhase> onPhase)
@@ -531,6 +519,7 @@ public class AdventureDslParser : IDslParser
     {
         ResolveDoorKeys(context);
         ResolveExits(context);
+        ResolveTimedDoors(context);
 
         Location startLocation = ResolveStartLocation(context);
         List<Location> locations = context.Locations.Values.ToList();
@@ -617,6 +606,33 @@ public class AdventureDslParser : IDslParser
                 context.Doors.TryGetValue(pending.DoorId, out Door? door)
                 ? from.AddExit(pending.Direction, target, door, pending.IsOneWay)
                 : from.AddExit(pending.Direction, target, pending.IsOneWay);
+        }
+    }
+
+    private static void ResolveTimedDoors(AdventureDslContext context)
+    {
+        foreach (PendingTimedDoor pending in context.PendingTimedDoors)
+        {
+            if (!context.Locations.TryGetValue(pending.LocationId, out Location? location))
+                continue;
+
+            if (!location.Exits.TryGetValue(pending.Direction, out Exit? exit))
+                continue;
+
+            string doorId = $"timed_{pending.LocationId}_{pending.Direction}".ToLowerInvariant();
+            TimedDoor timedDoor = exit.WithTimedDoor(doorId);
+
+            foreach (KeyValuePair<string, string> option in pending.Options)
+            {
+                if (option.Key.TextCompare("opens_at"))
+                    ApplyTickOrPhase(option.Value, tick => timedDoor.OpensAt(tick), phase => timedDoor.OpensAt(phase));
+                else if (option.Key.TextCompare("closes_at"))
+                    ApplyTickOrPhase(option.Value, tick => timedDoor.ClosesAt(tick), phase => timedDoor.ClosesAt(phase));
+                else if (option.Key.TextCompare("message"))
+                    _ = timedDoor.Message(option.Value);
+                else if (option.Key.TextCompare("closed_message"))
+                    _ = timedDoor.ClosedMessage(option.Value);
+            }
         }
     }
 

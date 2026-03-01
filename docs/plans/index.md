@@ -1,6 +1,9 @@
 # Text Adventure Engine — Slice Index
 
 - Overview: `docs/plans/overview.md`
+- AI Planning Summary: `docs/plans/ai-planning-summary.md`
+- AI Slices Index: `docs/plans/AI_SLICES_INDEX.md`
+- AI Feature Backlog: `docs/plans/AI_FEATURE_BACKLOG.md`
 
 | Slice | Title | Goal | File |
 | --- | --- | --- | --- |
@@ -49,3 +52,5 @@
 | 043 | Map Generator | Skapa en enkel map generator som kan rendera en ASCII-karta baserat på location-grafen och exits. | `slice043.md` |
 | 044 | String Case Utilities | Enkla stränghelpers för casing i UI/texter. | `slice044.md` |
 | 045 | Generic Fixes | Ersätt hårdkodade input-checkar (t.ex. `IsSitInput`) med en generisk, fluent alias‑lösning. | `slice045.md` |
+| 046 | Consumable Items — Eat, Drink & Healing | EatCommand, DrinkCommand, healing on consume, poison-over-time. | `slice046.md` |
+| 047 | Stackable Items & Inventory Grouping | Stack merging, partial take/drop, grouped inventory display. | `slice047.md` |

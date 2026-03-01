@@ -109,6 +109,26 @@ public class LookCommand : ICommand
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
 
+        INpc? npc = location.FindNpc(target);
+        if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
+        {
+            INpc? best = FuzzyMatcher.FindBestNpc(location.Npcs, target, context.State.FuzzyMaxDistance);
+            if (best != null)
+            {
+                npc = best;
+                suggestion = Language.EntityName(best);
+            }
+        }
+
+        if (npc != null)
+        {
+            string description = npc.GetDescription();
+            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+                ? Language.ItemDescription(Language.EntityName(npc))
+                : description);
+            return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        }
+
         IDoor? door = location.Exits.Values
             .Select(e => e.Door)
             .FirstOrDefault(d => d != null && (target.TextCompare("door") || d.Matches(target)));

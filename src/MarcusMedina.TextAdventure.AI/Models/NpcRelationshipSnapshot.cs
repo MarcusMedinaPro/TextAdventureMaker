@@ -1,0 +1,12 @@
+// <copyright file="NpcRelationshipSnapshot.cs" company="Marcus Ackre Medina">
+// Copyright (c) Marcus Ackre Medina. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
+namespace MarcusMedina.TextAdventure.AI.Models;
+
+public sealed record NpcRelationshipSnapshot(
+    int Affinity,
+    int Trust = 0,
+    int Fear = 0,
+    int Respect = 0);

@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.AI;
+namespace MarcusMedina.TextAdventure.AI.Settings;
 
 public sealed class OllamaSettings(string endpoint = "http://localhost:11434", string model = "llama2", string systemPrompt = "You are a helpful text adventure game command parser. Respond with only the command name and arguments. Examples: look, go north, take sword, talk to guard")
 {

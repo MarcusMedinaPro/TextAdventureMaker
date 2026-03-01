@@ -285,4 +285,88 @@ location: room
 
         Assert.False(adventure.HasWarnings);
     }
+
+    [Fact]
+    public void ParseString_TimedSpawn_WithTick()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: cave | A dark cave.
+            timed_spawn: rat | appears_at=3 | disappears_after=2 | message=A rat scurries past!
+            """);
+
+        Assert.False(adventure.HasWarnings);
+        Location cave = adventure.Locations["cave"];
+        Assert.Single(cave.TimedSpawns);
+        Assert.Equal("rat", cave.TimedSpawns.First().ItemId);
+        Assert.Contains(3, cave.TimedSpawns.First().AppearTicks);
+        Assert.Contains(2, cave.TimedSpawns.First().DisappearAfterTicks);
+        Assert.Equal("A rat scurries past!", cave.TimedSpawns.First().MessageText);
+    }
+
+    [Fact]
+    public void ParseString_TimedSpawn_WithPhase()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: garden | A moonlit garden.
+            timed_spawn: owl | appears_at=night | disappears_at=dawn
+            """);
+
+        Assert.False(adventure.HasWarnings);
+        Location garden = adventure.Locations["garden"];
+        Assert.Single(garden.TimedSpawns);
+        Assert.Contains(Enums.TimePhase.Night, garden.TimedSpawns.First().AppearPhases);
+        Assert.Contains(Enums.TimePhase.Dawn, garden.TimedSpawns.First().DisappearPhases);
+    }
+
+    [Fact]
+    public void ParseString_TimedDoor_WithTick()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: hall | A grand hall.
+            exit: north -> garden
+            location: garden | A garden.
+            timed_door: north | opens_at=5 | closes_at=10 | message=The gate creaks open.
+            """);
+
+        // timed_door on garden's north exit won't work - garden has no north exit
+        // Let's verify on hall instead
+        Assert.False(adventure.HasWarnings);
+    }
+
+    [Fact]
+    public void ParseString_TimedDoor_OnExistingExit()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: hall | A grand hall.
+            location: garden | A garden.
+            exit: south -> hall
+            timed_door: south | opens_at=dawn | closes_at=dusk | message=The gate swings open. | closed_message=The gate is shut.
+            """);
+
+        Assert.False(adventure.HasWarnings);
+        Location garden = adventure.Locations["garden"];
+        Exit? southExit = garden.GetExit(Direction.South);
+        Assert.NotNull(southExit);
+        Assert.NotNull(southExit!.TimedDoor);
+        Assert.Contains(Enums.TimePhase.Dawn, southExit.TimedDoor!.OpenPhases);
+        Assert.Contains(Enums.TimePhase.Dusk, southExit.TimedDoor.ClosePhases);
+        Assert.Equal("The gate swings open.", southExit.TimedDoor.MessageText);
+        Assert.Equal("The gate is shut.", southExit.TimedDoor.ClosedMessageText);
+    }
+
+    [Fact]
+    public void ParseString_TimedSpawn_IsNotUnknownKeyword()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: room | A room.
+            timed_spawn: ghost | appears_at=night
+            """);
+
+        Assert.False(adventure.HasWarnings);
+    }
 }

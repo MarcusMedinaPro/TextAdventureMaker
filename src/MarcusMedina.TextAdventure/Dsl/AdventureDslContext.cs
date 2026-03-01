@@ -19,6 +19,7 @@ public sealed class AdventureDslContext
 
     internal List<PendingExit> PendingExits { get; } = [];
     internal List<PendingDoorKey> PendingDoorKeys { get; } = [];
+    internal List<PendingTimedDoor> PendingTimedDoors { get; } = [];
 
     public Location? CurrentLocation { get; private set; }
     public IReadOnlyDictionary<string, Location> Locations => _locations;
@@ -159,3 +160,8 @@ internal sealed record PendingDoorKey(
     string KeyId,
     int LineNumber = 0,
     string LineContent = "");
+
+internal sealed record PendingTimedDoor(
+    string LocationId,
+    Direction Direction,
+    IReadOnlyDictionary<string, string> Options);

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MarcusMedina.TextAdventure\MarcusMedina.TextAdventure.csproj" />
+    <ProjectReference Include="..\..\src\MarcusMedina.TextAdventure.AI\MarcusMedina.TextAdventure.AI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

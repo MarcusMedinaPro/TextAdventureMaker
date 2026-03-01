@@ -95,6 +95,20 @@ public class CommandTests
     }
 
     [Fact]
+    public void LookCommand_CanLookAtNpcInLocation()
+    {
+        Location start = new("start");
+        INpc watchman = new Npc("watchman", "Watchman").Description("A tired guard watching every corner.");
+        start.AddNpc(watchman);
+        GameState state = new(start);
+
+        CommandResult result = state.Execute(new LookCommand("watchman"));
+
+        Assert.True(result.Success);
+        Assert.Equal("A tired guard watching every corner.", result.Message);
+    }
+
+    [Fact]
     public void LookCommand_CanLookAtDoor()
     {
         Location start = new("start");

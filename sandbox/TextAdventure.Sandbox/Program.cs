@@ -1,107 +1,196 @@
-using System;
-using System.Linq;
-using MarcusMedina.TextAdventure.Commands;
+using MarcusMedina.TextAdventure.AI.Models;
+using MarcusMedina.TextAdventure.AI.Plugin;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-// Slice 46 — Consumable Items: Eat, Drink & Healing
-// Tests:
-// - Eat food to heal
-// - Drink beverages to heal
-// - Poisoned items apply damage over turns
-// - Amount decreases on consume; removed at 0
-// - Stacked consumables work with Slice 47
+// AI Plugin Demo
+// Environment variables:
+// - TA_AI_PROVIDER (ollama|lmstudio|dockerai|openai|claude|mistral|openrouter|1minai|gemini)
+// - TA_AI_API_KEY
+// - TA_AI_MODEL
+// - TA_AI_ENDPOINT
+// - TA_AI_FALLBACK_PROVIDER (+ matching TA_AI_FALLBACK_API_KEY/MODEL/ENDPOINT)
+// - TA_AI_ENABLE_DESCRIPTION_CACHE_INVALIDATION (true/false)
+// - TA_AI_RUNTIME_TIMEOUT_MS
+// - TA_AI_NPC_MOVE_AI_EVERY_TURNS
+// - TA_AI_STORY_AI_EVERY_TURNS
+// - TA_AI_PREFER_LOCAL_PARSE_FIRST (true/false)
+// - TA_AI_SPINNER (true/false)
 
-Location kitchen = (id: "kitchen", description: "A warm kitchen. The smell of freshly baked bread fills the air.");
-Location cellar = (id: "cellar", description: "A dark cellar lined with dusty wine racks.");
+Location square = new("square", "A rain-soaked town square with a flickering lamp.");
+Location inn = new("inn", "A warm inn with polished oak tables and soft firelight.");
+Location alley = new("alley", "A narrow alley where loose shutters rattle in the wind.");
 
-kitchen.AddExit(Direction.Down, cellar);
-cellar.AddExit(Direction.Up, kitchen);
+square.AddExit(Direction.North, inn);
+square.AddExit(Direction.East, alley);
+inn.AddExit(Direction.South, square);
+alley.AddExit(Direction.West, square);
 
-// Food items
-var bread = new Item("bread", "Bread", "A crusty loaf of bread.")
-    .AsFood(5)
-    .SetAmount(3)
-    .SetStackable()
-    .SetWeight(0.3f)
-    .SetTakeable(true);
+Item map = new("map", "Town Map", "A weathered map of side streets and old service tunnels.");
+Item token = new("token", "Brass Token", "A stamped token from the inn cellar.");
+square.AddItem(map);
+inn.AddItem(token);
 
-var apple = new Item("apple", "Apple", "A crisp red apple.")
-    .AsFood(3)
-    .SetTakeable(true);
+var innkeeper = new Npc("innkeeper", "Innkeeper")
+    .Description("Pragmatic and observant. Speaks in short, careful sentences.")
+    .Dialog("Evening. Keep your voice down if you're planning trouble.");
 
-// Drinkable items
-var ale = new Item("ale", "Ale", "A frothy pint of ale.")
-    .AsDrink(2)
-    .SetTakeable(true);
+var watchman = new Npc("watchman", "Watchman")
+    .Description("Tired but dutiful. Keeps circling known trouble spots.")
+    .Dialog("Move along. No one lingers here without reason.");
 
-var poisonedWine = new Item("wine", "Wine", "A suspiciously dark vintage.")
-    .SetDrinkable()
-    .SetPoisoned()
-    .SetPoisonDamage(3, 4)
-    .SetTakeable(true);
+inn.AddNpc(innkeeper);
+square.AddNpc(watchman);
 
-// Non-consumable for contrast
-var knife = new Item("knife", "Kitchen Knife", "A sharp kitchen knife.")
-    .SetWeight(0.5f)
-    .SetTakeable(true);
+GameState state = new(square, worldLocations: [square, inn, alley]);
+var baseParser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
+using var spinner = new AiConsoleSpinner(ReadEnvBool("TA_AI_SPINNER", true));
+AiPluginBootstrap bootstrap = CreateAiBootstrap(baseParser, spinner);
 
-kitchen.AddItem(bread);
-kitchen.AddItem(apple);
-kitchen.AddItem(ale);
-kitchen.AddItem(knife);
-cellar.AddItem(poisonedWine);
+Game game = GameBuilder.Create()
+    .UseState(state)
+    .UseParser(bootstrap.Parser)
+    .UsePrompt("> ")
+    .Build();
 
-var state = new GameState(kitchen, worldLocations: [kitchen, cellar]);
+bootstrap.EnableRuntime(game);
+state.EnableAiNpcMovement(bootstrap.Module, bootstrap.PluginOptions);
 
-var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
-
-SetupC64("Consumable Items - Text Adventure Sandbox");
-WriteLineC64("=== CONSUMABLE ITEMS (Slice 46) ===");
-WriteLineC64("The kitchen has bread (x3), an apple, ale, and a knife.");
-WriteLineC64("The cellar (down) has a suspicious bottle of wine.");
+SetupC64("AI Plugin Sandbox");
+WriteLineC64("=== AI PLUGIN SANDBOX ===");
+WriteLineC64($"Provider: {ReadEnv("TA_AI_PROVIDER", "openai")}");
+WriteLineC64("Goal: talk to NPCs and explore. AI can shape dialogue, movement, descriptions, and story timeline.");
 WriteLineC64();
-WriteLineC64("Try: take bread, eat bread, take ale, drink ale");
-WriteLineC64("     go down, take wine, drink wine (poison!)");
-WriteLineC64("     stats, eat knife (can't eat that), quit");
+WriteLineC64("Try: look, talk innkeeper, go north, look map, go south, go east, talk watchman, quit");
 
 state.ShowRoom();
+game.Run();
 
-while (true)
+static AiPluginBootstrap CreateAiBootstrap(KeywordParser baseParser, AiConsoleSpinner spinner)
 {
-    // Tick poisons at the start of each turn
-    var poisonResults = state.TickPoisons();
-    foreach (var (sourceName, damage) in poisonResults)
+    try
     {
-        WriteLineC64(MarcusMedina.TextAdventure.Localization.Language.PoisonTick(sourceName, damage));
-    }
+        AiProviderInitOptions primary = BuildProvider("TA_AI_", defaultProvider: AiProviderKind.Ollama);
+        List<AiProviderInitOptions> fallbacks = [];
 
-    if (state.Stats.Health <= 0)
+        string? fallbackRaw = Environment.GetEnvironmentVariable("TA_AI_FALLBACK_PROVIDER");
+        if (!string.IsNullOrWhiteSpace(fallbackRaw))
+            fallbacks.Add(BuildProvider("TA_AI_FALLBACK_", ParseProvider(fallbackRaw)));
+
+        return AiPluginBootstrapFactory.Create(new AiPluginInitOptions
+        {
+            PrimaryProvider = primary,
+            FallbackProviders = fallbacks,
+            BaseParser = baseParser,
+            RouterDecorator = router => new SpinnerAiProviderRouter(router, spinner),
+            PluginOptions = new AiPluginOptions
+            {
+                EnableAiDialogue = ReadEnvBool("TA_AI_ENABLE_DIALOGUE", true),
+                EnableAiDescriptions = ReadEnvBool("TA_AI_ENABLE_DESCRIPTIONS", true),
+                EnableAiDescriptionCacheInvalidation = ReadEnvBool("TA_AI_ENABLE_DESCRIPTION_CACHE_INVALIDATION", true),
+                EnableAiNpcMovement = ReadEnvBool("TA_AI_ENABLE_NPC_MOVEMENT", true),
+                EnableAiStoryDirector = ReadEnvBool("TA_AI_ENABLE_STORY", true),
+                RuntimeFeatureTimeoutMs = ReadEnvInt("TA_AI_RUNTIME_TIMEOUT_MS", 1200),
+                NpcMovementAiEveryTurns = ReadEnvInt("TA_AI_NPC_MOVE_AI_EVERY_TURNS", 3),
+                StoryDirectorAiEveryTurns = ReadEnvInt("TA_AI_STORY_AI_EVERY_TURNS", 4)
+            },
+            ParserOptions = new MarcusMedina.TextAdventure.AI.Models.AiParserOptions
+            {
+                Enabled = ReadEnvBool("TA_AI_ENABLED", true),
+                PreferLocalCommandFirst = ReadEnvBool("TA_AI_PREFER_LOCAL_PARSE_FIRST", true),
+                StrictMode = ReadEnvBool("TA_AI_STRICT", false),
+                TimeoutMs = ReadEnvInt("TA_AI_TIMEOUT_MS", 8000),
+                EstimatedTokensPerRequest = ReadEnvInt("TA_AI_ESTIMATED_TOKENS", 128)
+            }
+        });
+    }
+    catch (Exception ex)
     {
-        WriteLineC64("You collapse from the poison. Game over.");
-        break;
+        WriteLineC64($"AI bootstrap failed: {ex.Message}");
+        WriteLineC64("Falling back to Ollama defaults.");
+
+        return AiPluginBootstrapFactory.Create(new AiPluginInitOptions
+        {
+            PrimaryProvider = new AiProviderInitOptions { Provider = AiProviderKind.Ollama },
+            BaseParser = baseParser,
+            RouterDecorator = router => new SpinnerAiProviderRouter(router, spinner)
+        });
     }
+}
 
-    WriteLineC64();
-    WritePromptC64("> ");
-    var input = Console.ReadLine();
-    if (input is null)
-        break;
+static AiProviderInitOptions BuildProvider(string prefix, AiProviderKind defaultProvider)
+{
+    string providerRaw = ReadEnv($"{prefix}PROVIDER", defaultProvider.ToString());
+    AiProviderKind provider = ParseProvider(providerRaw);
 
-    var trimmed = input.Trim();
-    if (string.IsNullOrWhiteSpace(trimmed))
-        continue;
+    return new AiProviderInitOptions
+    {
+        Provider = provider,
+        ApiKey = ReadEnvOptional($"{prefix}API_KEY"),
+        Model = ReadEnvOptional($"{prefix}MODEL"),
+        Endpoint = ReadEnvOptional($"{prefix}ENDPOINT"),
+        SystemPrompt = ReadEnvOptional($"{prefix}SYSTEM_PROMPT"),
+        TimeoutMs = ReadEnvIntOptional($"{prefix}TIMEOUT_MS"),
+        Temperature = ReadEnvDoubleOptional($"{prefix}TEMPERATURE"),
+        DailyTokenLimit = ReadEnvIntOptional($"{prefix}DAILY_TOKEN_LIMIT"),
+        Enabled = ReadEnvBool($"{prefix}ENABLED", true)
+    };
+}
 
-    var command = parser.Parse(trimmed);
-    var result = state.Execute(command);
+static AiProviderKind ParseProvider(string raw)
+{
+    string key = raw.Trim().ToLowerInvariant();
+    return key switch
+    {
+        "ollama" => AiProviderKind.Ollama,
+        "lmstudio" or "lm_studio" or "lm-studio" => AiProviderKind.LmStudio,
+        "dockerai" or "docker_ai" or "docker-ai" or "docker" => AiProviderKind.DockerAi,
+        "openai" => AiProviderKind.OpenAi,
+        "claude" or "anthropic" => AiProviderKind.Claude,
+        "mistral" => AiProviderKind.Mistral,
+        "openrouter" => AiProviderKind.OpenRouter,
+        "1minai" or "one_min_ai" or "oneminai" => AiProviderKind.OneMinAi,
+        "gemini" => AiProviderKind.Gemini,
+        _ => throw new ArgumentException($"Unknown provider: {raw}")
+    };
+}
 
-    state.DisplayResult(command, result);
+static string ReadEnv(string name, string fallback)
+{
+    string? value = Environment.GetEnvironmentVariable(name);
+    return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+}
 
-    if (result.ShouldQuit)
-        break;
+static string? ReadEnvOptional(string name)
+{
+    string? value = Environment.GetEnvironmentVariable(name);
+    return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+}
+
+static bool ReadEnvBool(string name, bool fallback)
+{
+    string? value = ReadEnvOptional(name);
+    return bool.TryParse(value, out bool parsed) ? parsed : fallback;
+}
+
+static int ReadEnvInt(string name, int fallback)
+{
+    string? value = ReadEnvOptional(name);
+    return int.TryParse(value, out int parsed) ? parsed : fallback;
+}
+
+static int? ReadEnvIntOptional(string name)
+{
+    string? value = ReadEnvOptional(name);
+    return int.TryParse(value, out int parsed) ? parsed : null;
+}
+
+static double? ReadEnvDoubleOptional(string name)
+{
+    string? value = ReadEnvOptional(name);
+    return double.TryParse(value, out double parsed) ? parsed : null;
 }

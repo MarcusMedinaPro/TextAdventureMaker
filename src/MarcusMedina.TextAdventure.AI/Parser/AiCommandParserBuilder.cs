@@ -48,6 +48,37 @@ public class AiCommandParserBuilder
         return this;
     }
 
+    public AiCommandParserBuilder WithEnabled(bool enabled = true)
+    {
+        _options.Enabled = enabled;
+        _settings.Enabled = enabled;
+        return this;
+    }
+
+    public AiCommandParserBuilder WithPreferLocalCommandFirst(bool preferLocal = true)
+    {
+        _options.PreferLocalCommandFirst = preferLocal;
+        return this;
+    }
+
+    public AiCommandParserBuilder WithFallbackOnSafetyRejection(bool fallback = true)
+    {
+        _options.FallbackOnSafetyRejection = fallback;
+        return this;
+    }
+
+    public AiCommandParserBuilder WithFallbackOnInvalidAiCommand(bool fallback = true)
+    {
+        _options.FallbackOnInvalidAiCommand = fallback;
+        return this;
+    }
+
+    public AiCommandParserBuilder WithDebugProbe(Action<string, string>? probe)
+    {
+        _options.DebugProbe = probe;
+        return this;
+    }
+
     public AiCommandParserBuilder WithTimeoutMs(int timeoutMs)
     {
         _options.TimeoutMs = timeoutMs;

@@ -58,7 +58,10 @@ public class AiCommandParser : ICommandParser
         {
             fallbackCommand = _fallback.Parse(input);
             if (IsAcceptableCommand(fallbackCommand))
+            {
+                Probe("parser.local", input);
                 return fallbackCommand;
+            }
         }
 
         AiRoutingResult? routingResult = null;
@@ -71,11 +74,16 @@ public class AiCommandParser : ICommandParser
                 SystemPrompt: _systemPrompt,
                 EstimatedTokens: _options.EstimatedTokensPerRequest);
 
+            Probe("parser.ai.call", input);
             routingResult = _router.RouteAsync(request, cts.Token).GetAwaiter().GetResult();
             LastRoutingResult = routingResult;
+            Probe("parser.ai.response", routingResult.CommandText ?? string.Empty);
 
             if (!routingResult.HasCommand || string.IsNullOrWhiteSpace(routingResult.CommandText))
+            {
+                Probe("parser.fallback", input);
                 return _fallback.Parse(input);
+            }
 
             AiSafetyDecision safety = _safetyPolicy.Evaluate(routingResult.CommandText);
             if (!safety.IsAllowed)
@@ -83,12 +91,16 @@ public class AiCommandParser : ICommandParser
                 if (_options.StrictMode || !_options.FallbackOnSafetyRejection)
                     return new ParserErrorCommand(safety.Message ?? "AI command rejected by safety policy.");
 
+                Probe("parser.fallback", input);
                 return _fallback.Parse(input);
             }
 
             ICommand aiCommand = _fallback.Parse(routingResult.CommandText);
             if (IsAcceptableCommand(aiCommand))
+            {
+                Probe("parser.ai.accepted", routingResult.CommandText);
                 return aiCommand;
+            }
 
             if (_options.StrictMode || !_options.FallbackOnInvalidAiCommand)
                 return new ParserErrorCommand("AI output could not be parsed into a valid command.");
@@ -99,12 +111,18 @@ public class AiCommandParser : ICommandParser
                 return new ParserErrorCommand("AI parser failed unexpectedly.");
         }
 
+        Probe("parser.fallback", input);
         return fallbackCommand ?? _fallback.Parse(input);
     }
 
     private static bool IsAcceptableCommand(ICommand command)
     {
         return command is not UnknownCommand and not ParserErrorCommand;
+    }
+
+    private void Probe(string eventName, string value)
+    {
+        _options.DebugProbe?.Invoke(eventName, value);
     }
 
     public bool TryGetLastProviderName(out string? providerName)

@@ -25,6 +25,7 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     public IDialogNode? DialogRoot { get; private set; }
     public IStats Stats { get; private set; } = stats ?? new Stats(20);
     public NpcMemory Memory { get; } = new();
+    public NpcPersonality Personality { get; set; } = new();
     public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
     public IReadOnlyList<NpcTrigger> Triggers => _triggers;
     public IReadOnlyDictionary<string, ICharacterArc> Arcs => _arcs;

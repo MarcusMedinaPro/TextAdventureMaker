@@ -17,9 +17,14 @@ public static class AiPluginBootstrapFactory
         ICommandParser baseParser = options.BaseParser ?? new KeywordParser(KeywordParserConfig.Default);
         AiCommandParserBuilder builder = new AiCommandParserBuilder()
             .WithFallback(baseParser)
+            .WithEnabled(options.ParserOptions.Enabled)
             .WithStrictMode(options.ParserOptions.StrictMode)
+            .WithPreferLocalCommandFirst(options.ParserOptions.PreferLocalCommandFirst)
+            .WithFallbackOnSafetyRejection(options.ParserOptions.FallbackOnSafetyRejection)
+            .WithFallbackOnInvalidAiCommand(options.ParserOptions.FallbackOnInvalidAiCommand)
             .WithTimeoutMs(options.ParserOptions.TimeoutMs)
             .WithEstimatedTokensPerRequest(options.ParserOptions.EstimatedTokensPerRequest)
+            .WithDebugProbe(options.ParserOptions.DebugProbe)
             .WithRouterDecorator(options.RouterDecorator);
 
         AddProvider(builder, options.PrimaryProvider);

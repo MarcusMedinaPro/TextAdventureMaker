@@ -20,7 +20,10 @@ public sealed class ItemDescriptionAiService(
         DescriptionRequest normalisedRequest = request with { EntityType = entityType };
         string key = DescriptionCacheKeyBuilder.Build(normalisedRequest);
         if (_cache.TryGet(key, out string cached))
+        {
+            Probe("description.cache.hit", key);
             return cached;
+        }
 
         string prompt = AiFeaturePrompts.BuildDescriptionPrompt(normalisedRequest);
         AiRoutingResult? route = await TryRouteAsync(prompt, cancellationToken).ConfigureAwait(false);
@@ -30,6 +33,7 @@ public sealed class ItemDescriptionAiService(
 
         string cleaned = description.Trim();
         _cache.Set(key, cleaned);
+        Probe("description.cache.store", key);
         return cleaned;
     }
 
@@ -48,6 +52,7 @@ public sealed class ItemDescriptionAiService(
             return null;
 
         _cache.Set(key, fallback);
+        Probe("description.cache.store", key);
         return fallback;
     }
 }

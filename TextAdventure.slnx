@@ -3,6 +3,7 @@
     <Project Path="sandbox/TextAdventure.Sandbox/TextAdventure.Sandbox.csproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/MarcusMedina.TextAdventure.DSLHelper/MarcusMedina.TextAdventure.DSLHelper.csproj" />
     <Project Path="src/MarcusMedina.TextAdventure.AI/MarcusMedina.TextAdventure.AI.csproj" />
     <Project Path="src/MarcusMedina.TextAdventure/MarcusMedina.TextAdventure.csproj" />
   </Folder>

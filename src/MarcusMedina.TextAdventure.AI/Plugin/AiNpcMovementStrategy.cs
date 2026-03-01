@@ -19,11 +19,34 @@ public sealed class AiNpcMovementStrategy(
     private readonly INpcMovement _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
     private readonly AiPluginOptions _options = options ?? new AiPluginOptions();
     private int _turnCounter;
+    private string? _lastPlayerLocationId;
 
     public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
     {
         ArgumentNullException.ThrowIfNull(currentLocation);
         ArgumentNullException.ThrowIfNull(state);
+
+        if (_options.NpcMovementAiOnlyInPlayerLocation
+            && !currentLocation.Id.TextCompare(state.CurrentLocation.Id))
+            return _fallback.GetNextLocation(currentLocation, state);
+
+        if (_options.NpcMovementAiRequiresPlayerTravel)
+        {
+            if (string.IsNullOrWhiteSpace(_lastPlayerLocationId))
+            {
+                _lastPlayerLocationId = state.CurrentLocation.Id;
+                return _fallback.GetNextLocation(currentLocation, state);
+            }
+
+            bool playerTravelled = !string.Equals(_lastPlayerLocationId, state.CurrentLocation.Id, StringComparison.OrdinalIgnoreCase);
+            _lastPlayerLocationId = state.CurrentLocation.Id;
+            if (!playerTravelled)
+                return _fallback.GetNextLocation(currentLocation, state);
+        }
+        else
+        {
+            _lastPlayerLocationId = state.CurrentLocation.Id;
+        }
 
         int interval = Math.Max(1, _options.NpcMovementAiEveryTurns);
         _turnCounter++;

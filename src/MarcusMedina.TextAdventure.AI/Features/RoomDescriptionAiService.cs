@@ -18,7 +18,10 @@ public sealed class RoomDescriptionAiService(
 
         string key = DescriptionCacheKeyBuilder.Build(request with { EntityType = "room" });
         if (_cache.TryGet(key, out string cached))
+        {
+            Probe("description.cache.hit", key);
             return cached;
+        }
 
         string prompt = AiFeaturePrompts.BuildDescriptionPrompt(request with { EntityType = "room" });
         AiRoutingResult? route = await TryRouteAsync(prompt, cancellationToken).ConfigureAwait(false);
@@ -28,6 +31,7 @@ public sealed class RoomDescriptionAiService(
 
         string cleaned = description.Trim();
         _cache.Set(key, cleaned);
+        Probe("description.cache.store", key);
         return cleaned;
     }
 
@@ -38,6 +42,7 @@ public sealed class RoomDescriptionAiService(
             return null;
 
         _cache.Set(key, fallback);
+        Probe("description.cache.store", key);
         return fallback;
     }
 }

@@ -12,6 +12,8 @@ public sealed class AiPluginOptions
     public bool EnableAiDescriptionCacheInvalidation { get; set; } = true;
     public bool EnableAiNpcMovement { get; set; } = true;
     public bool EnableAiStoryDirector { get; set; } = true;
+    public bool NpcMovementAiOnlyInPlayerLocation { get; set; } = true;
+    public bool NpcMovementAiRequiresPlayerTravel { get; set; } = true;
     public int RuntimeFeatureTimeoutMs { get; set; } = 1200;
     public int NpcMovementAiEveryTurns { get; set; } = 3;
     public int StoryDirectorAiEveryTurns { get; set; } = 4;

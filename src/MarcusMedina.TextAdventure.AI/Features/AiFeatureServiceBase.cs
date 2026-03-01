@@ -17,15 +17,24 @@ public abstract class AiFeatureServiceBase(IAiProviderRouter router, AiParserOpt
 
         try
         {
+            Probe("feature.ai.call", prompt);
             AiParseRequest request = new(
                 Input: prompt,
                 EstimatedTokens: Math.Max(1, Options.EstimatedTokensPerRequest));
 
-            return await Router.RouteAsync(request, cancellationToken).ConfigureAwait(false);
+            AiRoutingResult route = await Router.RouteAsync(request, cancellationToken).ConfigureAwait(false);
+            Probe("feature.ai.response", route.CommandText ?? string.Empty);
+            return route;
         }
         catch
         {
+            Probe("feature.ai.error", "route_failed");
             return null;
         }
+    }
+
+    protected void Probe(string eventName, string value)
+    {
+        Options.DebugProbe?.Invoke(eventName, value);
     }
 }

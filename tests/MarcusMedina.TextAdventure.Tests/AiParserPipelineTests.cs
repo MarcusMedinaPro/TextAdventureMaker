@@ -129,6 +129,32 @@ public class AiParserPipelineTests
         Assert.Equal(0, router.CallCount);
     }
 
+    [Fact]
+    public void Parser_DebugProbe_ReportsAiCallAndResponse()
+    {
+        List<string> events = [];
+        IAiProviderRouter router = new StubRouter(AiRoutingResult.Success(
+            AiProviderNames.OpenAi,
+            "look",
+            [new AiProviderAttempt(AiProviderNames.OpenAi, AiAttemptOutcome.Success)]));
+
+        ICommandParser fallback = new KeywordParser(KeywordParserConfig.Default);
+        AiCommandParser parser = new(
+            router,
+            fallback,
+            new CommandAllowlistSafetyPolicy(),
+            new AiParserOptions
+            {
+                PreferLocalCommandFirst = false,
+                DebugProbe = (eventName, payload) => events.Add($"{eventName}:{payload}")
+            });
+
+        _ = parser.Parse("inspect");
+
+        Assert.Contains(events, e => e.StartsWith("parser.ai.call:inspect", StringComparison.Ordinal));
+        Assert.Contains(events, e => e.StartsWith("parser.ai.response:look", StringComparison.Ordinal));
+    }
+
     private sealed class StubProvider(string name, AiProviderResult response) : IAiCommandProvider
     {
         public string Name { get; } = name;

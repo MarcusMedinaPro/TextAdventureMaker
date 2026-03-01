@@ -19,6 +19,7 @@ public interface INpc : IGameEntity
     IDialogNode? DialogRoot { get; }
     IStats Stats { get; }
     NpcMemory Memory { get; }
+    NpcPersonality Personality { get; }
     IReadOnlyList<DialogRule> DialogRules { get; }
     IReadOnlyList<NpcTrigger> Triggers { get; }
     IReadOnlyDictionary<string, ICharacterArc> Arcs { get; }

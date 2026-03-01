@@ -53,6 +53,33 @@ public class AiDescriptionCacheTests
         Assert.Contains("A tired guard.", output.ToString());
     }
 
+    [Fact]
+    public async Task ItemDescription_SecondLookup_ReportsCacheHitViaDebugProbe()
+    {
+        CountingRouter router = new("A stern watchman scans the square.");
+        SessionAiDescriptionCache cache = new();
+        List<string> events = [];
+        ItemDescriptionAiService service = new(
+            router,
+            cache,
+            new AiParserOptions
+            {
+                DebugProbe = (eventName, payload) => events.Add($"{eventName}:{payload}")
+            });
+
+        DescriptionRequest request = new(
+            EntityType: "npc",
+            EntityId: "watchman",
+            BaselinePrompt: "A tired guard.");
+
+        _ = await service.GenerateDescriptionAsync(request, TestContext.Current.CancellationToken);
+        _ = await service.GenerateDescriptionAsync(request, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, router.RequestCount);
+        Assert.Contains(events, e => e.StartsWith("feature.ai.call:", StringComparison.Ordinal));
+        Assert.Contains(events, e => e.StartsWith("description.cache.hit:", StringComparison.Ordinal));
+    }
+
     private static (Game game, StringWriter output) CreateGame(IAiProviderRouter router, string input)
     {
         Location square = new("square");

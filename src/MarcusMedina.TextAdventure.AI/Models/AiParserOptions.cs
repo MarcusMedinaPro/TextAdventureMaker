@@ -14,4 +14,5 @@ public sealed class AiParserOptions
     public bool FallbackOnInvalidAiCommand { get; set; } = true;
     public int TimeoutMs { get; set; } = 5000;
     public int EstimatedTokensPerRequest { get; set; } = 128;
+    public Action<string, string>? DebugProbe { get; set; }
 }

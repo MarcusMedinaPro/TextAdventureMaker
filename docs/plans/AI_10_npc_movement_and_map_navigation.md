@@ -20,3 +20,14 @@
 - AI proposal outside map is rejected.
 - Valid AI move executes.
 - Fallback strategy runs on timeout/error.
+
+## Implementation Checklist (engine/AI)
+
+- [x] `INpcMovementAiService`
+- [x] `NpcMovementContext` with reachable exits and player location
+- [x] Map-safe move validation against passable exits
+- [x] Deterministic fallback movement strategy for invalid/timeout AI output
+
+## Validation Notes (2026-03-01)
+
+- NPC movement service and strategy enforce map legality and fallback behaviour, including runtime controls in plugin options.

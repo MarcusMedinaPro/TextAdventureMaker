@@ -47,3 +47,7 @@
 
 - OpenRouter and 1minAI are both routable via `IAiProviderRouter`.
 - 1minAI adapter handles its unique JSON schema without leaking provider details into parser core.
+
+## Validation Notes (2026-03-01)
+
+- OpenRouter and 1minAI adapters are implemented, including 1minAI schema mapping and budget-aware routing defaults.

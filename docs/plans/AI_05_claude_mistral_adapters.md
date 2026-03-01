@@ -43,3 +43,7 @@
 
 - Claude and Mistral providers are selectable in routing profiles.
 - Duplicate normalization code is minimized.
+
+## Validation Notes (2026-03-01)
+
+- Claude and Mistral adapters are implemented with shared output normalization and adapter tests.

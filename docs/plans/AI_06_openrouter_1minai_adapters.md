@@ -37,11 +37,11 @@
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `OpenRouterSettings` + provider
-- [ ] `OneMinAiSettings` + provider
-- [ ] 1minAI DTO mapping layer
-- [ ] 1minAI budget default wiring
-- [ ] Adapter tests
+- [x] `OpenRouterSettings` + provider
+- [x] `OneMinAiSettings` + provider
+- [x] 1minAI DTO mapping layer
+- [x] 1minAI budget default wiring
+- [x] Adapter tests
 
 ## Definition of Done
 

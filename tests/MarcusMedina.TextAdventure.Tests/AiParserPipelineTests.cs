@@ -23,7 +23,7 @@ public class AiParserPipelineTests
         IAiCommandProvider second = new StubProvider(AiProviderNames.OpenAi, AiProviderResult.Success(AiProviderNames.OpenAi, "look"));
         IAiProviderRouter router = new AiProviderRouter([first, second]);
 
-        AiRoutingResult result = await router.RouteAsync(new AiParseRequest("inspect room"));
+        AiRoutingResult result = await router.RouteAsync(new AiParseRequest("inspect room"), TestContext.Current.CancellationToken);
 
         Assert.True(result.HasCommand);
         Assert.Equal("look", result.CommandText);
@@ -41,7 +41,7 @@ public class AiParserPipelineTests
         IAiCommandProvider second = new StubProvider(AiProviderNames.Ollama, AiProviderResult.Success(AiProviderNames.Ollama, "look"));
         IAiProviderRouter router = new AiProviderRouter([first, second], budget);
 
-        AiRoutingResult result = await router.RouteAsync(new AiParseRequest("look", EstimatedTokens: 20));
+        AiRoutingResult result = await router.RouteAsync(new AiParseRequest("look", EstimatedTokens: 20), TestContext.Current.CancellationToken);
 
         Assert.True(result.HasCommand);
         Assert.Equal(AiProviderNames.Ollama, result.ProviderName);
@@ -57,7 +57,7 @@ public class AiParserPipelineTests
             [new AiProviderAttempt(AiProviderNames.Ollama, AiAttemptOutcome.Success)]));
 
         ICommandParser fallback = new KeywordParser(KeywordParserConfig.Default);
-        OllamaCommandParser parser = new(
+        AiCommandParser parser = new(
             router,
             fallback,
             new CommandAllowlistSafetyPolicy(),
@@ -77,7 +77,7 @@ public class AiParserPipelineTests
             [new AiProviderAttempt(AiProviderNames.Ollama, AiAttemptOutcome.Success)]));
 
         ICommandParser fallback = new KeywordParser(KeywordParserConfig.Default);
-        OllamaCommandParser parser = new(
+        AiCommandParser parser = new(
             router,
             fallback,
             new CommandAllowlistSafetyPolicy(),
@@ -97,7 +97,7 @@ public class AiParserPipelineTests
             [new AiProviderAttempt(AiProviderNames.Ollama, AiAttemptOutcome.Success)]));
 
         ICommandParser fallback = new KeywordParser(KeywordParserConfig.Default);
-        OllamaCommandParser parser = new(
+        AiCommandParser parser = new(
             router,
             fallback,
             new CommandAllowlistSafetyPolicy(),

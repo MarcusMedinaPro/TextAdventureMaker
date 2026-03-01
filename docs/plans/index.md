@@ -1,6 +1,7 @@
 # Text Adventure Engine — Slice Index
 
 - Overview: `docs/plans/overview.md`
+- Truth Pass (2026-03-01): `docs/plans/TRUTH_PASS_2026-03-01.md`
 - AI Planning Summary: `docs/plans/ai-planning-summary.md`
 - AI Slices Index: `docs/plans/AI_SLICES_INDEX.md`
 - AI Feature Backlog: `docs/plans/AI_FEATURE_BACKLOG.md`

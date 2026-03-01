@@ -44,10 +44,10 @@
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `AiContextBuilder`
-- [ ] Safety policy implementation + strict mode
+- [x] `AiContextBuilder`
+- [x] Safety policy implementation + strict mode
 - [ ] Telemetry hooks and counters
-- [ ] Provider-chain sandbox demo
+- [x] Provider-chain sandbox demo
 - [ ] Documentation update
 
 ## Definition of Done

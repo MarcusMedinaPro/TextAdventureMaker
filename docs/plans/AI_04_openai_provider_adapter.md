@@ -37,10 +37,10 @@
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `OpenAiSettings`
-- [ ] `OpenAiCommandProvider`
-- [ ] Builder wiring
-- [ ] Unit tests with mocked `HttpMessageHandler`
+- [x] `OpenAiSettings`
+- [x] `OpenAiCommandProvider`
+- [x] Builder wiring
+- [x] Unit tests with mocked `HttpMessageHandler`
 
 ## Definition of Done
 

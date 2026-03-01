@@ -34,10 +34,10 @@
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `ClaudeSettings` + provider
-- [ ] `MistralSettings` + provider
-- [ ] Shared normalization helper
-- [ ] Adapter tests
+- [x] `ClaudeSettings` + provider
+- [x] `MistralSettings` + provider
+- [x] Shared normalization helper
+- [x] Adapter tests
 
 ## Definition of Done
 

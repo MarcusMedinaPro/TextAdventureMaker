@@ -37,10 +37,10 @@
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `OllamaCommandProvider`
+- [x] `OllamaCommandProvider`
 - [ ] Async refactor in parser/provider pipeline
 - [ ] Typed payload/response models
-- [ ] Compatibility tests
+- [x] Compatibility tests
 
 ## Definition of Done
 

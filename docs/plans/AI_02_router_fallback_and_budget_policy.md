@@ -42,10 +42,10 @@
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `AiProviderRouter`
-- [ ] `ITokenBudgetPolicy` + in-memory implementation
-- [ ] Routing profiles (`LocalFirst`, `LowCostFirst`, `QualityFirst`)
-- [ ] Unit tests for router/budget behaviour
+- [x] `AiProviderRouter`
+- [x] `ITokenBudgetPolicy` + in-memory implementation
+- [x] Routing profiles (implemented as `DevLocalFirst`, `CloudLowCost`, `CloudBalanced`)
+- [x] Unit tests for router/budget behaviour
 
 ## Definition of Done
 

@@ -32,9 +32,9 @@
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `GeminiSettings` + provider
-- [ ] Cost profile builders
-- [ ] Profile integration tests
+- [x] `GeminiSettings` + provider
+- [x] Cost profile builders
+- [x] Profile integration tests
 
 ## Definition of Done
 

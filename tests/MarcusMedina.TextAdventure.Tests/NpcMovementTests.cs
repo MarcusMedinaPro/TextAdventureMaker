@@ -73,6 +73,6 @@ public class NpcMovementTests
         var next = movement.GetNextLocation(start, state);
 
         Assert.NotNull(next);
-        Assert.Contains(next, [a, b]);
+        Assert.True(next == a || next == b);
     }
 }

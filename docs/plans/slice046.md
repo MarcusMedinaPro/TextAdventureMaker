@@ -159,17 +159,17 @@ public static Item WithPoison(this Item item, int damagePerTurn, int turns) =>
 ---
 
 ## Implementation Checklist (Engine)
-- [ ] `IItem.IsDrinkable` + `Item.SetDrinkable()`
-- [ ] `IItem.SetPoisonDamage(int, int)` + backing fields
-- [ ] `PoisonEffect` model
-- [ ] `EatCommand`
-- [ ] `DrinkCommand`
-- [ ] `GameState` poison tracking + turn tick
-- [ ] Parser registration for eat/drink keywords
-- [ ] Language strings for eat/drink/poison messages
-- [ ] Extension helpers (`AsFood`, `AsDrink`, `WithPoison`)
-- [ ] Clone() updated for new fields
-- [ ] Tests (minimum 10)
+- [x] `IItem.IsDrinkable` + `Item.SetDrinkable()`
+- [x] `IItem.SetPoisonDamage(int, int)` + backing fields
+- [x] `PoisonEffect` model
+- [x] `EatCommand`
+- [x] `DrinkCommand`
+- [x] `GameState` poison tracking + turn tick
+- [x] Parser registration for eat/drink keywords
+- [x] Language strings for eat/drink/poison messages
+- [x] Extension helpers (`AsFood`, `AsDrink`, `WithPoison`)
+- [x] Clone() updated for new fields
+- [x] Tests (minimum 10)
 
 ## Example Checklist (docs/examples)
 - [ ] Sandbox demo: `46_Consumables.md`

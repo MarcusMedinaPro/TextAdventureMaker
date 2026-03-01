@@ -58,12 +58,12 @@ From `src/MarcusMedina.TextAdventure/Extensions/`:
 
 ## Implementation Checklist (engine/AI)
 
-- [ ] `IAiCommandProvider`
-- [ ] `IAiProviderRouter`
-- [ ] `IAiCommandSafetyPolicy`
-- [ ] `AiParseRequest` / `AiProviderResult` / `AiParseTelemetry`
-- [ ] `AiParserOptions`
-- [ ] AI foundation tests
+- [x] `IAiCommandProvider`
+- [x] `IAiProviderRouter`
+- [x] `IAiCommandSafetyPolicy`
+- [x] `AiParseRequest` / `AiProviderResult` / routing telemetry equivalents (`AiRoutingResult`, `AiProviderAttempt`, `AiTokenUsage`)
+- [x] `AiParserOptions`
+- [x] AI foundation tests
 
 ## Definition of Done
 

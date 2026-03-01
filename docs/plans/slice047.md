@@ -219,18 +219,18 @@ public float TotalWeight => _items.Sum(i =>
 ---
 
 ## Implementation Checklist (Engine)
-- [ ] `IInventory.FindById(string id)`
-- [ ] `Inventory.Add()` stack merge logic
-- [ ] `Inventory.TotalWeight` stack-aware calculation
-- [ ] `TakeCommand` partial take support (amount parsing)
-- [ ] `DropCommand` partial drop support (amount parsing)
-- [ ] `InventoryCommand` grouped display
-- [ ] `TakeAllCommand` stack awareness
-- [ ] `DropAllCommand` stack awareness
-- [ ] `StackExtensions.cs` (`AsStack`, `TryMerge`, `SplitStack`)
-- [ ] Language strings for amount-aware messages
-- [ ] Parser: numeric prefix recognition for take/drop
-- [ ] Tests (minimum 12)
+- [x] `IInventory.FindById(string id)`
+- [x] `Inventory.Add()` stack merge logic
+- [x] `Inventory.TotalWeight` stack-aware calculation
+- [x] `TakeCommand` partial take support (amount parsing)
+- [x] `DropCommand` partial drop support (amount parsing)
+- [x] `InventoryCommand` grouped display
+- [x] `TakeAllCommand` stack awareness
+- [x] `DropAllCommand` stack awareness
+- [x] `StackExtensions.cs` (`AsStack`, `TryMerge`, `SplitStack`)
+- [x] Language strings for amount-aware messages
+- [x] Parser: numeric prefix recognition for take/drop
+- [x] Tests (minimum 12)
 
 ## Example Checklist (docs/examples)
 - [ ] Sandbox demo: `47_Stackable_Items.md`

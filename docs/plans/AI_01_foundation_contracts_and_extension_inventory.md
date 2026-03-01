@@ -70,3 +70,7 @@ From `src/MarcusMedina.TextAdventure/Extensions/`:
 - Existing AI usage still compiles with adapter shim.
 - Foundation is provider-agnostic and test-covered.
 - No duplicated logic that already exists in extension methods.
+
+## Validation Notes (2026-03-01)
+
+- Reviewed against current implementation: contracts, parser options, routing models, and baseline AI tests are present.

@@ -86,7 +86,8 @@ public static class DslErrorHelper
 {
     private static readonly HashSet<string> ValidKeywords = new(StringComparer.OrdinalIgnoreCase)
     {
-        "world", "goal", "start", "location", "description", "item", "key", "door", "exit"
+        "world", "goal", "start", "location", "description", "item", "key", "door", "exit",
+        "timed_spawn", "timed_door"
     };
 
     /// <summary>

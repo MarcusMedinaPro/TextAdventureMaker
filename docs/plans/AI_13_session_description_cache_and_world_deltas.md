@@ -19,3 +19,14 @@
 - Same key returns same description.
 - Delta change invalidates old key and creates new description.
 - Cache bypass works when AI is disabled.
+
+## Implementation Checklist (engine/AI)
+
+- [x] `IAiDescriptionCache` session abstraction
+- [x] Session cache implementation and cache-key strategy
+- [x] Delta-aware description request support via `DescriptionDelta`
+- [x] Cache invalidation wiring in plugin runtime policy
+
+## Validation Notes (2026-03-01)
+
+- Session-stable cache behaviour and delta-aware regeneration are implemented and covered by cache tests.

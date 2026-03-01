@@ -32,19 +32,33 @@ public class AdventureDslParser : IDslParser
     public DslAdventure ParseFile(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        AdventureDslContext context = CreateContext();
+        return ParseLines(File.ReadLines(path));
+    }
 
+    public DslAdventure ParseString(string adventureText)
+    {
+        ArgumentNullException.ThrowIfNull(adventureText);
+        string[] lines = adventureText.Split('\n');
+        return ParseLines(lines);
+    }
+
+    private DslAdventure ParseLines(IEnumerable<string> lines)
+    {
+        AdventureDslContext context = CreateContext();
         OnBeforeParse(context);
 
-        foreach (string line in File.ReadLines(path))
+        int lineNumber = 0;
+        foreach (string line in lines)
         {
+            lineNumber++;
+            context.CurrentLineNumber = lineNumber;
+            context.CurrentLineContent = line;
+
             (string Keyword, string Value)? parsedLine = ParseLine(line);
             if (parsedLine == null)
-            {
                 continue;
-            }
 
-            Dispatch(context, parsedLine.Value.Keyword, parsedLine.Value.Value);
+            Dispatch(context, parsedLine.Value.Keyword, parsedLine.Value.Value, lineNumber, line);
         }
 
         OnAfterParse(context);
@@ -94,12 +108,15 @@ public class AdventureDslParser : IDslParser
         return keyword.Length == 0 ? null : (keyword, value);
     }
 
-    private void Dispatch(AdventureDslContext context, string keyword, string value)
+    private void Dispatch(AdventureDslContext context, string keyword, string value, int lineNumber, string lineContent)
     {
         if (_handlers.TryGetValue(keyword, out Action<AdventureDslContext, string>? handler))
         {
             handler(context, value);
+            return;
         }
+
+        context.AddWarning(DslErrorHelper.UnknownKeyword(lineNumber, lineContent.Trim(), keyword));
     }
 
     private void RegisterDefaultKeywords()
@@ -113,6 +130,8 @@ public class AdventureDslParser : IDslParser
         _ = RegisterKeyword("key", HandleKey);
         _ = RegisterKeyword("door", HandleDoor);
         _ = RegisterKeyword("exit", HandleExit);
+        _ = RegisterKeyword("timed_spawn", HandleTimedSpawn);
+        _ = RegisterKeyword("timed_door", HandleTimedDoor);
     }
 
     private static void HandleLocation(AdventureDslContext context, string value)
@@ -172,7 +191,7 @@ public class AdventureDslParser : IDslParser
                 }
                 else
                 {
-                    context.PendingDoorKeys.Add(new PendingDoorKey(parsed.Id, keyId));
+                    context.PendingDoorKeys.Add(new PendingDoorKey(parsed.Id, keyId, context.CurrentLineNumber, context.CurrentLineContent));
                 }
             }
         }
@@ -231,7 +250,90 @@ public class AdventureDslParser : IDslParser
             targetId,
             direction,
             doorId,
-            oneWay));
+            oneWay,
+            context.CurrentLineNumber,
+            context.CurrentLineContent));
+    }
+
+    private static void HandleTimedSpawn(AdventureDslContext context, string value)
+    {
+        context.RequireCurrentLocation();
+
+        List<string> parts = SplitParts(value);
+        if (parts.Count == 0)
+            return;
+
+        string itemId = NormalizeId(parts[0]);
+        TimedSpawn spawn = context.CurrentLocation!.AddTimedSpawn(itemId);
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            KeyValuePair<string, string>? option = ParseOption(parts[i]);
+            if (option == null)
+                continue;
+
+            string key = option.Value.Key;
+            string val = option.Value.Value;
+
+            if (key.TextCompare("appears_at"))
+                ApplyTickOrPhase(val, tick => spawn.AppearsAt(tick), phase => spawn.AppearsAt(phase));
+            else if (key.TextCompare("disappears_after") && int.TryParse(val, out int ticks))
+                _ = spawn.DisappearsAfter(ticks);
+            else if (key.TextCompare("disappears_at") && Enum.TryParse<TimePhase>(val, true, out TimePhase phase))
+                _ = spawn.DisappearsAt(phase);
+            else if (key.TextCompare("message"))
+                _ = spawn.Message(val);
+        }
+    }
+
+    private static void HandleTimedDoor(AdventureDslContext context, string value)
+    {
+        context.RequireCurrentLocation();
+
+        List<string> parts = SplitParts(value);
+        if (parts.Count == 0)
+            return;
+
+        string directionText = parts[0].Trim();
+        if (!TryParseDirection(directionText, out Direction direction))
+            return;
+
+        if (!context.CurrentLocation!.Exits.TryGetValue(direction, out Exit? exit))
+            return;
+
+        string doorId = $"timed_{context.CurrentLocation.Id}_{directionText}".ToLowerInvariant();
+        TimedDoor timedDoor = exit.WithTimedDoor(doorId);
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            KeyValuePair<string, string>? option = ParseOption(parts[i]);
+            if (option == null)
+                continue;
+
+            string key = option.Value.Key;
+            string val = option.Value.Value;
+
+            if (key.TextCompare("opens_at"))
+                ApplyTickOrPhase(val, tick => timedDoor.OpensAt(tick), phase => timedDoor.OpensAt(phase));
+            else if (key.TextCompare("closes_at"))
+                ApplyTickOrPhase(val, tick => timedDoor.ClosesAt(tick), phase => timedDoor.ClosesAt(phase));
+            else if (key.TextCompare("message"))
+                _ = timedDoor.Message(val);
+            else if (key.TextCompare("closed_message"))
+                _ = timedDoor.ClosedMessage(val);
+        }
+    }
+
+    private static void ApplyTickOrPhase(string value, Action<int> onTick, Action<TimePhase> onPhase)
+    {
+        if (int.TryParse(value, out int tick))
+        {
+            onTick(tick);
+            return;
+        }
+
+        if (Enum.TryParse<TimePhase>(value, true, out TimePhase phase))
+            onPhase(phase);
     }
 
     private static DslItemParts ParseItemParts(string value)
@@ -440,7 +542,8 @@ public class AdventureDslParser : IDslParser
             new Dictionary<string, Item>(context.Items, StringComparer.OrdinalIgnoreCase),
             new Dictionary<string, Key>(context.Keys, StringComparer.OrdinalIgnoreCase),
             new Dictionary<string, Door>(context.Doors, StringComparer.OrdinalIgnoreCase),
-            new Dictionary<string, string>(context.Metadata, StringComparer.OrdinalIgnoreCase));
+            new Dictionary<string, string>(context.Metadata, StringComparer.OrdinalIgnoreCase),
+            context.Warnings);
     }
 
     private static Location ResolveStartLocation(AdventureDslContext context)
@@ -461,11 +564,21 @@ public class AdventureDslParser : IDslParser
         {
             if (!context.Doors.TryGetValue(pending.DoorId, out Door? door))
             {
+                context.AddWarning(new DslParseError(
+                    pending.LineNumber,
+                    pending.LineContent.Trim(),
+                    $"Door '{pending.DoorId}' referenced but not defined",
+                    "Add a 'door:' line to define it"));
                 continue;
             }
 
             if (!context.Keys.TryGetValue(pending.KeyId, out Key? key))
             {
+                context.AddWarning(new DslParseError(
+                    pending.LineNumber,
+                    pending.LineContent.Trim(),
+                    $"Key '{pending.KeyId}' referenced by door '{pending.DoorId}' but not defined",
+                    "Add a 'key:' line to define it"));
                 continue;
             }
 
@@ -478,11 +591,28 @@ public class AdventureDslParser : IDslParser
         foreach (PendingExit pending in context.PendingExits)
         {
             if (!context.Locations.TryGetValue(pending.FromId, out Location? from))
-            {
                 continue;
+
+            if (!context.Locations.ContainsKey(pending.TargetId))
+            {
+                context.AddWarning(new DslParseError(
+                    pending.LineNumber,
+                    pending.LineContent.Trim(),
+                    $"Exit target '{pending.TargetId}' is not defined as a location",
+                    "Add a 'location:' line to define it, or check for typos"));
             }
 
             Location target = context.GetOrCreateLocation(pending.TargetId);
+
+            if (!string.IsNullOrWhiteSpace(pending.DoorId) && !context.Doors.ContainsKey(pending.DoorId))
+            {
+                context.AddWarning(new DslParseError(
+                    pending.LineNumber,
+                    pending.LineContent.Trim(),
+                    $"Exit references undefined door '{pending.DoorId}'",
+                    "Add a 'door:' line to define it, or check for typos"));
+            }
+
             _ = !string.IsNullOrWhiteSpace(pending.DoorId) &&
                 context.Doors.TryGetValue(pending.DoorId, out Door? door)
                 ? from.AddExit(pending.Direction, target, door, pending.IsOneWay)

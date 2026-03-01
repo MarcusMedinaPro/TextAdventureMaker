@@ -14,7 +14,8 @@ public sealed class DslAdventure(
     IReadOnlyDictionary<string, Item> items,
     IReadOnlyDictionary<string, Key> keys,
     IReadOnlyDictionary<string, Door> doors,
-    IReadOnlyDictionary<string, string> metadata)
+    IReadOnlyDictionary<string, string> metadata,
+    IReadOnlyList<DslParseError>? warnings = null)
 {
     public GameState State { get; } = state ?? throw new ArgumentNullException(nameof(state));
     public IReadOnlyDictionary<string, Location> Locations { get; } = locations ?? throw new ArgumentNullException(nameof(locations));
@@ -22,7 +23,9 @@ public sealed class DslAdventure(
     public IReadOnlyDictionary<string, Key> Keys { get; } = keys ?? throw new ArgumentNullException(nameof(keys));
     public IReadOnlyDictionary<string, Door> Doors { get; } = doors ?? throw new ArgumentNullException(nameof(doors));
     public IReadOnlyDictionary<string, string> Metadata { get; } = metadata ?? throw new ArgumentNullException(nameof(metadata));
+    public IReadOnlyList<DslParseError> Warnings { get; } = warnings ?? [];
 
+    public bool HasWarnings => Warnings.Count > 0;
     public string? WorldName => GetMetadata("world");
     public string? Goal => GetMetadata("goal");
 

@@ -71,3 +71,27 @@ Register new keywords in code:
 var parser = new AdventureDslParser()
     .RegisterKeyword("mood", (ctx, value) => ctx.SetMetadata("mood", value));
 ```
+
+## Parsing from strings
+Parse adventure definitions from in-memory strings (useful for testing or generated content):
+```csharp
+var parser = new AdventureDslParser();
+DslAdventure adventure = parser.ParseString("""
+    world: My Adventure
+    location: start | The beginning.
+    exit: north -> forest
+    location: forest | Tall trees surround you.
+    """);
+```
+
+## Warnings
+Unknown keywords produce warnings (not errors). The parser continues and collects them:
+```csharp
+DslAdventure adventure = parser.ParseString("npc: guard | A guard.\nlocation: room");
+if (adventure.HasWarnings)
+{
+    foreach (var warning in adventure.Warnings)
+        Console.WriteLine(warning); // Line 1: Unknown keyword: 'npc'
+}
+```
+Misspelled keywords get correction suggestions (e.g. `locaton` suggests `location`).

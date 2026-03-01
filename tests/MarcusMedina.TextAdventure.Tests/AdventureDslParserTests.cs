@@ -86,4 +86,203 @@ location: room
             File.Delete(file);
         }
     }
+
+    [Fact]
+    public void ParseString_BuildsWorldFromString()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            world: String World
+            goal: Test parsing from string
+            start: hall
+
+            location: hall | A grand hall.
+            item: torch | torch | A flickering torch.
+            exit: north -> garden
+
+            location: garden | A peaceful garden.
+            """);
+
+        Assert.Equal("String World", adventure.WorldName);
+        Assert.Equal("Test parsing from string", adventure.Goal);
+        Assert.Equal("hall", adventure.State.CurrentLocation.Id);
+        Assert.Equal(2, adventure.Locations.Count);
+        Assert.True(adventure.Locations.ContainsKey("hall"));
+        Assert.True(adventure.Locations.ContainsKey("garden"));
+        Assert.True(adventure.Items.ContainsKey("torch"));
+    }
+
+    [Fact]
+    public void ParseString_MatchesParseFile()
+    {
+        string dsl = """
+            world: Round Trip
+            location: room | A room.
+            item: coin | gold coin | A shiny coin.
+            exit: north -> hall
+            location: hall | A hall.
+            """;
+
+        string file = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(file, dsl);
+            AdventureDslParser parser = new();
+
+            DslAdventure fromFile = parser.ParseFile(file);
+            DslAdventure fromString = parser.ParseString(dsl);
+
+            Assert.Equal(fromFile.WorldName, fromString.WorldName);
+            Assert.Equal(fromFile.Locations.Count, fromString.Locations.Count);
+            Assert.Equal(fromFile.Items.Count, fromString.Items.Count);
+        }
+        finally
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public void ParseString_UnknownKeyword_AddsWarning()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: room | A room.
+            npc: guard | A burly guard.
+            """);
+
+        Assert.True(adventure.HasWarnings);
+        Assert.Single(adventure.Warnings);
+        Assert.Contains("Unknown keyword", adventure.Warnings[0].Message);
+        Assert.Contains("npc", adventure.Warnings[0].Message);
+    }
+
+    [Fact]
+    public void ParseString_UnknownKeyword_SuggestsCorrection()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: room | A room.
+            locaton: room2 | Another room.
+            """);
+
+        Assert.True(adventure.HasWarnings);
+        Assert.Single(adventure.Warnings);
+        Assert.Contains("location", adventure.Warnings[0].Suggestion!);
+    }
+
+    [Fact]
+    public void ParseString_UnknownKeyword_TracksLineNumber()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            world: Test
+            location: room | A room.
+            badkeyword: value
+            """);
+
+        Assert.True(adventure.HasWarnings);
+        Assert.Single(adventure.Warnings);
+        Assert.Equal(3, adventure.Warnings[0].Line);
+    }
+
+    [Fact]
+    public void ParseString_RegisteredKeyword_NoWarning()
+    {
+        AdventureDslParser parser = new AdventureDslParser()
+            .RegisterKeyword("mood", (ctx, value) => ctx.SetMetadata("mood", value));
+
+        DslAdventure adventure = parser.ParseString("""
+            mood: eerie
+            location: room | A room.
+            """);
+
+        Assert.False(adventure.HasWarnings);
+        Assert.Equal("eerie", adventure.GetMetadata("mood"));
+    }
+
+    [Fact]
+    public void ParseString_MultipleUnknownKeywords_AllWarned()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: room | A room.
+            npc: guard | A guard.
+            weather: rain
+            """);
+
+        Assert.Equal(2, adventure.Warnings.Count);
+    }
+
+    [Fact]
+    public void ParseString_CommentsAndBlanks_NoWarnings()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            # This is a comment
+            // This is also a comment
+
+            location: room | A room.
+            """);
+
+        Assert.False(adventure.HasWarnings);
+    }
+
+    [Fact]
+    public void ParseString_UndefinedExitTarget_WarnsButStillCreates()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: hall | A grand hall.
+            exit: north -> missing_room
+            """);
+
+        Assert.True(adventure.HasWarnings);
+        Assert.Contains(adventure.Warnings, w => w.Message.Contains("missing_room"));
+        Assert.Contains(adventure.Warnings, w => w.Message.Contains("not defined"));
+        // Exit still gets created (auto-creates location)
+        Assert.True(adventure.Locations.ContainsKey("missing_room"));
+    }
+
+    [Fact]
+    public void ParseString_UndefinedDoorOnExit_Warns()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: room1 | Room one.
+            exit: north -> room2 | door=ghost_door
+            location: room2 | Room two.
+            """);
+
+        Assert.True(adventure.HasWarnings);
+        Assert.Contains(adventure.Warnings, w => w.Message.Contains("ghost_door"));
+    }
+
+    [Fact]
+    public void ParseString_UndefinedKeyOnDoor_Warns()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: room | A room.
+            door: my_door | my door | A door. | key=ghost_key
+            """);
+
+        Assert.True(adventure.HasWarnings);
+        Assert.Contains(adventure.Warnings, w => w.Message.Contains("ghost_key"));
+    }
+
+    [Fact]
+    public void ParseString_AllReferencesResolved_NoWarnings()
+    {
+        AdventureDslParser parser = new();
+        DslAdventure adventure = parser.ParseString("""
+            location: entrance | The entrance.
+            key: brass_key | brass key | A key.
+            door: gate | iron gate | A gate. | key=brass_key
+            exit: north -> garden | door=gate
+            location: garden | A garden.
+            """);
+
+        Assert.False(adventure.HasWarnings);
+    }
 }

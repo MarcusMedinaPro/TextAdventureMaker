@@ -15,6 +15,7 @@ public sealed class AdventureDslContext
     private readonly Dictionary<string, Key> _keys = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Door> _doors = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> _metadata = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<DslParseError> _warnings = [];
 
     internal List<PendingExit> PendingExits { get; } = [];
     internal List<PendingDoorKey> PendingDoorKeys { get; } = [];
@@ -25,7 +26,12 @@ public sealed class AdventureDslContext
     public IReadOnlyDictionary<string, Key> Keys => _keys;
     public IReadOnlyDictionary<string, Door> Doors => _doors;
     public IReadOnlyDictionary<string, string> Metadata => _metadata;
+    public IReadOnlyList<DslParseError> Warnings => _warnings;
     public string? StartLocationId { get; set; }
+    public int CurrentLineNumber { get; set; }
+    public string CurrentLineContent { get; set; } = "";
+
+    public void AddWarning(DslParseError warning) => _warnings.Add(warning);
 
     public void SetMetadata(string key, string value)
     {
@@ -144,8 +150,12 @@ internal sealed record PendingExit(
     string TargetId,
     Direction Direction,
     string? DoorId,
-    bool IsOneWay);
+    bool IsOneWay,
+    int LineNumber = 0,
+    string LineContent = "");
 
 internal sealed record PendingDoorKey(
     string DoorId,
-    string KeyId);
+    string KeyId,
+    int LineNumber = 0,
+    string LineContent = "");

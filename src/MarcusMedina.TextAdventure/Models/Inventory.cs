@@ -16,15 +16,16 @@ public class Inventory(InventoryLimitType limitType = InventoryLimitType.Unlimit
     public int MaxCount { get; private set; } = maxCount;
     public float MaxWeight { get; private set; } = maxWeight;
     public int Count => _items.Count;
-    public float TotalWeight => _items.Sum(i => i.Weight);
+    public float TotalWeight => _items.Sum(i =>
+        i.IsStackable ? i.Weight * (i.Amount ?? 1) : i.Weight);
     public IReadOnlyList<IItem> Items => _items;
 
     public bool CanAdd(IItem item) =>
         LimitType switch
         {
             InventoryLimitType.Unlimited => true,
-            InventoryLimitType.ByCount => Count + 1 <= MaxCount,
-            InventoryLimitType.ByWeight => TotalWeight + item.Weight <= MaxWeight,
+            InventoryLimitType.ByCount => item.IsStackable && FindById(item.Id) is not null || Count + 1 <= MaxCount,
+            InventoryLimitType.ByWeight => TotalWeight + item.Weight * (item.IsStackable ? (item.Amount ?? 1) : 1) <= MaxWeight,
             _ => true
         };
 
@@ -32,6 +33,17 @@ public class Inventory(InventoryLimitType limitType = InventoryLimitType.Unlimit
     {
         if (!CanAdd(item))
             return false;
+
+        if (item.IsStackable)
+        {
+            IItem? existing = FindById(item.Id);
+            if (existing is not null)
+            {
+                int newAmount = (existing.Amount ?? 1) + (item.Amount ?? 1);
+                existing.SetAmount(newAmount);
+                return true;
+            }
+        }
 
         _items.Add(item);
         return true;
@@ -41,6 +53,10 @@ public class Inventory(InventoryLimitType limitType = InventoryLimitType.Unlimit
 
     public IItem? FindItem(string name) =>
         string.IsNullOrWhiteSpace(name) ? null : _items.FirstOrDefault(i => i.Matches(name));
+
+    public IItem? FindById(string id) =>
+        string.IsNullOrWhiteSpace(id) ? null : _items.FirstOrDefault(i =>
+            string.Equals(i.Id, id, StringComparison.OrdinalIgnoreCase));
 
     public void Clear() => _items.Clear();
 }

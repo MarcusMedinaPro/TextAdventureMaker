@@ -38,33 +38,13 @@ public class InventoryCommand : ICommand
 
     private static IEnumerable<string> FormatItems(IEnumerable<IItem> items)
     {
-        List<IItem> materialised = items.ToList();
-        IEnumerable<IGrouping<string, IItem>> stacked = materialised
-            .Where(item => item.IsStackable)
-            .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase);
-
-        foreach (IGrouping<string, IItem> group in stacked)
+        foreach (IItem item in items)
         {
-            IItem sample = group.First();
-            int amount = group.Sum(item => item.Amount ?? 1);
-            string name = Language.EntityName(sample);
-            if (amount > 1 || sample.Amount.HasValue)
-            {
-                name = $"{name} ({amount})";
-            }
+            string name = item is { IsStackable: true, Amount: > 1 }
+                ? $"{Language.EntityName(item)} (x{item.Amount})"
+                : Language.EntityName(item);
 
-            yield return Language.ItemWithWeight(name, sample.Weight);
-        }
-
-        foreach (IItem item in materialised.Where(item => !item.IsStackable))
-        {
-            string name = Language.EntityName(item);
-            if (item.Amount.HasValue)
-            {
-                name = $"{name} ({item.Amount.Value})";
-            }
-
-            yield return Language.ItemWithWeight(name, item.Weight);
+            yield return Language.ItemWithWeight(name, item.IsStackable ? item.Weight * (item.Amount ?? 1) : item.Weight);
         }
     }
 }

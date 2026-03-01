@@ -18,3 +18,14 @@
 - Illegal actions are rejected and replaced by fallback strategy.
 - Valid AI action is executed through existing combat system.
 - Relationship/fear inputs affect action tendencies.
+
+## Implementation Checklist (engine/AI)
+
+- [x] `INpcCombatAiService`
+- [x] `CombatAiContext` model with action set and state
+- [x] Action legality validation with deterministic fallback action
+- [x] Integration path for AI combat decision output
+
+## Validation Notes (2026-03-01)
+
+- Combat AI service is implemented with structured action parsing and safe fallback when output is invalid.

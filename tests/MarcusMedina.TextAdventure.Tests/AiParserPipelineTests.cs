@@ -48,6 +48,7 @@ public class AiParserPipelineTests
         Assert.Equal(AiAttemptOutcome.SkippedBudget, result.Attempts[0].Outcome);
     }
 
+
     [Fact]
     public void Parser_UsesAiCommand_WhenSafeAndValid()
     {

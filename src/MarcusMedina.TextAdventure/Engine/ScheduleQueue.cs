@@ -70,6 +70,6 @@ public sealed class ScheduledEvent(int? atTick, int? everyTicks, Func<IGameState
             return true;
         }
 
-        return Condition != null && Condition(state);
+        return Condition  is not null && Condition(state);
     }
 }

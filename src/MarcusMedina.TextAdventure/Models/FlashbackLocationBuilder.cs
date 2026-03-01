@@ -23,7 +23,7 @@ public sealed class FlashbackLocationBuilder(FlashbackTrigger trigger)
 
     public FlashbackLocationBuilder ReturnsTo(ILocation location)
     {
-        if (location != null)
+        if (location  is not null)
         {
             trigger.ReturnsTo(location.Id);
         }

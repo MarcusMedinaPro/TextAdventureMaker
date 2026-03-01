@@ -28,7 +28,7 @@ public class RedoCommand : ICommand
     {
         GameMemento? memento = _state.History.Redo();
 
-        if (memento == null)
+        if (memento  is null)
         {
             return CommandResult.Fail("Nothing to redo.", GameError.None);
         }

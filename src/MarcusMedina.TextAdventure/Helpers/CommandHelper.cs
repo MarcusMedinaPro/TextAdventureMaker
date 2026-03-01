@@ -12,7 +12,7 @@ public static class CommandHelper
     public static HashSet<string> NewCommands(params string[] commands)
     {
         HashSet<string> set = new(StringComparer.OrdinalIgnoreCase);
-        if (commands == null)
+        if (commands  is null)
         {
             return set;
         }

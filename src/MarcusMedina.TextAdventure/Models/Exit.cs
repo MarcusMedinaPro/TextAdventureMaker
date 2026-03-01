@@ -18,7 +18,7 @@ public class Exit
     public int? PerceptionDifficulty { get; private set; }
     public TimedDoor? TimedDoor { get; private set; }
 
-    public bool IsPassable => Door == null || Door.IsPassable;
+    public bool IsPassable => Door is null || Door.IsPassable;
     public bool IsVisible => !IsHidden || IsDiscovered;
 
     public Exit(ILocation target, IDoor? door = null, bool isOneWay = false)
@@ -57,9 +57,6 @@ public class Exit
             return false;
 
         if (PerceptionDifficulty.HasValue && Random.Shared.Next(1, 101) < PerceptionDifficulty.Value)
-            return false;
-
-        if (DiscoverCondition is not null && !DiscoverCondition(state))
             return false;
 
         IsDiscovered = true;

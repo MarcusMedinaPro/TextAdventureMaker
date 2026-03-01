@@ -36,17 +36,13 @@ public sealed class LocationList
 
     public LocationList AddMany(params string[] names)
     {
-        if (names == null)
-        {
+        if (names is null)
             return this;
-        }
 
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
-            {
                 _ = Add(name);
-            }
         }
 
         return this;
@@ -54,17 +50,13 @@ public sealed class LocationList
 
     public LocationList AddMany(IEnumerable<string> names)
     {
-        if (names == null)
-        {
+        if (names is null)
             return this;
-        }
 
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
-            {
                 _ = Add(name);
-            }
         }
 
         return this;
@@ -84,15 +76,12 @@ public sealed class LocationList
         return location ?? throw new KeyNotFoundException($"No location found for '{token}'.");
     }
 
-    public bool Remove(string token)
-    {
-        var location = Find(token);
-        return location != null && _locations.Remove(location.Id);
-    }
+    public bool Remove(string token) =>
+        Find(token) is { } location && _locations.Remove(location.Id);
 
     public bool TryGet(string token, out Location location)
     {
         location = Find(token) ?? null!;
-        return location != null;
+        return location is not null;
     }
 }

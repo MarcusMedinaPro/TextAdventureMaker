@@ -75,7 +75,7 @@ public sealed class ChapterSystem : IChapterSystem
         }
 
         ChapterObjective? objective = chapter.FindObjective(objectiveId);
-        if (objective == null)
+        if (objective  is null)
         {
             return;
         }

@@ -15,9 +15,9 @@ public class CloseCommand : ICommand
     public CommandResult Execute(CommandContext context)
     {
         Exit? exitWithDoor = context.State.CurrentLocation.Exits.Values
-            .FirstOrDefault(e => e.Door != null);
+            .FirstOrDefault(e => e.Door  is not null);
 
-        if (exitWithDoor?.Door == null)
+        if (exitWithDoor?.Door  is null)
         {
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
         }
@@ -42,7 +42,7 @@ public class CloseCommand : ICommand
         {
             context.State.Events.Publish(new GameEvent(GameEventType.CloseDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
             string? reaction = exitWithDoor.Door.GetReaction(DoorAction.Close);
-            return reaction != null
+            return reaction  is not null
                 ? CommandResult.Ok(Language.DoorClosedByPlayer(doorName), reaction)
                 : CommandResult.Ok(Language.DoorClosedByPlayer(doorName));
         }

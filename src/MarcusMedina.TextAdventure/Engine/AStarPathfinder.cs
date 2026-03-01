@@ -54,7 +54,7 @@ public sealed class AStarPathfinder : IPathfinder
 
         List<Direction> path = [];
         ILocation? step = goal;
-        while (step != null && !ReferenceEquals(step, start))
+        while (step  is not null && !ReferenceEquals(step, start))
         {
             (ILocation? prev, Direction? dir) = visited[step];
             if (dir.HasValue)

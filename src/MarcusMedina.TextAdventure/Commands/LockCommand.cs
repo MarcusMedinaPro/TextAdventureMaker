@@ -15,15 +15,15 @@ public class LockCommand : ICommand
     public CommandResult Execute(CommandContext context)
     {
         Exit? exitWithDoor = context.State.CurrentLocation.Exits.Values
-            .FirstOrDefault(e => e.Door != null);
+            .FirstOrDefault(e => e.Door  is not null);
 
-        if (exitWithDoor?.Door == null)
+        if (exitWithDoor?.Door  is null)
         {
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
         }
 
         string doorName = Language.EntityName(exitWithDoor.Door);
-        if (exitWithDoor.Door.RequiredKey == null)
+        if (exitWithDoor.Door.RequiredKey  is null)
         {
             return CommandResult.Fail(Language.NoKeyRequired, GameError.NoKeyRequired);
         }
@@ -50,7 +50,7 @@ public class LockCommand : ICommand
             {
                 context.State.Events.Publish(new GameEvent(GameEventType.LockDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
                 string? reaction = exitWithDoor.Door.GetReaction(DoorAction.Lock);
-                return reaction != null
+                return reaction  is not null
                     ? CommandResult.Ok(Language.DoorLockedByPlayer(doorName), reaction)
                     : CommandResult.Ok(Language.DoorLockedByPlayer(doorName));
             }

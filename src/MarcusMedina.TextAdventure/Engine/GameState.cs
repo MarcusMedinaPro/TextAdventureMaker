@@ -136,7 +136,7 @@ public class GameState : IGameState
 
     public void SetTimeSystem(ITimeSystem timeSystem)
     {
-        if (timeSystem == null)
+        if (timeSystem  is null)
         {
             return;
         }
@@ -146,7 +146,7 @@ public class GameState : IGameState
 
     public void SetFactionSystem(IFactionSystem factionSystem)
     {
-        if (factionSystem == null)
+        if (factionSystem  is null)
         {
             return;
         }
@@ -156,7 +156,7 @@ public class GameState : IGameState
 
     public void SetRandomEventPool(IRandomEventPool randomEventPool)
     {
-        if (randomEventPool == null)
+        if (randomEventPool  is null)
         {
             return;
         }
@@ -166,7 +166,7 @@ public class GameState : IGameState
 
     public void SetPathfinder(IPathfinder pathfinder)
     {
-        if (pathfinder == null)
+        if (pathfinder  is null)
         {
             return;
         }
@@ -207,7 +207,7 @@ public class GameState : IGameState
 
     public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)
     {
-        if (locationDiscovery == null)
+        if (locationDiscovery  is null)
         {
             return;
         }
@@ -221,7 +221,7 @@ public class GameState : IGameState
 
     public void SetForeshadowingSystem(IForeshadowingSystem foreshadowingSystem)
     {
-        if (foreshadowingSystem == null)
+        if (foreshadowingSystem  is null)
         {
             return;
         }
@@ -231,7 +231,7 @@ public class GameState : IGameState
 
     public void SetNarrativeVoiceSystem(INarrativeVoiceSystem narrativeVoiceSystem)
     {
-        if (narrativeVoiceSystem == null)
+        if (narrativeVoiceSystem  is null)
         {
             return;
         }
@@ -241,7 +241,7 @@ public class GameState : IGameState
 
     public void SetAgencyTracker(IAgencyTracker agencyTracker)
     {
-        if (agencyTracker == null)
+        if (agencyTracker  is null)
         {
             return;
         }
@@ -251,7 +251,7 @@ public class GameState : IGameState
 
     public void SetDramaticIronySystem(IDramaticIronySystem dramaticIronySystem)
     {
-        if (dramaticIronySystem == null)
+        if (dramaticIronySystem  is null)
         {
             return;
         }
@@ -261,7 +261,7 @@ public class GameState : IGameState
 
     public void SetTensionSystem(ITensionSystem tensionSystem)
     {
-        if (tensionSystem == null)
+        if (tensionSystem  is null)
         {
             return;
         }
@@ -271,7 +271,7 @@ public class GameState : IGameState
 
     public void SetFlashbackSystem(IFlashbackSystem flashbackSystem)
     {
-        if (flashbackSystem == null)
+        if (flashbackSystem  is null)
         {
             return;
         }
@@ -281,7 +281,7 @@ public class GameState : IGameState
 
     public void SetChapterSystem(IChapterSystem chapterSystem)
     {
-        if (chapterSystem == null)
+        if (chapterSystem  is null)
         {
             return;
         }
@@ -291,7 +291,7 @@ public class GameState : IGameState
 
     public void SetScheduleQueue(IScheduleQueue scheduleQueue)
     {
-        if (scheduleQueue == null)
+        if (scheduleQueue  is null)
         {
             return;
         }
@@ -301,7 +301,7 @@ public class GameState : IGameState
 
     public void SetActionTriggerSystem(IActionTriggerSystem actionTriggerSystem)
     {
-        if (actionTriggerSystem == null)
+        if (actionTriggerSystem  is null)
         {
             return;
         }
@@ -367,7 +367,7 @@ public class GameState : IGameState
         foreach (string itemId in memento.InventoryItemIds)
         {
             IItem? item = FindItemById(itemId, allLocations);
-            if (item == null)
+            if (item  is null)
             {
                 continue;
             }
@@ -388,7 +388,7 @@ public class GameState : IGameState
         foreach (ILocation location in locations)
         {
             IItem? item = location.Items.FirstOrDefault(i => i.Id.TextCompare(id));
-            if (item != null)
+            if (item  is not null)
             {
                 return item;
             }
@@ -403,7 +403,7 @@ public class GameState : IGameState
         LastMoveErrorCode = GameError.None;
         Exit? exit = CurrentLocation.GetExit(direction);
 
-        if (exit == null)
+        if (exit  is null)
         {
             LastMoveError = Language.CantGoThatWay;
             LastMoveErrorCode = GameError.NoExitInDirection;

@@ -60,7 +60,7 @@ public sealed class Faction : IFaction
 
     public IFaction WithNpcs(params string[] npcIds)
     {
-        if (npcIds == null)
+        if (npcIds  is null)
         {
             return this;
         }

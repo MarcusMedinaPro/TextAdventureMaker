@@ -23,7 +23,7 @@ public sealed class SceneTransitionBuilder(Scene scene)
 
     public SceneTransitionBuilder Trigger(string trigger)
     {
-        if (_pending == null || string.IsNullOrWhiteSpace(trigger))
+        if (_pending  is null || string.IsNullOrWhiteSpace(trigger))
         {
             _pending = null;
             return this;

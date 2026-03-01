@@ -69,7 +69,7 @@ public sealed class EnglishGrammar : IGrammarProvider
 
     public string NaturalList(IEnumerable<string> items)
     {
-        if (items == null)
+        if (items  is null)
         {
             return string.Empty;
         }

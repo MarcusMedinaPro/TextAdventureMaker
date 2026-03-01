@@ -88,7 +88,7 @@ public class AdventureDslExporter
 
         List<string> options = [];
 
-        if (door.RequiredKey != null)
+        if (door.RequiredKey  is not null)
         {
             options.Add($"key={door.RequiredKey.Id}");
         }
@@ -106,7 +106,7 @@ public class AdventureDslExporter
     {
         List<string> parts = [$"{direction.ToString().ToLowerInvariant()} -> {exit.Target.Id}"];
 
-        if (exit.Door != null)
+        if (exit.Door  is not null)
         {
             parts.Add($"door={exit.Door.Id}");
         }
@@ -211,7 +211,7 @@ public class AdventureDslExporter
         // Export doors (only once per door)
         foreach (var exit in location.Exits)
         {
-            if (exit.Value.Door != null && !exportedDoors.Contains(exit.Value.Door.Id))
+            if (exit.Value.Door  is not null && !exportedDoors.Contains(exit.Value.Door.Id))
             {
                 ExportDoor(sb, exit.Value.Door);
                 _ = exportedDoors.Add(exit.Value.Door.Id);

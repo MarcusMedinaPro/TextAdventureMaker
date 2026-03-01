@@ -45,7 +45,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         _lastInput = trimmed;
 
         ICommand? custom = TryParseCustomCommand(trimmed);
-        if (custom != null)
+        if (custom  is not null)
         {
             return GuardPronoun(custom);
         }
@@ -116,7 +116,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new TakeAllCommand();
 
             (int? takeAmount, string? takeName) = ParseAmountAndItem(tokens, 1);
-            ICommand takeCmd = takeName != null ? new TakeCommand(takeName, takeAmount) : new UnknownCommand();
+            ICommand takeCmd = takeName  is not null ? new TakeCommand(takeName, takeAmount) : new UnknownCommand();
             return GuardPronoun(takeCmd);
         }
 
@@ -126,28 +126,28 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new DropAllCommand();
 
             (int? dropAmount, string? dropName) = ParseAmountAndItem(tokens, 1);
-            ICommand dropCmd = dropName != null ? new DropCommand(dropName, dropAmount) : new UnknownCommand();
+            ICommand dropCmd = dropName  is not null ? new DropCommand(dropName, dropAmount) : new UnknownCommand();
             return GuardPronoun(dropCmd);
         }
 
         if (_config.Eat.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new EatCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName  is not null ? new EatCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
         if (_config.Drink.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new DrinkCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName  is not null ? new DrinkCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
         if (_config.Use.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new UseCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName  is not null ? new UseCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
@@ -169,14 +169,14 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? target = ParseItemName(tokens, 1);
-            ICommand command = target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
+            ICommand command = target  is not null ? new MoveCommand(target) : new MoveCommand(string.Empty);
             return GuardPronoun(command);
         }
 
         if (_config.Read.Contains(keyword))
         {
             string? target = ParseItemName(tokens, 1);
-            ICommand command = target != null ? new ReadCommand(target) : new UnknownCommand();
+            ICommand command = target  is not null ? new ReadCommand(target) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
@@ -231,7 +231,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (_config.EnableFuzzyMatching)
         {
             ICommand? fuzzy = TryParseFuzzyKeyword(keyword, tokens);
-            if (fuzzy != null)
+            if (fuzzy  is not null)
             {
                 return fuzzy;
             }
@@ -279,7 +279,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         }
 
         ICommand? command = BuildCommandForKeyword(best, tokens);
-        return command == null
+        return command  is null
             ? null
             : new FuzzyCommand(command, best.ToProperCase());
     }
@@ -343,7 +343,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new TakeAllCommand();
 
             (int? takeAmount, string? takeName) = ParseAmountAndItem(tokens, 1);
-            ICommand takeCmd = takeName != null ? new TakeCommand(takeName, takeAmount) : new UnknownCommand();
+            ICommand takeCmd = takeName  is not null ? new TakeCommand(takeName, takeAmount) : new UnknownCommand();
             return GuardPronoun(takeCmd);
         }
 
@@ -353,28 +353,28 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new DropAllCommand();
 
             (int? dropAmount, string? dropName) = ParseAmountAndItem(tokens, 1);
-            ICommand dropCmd = dropName != null ? new DropCommand(dropName, dropAmount) : new UnknownCommand();
+            ICommand dropCmd = dropName  is not null ? new DropCommand(dropName, dropAmount) : new UnknownCommand();
             return GuardPronoun(dropCmd);
         }
 
         if (_config.Eat.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new EatCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName  is not null ? new EatCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
         if (_config.Drink.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new DrinkCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName  is not null ? new DrinkCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
         if (_config.Use.Contains(keyword))
         {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new UseCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName  is not null ? new UseCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
@@ -391,7 +391,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (_config.Read.Contains(keyword))
         {
             var target = ParseItemName(tokens, 1);
-            ICommand command = target != null ? new ReadCommand(target) : new UnknownCommand();
+            ICommand command = target  is not null ? new ReadCommand(target) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
@@ -403,7 +403,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             }
 
             string? target = ParseItemName(tokens, 1);
-            ICommand command = target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
+            ICommand command = target  is not null ? new MoveCommand(target) : new MoveCommand(string.Empty);
             return GuardPronoun(command);
         }
 
@@ -540,7 +540,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (int.TryParse(tokens[startIndex], out int amount) && amount > 0)
         {
             string? itemName = ParseItemName(tokens, startIndex + 1);
-            return itemName != null ? (amount, itemName) : (null, null);
+            return itemName  is not null ? (amount, itemName) : (null, null);
         }
 
         return (null, ParseItemName(tokens, startIndex));
@@ -567,7 +567,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .OrderByDescending(key => key.Length)
             .FirstOrDefault(key => input.StartsWith(key, StringComparison.OrdinalIgnoreCase));
 
-        if (match == null)
+        if (match  is null)
         {
             return null;
         }
@@ -589,7 +589,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
     private ICommand ParseGoTarget(string[] tokens)
     {
         string? target = ParseItemName(tokens, 1);
-        ICommand command = target != null ? new GoToCommand(target) : new UnknownCommand();
+        ICommand command = target  is not null ? new GoToCommand(target) : new UnknownCommand();
         return GuardPronoun(command);
     }
 

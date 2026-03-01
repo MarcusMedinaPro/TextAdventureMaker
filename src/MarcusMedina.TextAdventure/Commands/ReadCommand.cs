@@ -25,17 +25,17 @@ public class ReadCommand(string target) : ICommand
         var itemInRoom = location.FindItem(Target);
         var itemInInventory = context.State.Inventory.FindItem(Target);
         string? suggestion = null;
-        if (itemInRoom == null && itemInInventory == null &&
+        if (itemInRoom  is null && itemInInventory  is null &&
             context.State.EnableFuzzyMatching &&
             !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
             var bestRoom = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
             var bestInventory = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, Target, context.State.FuzzyMaxDistance);
             var best = bestInventory ?? bestRoom;
-            if (best != null)
+            if (best  is not null)
             {
                 suggestion = best.Name;
-                if (bestInventory != null)
+                if (bestInventory  is not null)
                 {
                     itemInInventory = bestInventory;
                 }
@@ -48,7 +48,7 @@ public class ReadCommand(string target) : ICommand
 
         var item = itemInInventory ?? itemInRoom;
 
-        if (item == null)
+        if (item  is null)
         {
             return CommandResult.Fail(Language.NothingToRead, GameError.ItemNotFound);
         }
@@ -58,7 +58,7 @@ public class ReadCommand(string target) : ICommand
             return CommandResult.Fail(Language.CannotReadThat, GameError.ItemNotUsable);
         }
 
-        if (item.RequiresTakeToRead && itemInInventory == null)
+        if (item.RequiresTakeToRead && itemInInventory  is null)
         {
             return CommandResult.Fail(Language.MustTakeToRead, GameError.ItemNotInInventory);
         }
@@ -66,7 +66,7 @@ public class ReadCommand(string target) : ICommand
         if (!item.CanRead(context.State))
         {
             var reaction = item.GetReaction(ItemAction.ReadFailed);
-            return reaction != null
+            return reaction  is not null
                 ? CommandResult.Fail(Language.TooDarkToRead, GameError.ItemNotUsable, reaction)
                 : CommandResult.Fail(Language.TooDarkToRead, GameError.ItemNotUsable);
         }
@@ -77,10 +77,10 @@ public class ReadCommand(string target) : ICommand
             : text;
 
         var onRead = item.GetReaction(ItemAction.Read);
-        var result = onRead != null
+        var result = onRead  is not null
             ? CommandResult.Ok(message, onRead)
             : CommandResult.Ok(message);
 
-        return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
     }
 }

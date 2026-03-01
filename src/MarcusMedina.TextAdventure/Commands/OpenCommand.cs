@@ -15,9 +15,9 @@ public class OpenCommand : ICommand
     public CommandResult Execute(CommandContext context)
     {
         Exit? exitWithDoor = context.State.CurrentLocation.Exits.Values
-            .FirstOrDefault(e => e.Door != null);
+            .FirstOrDefault(e => e.Door  is not null);
 
-        if (exitWithDoor?.Door == null)
+        if (exitWithDoor?.Door  is null)
         {
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
         }
@@ -32,7 +32,7 @@ public class OpenCommand : ICommand
         {
             context.State.Events.Publish(new GameEvent(GameEventType.OpenDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
             string? reaction = exitWithDoor.Door.GetReaction(DoorAction.Open);
-            return reaction != null
+            return reaction  is not null
                 ? CommandResult.Ok(Language.DoorOpened(doorName), reaction)
                 : CommandResult.Ok(Language.DoorOpened(doorName));
         }
@@ -45,7 +45,7 @@ public class OpenCommand : ICommand
             ? GameError.DoorIsLocked
             : GameError.DoorIsClosed;
         string? failReaction = exitWithDoor.Door.GetReaction(DoorAction.OpenFailed);
-        return failReaction != null
+        return failReaction  is not null
             ? CommandResult.Fail(message, error, failReaction)
             : CommandResult.Fail(message, error);
     }

@@ -121,7 +121,7 @@ public class Door(string id, string name, DoorState initialState = DoorState.Clo
         if (State == DoorState.Destroyed || State == DoorState.Open)
             return false;
 
-        if (RequiredKey != null && RequiredKey.Id != key.Id)
+        if (RequiredKey is not null && RequiredKey.Id != key.Id)
             return false;
 
         if (State == DoorState.Locked && RequiredKey?.Id == key.Id)
@@ -136,7 +136,7 @@ public class Door(string id, string name, DoorState initialState = DoorState.Clo
         if (State != DoorState.Locked)
             return false;
 
-        if (RequiredKey == null || RequiredKey.Id != key.Id)
+        if (RequiredKey is null || RequiredKey.Id != key.Id)
             return false;
 
         return ChangeState(DoorState.Closed, OnUnlock);

@@ -15,15 +15,15 @@ public class UnlockCommand : ICommand
     public CommandResult Execute(CommandContext context)
     {
         var exitWithDoor = context.State.CurrentLocation.Exits.Values
-            .FirstOrDefault(e => e.Door != null);
+            .FirstOrDefault(e => e.Door  is not null);
 
-        if (exitWithDoor?.Door == null)
+        if (exitWithDoor?.Door  is null)
         {
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
         }
 
         string doorName = Language.EntityName(exitWithDoor.Door);
-        if (exitWithDoor.Door.RequiredKey == null)
+        if (exitWithDoor.Door.RequiredKey  is null)
         {
             return CommandResult.Fail(Language.NoKeyRequired, GameError.NoKeyRequired);
         }
@@ -40,14 +40,14 @@ public class UnlockCommand : ICommand
             {
                 context.State.Events.Publish(new GameEvent(GameEventType.UnlockDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
                 var reaction = exitWithDoor.Door.GetReaction(DoorAction.Unlock);
-                return reaction != null
+                return reaction  is not null
                     ? CommandResult.Ok(Language.DoorUnlocked(doorName), reaction)
                     : CommandResult.Ok(Language.DoorUnlocked(doorName));
             }
         }
 
         var failReaction = exitWithDoor.Door.GetReaction(DoorAction.UnlockFailed);
-        return failReaction != null
+        return failReaction  is not null
             ? CommandResult.Fail(Language.ThatKeyDoesNotFit, GameError.WrongKey, failReaction)
             : CommandResult.Fail(Language.ThatKeyDoesNotFit, GameError.WrongKey);
     }

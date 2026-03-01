@@ -51,7 +51,7 @@ public sealed class LayeredDescription
 
     public string Resolve(IGameState state, int visitCount)
     {
-        if (state != null)
+        if (state  is not null)
         {
             foreach ((string itemId, string overrideText) in _itemOverrides)
             {

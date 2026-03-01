@@ -25,17 +25,17 @@ public class AttackCommand(string? target) : ICommand
         var location = context.State.CurrentLocation;
         var npc = location.FindNpc(Target);
         string? suggestion = null;
-        if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
+        if (npc  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
             var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 npc = best;
                 suggestion = best.Name;
             }
         }
 
-        if (npc == null)
+        if (npc  is null)
         {
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
         }
@@ -52,6 +52,6 @@ public class AttackCommand(string? target) : ICommand
 
         context.State.Events.Publish(new GameEvent(GameEventType.CombatStart, context.State, location, npc: npc));
         var result = context.State.CombatSystem.Attack(context.State, npc);
-        return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
     }
 }

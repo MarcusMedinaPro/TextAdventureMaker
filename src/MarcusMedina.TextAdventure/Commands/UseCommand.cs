@@ -23,17 +23,17 @@ public class UseCommand : ICommand
     {
         IItem? item = context.State.Inventory.FindItem(ItemName);
         string? suggestion = null;
-        if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
+        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
         {
             IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 item = best;
                 suggestion = best.Name;
             }
         }
 
-        if (item == null)
+        if (item  is null)
         {
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotFound);
         }
@@ -45,10 +45,10 @@ public class UseCommand : ICommand
         }
         string displayName = Language.EntityName(item);
         string? onUse = item.GetReaction(ItemAction.Use);
-        CommandResult result = onUse != null
+        CommandResult result = onUse  is not null
             ? CommandResult.Ok(Language.UseItem(displayName), onUse)
             : CommandResult.Ok(Language.UseItem(displayName));
 
-        return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
     }
 }

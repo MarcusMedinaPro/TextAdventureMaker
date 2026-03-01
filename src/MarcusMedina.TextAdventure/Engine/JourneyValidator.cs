@@ -21,7 +21,7 @@ public sealed class JourneyValidator
 
     public IReadOnlyCollection<string> Validate(IHeroJourney journey)
     {
-        if (journey == null)
+        if (journey  is null)
         {
             return ["Journey is missing."];
         }
@@ -30,7 +30,7 @@ public sealed class JourneyValidator
 
         foreach (JourneyStage stage in RequiredStages)
         {
-            if (journey.GetStage(stage) == null)
+            if (journey.GetStage(stage)  is null)
             {
                 warnings.Add($"Missing stage: {stage}");
             }

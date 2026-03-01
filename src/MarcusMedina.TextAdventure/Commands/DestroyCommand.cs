@@ -17,12 +17,12 @@ public class DestroyCommand(string? target) : ICommand
     public CommandResult Execute(CommandContext context)
     {
         ILocation location = context.State.CurrentLocation;
-        Exit? exitWithDoor = location.Exits.Values.FirstOrDefault(e => e.Door != null);
+        Exit? exitWithDoor = location.Exits.Values.FirstOrDefault(e => e.Door  is not null);
         IDoor? door = exitWithDoor?.Door;
 
         if (string.IsNullOrWhiteSpace(Target))
         {
-            if (door == null)
+            if (door  is null)
             {
                 return CommandResult.Fail(Language.NothingToDestroy, GameError.MissingArgument);
             }
@@ -31,13 +31,13 @@ public class DestroyCommand(string? target) : ICommand
         }
 
         string token = Target.Trim();
-        if (door != null && door.Matches(token))
+        if (door  is not null && door.Matches(token))
         {
             return DestroyDoor(context, door);
         }
 
         IItem? item = location.FindItem(token);
-        if (item == null)
+        if (item  is null)
         {
             return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
         }
@@ -45,7 +45,7 @@ public class DestroyCommand(string? target) : ICommand
         item.Destroy();
         string displayName = Language.EntityName(item);
         string? reaction = item.GetReaction(ItemAction.Destroy);
-        return reaction != null
+        return reaction  is not null
             ? CommandResult.Ok(Language.DestroyedItem(displayName), reaction)
             : CommandResult.Ok(Language.DestroyedItem(displayName));
     }
@@ -61,7 +61,7 @@ public class DestroyCommand(string? target) : ICommand
         door.Destroy();
         context.State.Events.Publish(new GameEvent(GameEventType.DestroyDoor, context.State, context.State.CurrentLocation, door: door));
         string? reaction = door.GetReaction(DoorAction.Destroy);
-        return reaction != null
+        return reaction  is not null
             ? CommandResult.Ok(Language.DoorDestroyed(doorName), reaction)
             : CommandResult.Ok(Language.DoorDestroyed(doorName));
     }

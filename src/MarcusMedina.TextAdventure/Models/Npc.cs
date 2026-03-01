@@ -133,7 +133,7 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
 
         var context = new DialogContext(state, this, Memory);
         var matching = _dialogRules
-            .Where(rule => rule.Matches(context) && rule.GetText(context) != null)
+            .Where(rule => rule.Matches(context) && rule.GetText(context)  is not null)
             .ToList();
 
         if (matching.Count == 0)

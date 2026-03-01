@@ -24,23 +24,23 @@ public class FleeCommand(string? target = null) : ICommand
                 : null;
 
         string? suggestion = null;
-        if (npc == null && !string.IsNullOrWhiteSpace(Target) &&
+        if (npc  is null && !string.IsNullOrWhiteSpace(Target) &&
             context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
             var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 npc = best;
                 suggestion = best.Name;
             }
         }
 
-        if (npc == null)
+        if (npc  is null)
         {
             return CommandResult.Fail(Language.NoOneToFlee, GameError.TargetNotFound);
         }
 
         var result = context.State.CombatSystem.Flee(context.State, npc);
-        return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
     }
 }

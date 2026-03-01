@@ -48,7 +48,7 @@ public static class LocationExtensions
         {
             string direction = GetDirectionName(provider, exit.Key);
             var door = exit.Value.Door;
-            if (door == null)
+            if (door  is null)
                 return direction;
             string stateText = door.State.ToString().ToLowerInvariant().ToProperCase();
             return $"{direction} ({door.Name.ToProperCase()}, {stateText})";
@@ -134,7 +134,7 @@ public static class LocationExtensions
     public static ILocation AddItems(this ILocation location, params string[] itemNames)
     {
         ArgumentNullException.ThrowIfNull(location);
-        if (itemNames == null)
+        if (itemNames  is null)
         {
             return location;
         }
@@ -156,7 +156,7 @@ public static class LocationExtensions
     public static ILocation AddDSLItems(this ILocation location, params string[] entries)
     {
         ArgumentNullException.ThrowIfNull(location);
-        if (entries == null)
+        if (entries  is null)
         {
             return location;
         }
@@ -164,7 +164,7 @@ public static class LocationExtensions
         foreach (string entry in entries)
         {
             Item? item = ParseDslItem(entry);
-            if (item != null)
+            if (item  is not null)
             {
                 location.AddItem(item);
             }

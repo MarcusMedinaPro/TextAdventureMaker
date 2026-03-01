@@ -58,11 +58,11 @@ public class Location(string id) : ILocation
 
     public string GetDescription(IGameState state)
     {
-        if (state == null)
+        if (state is null)
             return GetDescription();
 
-        bool firstVisit = _visitCount == 0;
-        string text = _layeredDescription != null
+        var firstVisit = _visitCount == 0;
+        var text = _layeredDescription is not null
             ? _layeredDescription.Resolve(state, _visitCount)
             : _dynamicDescription?.Resolve(state, firstVisit) ?? GetDescription();
 
@@ -156,6 +156,8 @@ public class Location(string id) : ILocation
 
         return exit.IsVisible ? exit : null;
     }
+
+    public bool RemoveExit(Direction direction) => _exits.Remove(direction);
 
     public bool DiscoverHiddenExits(IGameState state)
     {

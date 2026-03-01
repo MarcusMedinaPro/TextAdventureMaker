@@ -28,7 +28,7 @@ public class UndoCommand : ICommand
     {
         GameMemento? memento = _state.History.Undo();
 
-        if (memento == null)
+        if (memento  is null)
         {
             return CommandResult.Fail("Nothing to undo.", Enums.GameError.None);
         }

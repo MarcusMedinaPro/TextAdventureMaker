@@ -14,7 +14,7 @@ public sealed class AnyOfCondition : IQuestCondition
     public AnyOfCondition(IEnumerable<IQuestCondition> conditions)
     {
         ArgumentNullException.ThrowIfNull(conditions);
-        _conditions = [..conditions.Where(c => c != null)];
+        _conditions = [..conditions.Where(c => c  is not null)];
     }
 
     public IReadOnlyList<IQuestCondition> Conditions => _conditions;

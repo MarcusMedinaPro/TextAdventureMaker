@@ -36,14 +36,10 @@ public sealed class ProppianStructure
 
     private static void AddFunctions(HashSet<ProppFunction> target, IEnumerable<ProppFunction> functions)
     {
-        if (functions == null)
-        {
+        if (functions is null)
             return;
-        }
 
-        foreach (ProppFunction function in functions)
-        {
+        foreach (var function in functions)
             target.Add(function);
-        }
     }
 }

@@ -22,7 +22,7 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
         Discover(state.CurrentLocation.Id);
         events.Subscribe(GameEventType.EnterLocation, e =>
         {
-            if (e.Location != null)
+            if (e.Location  is not null)
             {
                 Discover(e.Location.Id);
             }
@@ -46,7 +46,7 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
 
     public IEnumerable<ILocation> FilterVisible(IEnumerable<ILocation> locations, bool includeUndiscovered = false)
     {
-        if (locations == null)
+        if (locations  is null)
         {
             yield break;
         }
@@ -55,7 +55,7 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
         {
             foreach (ILocation location in locations)
             {
-                if (location != null)
+                if (location  is not null)
                 {
                     yield return location;
                 }
@@ -66,7 +66,7 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
 
         foreach (ILocation location in locations)
         {
-            if (location != null && IsDiscovered(location.Id))
+            if (location  is not null && IsDiscovered(location.Id))
             {
                 yield return location;
             }

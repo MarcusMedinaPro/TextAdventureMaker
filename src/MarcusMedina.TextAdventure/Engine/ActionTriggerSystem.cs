@@ -46,7 +46,7 @@ public sealed class ActionTriggerSystem : IActionTriggerSystem
 
     private static void Register(Dictionary<string, List<Action<ActionTriggerContext>>> store, string id, Action<ActionTriggerContext> handler)
     {
-        if (string.IsNullOrWhiteSpace(id) || handler == null)
+        if (string.IsNullOrWhiteSpace(id) || handler  is null)
         {
             return;
         }
@@ -66,7 +66,7 @@ public sealed class ActionTriggerSystem : IActionTriggerSystem
         IGameState state,
         ILocation? location)
     {
-        if (string.IsNullOrWhiteSpace(id) || state == null)
+        if (string.IsNullOrWhiteSpace(id) || state  is null)
         {
             return;
         }

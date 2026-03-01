@@ -115,7 +115,7 @@ public static class DslErrorHelper
     public static DslParseError UnknownKeyword(int line, string lineContent, string keyword)
     {
         string? suggestion = SuggestKeyword(keyword);
-        string suggestionText = suggestion != null
+        string suggestionText = suggestion  is not null
             ? $"Did you mean '{suggestion}'?"
             : $"Valid keywords: {string.Join(", ", ValidKeywords.OrderBy(k => k))}";
 

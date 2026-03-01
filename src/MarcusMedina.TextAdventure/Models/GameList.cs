@@ -31,17 +31,13 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
 
     public GameList<T> AddMany(params string[] names)
     {
-        if (names == null)
-        {
+        if (names is null)
             return this;
-        }
 
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
-            {
                 _ = Add(name);
-            }
         }
 
         return this;
@@ -49,17 +45,13 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
 
     public GameList<T> AddMany(IEnumerable<string> names)
     {
-        if (names == null)
-        {
+        if (names is null)
             return this;
-        }
 
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
-            {
                 _ = Add(name);
-            }
         }
 
         return this;
@@ -67,17 +59,13 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
 
     public GameList<T> AddMany(IEnumerable<T> items)
     {
-        if (items == null)
-        {
+        if (items is null)
             return this;
-        }
 
         foreach (var item in items)
         {
-            if (item != null)
-            {
+            if (item is not null)
                 _ = Add(item);
-            }
         }
 
         return this;
@@ -91,22 +79,16 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
             ? default
             : _items.TryGetValue(token, out var item) ? item : _items.Values.FirstOrDefault(i => Matches(i, token));
 
-    public T Get(string token)
-    {
-        var item = Find(token);
-        return item == null ? throw new KeyNotFoundException($"No item found for '{token}'.") : item;
-    }
+    public T Get(string token) =>
+        Find(token) ?? throw new KeyNotFoundException($"No item found for '{token}'.");
 
-    public bool Remove(string token)
-    {
-        var item = Find(token);
-        return item != null && _items.Remove(item.Id);
-    }
+    public bool Remove(string token) =>
+        Find(token) is { } item && _items.Remove(item.Id);
 
     public bool TryGet(string token, out T item)
     {
         item = Find(token) ?? default!;
-        return item != null;
+        return item is not null;
     }
 
     private static bool Matches(T item, string token) => item is IItem itemWithAliases

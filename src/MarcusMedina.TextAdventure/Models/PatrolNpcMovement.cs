@@ -16,7 +16,7 @@ public sealed class PatrolNpcMovement : INpcMovement
     public PatrolNpcMovement(IEnumerable<ILocation> route)
     {
         ArgumentNullException.ThrowIfNull(route);
-        _route = [..route.Where(location => location != null)];
+        _route = [..route.Where(location => location  is not null)];
 
         if (_route.Count == 0)
         {

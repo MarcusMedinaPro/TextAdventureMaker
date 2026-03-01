@@ -10,8 +10,10 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class DebugRevealMapCommand(GameState state, string[] tokens) : ICommand
+public class DebugRevealMapCommand(GameState state) : ICommand
 {
+    public DebugRevealMapCommand(GameState state, string[] tokens) : this(state) { }
+
     public string Name => "revealmap";
     public string[]? Aliases => null;
     public string Description => "Reveal all locations (debug only)";
@@ -26,7 +28,7 @@ public class DebugRevealMapCommand(GameState state, string[] tokens) : ICommand
 
         foreach (var location in state.Locations)
         {
-            string locName = location is Models.Location loc ? loc.Name : location.Id;
+            var locName = location is Location loc ? loc.Name : location.Id;
             sb.AppendLine($"\n{locName} ({location.Id})");
             if (location.Exits.Count > 0)
                 sb.AppendLine($"  Exits: {string.Join(", ", location.Exits.Keys)}");

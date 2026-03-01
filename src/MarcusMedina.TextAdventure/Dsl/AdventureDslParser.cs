@@ -55,7 +55,7 @@ public class AdventureDslParser : IDslParser
             context.CurrentLineContent = line;
 
             (string Keyword, string Value)? parsedLine = ParseLine(line);
-            if (parsedLine == null)
+            if (parsedLine  is null)
                 continue;
 
             Dispatch(context, parsedLine.Value.Keyword, parsedLine.Value.Value, lineNumber, line);
@@ -230,7 +230,7 @@ public class AdventureDslParser : IDslParser
         for (int i = 1; i < parts.Count; i++)
         {
             KeyValuePair<string, string>? option = ParseOption(parts[i]);
-            if (option == null)
+            if (option  is null)
             {
                 continue;
             }
@@ -269,7 +269,7 @@ public class AdventureDslParser : IDslParser
         for (int i = 1; i < parts.Count; i++)
         {
             KeyValuePair<string, string>? option = ParseOption(parts[i]);
-            if (option == null)
+            if (option  is null)
                 continue;
 
             string key = option.Value.Key;
@@ -302,7 +302,7 @@ public class AdventureDslParser : IDslParser
         for (int i = 1; i < parts.Count; i++)
         {
             KeyValuePair<string, string>? option = ParseOption(parts[i]);
-            if (option != null)
+            if (option  is not null)
                 options[option.Value.Key] = option.Value.Value;
         }
 
@@ -451,7 +451,7 @@ public class AdventureDslParser : IDslParser
         for (int i = startIndex; i < parts.Count; i++)
         {
             KeyValuePair<string, string>? option = ParseOption(parts[i]);
-            if (option == null)
+            if (option  is null)
             {
                 continue;
             }

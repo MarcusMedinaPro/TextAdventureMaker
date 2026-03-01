@@ -19,13 +19,13 @@ public static class EnumerableExtensions
     /// </summary>
     public static string CommaJoinNames(this IEnumerable<IGameEntity> entities, bool properCase = false)
     {
-        if (entities == null)
+        if (entities  is null)
         {
             return string.Empty;
         }
 
         var names = entities
-            .Where(entity => entity != null && !string.IsNullOrWhiteSpace(entity.Name))
+            .Where(entity => entity  is not null && !string.IsNullOrWhiteSpace(entity.Name))
             .Select(entity => entity.Name.Trim());
 
         if (properCase)

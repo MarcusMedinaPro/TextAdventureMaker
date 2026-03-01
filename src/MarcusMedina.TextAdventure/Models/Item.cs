@@ -209,10 +209,8 @@ public class Item(string id, string name, string description = "") : IItem
         return this;
     }
 
-    public bool CanRead(IGameState state)
-    {
-        return _readCondition == null || _readCondition(state);
-    }
+    public bool CanRead(IGameState state) =>
+        _readCondition is null || _readCondition(state);
 
     public IItem SetReadable(bool readable = true)
     {
@@ -276,20 +274,14 @@ public class Item(string id, string name, string description = "") : IItem
             _ = copy.AddAliases(_aliases.ToArray());
         }
 
-        if (_readText != null)
-        {
+        if (_readText is not null)
             _ = copy.SetReadText(_readText);
-        }
 
         if (RequiresTakeToRead)
-        {
             _ = copy.RequireTakeToRead();
-        }
 
-        if (_readCondition != null)
-        {
+        if (_readCondition is not null)
             _ = copy.RequiresToRead(_readCondition);
-        }
 
         foreach (KeyValuePair<ItemAction, string> reaction in _reactions)
         {

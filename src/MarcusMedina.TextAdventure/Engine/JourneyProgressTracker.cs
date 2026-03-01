@@ -13,7 +13,7 @@ public sealed class JourneyProgressTracker
 {
     public string Render(IHeroJourney journey, JourneyStage currentStage)
     {
-        if (journey == null)
+        if (journey  is null)
         {
             return "No journey tracked.";
         }

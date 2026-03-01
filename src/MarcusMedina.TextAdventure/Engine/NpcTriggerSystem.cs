@@ -20,7 +20,7 @@ public sealed class NpcTriggerSystem
 
         events.Subscribe(GameEventType.EnterLocation, e =>
         {
-            if (e.Location != null)
+            if (e.Location  is not null)
             {
                 TriggerSense(state, e.Location, NpcSense.See, "player");
             }

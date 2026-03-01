@@ -26,17 +26,17 @@ public class TalkCommand(string? target) : ICommand
         var location = context.State.CurrentLocation;
         var npc = location.FindNpc(Target);
         string? suggestion = null;
-        if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
+        if (npc  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
             var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 npc = best;
                 suggestion = best.Name;
             }
         }
 
-        if (npc == null)
+        if (npc  is null)
         {
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
         }
@@ -47,11 +47,11 @@ public class TalkCommand(string? target) : ICommand
         if (!string.IsNullOrWhiteSpace(ruleBased))
         {
             var ruleResult = CommandResult.Ok(ruleBased);
-            return suggestion != null ? ruleResult.WithSuggestion(suggestion) : ruleResult;
+            return suggestion  is not null ? ruleResult.WithSuggestion(suggestion) : ruleResult;
         }
 
         var dialog = npc.DialogRoot;
-        if (dialog == null)
+        if (dialog  is null)
         {
             npc.Memory.MarkMet();
             return CommandResult.Ok(Language.NpcHasNothingToSay);
@@ -77,6 +77,6 @@ public class TalkCommand(string? target) : ICommand
 
         npc.Memory.MarkMet();
         var result = CommandResult.Ok(builder.ToString());
-        return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
     }
 }

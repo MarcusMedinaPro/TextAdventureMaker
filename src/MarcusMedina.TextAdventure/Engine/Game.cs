@@ -76,7 +76,7 @@ public sealed class Game(
             foreach (INpc? npc in location.Npcs.ToList())
             {
                 ILocation? next = npc.GetNextLocation(location, State);
-                if (next != null && !ReferenceEquals(next, location))
+                if (next  is not null && !ReferenceEquals(next, location))
                 {
                     moves.Add((npc, location, next));
                 }
@@ -107,7 +107,7 @@ public sealed class Game(
 
             Output.Write(Prompt);
             string? input = Input.ReadLine();
-            if (input == null)
+            if (input  is null)
             {
                 break;
             }

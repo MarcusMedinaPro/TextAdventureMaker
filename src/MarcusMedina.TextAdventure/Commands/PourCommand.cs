@@ -26,7 +26,7 @@ public class PourCommand : ICommand
         IInventory inventory = context.State.Inventory;
         IFluid? fluidItem = inventory.FindItem(FluidName) as IFluid;
         string? suggestion = null;
-        if (fluidItem == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(FluidName))
+        if (fluidItem  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(FluidName))
         {
             if (FuzzyMatcher.FindBestItem(inventory.Items, FluidName, context.State.FuzzyMaxDistance) is IFluid best)
             {
@@ -35,16 +35,16 @@ public class PourCommand : ICommand
             }
         }
 
-        if (fluidItem == null)
+        if (fluidItem  is null)
         {
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
         }
 
         IItem? containerItem = inventory.FindItem(ContainerName);
-        if (containerItem == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ContainerName))
+        if (containerItem  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ContainerName))
         {
             IItem? best = FuzzyMatcher.FindBestItem(inventory.Items, ContainerName, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 containerItem = best;
                 suggestion ??= best.Name;
@@ -65,6 +65,6 @@ public class PourCommand : ICommand
         string fluidName = Language.EntityName(fluidItem.Id, fluidItem.Name);
         string containerName = Language.EntityName(containerItem);
         CommandResult ok = CommandResult.Ok(Language.PourResult(fluidName, containerName));
-        return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
+        return suggestion  is not null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

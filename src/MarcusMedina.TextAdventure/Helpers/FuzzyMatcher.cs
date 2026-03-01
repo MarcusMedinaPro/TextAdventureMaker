@@ -67,7 +67,7 @@ public static class FuzzyMatcher
             return null;
         }
 
-        if (candidates == null)
+        if (candidates  is null)
         {
             return null;
         }
@@ -123,7 +123,7 @@ public static class FuzzyMatcher
         foreach (var entity in entities)
         {
             var candidates = tokens(entity);
-            if (candidates == null)
+            if (candidates  is null)
             {
                 continue;
             }

@@ -335,7 +335,7 @@ public sealed class KeywordParserConfigBuilder
     /// <summary>Register a custom command handler for a full phrase.</summary>
     public KeywordParserConfigBuilder WithCustomCommand(string phrase, Func<string[], ICommand> handler)
     {
-        if (!string.IsNullOrWhiteSpace(phrase) && handler != null)
+        if (!string.IsNullOrWhiteSpace(phrase) && handler  is not null)
         {
             _customCommands[phrase.Trim()] = handler;
         }
@@ -357,7 +357,7 @@ public sealed class KeywordParserConfigBuilder
     /// <summary>Override command keywords based on a language provider.</summary>
     public KeywordParserConfigBuilder WithLanguageProvider(ICommandLanguageProvider provider, IDictionary<string, Func<string[], ICommand>>? customHandlers = null)
     {
-        if (provider == null)
+        if (provider  is null)
         {
             return this;
         }
@@ -391,7 +391,7 @@ public sealed class KeywordParserConfigBuilder
         OverrideIfPresent(provider, "hint", WithHint);
         OverrideIfPresent(provider, "all", WithAll);
 
-        if (customHandlers != null)
+        if (customHandlers  is not null)
         {
             foreach ((string key, List<string> aliases) in provider.GetCommandMap())
             {

@@ -26,17 +26,17 @@ public class DropCommand : ICommand
     {
         IItem? item = context.State.Inventory.FindItem(ItemName);
         string? suggestion = null;
-        if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
+        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
         {
             IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 item = best;
                 suggestion = best.Name;
             }
         }
 
-        if (item == null)
+        if (item  is null)
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
 
         ILocation location = context.State.CurrentLocation;
@@ -54,11 +54,11 @@ public class DropCommand : ICommand
 
             string splitDisplay = $"{Amount.Value} {item.Name}";
             string? onDrop = item.GetReaction(ItemAction.Drop);
-            CommandResult splitResult = onDrop != null
+            CommandResult splitResult = onDrop  is not null
                 ? CommandResult.Ok(Language.DropItem(splitDisplay), onDrop)
                 : CommandResult.Ok(Language.DropItem(splitDisplay));
 
-            return suggestion != null ? splitResult.WithSuggestion(suggestion) : splitResult;
+            return suggestion  is not null ? splitResult.WithSuggestion(suggestion) : splitResult;
         }
 
         // Full drop
@@ -69,10 +69,10 @@ public class DropCommand : ICommand
 
         string displayName = Language.EntityName(item);
         string? fullOnDrop = item.GetReaction(ItemAction.Drop);
-        CommandResult result = fullOnDrop != null
+        CommandResult result = fullOnDrop  is not null
             ? CommandResult.Ok(Language.DropItem(displayName), fullOnDrop)
             : CommandResult.Ok(Language.DropItem(displayName));
 
-        return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
     }
 }

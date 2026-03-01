@@ -27,7 +27,7 @@ public class DebugTeleportCommand(GameState state, string[] tokens) : ICommand
         string locationId = string.Join(" ", tokens.Skip(1));
         var location = state.Locations.FirstOrDefault(l => l.Id == locationId);
 
-        if (location == null)
+        if (location  is null)
             return CommandResult.Fail($"Location '{locationId}' not found.", GameError.None);
 
         state.Teleport(location);

@@ -31,20 +31,20 @@ public class CombineCommand : ICommand
 
         if (context.State.EnableFuzzyMatching)
         {
-            if (leftItem == null && !FuzzyMatcher.IsLikelyCommandToken(Left))
+            if (leftItem  is null && !FuzzyMatcher.IsLikelyCommandToken(Left))
             {
                 IItem? bestLeft = FuzzyMatcher.FindBestItem(inventory.Items, Left, context.State.FuzzyMaxDistance);
-                if (bestLeft != null)
+                if (bestLeft  is not null)
                 {
                     leftItem = bestLeft;
                     suggestion ??= bestLeft.Name;
                 }
             }
 
-            if (rightItem == null && !FuzzyMatcher.IsLikelyCommandToken(Right))
+            if (rightItem  is null && !FuzzyMatcher.IsLikelyCommandToken(Right))
             {
                 IItem? bestRight = FuzzyMatcher.FindBestItem(inventory.Items, Right, context.State.FuzzyMaxDistance);
-                if (bestRight != null)
+                if (bestRight  is not null)
                 {
                     rightItem = bestRight;
                     suggestion ??= bestRight.Name;
@@ -52,7 +52,7 @@ public class CombineCommand : ICommand
             }
         }
 
-        if (leftItem == null || rightItem == null)
+        if (leftItem  is null || rightItem  is null)
         {
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
         }
@@ -72,6 +72,6 @@ public class CombineCommand : ICommand
         }
 
         CommandResult ok = CommandResult.Ok(Language.CombineResult(Language.EntityName(leftItem), Language.EntityName(rightItem)));
-        return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
+        return suggestion  is not null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

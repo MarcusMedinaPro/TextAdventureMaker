@@ -41,7 +41,7 @@ public class DebugInspectCommand(GameState state, string[] tokens) : ICommand
 
         // Check items
         var item = state.CurrentLocation.Items.FirstOrDefault(i => i.Id == entityId || i.Matches(entityId));
-        if (item != null)
+        if (item  is not null)
         {
             sb.AppendLine($"Item: {item.Name}");
             sb.AppendLine($"ID: {item.Id}");
@@ -51,7 +51,7 @@ public class DebugInspectCommand(GameState state, string[] tokens) : ICommand
 
         // Check NPCs
         var npc = state.CurrentLocation.Npcs.FirstOrDefault(n => n.Id == entityId);
-        if (npc != null)
+        if (npc  is not null)
         {
             sb.AppendLine($"NPC: {npc.Name}");
             sb.AppendLine($"State: {npc.State}");

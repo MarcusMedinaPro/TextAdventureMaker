@@ -25,7 +25,7 @@ public sealed class HintCommand(string? target) : ICommand
         ILocation? goal = context.State.Locations
             .FirstOrDefault(location => location.Id.TextCompare(token));
 
-        if (goal == null)
+        if (goal  is null)
         {
             return CommandResult.Fail(Language.UnknownLocation, GameError.LocationNotFound);
         }

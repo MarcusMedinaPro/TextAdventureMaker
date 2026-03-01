@@ -20,18 +20,18 @@ public class GoToCommand(string target) : ICommand
         var exits = context.State.CurrentLocation.Exits;
         string? suggestion = null;
         var matches = exits
-            .Where(e => e.Value.Door != null && (Target.TextCompare("door") || e.Value.Door.Matches(Target)))
+            .Where(e => e.Value.Door  is not null && (Target.TextCompare("door") || e.Value.Door.Matches(Target)))
             .ToList();
 
         if (matches.Count == 0 && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
-            var doors = exits.Values.Select(e => e.Door).Where(d => d != null).Cast<IDoor>();
+            var doors = exits.Values.Select(e => e.Door).Where(d => d  is not null).Cast<IDoor>();
             var best = FuzzyMatcher.FindBestDoor(doors, Target, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 suggestion = best.Name;
                 matches = exits
-                    .Where(e => e.Value.Door != null && ReferenceEquals(e.Value.Door, best))
+                    .Where(e => e.Value.Door  is not null && ReferenceEquals(e.Value.Door, best))
                     .ToList();
             }
         }
@@ -45,7 +45,7 @@ public class GoToCommand(string target) : ICommand
         if (context.State.Move(direction))
         {
             var result = CommandResult.Ok(Language.GoDirection(direction.ToString().Lower()));
-            return suggestion != null ? result.WithSuggestion(suggestion) : result;
+            return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
         }
 
         var error = context.State.LastMoveErrorCode != GameError.None

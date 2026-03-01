@@ -44,17 +44,13 @@ public sealed class GameItemList
 
     public GameItemList AddMany(params string[] names)
     {
-        if (names == null)
-        {
+        if (names is null)
             return this;
-        }
 
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
-            {
                 _ = Add(name);
-            }
         }
 
         return this;
@@ -62,17 +58,13 @@ public sealed class GameItemList
 
     public GameItemList AddMany(IEnumerable<string> names)
     {
-        if (names == null)
-        {
+        if (names is null)
             return this;
-        }
 
         foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
-            {
                 _ = Add(name);
-            }
         }
 
         return this;
@@ -92,15 +84,12 @@ public sealed class GameItemList
         return item ?? throw new KeyNotFoundException($"No item found for '{token}'.");
     }
 
-    public bool Remove(string token)
-    {
-        var item = Find(token);
-        return item != null && _items.Remove(item.Id);
-    }
+    public bool Remove(string token) =>
+        Find(token) is { } item && _items.Remove(item.Id);
 
     public bool TryGet(string token, out Item item)
     {
         item = Find(token) ?? null!;
-        return item != null;
+        return item is not null;
     }
 }

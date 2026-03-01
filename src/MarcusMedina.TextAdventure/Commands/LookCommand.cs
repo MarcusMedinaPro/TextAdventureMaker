@@ -13,42 +13,33 @@ using System.Text;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class LookCommand : ICommand
+public class LookCommand(string? target = null) : ICommand
 {
-    public string? Target { get; }
-
-    public LookCommand(string? target = null)
-    {
-        Target = target;
-    }
+    public string? Target { get; } = target;
 
     public CommandResult Execute(CommandContext context)
     {
-        ILocation location = context.State.CurrentLocation;
+        var location = context.State.CurrentLocation;
         if (!string.IsNullOrWhiteSpace(Target))
-        {
             return ExecuteTarget(context, Target);
-        }
 
-        string description = location is Location loc
+        var description = location is Location loc
             ? loc.GetDescription(context.State)
             : location.GetDescription();
-        IEnumerable<KeyValuePair<Direction, Exit>> exitsSource = location.Exits
+        var exitsSource = location.Exits
             .Where(e => e.Value.IsVisible)
             .Where(e => !context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly ||
-                        e.Value.Door == null ||
+                        e.Value.Door is null ||
                         e.Value.Door.State != DoorState.Locked);
 
-        IEnumerable<string> exits = exitsSource
-            .Select(e => e.Value.Door != null
+        var exits = exitsSource
+            .Select(e => e.Value.Door is not null
                 ? $"{e.Key} ({Language.EntityName(e.Value.Door)}: {e.Value.Door.State})"
                 : e.Key.ToString());
 
-        StringBuilder builder = new();
+        var builder = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(description))
-        {
             _ = builder.Append(description.Trim());
-        }
 
         _ = builder.Append(builder.Length > 0 ? "\n" : string.Empty);
         _ = builder.Append(Language.HealthStatus(context.State.Stats.Health, context.State.Stats.MaxHealth));
@@ -89,93 +80,93 @@ public class LookCommand : ICommand
         ILocation location = context.State.CurrentLocation;
         IItem? item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
         string? suggestion = null;
-        if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
+        if (item is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
             IEnumerable<IItem> candidates = location.Items.Concat(context.State.Inventory.Items);
             IItem? best = FuzzyMatcher.FindBestItem(candidates, target, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best is not null)
             {
                 item = best;
                 suggestion = Language.EntityName(best);
             }
         }
 
-        if (item != null)
+        if (item is not null)
         {
             string description = item.GetDescription();
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(item))
                 : description);
-            return suggestion != null ? result.WithSuggestion(suggestion) : result;
+            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
         }
 
         INpc? npc = location.FindNpc(target);
-        if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
+        if (npc is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
             INpc? best = FuzzyMatcher.FindBestNpc(location.Npcs, target, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best is not null)
             {
                 npc = best;
                 suggestion = Language.EntityName(best);
             }
         }
 
-        if (npc != null)
+        if (npc is not null)
         {
             string description = npc.GetDescription();
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(npc))
                 : description);
-            return suggestion != null ? result.WithSuggestion(suggestion) : result;
+            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
         }
 
         IDoor? door = location.Exits.Values
             .Select(e => e.Door)
-            .FirstOrDefault(d => d != null && (target.TextCompare("door") || d.Matches(target)));
+            .FirstOrDefault(d => d is not null && (target.TextCompare("door") || d.Matches(target)));
 
-        if (door == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
+        if (door is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
-            IEnumerable<IDoor> doors = location.Exits.Values.Select(e => e.Door).Where(d => d != null).Cast<IDoor>();
+            IEnumerable<IDoor> doors = location.Exits.Values.Select(e => e.Door).Where(d => d is not null).Cast<IDoor>();
             door = FuzzyMatcher.FindBestDoor(doors, target, context.State.FuzzyMaxDistance);
-            if (door != null)
+            if (door is not null)
             {
                 suggestion = Language.EntityName(door);
             }
         }
 
-        if (door != null)
+        if (door is not null)
         {
             string description = door.GetDescription();
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(door))
                 : description);
-            return suggestion != null ? result.WithSuggestion(suggestion) : result;
+            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
         }
 
         IKey? key = location.Exits.Values
             .Select(e => e.Door?.RequiredKey)
-            .FirstOrDefault(k => k != null && k.Name.TextCompare(target));
+            .FirstOrDefault(k => k is not null && k.Name.TextCompare(target));
 
-        if (key == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
+        if (key is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
             IEnumerable<IItem> keys = location.Exits.Values
                 .Select(e => e.Door?.RequiredKey)
-                .Where(k => k != null)
+                .Where(k => k is not null)
                 .Cast<IItem>();
             key = FuzzyMatcher.FindBestItem(keys, target, context.State.FuzzyMaxDistance) as IKey;
-            if (key != null)
+            if (key is not null)
             {
                 suggestion = Language.EntityName(key);
             }
         }
 
-        if (key != null)
+        if (key is not null)
         {
             string description = key.GetDescription();
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(key))
                 : description);
-            return suggestion != null ? result.WithSuggestion(suggestion) : result;
+            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
         }
 
         if (target.TextCompare(location.Id) || target.TextCompare("here") || target.TextCompare("room"))

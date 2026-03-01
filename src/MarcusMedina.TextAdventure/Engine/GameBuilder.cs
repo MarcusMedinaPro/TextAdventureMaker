@@ -158,14 +158,14 @@ public sealed class GameBuilder
 
     public GameBuilder AddLocations(IEnumerable<ILocation> locations)
     {
-        if (locations == null)
+        if (locations  is null)
         {
             return this;
         }
 
         foreach (ILocation location in locations)
         {
-            if (location == null)
+            if (location  is null)
             {
                 continue;
             }
@@ -232,77 +232,77 @@ public sealed class GameBuilder
         ICommandParser parser = _parser ?? throw new InvalidOperationException("Parser must be provided.");
         GameState state = _state ?? BuildStateFromLocations();
 
-        if (_state != null && _locations.Count > 0)
+        if (_state  is not null && _locations.Count > 0)
         {
             state.RegisterLocations(_locations);
         }
 
-        if (_timeSystem != null)
+        if (_timeSystem  is not null)
         {
             state.SetTimeSystem(_timeSystem);
         }
 
-        if (_pathfinder != null)
+        if (_pathfinder  is not null)
         {
             state.SetPathfinder(_pathfinder);
         }
 
-        if (_foreshadowingSystem != null)
+        if (_foreshadowingSystem  is not null)
         {
             state.SetForeshadowingSystem(_foreshadowingSystem);
         }
 
-        if (_narrativeVoiceSystem != null)
+        if (_narrativeVoiceSystem  is not null)
         {
             state.SetNarrativeVoiceSystem(_narrativeVoiceSystem);
         }
 
-        if (_agencyTracker != null)
+        if (_agencyTracker  is not null)
         {
             state.SetAgencyTracker(_agencyTracker);
         }
 
-        if (_dramaticIronySystem != null)
+        if (_dramaticIronySystem  is not null)
         {
             state.SetDramaticIronySystem(_dramaticIronySystem);
         }
 
-        if (_tensionSystem != null)
+        if (_tensionSystem  is not null)
         {
             state.SetTensionSystem(_tensionSystem);
         }
 
-        if (_flashbackSystem != null)
+        if (_flashbackSystem  is not null)
         {
             state.SetFlashbackSystem(_flashbackSystem);
         }
 
-        if (_chapterSystem != null)
+        if (_chapterSystem  is not null)
         {
             state.SetChapterSystem(_chapterSystem);
         }
 
-        if (_scheduleQueue != null)
+        if (_scheduleQueue  is not null)
         {
             state.SetScheduleQueue(_scheduleQueue);
         }
 
-        if (_actionTriggerSystem != null)
+        if (_actionTriggerSystem  is not null)
         {
             state.SetActionTriggerSystem(_actionTriggerSystem);
         }
 
-        if (_weatherSystem != null)
+        if (_weatherSystem  is not null)
         {
             state.SetWeatherSystem(_weatherSystem);
         }
 
-        if (_accessibilitySystem != null)
+        if (_accessibilitySystem  is not null)
         {
             state.SetAccessibilitySystem(_accessibilitySystem);
         }
 
-        if (_moodSystem != null)
+        if (_moodSystem  is not null)
         {
             state.SetMoodSystem(_moodSystem);
         }
@@ -324,12 +324,12 @@ public sealed class GameBuilder
             game.AddTurnEndHandler(handler);
         }
 
-        if (_storyLogger != null)
+        if (_storyLogger  is not null)
         {
             game.AddTurnEndHandler((g, command, result) => _storyLogger.LogTurn(g.State, command, result));
         }
 
-        if (_devLogger != null)
+        if (_devLogger  is not null)
         {
             game.AddTurnEndHandler((g, command, result) => _devLogger.LogTurn(g.State, command, result));
         }
@@ -340,7 +340,7 @@ public sealed class GameBuilder
     private GameState BuildStateFromLocations()
     {
         ILocation? start = _startLocation ?? _locations.FirstOrDefault();
-        if (start == null)
+        if (start  is null)
         {
             throw new InvalidOperationException("Start location must be provided.");
         }

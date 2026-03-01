@@ -33,7 +33,7 @@ public sealed class HeroJourneyBuilder
 
     public HeroJourneyBuilder Trigger(Action<JourneyTriggerBuilder> configure)
     {
-        if (_current == null)
+        if (_current  is null)
         {
             return this;
         }
@@ -51,7 +51,7 @@ public sealed class HeroJourneyBuilder
 
     public HeroJourneyBuilder Provides(Action<JourneyGiftBuilder> configure)
     {
-        if (_current == null)
+        if (_current  is null)
         {
             return this;
         }
@@ -93,7 +93,7 @@ public sealed class HeroJourneyBuilder
 
     public HeroJourneyBuilder TransformationComplete(Action<JourneyTransformationBuilder> configure)
     {
-        if (_current == null)
+        if (_current  is null)
         {
             return this;
         }

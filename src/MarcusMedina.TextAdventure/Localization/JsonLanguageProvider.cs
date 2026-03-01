@@ -97,7 +97,7 @@ public sealed class JsonLanguageProvider : ICommandLanguageProvider
     public IReadOnlyDictionary<string, Direction> GetDirectionAliases()
     {
         Dictionary<string, Direction> result = new(StringComparer.OrdinalIgnoreCase);
-        if (_data.Directions == null)
+        if (_data.Directions  is null)
         {
             return result;
         }

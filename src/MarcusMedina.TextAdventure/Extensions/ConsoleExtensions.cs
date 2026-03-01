@@ -29,7 +29,7 @@ public static class ConsoleExtensions
     /// <summary>Prints each character with a delay for a typewriter effect.</summary>
     public static void TypewriterPrint(this string text, int delayMs = 50)
     {
-        if (text == null)
+        if (text  is null)
         {
             Console.WriteLine();
             return;

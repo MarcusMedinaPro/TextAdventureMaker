@@ -95,7 +95,7 @@ public sealed class RandomEventPool : IRandomEventPool
         public int LastTriggeredTick { get; private set; } = int.MinValue;
         public int Weight { get; } = weight;
 
-        public bool CanTrigger(IGameState state, int now) => (CooldownTicks <= 0 || (long)now - LastTriggeredTick >= CooldownTicks) && (Condition == null || Condition(state));
+        public bool CanTrigger(IGameState state, int now) => (CooldownTicks <= 0 || (long)now - LastTriggeredTick >= CooldownTicks) && (Condition  is null || Condition(state));
 
         public void Trigger(IGameState state, int now)
         {

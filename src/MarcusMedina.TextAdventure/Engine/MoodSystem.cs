@@ -62,7 +62,7 @@ public sealed class MoodSystem : IMoodSystem
 
     public void Propagate(ILocation start, int depth = 1)
     {
-        if (start == null || depth <= 0)
+        if (start  is null || depth <= 0)
         {
             return;
         }

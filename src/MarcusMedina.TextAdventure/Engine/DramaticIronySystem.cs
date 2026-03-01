@@ -23,7 +23,7 @@ public sealed class DramaticIronySystem : IDramaticIronySystem
 
     public void NpcLearn(INpc npc, string secretId)
     {
-        if (npc == null || string.IsNullOrWhiteSpace(secretId))
+        if (npc  is null || string.IsNullOrWhiteSpace(secretId))
         {
             return;
         }
@@ -75,7 +75,7 @@ public sealed class DramaticIronySystem : IDramaticIronySystem
 
     public IReadOnlyCollection<string> GetGaps(INpc npc)
     {
-        if (npc == null)
+        if (npc  is null)
         {
             return Array.Empty<string>();
         }
@@ -96,7 +96,7 @@ public sealed class DramaticIronySystem : IDramaticIronySystem
 
     public bool ExistsForNpc(INpc npc)
     {
-        return npc != null && GetGaps(npc).Count > 0;
+        return npc  is not null && GetGaps(npc).Count > 0;
     }
 
     private bool HasGap(string secretId)

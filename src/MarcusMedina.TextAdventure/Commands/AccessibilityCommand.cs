@@ -17,7 +17,7 @@ public class AccessibilityCommand(string? option = null) : ICommand
     public CommandResult Execute(CommandContext context)
     {
         IAccessibilitySystem? accessibility = context.State.Accessibility;
-        if (accessibility == null)
+        if (accessibility  is null)
             return CommandResult.Fail("Accessibility system is not enabled.", Enums.GameError.None);
 
         if (string.IsNullOrWhiteSpace(option))
@@ -57,7 +57,7 @@ public class AccessibilityCommand(string? option = null) : ICommand
             _ => null
         };
 
-        if (verbosity == null)
+        if (verbosity  is null)
             return CommandResult.Fail($"Unknown verbosity level '{level}'. Use: brief, normal, or verbose.", Enums.GameError.None);
 
         _ = accessibility.SetVerbosity(verbosity.Value);
@@ -76,7 +76,7 @@ public class AccessibilityCommand(string? option = null) : ICommand
             _ => null
         };
 
-        if (verbosity == null)
+        if (verbosity  is null)
             return CommandResult.Fail($"Unknown verbosity level '{level}'.", Enums.GameError.None);
 
         _ = accessibility.SetVerbosity(verbosity.Value);
@@ -101,7 +101,7 @@ public class AccessibilityCommand(string? option = null) : ICommand
             _ => null
         };
 
-        if (enabled == null)
+        if (enabled  is null)
             return CommandResult.Fail($"Use: screenreader on/off", Enums.GameError.None);
 
         _ = accessibility.EnableScreenReader(enabled.Value);
@@ -124,7 +124,7 @@ public class AccessibilityCommand(string? option = null) : ICommand
             _ => null
         };
 
-        if (contrast == null)
+        if (contrast  is null)
             return CommandResult.Fail($"Unknown contrast level '{level}'. Use: normal, high, or highest.", Enums.GameError.None);
 
         _ = accessibility.SetContrast(contrast.Value);

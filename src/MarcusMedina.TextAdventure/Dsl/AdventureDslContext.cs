@@ -139,7 +139,7 @@ public sealed class AdventureDslContext
 
     public void RequireCurrentLocation()
     {
-        if (CurrentLocation == null)
+        if (CurrentLocation  is null)
         {
             throw new InvalidOperationException("No current location set for DSL entries.");
         }

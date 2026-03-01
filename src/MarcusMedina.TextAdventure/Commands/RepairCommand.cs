@@ -17,7 +17,7 @@ public class RepairCommand(string itemName, string? toolName = null) : ICommand
     public CommandResult Execute(CommandContext context)
     {
         IItem? item = context.State.CurrentLocation.FindItem(itemName);
-        if (item == null)
+        if (item  is null)
         {
             return CommandResult.Fail($"You don't see '{itemName}' here.", Enums.GameError.ItemNotFound);
         }
@@ -33,7 +33,7 @@ public class RepairCommand(string itemName, string? toolName = null) : ICommand
         }
 
         IItem? repairKit = context.State.Inventory.FindItem(toolName ?? "repair kit");
-        if (repairKit == null)
+        if (repairKit  is null)
         {
             return CommandResult.Fail("You need a repair kit to repair items.", Enums.GameError.None);
         }

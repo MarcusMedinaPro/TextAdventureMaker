@@ -13,7 +13,7 @@ public sealed class ChapterProgressRenderer
 {
     public string Render(IChapter chapter)
     {
-        if (chapter == null)
+        if (chapter  is null)
         {
             return "No chapter active.";
         }

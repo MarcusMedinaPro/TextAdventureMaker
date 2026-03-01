@@ -85,7 +85,7 @@ public sealed class ForeshadowingSystem : IForeshadowingSystem
         Seed seed = GetOrCreate(tag);
         seed.PaidOff = true;
 
-        if (!seed.Hinted && missedHintCallback != null && state != null)
+        if (!seed.Hinted && missedHintCallback  is not null && state  is not null)
         {
             missedHintCallback(state);
         }

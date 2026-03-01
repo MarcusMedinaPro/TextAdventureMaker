@@ -27,23 +27,23 @@ public class TakeCommand : ICommand
         ILocation location = context.State.CurrentLocation;
         IItem? item = location.FindItem(ItemName);
         string? suggestion = null;
-        if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
+        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
         {
             IItem? best = FuzzyMatcher.FindBestItem(location.Items, ItemName, context.State.FuzzyMaxDistance);
-            if (best != null)
+            if (best  is not null)
             {
                 item = best;
                 suggestion = best.Name;
             }
         }
 
-        if (item == null)
+        if (item  is null)
             return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
 
         if (!item.Takeable)
         {
             string? reaction = item.GetReaction(ItemAction.TakeFailed);
-            return reaction != null
+            return reaction  is not null
                 ? CommandResult.Fail(Language.CannotTakeItem, GameError.ItemNotTakeable, reaction)
                 : CommandResult.Fail(Language.CannotTakeItem, GameError.ItemNotTakeable);
         }
@@ -54,7 +54,7 @@ public class TakeCommand : ICommand
         if (Amount.HasValue && item.IsStackable && item.Amount.HasValue && Amount.Value < item.Amount.Value)
         {
             IItem? split = item.Clone();
-            if (split == null)
+            if (split  is null)
                 return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
 
             split.SetAmount(Amount.Value);
@@ -69,11 +69,11 @@ public class TakeCommand : ICommand
 
             string splitDisplay = $"{Amount.Value} {item.Name}";
             string? onTake = item.GetReaction(ItemAction.Take);
-            CommandResult splitResult = onTake != null
+            CommandResult splitResult = onTake  is not null
                 ? CommandResult.Ok(Language.TakeItem(splitDisplay), onTake)
                 : CommandResult.Ok(Language.TakeItem(splitDisplay));
 
-            return suggestion != null ? splitResult.WithSuggestion(suggestion) : splitResult;
+            return suggestion  is not null ? splitResult.WithSuggestion(suggestion) : splitResult;
         }
 
         // Full take (normal or full stack)
@@ -88,10 +88,10 @@ public class TakeCommand : ICommand
 
         string displayName = Language.EntityName(item);
         string? fullOnTake = item.GetReaction(ItemAction.Take);
-        CommandResult result = fullOnTake != null
+        CommandResult result = fullOnTake  is not null
             ? CommandResult.Ok(Language.TakeItem(displayName), fullOnTake)
             : CommandResult.Ok(Language.TakeItem(displayName));
 
-        return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
     }
 }

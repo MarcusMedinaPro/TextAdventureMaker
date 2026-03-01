@@ -9,8 +9,10 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class DebugGodModeCommand(GameState state, string[] tokens) : ICommand
+public class DebugGodModeCommand(GameState state) : ICommand
 {
+    public DebugGodModeCommand(GameState state, string[] tokens) : this(state) { }
+
     public string Name => "godmode";
     public string[]? Aliases => null;
     public string Description => "Toggle god mode (debug only)";

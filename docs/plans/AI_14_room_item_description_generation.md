@@ -18,3 +18,15 @@
 - Generated descriptions are cached and stable.
 - Changed room state yields updated description.
 - Output violating consistency rules is rejected/fallbacked.
+
+## Implementation Checklist (engine/AI)
+
+- [x] `IRoomDescriptionAiService`
+- [x] `IItemDescriptionAiService`
+- [x] Prompt schemas with baseline + delta input
+- [x] Session cache integration for stable descriptions
+- [x] Fallback behaviour for invalid or unavailable AI output
+
+## Validation Notes (2026-03-01)
+
+- Room/item description services are implemented with cache integration and deterministic fallback paths.

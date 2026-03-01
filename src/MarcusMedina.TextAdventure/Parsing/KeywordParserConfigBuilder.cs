@@ -37,6 +37,8 @@ public sealed class KeywordParserConfigBuilder
     private ISet<string> _save;
     private ISet<string> _load;
     private ISet<string> _quest;
+    private ISet<string> _eat;
+    private ISet<string> _drink;
     private ISet<string> _hint;
     private ISet<string> _again;
     private ISet<string> _pronouns;
@@ -78,6 +80,8 @@ public sealed class KeywordParserConfigBuilder
         _save = CommandHelper.NewCommands("save");
         _load = CommandHelper.NewCommands("load");
         _quest = CommandHelper.NewCommands("quests", "quest", "journal");
+        _eat = CommandHelper.NewCommands("eat", "consume", "munch", "devour");
+        _drink = CommandHelper.NewCommands("drink", "sip", "gulp", "quaff");
         _hint = CommandHelper.NewCommands("hint", "path");
         _again = CommandHelper.NewCommands("again", "repeat");
         _pronouns = CommandHelper.NewCommands("it", "them");
@@ -282,6 +286,20 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
+    /// <summary>Set keywords for eating items.</summary>
+    public KeywordParserConfigBuilder WithEat(params string[] commands)
+    {
+        _eat = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for drinking items.</summary>
+    public KeywordParserConfigBuilder WithDrink(params string[] commands)
+    {
+        _drink = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
     /// <summary>Set keywords for hint/path.</summary>
     public KeywordParserConfigBuilder WithHint(params string[] commands)
     {
@@ -368,6 +386,8 @@ public sealed class KeywordParserConfigBuilder
         OverrideIfPresent(provider, "save", WithSave);
         OverrideIfPresent(provider, "load", WithLoad);
         OverrideIfPresent(provider, "quest", WithQuest);
+        OverrideIfPresent(provider, "eat", WithEat);
+        OverrideIfPresent(provider, "drink", WithDrink);
         OverrideIfPresent(provider, "hint", WithHint);
         OverrideIfPresent(provider, "all", WithAll);
 
@@ -499,6 +519,8 @@ public sealed class KeywordParserConfigBuilder
             save: _save,
             load: _load,
             quest: _quest,
+            eat: _eat,
+            drink: _drink,
             hint: _hint,
             again: _again,
             pronouns: _pronouns,

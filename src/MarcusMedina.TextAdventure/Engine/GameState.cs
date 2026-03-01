@@ -42,6 +42,8 @@ public class GameState : IGameState
     public IQuestLog Quests { get; }
     public StoryState Story { get; }
     private readonly NpcTriggerSystem _npcTriggers = new();
+    private readonly List<PoisonEffect> _activePoisons = [];
+    public IReadOnlyList<PoisonEffect> ActivePoisons => _activePoisons;
     public MementoCaretaker History { get; }
     public IWeatherSystem? Weather { get; private set; }
     public IAccessibilitySystem? Accessibility { get; private set; }
@@ -175,6 +177,32 @@ public class GameState : IGameState
     public void TickNpcTriggers()
     {
         _npcTriggers.Tick(this);
+    }
+
+    public void AddPoison(PoisonEffect poison)
+    {
+        ArgumentNullException.ThrowIfNull(poison);
+        _activePoisons.Add(poison);
+    }
+
+    public List<(string SourceName, int Damage)> TickPoisons()
+    {
+        List<(string, int)> results = [];
+        for (int i = _activePoisons.Count - 1; i >= 0; i--)
+        {
+            PoisonEffect poison = _activePoisons[i];
+            int damage = poison.Tick();
+            if (damage > 0)
+            {
+                Stats.Damage(damage);
+                results.Add((poison.SourceName, damage));
+            }
+
+            if (poison.IsExpired)
+                _activePoisons.RemoveAt(i);
+        }
+
+        return results;
     }
 
     public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)

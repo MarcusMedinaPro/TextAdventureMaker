@@ -38,6 +38,7 @@ public interface IGameState
     /// <summary>Quest log for tracking active and completed quests.</summary>
     IQuestLog Quests { get; }
     StoryState Story { get; }
+    IReadOnlyList<PoisonEffect> ActivePoisons { get; }
     IWeatherSystem? Weather { get; }
     IAccessibilitySystem? Accessibility { get; }
     IMoodSystem? MoodSystem { get; }

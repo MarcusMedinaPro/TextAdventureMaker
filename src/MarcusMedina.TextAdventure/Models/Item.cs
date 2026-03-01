@@ -23,8 +23,11 @@ public class Item(string id, string name, string description = "") : IItem
     private bool _isStackable;
     private string? _presenceDescription;
     private bool _isFood;
+    private bool _isDrinkable;
     private bool _isPoisoned;
     private int _healAmount;
+    private int _poisonDamagePerTurn;
+    private int _poisonDurationTurns;
     private int? _durability;
     private int? _maxDurability;
 
@@ -44,8 +47,11 @@ public class Item(string id, string name, string description = "") : IItem
     public bool IsStackable => _isStackable;
     public string? PresenceDescription => _presenceDescription;
     public bool IsFood => _isFood;
+    public bool IsDrinkable => _isDrinkable;
     public bool IsPoisoned => _isPoisoned;
     public int HealAmount => _healAmount;
+    public int PoisonDamagePerTurn => _poisonDamagePerTurn;
+    public int PoisonDurationTurns => _poisonDurationTurns;
     public IDictionary<string, string> Properties => _properties;
     public string GetDescription() => _description;
 
@@ -127,6 +133,12 @@ public class Item(string id, string name, string description = "") : IItem
         return this;
     }
 
+    public Item SetDrinkable(bool isDrinkable = true)
+    {
+        _isDrinkable = isDrinkable;
+        return this;
+    }
+
     public Item SetPoisoned(bool isPoisoned = true)
     {
         _isPoisoned = isPoisoned;
@@ -136,6 +148,13 @@ public class Item(string id, string name, string description = "") : IItem
     public Item SetHealAmount(int amount)
     {
         _healAmount = Math.Max(0, amount);
+        return this;
+    }
+
+    public Item SetPoisonDamage(int damagePerTurn, int turns)
+    {
+        _poisonDamagePerTurn = Math.Max(0, damagePerTurn);
+        _poisonDurationTurns = Math.Max(0, turns);
         return this;
     }
 
@@ -161,8 +180,10 @@ public class Item(string id, string name, string description = "") : IItem
     IItem IItem.SetStackable(bool isStackable) => SetStackable(isStackable);
     IItem IItem.SetPresenceDescription(string text) => SetPresenceDescription(text);
     IItem IItem.SetFood(bool isFood) => SetFood(isFood);
+    IItem IItem.SetDrinkable(bool isDrinkable) => SetDrinkable(isDrinkable);
     IItem IItem.SetPoisoned(bool isPoisoned) => SetPoisoned(isPoisoned);
     IItem IItem.SetHealAmount(int amount) => SetHealAmount(amount);
+    IItem IItem.SetPoisonDamage(int damagePerTurn, int turns) => SetPoisonDamage(damagePerTurn, turns);
     IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
 
     public bool Matches(string name)
@@ -290,6 +311,11 @@ public class Item(string id, string name, string description = "") : IItem
             _ = copy.SetFood();
         }
 
+        if (_isDrinkable)
+        {
+            _ = copy.SetDrinkable();
+        }
+
         if (_isPoisoned)
         {
             _ = copy.SetPoisoned();
@@ -298,6 +324,11 @@ public class Item(string id, string name, string description = "") : IItem
         if (_healAmount > 0)
         {
             _ = copy.SetHealAmount(_healAmount);
+        }
+
+        if (_poisonDamagePerTurn > 0 || _poisonDurationTurns > 0)
+        {
+            _ = copy.SetPoisonDamage(_poisonDamagePerTurn, _poisonDurationTurns);
         }
 
         if (_durability.HasValue && _maxDurability.HasValue)

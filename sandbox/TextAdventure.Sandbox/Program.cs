@@ -9,33 +9,84 @@ using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-// Slice 45 — Aliases + Pronouns + Custom Commands
+// Slice 46 — Consumable Items: Eat, Drink & Healing
 // Tests:
-// - Phrase aliases ("sit down" -> "sit")
-// - Pronoun carry-over ("take jeans" then "wear them")
-// - "again" repeats last command
-// - Custom commands ("shoot ant", "pull rubber chicken")
+// - Eat food to heal
+// - Drink beverages to heal
+// - Poisoned items apply damage over turns
+// - Amount decreases on consume; removed at 0
+// - Stacked consumables work with Slice 47
 
-Location room = (id: "room", description: "A small room with a coat rack and a rubber chicken.");
-room.AddItem(new Item("jeans", "jeans", "A pair of worn jeans."));
-room.AddItem(new Item("chicken", "rubber chicken", "A rubber chicken with a pulley in the middle."));
+Location kitchen = (id: "kitchen", description: "A warm kitchen. The smell of freshly baked bread fills the air.");
+Location cellar = (id: "cellar", description: "A dark cellar lined with dusty wine racks.");
 
-var state = new GameState(room, worldLocations: new[] { room });
+kitchen.AddExit(Direction.Down, cellar);
+cellar.AddExit(Direction.Up, kitchen);
 
-var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
-    .WithPhraseAlias("sit down", "sit")
-    .WithPronouns("it", "them")
-    .WithAgain("again", "g")
-    .WithCustomCommand("shoot ant", _ => new CustomCommand("You shoot the ant. It had it coming."))
-    .WithCustomCommand("pull rubber chicken", _ => new CustomCommand("You pull the chicken. A soft squeak answers."))
-    .Build());
+// Food items
+var bread = new Item("bread", "Bread", "A crusty loaf of bread.")
+    .AsFood(5)
+    .SetAmount(3)
+    .SetStackable()
+    .SetWeight(0.3f)
+    .SetTakeable(true);
 
-SetupC64("Custom Commands - Text Adventure Sandbox");
-WriteLineC64("=== CUSTOM COMMANDS (Slice 45) ===");
-WriteLineC64("Try: take jeans, wear them, again, sit down, shoot ant, pull rubber chicken.");
+var apple = new Item("apple", "Apple", "A crisp red apple.")
+    .AsFood(3)
+    .SetTakeable(true);
+
+// Drinkable items
+var ale = new Item("ale", "Ale", "A frothy pint of ale.")
+    .AsDrink(2)
+    .SetTakeable(true);
+
+var poisonedWine = new Item("wine", "Wine", "A suspiciously dark vintage.")
+    .SetDrinkable()
+    .SetPoisoned()
+    .SetPoisonDamage(3, 4)
+    .SetTakeable(true);
+
+// Non-consumable for contrast
+var knife = new Item("knife", "Kitchen Knife", "A sharp kitchen knife.")
+    .SetWeight(0.5f)
+    .SetTakeable(true);
+
+kitchen.AddItem(bread);
+kitchen.AddItem(apple);
+kitchen.AddItem(ale);
+kitchen.AddItem(knife);
+cellar.AddItem(poisonedWine);
+
+var state = new GameState(kitchen, worldLocations: [kitchen, cellar]);
+
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
+
+SetupC64("Consumable Items - Text Adventure Sandbox");
+WriteLineC64("=== CONSUMABLE ITEMS (Slice 46) ===");
+WriteLineC64("The kitchen has bread (x3), an apple, ale, and a knife.");
+WriteLineC64("The cellar (down) has a suspicious bottle of wine.");
+WriteLineC64();
+WriteLineC64("Try: take bread, eat bread, take ale, drink ale");
+WriteLineC64("     go down, take wine, drink wine (poison!)");
+WriteLineC64("     stats, eat knife (can't eat that), quit");
+
+state.ShowRoom();
 
 while (true)
 {
+    // Tick poisons at the start of each turn
+    var poisonResults = state.TickPoisons();
+    foreach (var (sourceName, damage) in poisonResults)
+    {
+        WriteLineC64(MarcusMedina.TextAdventure.Localization.Language.PoisonTick(sourceName, damage));
+    }
+
+    if (state.Stats.Health <= 0)
+    {
+        WriteLineC64("You collapse from the poison. Game over.");
+        break;
+    }
+
     WriteLineC64();
     WritePromptC64("> ");
     var input = Console.ReadLine();
@@ -47,29 +98,10 @@ while (true)
         continue;
 
     var command = parser.Parse(trimmed);
-    if (command is CustomCommand custom)
-    {
-        WriteLineC64(custom.Message);
-        continue;
-    }
-
     var result = state.Execute(command);
-    if (!string.IsNullOrWhiteSpace(result.Message))
-        WriteLineC64(result.Message);
 
-    foreach (var reaction in result.ReactionsList.Where(r => !string.IsNullOrWhiteSpace(r)))
-        WriteLineC64($"> {reaction}");
+    state.DisplayResult(command, result);
 
     if (result.ShouldQuit)
         break;
-}
-
-sealed class CustomCommand(string message) : ICommand
-{
-    public string Message { get; } = message;
-
-    public CommandResult Execute(CommandContext context)
-    {
-        return CommandResult.Ok(Message);
-    }
 }

@@ -17,8 +17,11 @@ public interface IItem : IGameEntity
     bool IsStackable { get; }
     string? PresenceDescription { get; }
     bool IsFood { get; }
+    bool IsDrinkable { get; }
     bool IsPoisoned { get; }
     int HealAmount { get; }
+    int PoisonDamagePerTurn { get; }
+    int PoisonDurationTurns { get; }
     bool Takeable { get; }
     float Weight { get; }
     IReadOnlyList<string> Aliases { get; }
@@ -46,8 +49,10 @@ public interface IItem : IGameEntity
     IItem SetStackable(bool isStackable = true);
     IItem SetPresenceDescription(string text);
     IItem SetFood(bool isFood = true);
+    IItem SetDrinkable(bool isDrinkable = true);
     IItem SetPoisoned(bool isPoisoned = true);
     IItem SetHealAmount(int amount);
+    IItem SetPoisonDamage(int damagePerTurn, int turns);
     IItem AddAliases(params string[] aliases);
     string? GetReaction(ItemAction action);
     IItem SetReaction(ItemAction action, string text);

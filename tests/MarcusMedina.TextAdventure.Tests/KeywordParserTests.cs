@@ -306,14 +306,22 @@ public class KeywordParserTests
         _ = Assert.IsType<QuestCommand>(command);
     }
 
-    [Theory]
-    [InlineData("eat ice")]
-    [InlineData("bite ice")]
-    public void Parse_EatOrBite_ReturnsUseCommand(string input)
+    [Fact]
+    public void Parse_Eat_ReturnsEatCommand()
     {
         KeywordParser parser = new(CreateEnglishConfig());
 
-        ICommand command = parser.Parse(input);
+        ICommand command = parser.Parse("eat ice");
+
+        _ = Assert.IsType<EatCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_Bite_ReturnsUseCommand()
+    {
+        KeywordParser parser = new(CreateEnglishConfig());
+
+        ICommand command = parser.Parse("bite ice");
 
         _ = Assert.IsType<UseCommand>(command);
     }

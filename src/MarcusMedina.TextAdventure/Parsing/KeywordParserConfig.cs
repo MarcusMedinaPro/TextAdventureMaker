@@ -37,6 +37,8 @@ public sealed class KeywordParserConfig
         save: CommandHelper.NewCommands("save"),
         load: CommandHelper.NewCommands("load"),
         quest: CommandHelper.NewCommands("quests", "quest", "journal"),
+        eat: CommandHelper.NewCommands("eat", "consume", "munch", "devour"),
+        drink: CommandHelper.NewCommands("drink", "sip", "gulp", "quaff"),
         hint: CommandHelper.NewCommands("hint", "path"),
         again: CommandHelper.NewCommands("again", "repeat"),
         pronouns: CommandHelper.NewCommands("it", "them"),
@@ -111,6 +113,10 @@ public sealed class KeywordParserConfig
     public ISet<string> Load { get; }
     /// <summary>Keywords used to show quest log.</summary>
     public ISet<string> Quest { get; }
+    /// <summary>Keywords used to eat items.</summary>
+    public ISet<string> Eat { get; }
+    /// <summary>Keywords used to drink items.</summary>
+    public ISet<string> Drink { get; }
     /// <summary>Keywords used to request a path hint.</summary>
     public ISet<string> Hint { get; }
     /// <summary>Keywords used to repeat the previous command.</summary>
@@ -167,6 +173,8 @@ public sealed class KeywordParserConfig
         ISet<string> save,
         ISet<string> load,
         ISet<string> quest,
+        ISet<string> eat,
+        ISet<string> drink,
         ISet<string> hint,
         ISet<string> again,
         ISet<string> pronouns,
@@ -206,6 +214,8 @@ public sealed class KeywordParserConfig
         Save = save ?? throw new ArgumentNullException(nameof(save));
         Load = load ?? throw new ArgumentNullException(nameof(load));
         Quest = quest ?? throw new ArgumentNullException(nameof(quest));
+        Eat = eat ?? CommandHelper.NewCommands("eat", "consume", "munch", "devour");
+        Drink = drink ?? CommandHelper.NewCommands("drink", "sip", "gulp", "quaff");
         Hint = hint ?? throw new ArgumentNullException(nameof(hint));
         Again = again ?? throw new ArgumentNullException(nameof(again));
         Pronouns = pronouns ?? throw new ArgumentNullException(nameof(pronouns));
@@ -279,6 +289,8 @@ public sealed class KeywordParserConfig
             save,
             load,
             quest,
+            null!,
+            null!,
             hint,
             CommandHelper.NewCommands("again", "repeat"),
             CommandHelper.NewCommands("it", "them"),

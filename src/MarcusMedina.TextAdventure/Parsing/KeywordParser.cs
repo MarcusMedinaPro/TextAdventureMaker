@@ -113,24 +113,34 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (_config.Take.Contains(keyword))
         {
             if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
-            {
                 return new TakeAllCommand();
-            }
 
-            string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
-            return GuardPronoun(command);
+            (int? takeAmount, string? takeName) = ParseAmountAndItem(tokens, 1);
+            ICommand takeCmd = takeName != null ? new TakeCommand(takeName, takeAmount) : new UnknownCommand();
+            return GuardPronoun(takeCmd);
         }
 
         if (_config.Drop.Contains(keyword))
         {
             if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
-            {
                 return new DropAllCommand();
-            }
 
+            (int? dropAmount, string? dropName) = ParseAmountAndItem(tokens, 1);
+            ICommand dropCmd = dropName != null ? new DropCommand(dropName, dropAmount) : new UnknownCommand();
+            return GuardPronoun(dropCmd);
+        }
+
+        if (_config.Eat.Contains(keyword))
+        {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new DropCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new EatCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
+        }
+
+        if (_config.Drink.Contains(keyword))
+        {
+            string? itemName = ParseItemName(tokens, 1);
+            ICommand command = itemName != null ? new DrinkCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
@@ -330,24 +340,34 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (_config.Take.Contains(keyword))
         {
             if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
-            {
                 return new TakeAllCommand();
-            }
 
-            string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
-            return GuardPronoun(command);
+            (int? takeAmount, string? takeName) = ParseAmountAndItem(tokens, 1);
+            ICommand takeCmd = takeName != null ? new TakeCommand(takeName, takeAmount) : new UnknownCommand();
+            return GuardPronoun(takeCmd);
         }
 
         if (_config.Drop.Contains(keyword))
         {
             if (tokens.Length >= 2 && _config.All.Contains(tokens[1]))
-            {
                 return new DropAllCommand();
-            }
 
+            (int? dropAmount, string? dropName) = ParseAmountAndItem(tokens, 1);
+            ICommand dropCmd = dropName != null ? new DropCommand(dropName, dropAmount) : new UnknownCommand();
+            return GuardPronoun(dropCmd);
+        }
+
+        if (_config.Eat.Contains(keyword))
+        {
             string? itemName = ParseItemName(tokens, 1);
-            ICommand command = itemName != null ? new DropCommand(itemName) : new UnknownCommand();
+            ICommand command = itemName != null ? new EatCommand(itemName) : new UnknownCommand();
+            return GuardPronoun(command);
+        }
+
+        if (_config.Drink.Contains(keyword))
+        {
+            string? itemName = ParseItemName(tokens, 1);
+            ICommand command = itemName != null ? new DrinkCommand(itemName) : new UnknownCommand();
             return GuardPronoun(command);
         }
 
@@ -469,6 +489,8 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .Concat(_config.Save)
             .Concat(_config.Load)
             .Concat(_config.Quest)
+            .Concat(_config.Eat)
+            .Concat(_config.Drink)
             .Concat(_config.Hint)
             .Distinct(StringComparer.OrdinalIgnoreCase);
     }
@@ -507,6 +529,21 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         }
 
         return target;
+    }
+
+    private (int? Amount, string? ItemName) ParseAmountAndItem(string[] tokens, int startIndex)
+    {
+        if (tokens.Length <= startIndex)
+            return (null, null);
+
+        // Check if first token after command is a number: "take 3 arrows"
+        if (int.TryParse(tokens[startIndex], out int amount) && amount > 0)
+        {
+            string? itemName = ParseItemName(tokens, startIndex + 1);
+            return itemName != null ? (amount, itemName) : (null, null);
+        }
+
+        return (null, ParseItemName(tokens, startIndex));
     }
 
     private string ApplyPhraseAliases(string input)

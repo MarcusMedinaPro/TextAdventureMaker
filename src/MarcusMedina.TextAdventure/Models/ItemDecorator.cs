@@ -24,8 +24,11 @@ public abstract class ItemDecorator : IItem
     public virtual bool IsStackable => Inner.IsStackable;
     public virtual string? PresenceDescription => Inner.PresenceDescription;
     public virtual bool IsFood => Inner.IsFood;
+    public virtual bool IsDrinkable => Inner.IsDrinkable;
     public virtual bool IsPoisoned => Inner.IsPoisoned;
     public virtual int HealAmount => Inner.HealAmount;
+    public virtual int PoisonDamagePerTurn => Inner.PoisonDamagePerTurn;
+    public virtual int PoisonDurationTurns => Inner.PoisonDurationTurns;
     public virtual IDictionary<string, string> Properties => Inner.Properties;
     public virtual bool Takeable => Inner.Takeable;
     public virtual float Weight => Inner.Weight;
@@ -143,6 +146,11 @@ public abstract class ItemDecorator : IItem
         return Inner.SetFood(isFood);
     }
 
+    public virtual IItem SetDrinkable(bool isDrinkable = true)
+    {
+        return Inner.SetDrinkable(isDrinkable);
+    }
+
     public virtual IItem SetPoisoned(bool isPoisoned = true)
     {
         return Inner.SetPoisoned(isPoisoned);
@@ -151,6 +159,11 @@ public abstract class ItemDecorator : IItem
     public virtual IItem SetHealAmount(int amount)
     {
         return Inner.SetHealAmount(amount);
+    }
+
+    public virtual IItem SetPoisonDamage(int damagePerTurn, int turns)
+    {
+        return Inner.SetPoisonDamage(damagePerTurn, turns);
     }
 
     public virtual bool CanRead(IGameState state)

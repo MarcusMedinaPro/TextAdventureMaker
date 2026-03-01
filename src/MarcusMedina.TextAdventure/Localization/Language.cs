@@ -327,6 +327,22 @@ public static class Language
 
     public static string RoomLabel => Provider.Get("RoomLabel");
     public static string RoomDescriptionLabel => Provider.Get("RoomDescriptionLabel");
+    public static string CannotEatThat => Provider.Get("CannotEatThat");
+    public static string CannotDrinkThat => Provider.Get("CannotDrinkThat");
+
+    public static string EatItem(string itemName) =>
+        Provider.Format("EatItemTemplate", itemName);
+
+    public static string DrinkItem(string itemName) =>
+        Provider.Format("DrinkItemTemplate", itemName);
+
+    public static string HealedAmount(int amount) =>
+        Provider.Format("HealedAmountTemplate", amount);
+
+    public static string PoisonedMessage => Provider.Get("PoisonedMessage");
+
+    public static string PoisonTick(string sourceName, int damage) =>
+        Provider.Format("PoisonTickTemplate", sourceName, damage);
 
     private sealed class DefaultLanguageProvider : ILanguageProvider
     {
@@ -428,7 +444,14 @@ public static class Language
             ["LanguageHint"] = "Type 'language <code>' to switch languages.",
             ["LanguageLoadedTemplate"] = "Loaded {0} ({1}) language file.",
             ["RoomLabel"] = "Room:",
-            ["RoomDescriptionLabel"] = "Description:"
+            ["RoomDescriptionLabel"] = "Description:",
+            ["CannotEatThat"] = "You can't eat that.",
+            ["CannotDrinkThat"] = "You can't drink that.",
+            ["EatItemTemplate"] = "You eat the {0}.",
+            ["DrinkItemTemplate"] = "You drink the {0}.",
+            ["HealedAmountTemplate"] = "You feel better. (+{0} health)",
+            ["PoisonedMessage"] = "Something tastes wrong...",
+            ["PoisonTickTemplate"] = "The poison from the {0} courses through you. (-{1} health)"
         };
 
         public string Get(string key)

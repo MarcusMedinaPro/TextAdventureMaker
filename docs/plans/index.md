@@ -55,3 +55,29 @@
 | 045 | Generic Fixes | Ersätt hårdkodade input-checkar (t.ex. `IsSitInput`) med en generisk, fluent alias‑lösning. | `slice045.md` |
 | 046 | Consumable Items — Eat, Drink & Healing | EatCommand, DrinkCommand, healing on consume, poison-over-time. | `slice046.md` |
 | 047 | Stackable Items & Inventory Grouping | Stack merging, partial take/drop, grouped inventory display. | `slice047.md` |
+
+## DSL v2 Upgrade Track (72+)
+
+| Slice | Title | Goal | File |
+| --- | --- | --- | --- |
+| 073 | DSL v2 Entities, Rich Items & Start State | Entity definitions, richer item schema, and start-state bootstrap in DSL. | `slice073.md` |
+| 074 | Item Reactions, Consequences & Recipes | Declarative item behaviour, consequences, and combine recipes. | `slice074.md` |
+| 075 | Variable Interpolation & Safe Expressions | `{...}` templates, path resolvers, and safe expression parsing. | `slice075.md` |
+| 076 | Door/Exit Expansion & Dynamic Rooms | Door/exit rules, hidden discovery, dynamic room descriptions, transforms. | `slice076.md` |
+| 077 | NPC Base DSL + Acceptance Thresholds | NPC definitions, placement, and acceptance ladders. | `slice077.md` |
+| 078 | NPC Rules, Triggers & Dialogue Options | Rule-based dialogue and trigger behaviours via DSL. | `slice078.md` |
+| 079 | Quest DSL & Condition Graph | Quest/stage/objective definitions with all/any condition grammar. | `slice079.md` |
+| 080 | Event, Schedule & Random Automation DSL | World automation via triggers, schedules, and random events. | `slice080.md` |
+| 081 | Two-File DSL Architecture + Save Snapshots | World DSL + state/save DSL loading and export/import flow. | `slice081.md` |
+| 082 | DSL v2 Validator, DSLHelper CRUD & Migration | Validation tooling, CRUD workflows, and migration path to v2. | `slice082.md` |
+| 083 | Story Branches & Chapter DSL | Configure StoryBranch and ChapterSystem from DSL. | `slice083.md` |
+| 084 | Parser & Command Settings via DSL | Configure aliases and parser options directly in DSL. | `slice084.md` |
+| 085 | DSL v2 Exporter & Round-Trip Fidelity | Stable export/import semantics for world and state DSL files. | `slice085.md` |
+| 086 | Condition/Effect Runtime Engine Hardening | Compile and harden rule execution for performance and safety. | `slice086.md` |
+| 087 | Save Snapshot Completeness | Ensure DSL saves capture gameplay-critical runtime state. | `slice087.md` |
+| 088 | DSLHelper Advanced CRUD & Refactoring Workflows | Safe mass-editing and refactoring operations for DSL content. | `slice088.md` |
+| 089 | Migration Tooling v1 -> v2 | Automated migration with reports and compatibility checks. | `slice089.md` |
+| 090 | DSL v2 Quality Gates & Fixture Corpus | CI validation fixtures, diagnostics, and regression quality gates. | `slice090.md` |
+| 091 | Demo Adventure in Pure DSL v2 | End-to-end reference game authored in DSL v2. | `slice091.md` |
+| 092 | DSL v2 Release, Versioning & Deprecation | Release readiness, support matrix, and deprecation policy. | `slice092.md` |
+| 093 | Post-GA Governance & v2.x Backlog | Ongoing schema governance and roadmap after GA. | `slice093.md` |

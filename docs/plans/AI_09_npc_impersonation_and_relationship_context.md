@@ -19,3 +19,14 @@
 - Context includes relationship and location.
 - AI response is rejected when it breaks safety format.
 - Fallback returns deterministic non-AI dialogue.
+
+## Implementation Checklist (engine/AI)
+
+- [x] `NpcAiContext` with relationship and location context
+- [x] `INpcDialogueAiService`
+- [x] NPC dialogue prompt template
+- [x] Safety-gated fallback behaviour for unavailable/invalid AI output
+
+## Validation Notes (2026-03-01)
+
+- Dialogue context and deterministic fallback behaviour are implemented through `NpcDialogueAiService` and plugin command integration.

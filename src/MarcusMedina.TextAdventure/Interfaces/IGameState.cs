@@ -50,4 +50,6 @@ public interface IGameState
     int FuzzyMaxDistance { get; set; }
     IReadOnlyCollection<ILocation> Locations { get; }
     bool TestingModeEnabled { get; set; }
+    IPlayerHistory PlayerHistory { get; }
+    Wallet Wallet { get; }
 }

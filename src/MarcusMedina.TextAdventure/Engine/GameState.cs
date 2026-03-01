@@ -58,6 +58,7 @@ public class GameState : IGameState
     public bool TestingModeEnabled { get; set; }
     public bool DebugMode { get; set; }
     public IPlayerHistory PlayerHistory { get; }
+    public Wallet Wallet { get; }
 
     public GameState(
         ILocation startLocation,
@@ -111,6 +112,7 @@ public class GameState : IGameState
         Story = new StoryState();
         History = new MementoCaretaker();
         PlayerHistory = new PlayerHistory();
+        Wallet = new Wallet();
         Accessibility = new AccessibilitySystem();
         MoodSystem = new MoodSystem();
 

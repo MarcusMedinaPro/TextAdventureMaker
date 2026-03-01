@@ -57,6 +57,7 @@ public class GameState : IGameState
     public IReadOnlyCollection<ILocation> Locations => _locations.Values;
     public bool TestingModeEnabled { get; set; }
     public bool DebugMode { get; set; }
+    public IPlayerHistory PlayerHistory { get; }
 
     public GameState(
         ILocation startLocation,
@@ -109,6 +110,7 @@ public class GameState : IGameState
         Quests = new QuestLog();
         Story = new StoryState();
         History = new MementoCaretaker();
+        PlayerHistory = new PlayerHistory();
         Accessibility = new AccessibilitySystem();
         MoodSystem = new MoodSystem();
 

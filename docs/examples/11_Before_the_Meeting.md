@@ -8,59 +8,95 @@ _Slice tag: Slice 11 — Language Provider (file-based). Demo focuses on swappin
 3) Find your notes.
 4) Leave for the meeting.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Bedroom   │─────│  Hallway   │
+│  C, Co*    │     │   M*       │
+└────────────┘     └────────────┘
+
+C = Coffee
+Co* = Coat (hidden)
+M* = Mirror (hidden)
+```
+
 ## Example (swap language at runtime)
 ```csharp
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-var localizedDescriptions = new List<(Action<string> Apply, string Key)>();
+GameState state = BuildGameState();
+JsonLanguageProvider jsonProvider = LoadLanguage(Language.DefaultLanguageCode);
+Language.SetProvider(jsonProvider);
+KeywordParser parser = BuildParser(jsonProvider);
 
-var state = BuildGameState(localizedDescriptions);
+SetupC64("BEFORE THE MEETING (Slice 11)");
 
-var languagePath = Language.GetLanguageFilePath(Language.DefaultLanguageCode);
-Language.SetProvider(new FileLanguageProvider(languagePath));
-RefreshLocalization(localizedDescriptions);
+WriteLineC64("=== BEFORE THE MEETING (Slice 11) ===");
+WriteLineC64($"{Language.GoalLabel} {Language.GoalIntro}");
+WriteLineC64("Test: swap language at runtime and confirm room/item text updates.");
+WriteLineC64($"Language file: {Path.GetFileName(Language.GetLanguageFilePath(jsonProvider.Code))}");
+WriteLineC64(Language.LanguageHint);
+int hour = 8;
+int minutes = 30;
+string[] destroyPrefixes = ["destroy ", "smash ", "krossa ", "förstör ", "sla ", "slå "];
 
-var parser = new KeywordParser(KeywordParserConfig.Default);
-
-Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
-Console.WriteLine($"{Language.GoalLabel} {Language.GoalIntro}");
-Console.WriteLine($"Language file: {Path.GetFileName(languagePath)}");
-Console.WriteLine(Language.LanguageHint);
 ShowRoom();
-
 while (true)
 {
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim();
+    Tick_Tock();
+
+    WriteLineC64();
+    WritePromptC64("> ");
+    string? input = Console.ReadLine();
+    if (input is null)
+    {
+        break;
+    }
+
+    input = input.Trim();
     if (string.IsNullOrWhiteSpace(input))
     {
         continue;
     }
 
-    if (IsHelp(input))
+    if (input.IsHelpRequest())
     {
         ShowHelp();
         continue;
     }
 
-    if (TryHandleLanguageSwitch(input, localizedDescriptions))
+    if (TryHandleLocalActions(input))
     {
         continue;
     }
 
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
+    if (TryHandleLanguageSwitch(input))
+    {
+        continue;
+    }
+
+    ICommand command = parser.Parse(input);
+
+    if (command is LookCommand { Target: null or "" })
+    {
+        Tick_Tock_reverse();
+        ShowRoom();
+        continue;
+    }
+
+    CommandResult result = state.Execute(command);
 
     DisplayResult(result);
     if (ShouldShowRoom(command, result))
@@ -70,140 +106,301 @@ while (true)
 
     if (result.ShouldQuit)
     {
-        Console.WriteLine(Language.ThanksForPlaying);
+        WriteLineC64(Language.ThanksForPlaying);
         break;
     }
 }
 
-static GameState BuildGameState(List<(Action<string> Apply, string Key)> localizedDescriptions)
+void Tick_Tock()
 {
-    var bedroom = new Location("bedroom");
-    var hallway = new Location("hallway");
+    minutes += 1;
+    if (minutes < 60)
+        return;
 
-    localizedDescriptions.Add((text => bedroom.Description(text), "BedroomDescription"));
-    localizedDescriptions.Add((text => hallway.Description(text), "HallwayDescription"));
-
-    var coffee = new Item("coffee", "coffee");
-    localizedDescriptions.Add((text => coffee.Description(text), "CoffeeDescription"));
-
-    bedroom.AddItem(coffee);
-
-    bedroom.AddExit(Direction.East, hallway);
-    hallway.AddExit(Direction.West, bedroom);
-
-    return new GameState(bedroom, worldLocations: new[] { bedroom, hallway });
+    minutes = 0;
+    hour = (hour + 1) % 24;
 }
 
-static void DisplayResult(CommandResult result)
+void Tick_Tock_reverse()
 {
-    if (!string.IsNullOrWhiteSpace(result.Message))
+    minutes -= 1;
+    if (minutes >= 0)
+        return;
+
+    minutes = 59;
+    hour = (hour + 23) % 24;
+}
+
+static GameState BuildGameState()
+{
+    Location bedroom = new("bedroom");
+    Location hallway = new("hallway");
+
+    Item coffee = new("coffee", "coffee");
+    Item coat = new("coat", "coat", "An old coat. Best donated to a thrift shop.");
+    _ = coat
+        .HideFromItemList()
+        .SetTakeable(false)
+        .SetReaction(ItemAction.TakeFailed, "The coat is hopelessly out of fashion.");
+    Item mirror = new("mirror", "mirror", "You see yourself reflected.");
+    _ = mirror
+        .HideFromItemList()
+        .SetTakeable(false)
+        .SetReaction(ItemAction.TakeFailed, "It is far too large to carry.")
+        .SetReaction(ItemAction.Destroy, "A terrible idea. Seven years of bad luck await. Better not do it!");
+    bedroom.AddItem(coffee);
+    bedroom.AddItem(coat);
+    hallway.AddItem(mirror);
+
+    _ = bedroom.AddExit(Direction.East, hallway);
+    _ = hallway.AddExit(Direction.West, bedroom);
+
+    return new GameState(bedroom, worldLocations: [bedroom, hallway]);
+}
+
+JsonLanguageProvider LoadLanguage(string code)
+{
+    string langPath = Path.Combine(AppContext.BaseDirectory, "lang", $"gamelang.{code}.json");
+    JsonLanguageProvider provider = new(langPath);
+
+    foreach (Location loc in state.Locations.OfType<Location>())
     {
-        Console.WriteLine(result.Message);
+        ApplyDescription(loc, provider.GetDescription(loc.Id));
+        foreach (Item item in loc.Items.OfType<Item>())
+            ApplyTranslation(item, provider);
     }
 
-    foreach (var reaction in result.ReactionsList)
+    foreach (Item item in state.Inventory.Items.OfType<Item>())
     {
-        if (!string.IsNullOrWhiteSpace(reaction))
+        ApplyTranslation(item, provider);
+    }
+
+    ApplyReaction("coat", ItemAction.TakeFailed, provider.Get("coatTakeFailed"));
+    ApplyReaction("mirror", ItemAction.TakeFailed, provider.Get("mirrorTakeFailed"));
+    ApplyReaction("mirror", ItemAction.Destroy, provider.Get("mirrorDestroy"));
+
+    return provider;
+}
+
+static void ApplyDescription(Location location, string description)
+{
+    if (string.IsNullOrWhiteSpace(description))
+        return;
+
+    _ = location.Description(description);
+}
+
+static void ApplyTranslation(Item item, JsonLanguageProvider provider)
+{
+    string itemDesc = provider.GetDescription(item.Id);
+    if (!string.IsNullOrWhiteSpace(itemDesc))
+        _ = item.SetDescription(itemDesc);
+
+    string translatedName = provider.GetName(item.Id);
+    if (string.IsNullOrWhiteSpace(translatedName))
+        return;
+
+    if (translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+        return;
+
+    _ = item.AddAliases(translatedName);
+}
+
+void ApplyReaction(string itemId, ItemAction action, string reaction)
+{
+    if (string.IsNullOrWhiteSpace(reaction))
+    {
+        return;
+    }
+
+    Item? item = state.Locations
+        .SelectMany(location => location.Items)
+        .OfType<Item>()
+        .FirstOrDefault(candidate => candidate.Id.TextCompare(itemId));
+    if (item != null)
+    {
+        _ = item.SetReaction(action, reaction);
+    }
+}
+
+static KeywordParser BuildParser(JsonLanguageProvider provider)
+{
+    KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+        .WithLanguageProvider(provider)
+        .WithIgnoreItemTokens("up", "to", "at", "the", "a", "på", "till", "en", "ett")
+        .WithCombineSeparators("and", "+", "och", "med")
+        .WithPourPrepositions("into", "in", "i")
+        .WithDirectionAliases(provider.GetDirectionAliases())
+        .AllowDirectionEnumNames(true)
+        .Build();
+
+    return new KeywordParser(config);
+}
+
+void DisplayResult(CommandResult result)
+{
+    if (!string.IsNullOrWhiteSpace(result.Message))
+        WriteLineC64(TranslateDirectionsInMessage(result.Message));
+
+    foreach (string reaction in result.ReactionsList.Where(r => !string.IsNullOrWhiteSpace(r)))
+        WriteLineC64($"> {reaction}");
+}
+
+string TranslateDirectionsInMessage(string message)
+{
+    foreach (Direction dir in Enum.GetValues<Direction>())
+    {
+        string englishName = dir.ToString();
+        string translatedName = jsonProvider.GetDirectionName(dir);
+        if (!englishName.Equals(translatedName, StringComparison.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"> {reaction}");
+            message = message.Replace(englishName, translatedName, StringComparison.OrdinalIgnoreCase);
         }
     }
+    return message;
 }
 
 void ShowRoom()
 {
-    var location = state.CurrentLocation;
-    Console.WriteLine();
-    Console.WriteLine($"{Language.RoomLabel} {location.Id.ToProperCase()}");
-    Console.WriteLine($"{Language.RoomDescriptionLabel} {location.GetDescription()}");
-
-    var items = location.Items.CommaJoinNames(properCase: true);
-    Console.WriteLine(string.IsNullOrWhiteSpace(items)
-        ? FormatLabel(Language.ItemsHereLabel, Language.None)
-        : FormatLabel(Language.ItemsHereLabel, items));
-
-    var exits = location.Exits.Keys
-        .Select(direction => direction.ToString().ToLowerInvariant().ToProperCase())
-        .ToList();
-    Console.WriteLine(exits.Count > 0
-        ? FormatLabel(Language.ExitsLabel, exits.CommaJoin())
-        : FormatLabel(Language.ExitsLabel, Language.None));
+    ILocation location = state.CurrentLocation;
+    WriteLineC64();
+    WriteLineC64($"{Language.RoomLabel} {jsonProvider.GetName(location.Id)}");
+    WriteLineC64($"{Language.RoomDescriptionLabel} {string.Format(location.GetDescription(), hour, minutes)}");
+    WriteLineC64(FormatRoomLine(Language.ItemsHereLabel, location.GetRoomItems(showAll: false)));
+    WriteLineC64(FormatRoomLine(Language.ExitsLabel, location.GetRoomExits()));
 }
 
-static string FormatLabel(string label, string value) => $"{label.TrimEnd()} {value}";
+static void ShowHelp() =>
+    WriteLineC64("Commands: look, take, go <direction>, inventory, save, load, language/lang <code>, quit");
 
-static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, language <code>, quit");
 
-static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?";
-
-bool TryHandleLanguageSwitch(string input, List<(Action<string> Apply, string Key)> localizedDescriptions)
+bool TryHandleLanguageSwitch(string input)
 {
-    var tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-    if (tokens.Length == 0 || !tokens[0].TextCompare("language"))
+    string[] tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+    if (tokens.Length == 0 || !IsLanguageCommand(tokens[0]))
     {
         return false;
     }
 
-    var supportedCodes = string.Join(", ", Language.SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
+    string supportedCodes = string.Join(", ", Language.SupportedLanguages.Keys.Select(code => code.ToUpperInvariant()));
     if (tokens.Length == 1)
     {
-        Console.WriteLine($"Usage: language <code> (supported: {supportedCodes}).");
+        WriteLineC64($"Usage: language <code> (supported: {supportedCodes}).");
         return true;
     }
 
-    var chosen = tokens[1].ToLowerInvariant();
-    if (!Language.SupportedLanguages.TryGetValue(chosen, out var info))
+    string chosen = tokens[1].ToLowerInvariant();
+    if (!Language.SupportedLanguages.TryGetValue(chosen, out (string File, string DisplayName) info))
     {
-        Console.WriteLine($"Unsupported language code '{chosen}'. Supported: {supportedCodes}.");
+        WriteLineC64($"Unsupported language code '{chosen}'. Supported: {supportedCodes}.");
         return true;
     }
 
-    var path = Language.GetLanguageFilePath(chosen);
+    string path = Language.GetLanguageFilePath(chosen);
     if (!File.Exists(path))
     {
-        Console.WriteLine($"Language file '{info.File}' is missing.");
+        WriteLineC64($"Language file '{info.File}' is missing.");
         return true;
     }
 
-    Language.SetProvider(new FileLanguageProvider(path));
-    RefreshLocalization(localizedDescriptions);
-    Console.WriteLine(Language.LanguageLoaded(info.DisplayName, chosen.ToUpperInvariant()));
+    jsonProvider = LoadLanguage(chosen);
+    Language.SetProvider(jsonProvider);
+    parser = BuildParser(jsonProvider);
+
+    WriteLineC64(Language.Provider.Format("LanguageLoadedTemplate", jsonProvider.Name, jsonProvider.Code.ToUpperInvariant()));
+    Tick_Tock_reverse();
     ShowRoom();
     return true;
 }
 
-static bool ShouldShowRoom(ICommand command, CommandResult result) =>
-    result.Success && !result.ShouldQuit && (command is GoCommand or MoveCommand or LoadCommand);
-
-static void RefreshLocalization(List<(Action<string> Apply, string Key)> localizedDescriptions)
+bool TryHandleLocalActions(string input)
 {
-    foreach (var (apply, key) in localizedDescriptions)
-    {
-        apply(Language.Provider.Get(key));
-    }
+    string trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
+        return false;
+
+    string lower = trimmed.Lower();
+    if (!IsDestroyCommand(lower))
+        return false;
+
+    string[] parts = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+    if (parts.Length < 2)
+        return HandleMissingTarget();
+
+    string target = parts[1];
+    IItem? item = state.CurrentLocation.FindItem(target) ?? state.Inventory.FindItem(target);
+    if (item == null)
+        return HandleNoItemHere();
+
+    string? reaction = item.GetReaction(ItemAction.Destroy);
+    WriteLineC64(string.IsNullOrWhiteSpace(reaction)
+        ? "You can't bring yourself to do that."
+        : reaction);
+    return true;
 }
 
+bool IsDestroyCommand(string input)
+{
+    return destroyPrefixes.Any(prefix => input.StartsWithIgnoreCase(prefix));
+}
+
+static bool IsLanguageCommand(string token)
+{
+    return token.TextCompare("language") || token.TextCompare("lang") || token.TextCompare("språk");
+}
+
+static bool ShouldShowRoom(ICommand command, CommandResult result)
+{
+    return result.Success && !result.ShouldQuit && command is GoCommand or MoveCommand or LoadCommand;
+}
+
+string FormatRoomLine(string label, IReadOnlyCollection<string> values)
+{
+    string trimmedLabel = label.TrimEnd();
+    return values.Count > 0
+        ? $"{trimmedLabel} {values.CommaJoin()}"
+        : $"{trimmedLabel} {Language.None}";
+}
+
+bool HandleMissingTarget()
+{
+    WriteLineC64(Language.NothingToLookAt);
+    return true;
+}
+
+bool HandleNoItemHere()
+{
+    WriteLineC64(Language.NoSuchItemHere);
+    return true;
+}
 ```
 
-## Language file format (key=value)
-```text
-# English file highlights (same keys exist for Swedish)
-BedroomDescription=Your alarm blinks 08:57. A coat hangs by the door.
-HallwayDescription=A quiet hallway with a mirror.
-CoffeeDescription=A hot cup of coffee.
-GoalLabel=Goal:
-GoalIntro=Load whichever language provider you prefer before heading to the meeting.
-LanguageHint=Type "language <code>" to switch languages.
-RoomLabel=Room:
-RoomDescriptionLabel=Description:
-
-# Swedish file equivalents
-BedroomDescription=Sovrummet doftar av kall luft och möblerad disciplin.
-HallwayDescription=En stilla hall med ett spegelliknande tyst sinne.
-CoffeeDescription=En rykande kopp kaffe som väntar på din uppmärksamhet.
-GoalLabel=Mål:
-GoalIntro=Ladda det språk du föredrar innan du går till mötet.
-LanguageHint=Skriv "language <kod>" för att byta språk.
-RoomLabel=Rum:
-RoomDescriptionLabel=Beskrivning:
+## Language file format (JSON)
+```json
+{
+  "meta": { "code": "sv", "name": "Svenska" },
+  "labels": {
+    "roomLabel": "Rum:",
+    "descriptionLabel": "Beskrivning:",
+    "itemsHereLabel": "Föremål här:",
+    "exitsLabel": "Utgångar:",
+    "goalLabel": "Mål:"
+  },
+  "messages": {
+    "goalIntro": "Ladda den språkleverantör du föredrar innan du går till mötet.",
+    "languageHint": "Skriv \"language <code>\" för att byta språk."
+  },
+  "names": {
+    "bedroom": "Sovrum",
+    "hallway": "Korridor",
+    "coffee": "Kaffe"
+  },
+  "descriptions": {
+    "bedroom": "Ditt alarm blinkar 08:57. En kappa hänger vid dörren.",
+    "hallway": "En tyst korridor med en spegel.",
+    "coffee": "En het kopp kaffe."
+  }
+}
 ```
+
+_Note: `.txt` language files are deprecated. Use `.json` going forward._

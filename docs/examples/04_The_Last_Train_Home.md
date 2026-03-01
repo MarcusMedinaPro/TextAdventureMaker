@@ -74,17 +74,24 @@ using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-var platform = new Location("platform", "A quiet platform. The last train waits in the rain.");
-var carriage = new Location("carriage", "Warm light, tired faces, a seat by the window.");
+// Slice 4 — Take All
+// Tests:
+// - TakeAll command (explicit take all/everything)
+// - Inventory and room refresh after actions
 
-var ticket = new Item("ticket", "train ticket", "A single-ride ticket with a faded stamp.")
+Location platform = new("platform", "A quiet platform. The last train waits in the rain.");
+Location carriage = new("carriage", "Warm light, tired faces, a seat by the window.");
+
+Item ticket = new("ticket", "train ticket", "A single-ride ticket with a faded stamp.")
     .SetWeight(0.01f)
     .AddAliases("ticket", "pass");
 
-var thermos = new Item("thermos", "tea thermos", "A dented thermos smelling of black tea.")
+Item thermos = new("thermos", "tea thermos", "A dented thermos smelling of black tea.")
     .SetWeight(0.6f)
     .AddAliases("thermos", "tea")
     .SetReaction(ItemAction.Use, "You take a careful sip. It warms your hands and sends a curl of steam into the rain.");
@@ -94,13 +101,13 @@ platform.AddItem(thermos);
 platform.AddExit(Direction.In, carriage, oneWay: true);
 carriage.AddExit(Direction.Out, platform);
 
-var state = new GameState(platform, worldLocations: new[] { platform, carriage })
+GameState state = new(platform, worldLocations: [platform, carriage])
 {
     EnableFuzzyMatching = true,
     FuzzyMaxDistance = 1
 };
 
-var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
+KeywordParserConfig parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .WithLook("look", "l")
     .WithExamine("examine", "x")
     .WithMove("move", "push", "shift", "lift", "slide")
@@ -116,127 +123,126 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
         ["out"] = Direction.Out
     })
     .Build();
-var parser = new KeywordParser(parserConfig);
+KeywordParser parser = new(parserConfig);
 
-Console.WriteLine("=== THE LAST TRAIN HOME (Slice 4) ===");
-Console.WriteLine("Goal: find the ticket, board the train, or stay on the platform.");
-Console.WriteLine("Commands: look, examine <item>, take <item>, inventory, move <item>, use/drink/sip <item>, go in/out, board, sit, stay, quit.");
+SetupC64("THE LAST TRAIN HOME (Slice 4) - Text Adventure Sandbox");
+WriteLineC64("=== THE LAST TRAIN HOME (Slice 4) ===");
+WriteLineC64("Goal: gather your things (try take all), then board the train or stay on the platform.");
+WriteLineC64("Commands: look, examine <item>, take <item>, take all, inventory, move <item>, use/drink/sip <item>, go in/out, board, sit, stay, quit.");
 ShowRoom();
 
 while (true)
 {
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input)) continue;
+    WriteLineC64();
+    WritePromptC64("> ");
+    string? input = Console.ReadLine();
+    if (input is null)
+        break;
 
-    if (input.Is("stay"))
+    string trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
+        continue;
+
+    if (trimmed.Is("stay"))
     {
-        Console.WriteLine("You let the train go. You stay behind and watch the vapour trail.");
+        WriteLineC64("You let the train go. You stay behind and watch the vapour trail.");
         break;
     }
 
-    if (input.Is("sit"))
+    if (trimmed.Is("sit"))
     {
         if (state.IsCurrentRoomId("carriage"))
         {
-            Console.WriteLine("You take a seat and watch rain smear the window into silver.");
+            WriteLineC64("You take a seat and watch rain smear the window into silver.");
         }
         else
         {
-            Console.WriteLine("You sit for a moment, listening to the rain against the platform tiles.");
+            WriteLineC64("You sit for a moment, listening to the rain against the platform tiles.");
         }
         continue;
     }
 
-    if (input.Is("board"))
+    if (trimmed.Is("board"))
     {
         if (!state.IsCurrentRoomId("platform"))
         {
-            Console.WriteLine("You are already on board the train.");
+            WriteLineC64("You are already on board the train.");
             continue;
         }
 
         if (state.Inventory.FindItem("ticket") is null)
         {
-            Console.WriteLine("You need a ticket to board.");
+            WriteLineC64("You need a ticket to board.");
             continue;
         }
 
         if (state.Move(Direction.In))
         {
-            Console.WriteLine("You board the train. The city blurs into neon.");
+            WriteLineC64("You board the train. The city blurs into neon.");
             ShowRoom();
         }
         else
         {
-            Console.WriteLine(state.LastMoveError ?? "You cannot go that way.");
+            WriteLineC64(state.LastMoveError ?? "You cannot go that way.");
         }
         continue;
     }
 
-    var command = parser.Parse(input);
-    var result = state.Execute(command);
+    ICommand command = parser.Parse(trimmed);
+    CommandResult result = state.Execute(command);
 
-    switch (command)
-    {
-        case LookCommand:
-            ShowLookResult(result);
-            break;
-        default:
-            WriteResult(result);
-            break;
-    }
+    DisplayResult(command, result);
 
-    if (command is GoCommand && result.Success && !result.ShouldQuit)
-    {
-        ShowRoom();
-    }
-
-    if (result.ShouldQuit) break;
+    if (result.ShouldQuit)
+        break;
 }
 
-void WriteResult(CommandResult result)
+void DisplayResult(ICommand command, CommandResult result)
 {
-    if (!string.IsNullOrWhiteSpace(result.Message))
+    if (command is LookCommand)
     {
-        Console.WriteLine(result.Message);
+        ShowLookResult(result);
+        return;
     }
 
-    foreach (var reaction in result.ReactionsList)
-    {
-        if (!string.IsNullOrWhiteSpace(reaction))
-        {
-            Console.WriteLine($"> {reaction}");
-        }
-    }
+    if (!string.IsNullOrWhiteSpace(result.Message))
+        WriteLineC64(result.Message);
+
+    foreach (string reaction in result.ReactionsList.Where(r => !string.IsNullOrWhiteSpace(r)))
+        WriteLineC64($"> {reaction}");
+
+    if (command is GoCommand && result.Success && !result.ShouldQuit)
+        ShowRoom();
 }
 
 void ShowRoom()
 {
-    var location = state.CurrentLocation;
-    Console.WriteLine();
-    Console.WriteLine($"Room: {location.Id.ToProperCase()}");
-    Console.WriteLine(location.GetDescription());
+    ILocation location = state.CurrentLocation;
+    WriteLineC64();
+    WriteLineC64($"Room: {location.Id.ToProperCase()}");
+    WriteLineC64(location.GetDescription());
 
-    var items = location.Items.CommaJoinNames(properCase: true);
-    Console.WriteLine(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
+    string items = location.Items.CommaJoinNames(properCase: true);
+    WriteLineC64(string.IsNullOrWhiteSpace(items) ? "Items here: None" : $"Items here: {items}");
 
-    var exits = location.Exits
-        .Select(exit =>
-        {
-            var direction = exit.Key.ToString().ToLowerInvariant().ToProperCase();
-            return exit.Value.Door == null
-                ? direction
-                : $"{direction} ({exit.Value.Door.Name.ToProperCase()}, {exit.Value.Door.State.ToString().ToProperCase()})";
-        })
+    List<string> exits = location.Exits
+        .Select(exit => FormatExit(exit.Key, exit.Value))
         .ToList();
 
-    Console.WriteLine(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
+    WriteLineC64(exits.Count > 0 ? $"Exits: {exits.CommaJoin()}" : "Exits: None");
 }
 
 void ShowLookResult(CommandResult result)
 {
-    Console.WriteLine($"Room: {state.CurrentLocation.Id.ToProperCase()}");
-    WriteResult(result);
+    WriteLineC64($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    DisplayResult(new UnknownCommand(), result);
+}
+
+string FormatExit(Direction direction, Exit exit)
+{
+    string directionName = direction.ToString().ToLowerInvariant().ToProperCase();
+    return exit.Door == null
+        ? directionName
+        : $"{directionName} ({exit.Door.Name.ToProperCase()}, {exit.Door.State.ToString().ToProperCase()})";
 }
 ```

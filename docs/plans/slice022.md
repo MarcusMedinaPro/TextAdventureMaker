@@ -20,3 +20,11 @@ player.ModifyReputation("thieves_guild", +20);
 ### Task 22.4: Sandbox — två factions, val påverkar ending
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IFaction` + `Faction`
+- [x] `IFactionSystem` + `FactionSystem`
+- [x] Reputation thresholds with callbacks
+
+## Example checklist (docs/examples)
+- [x] Two factions + reputation effects (`22_Street_Robbery.md`)

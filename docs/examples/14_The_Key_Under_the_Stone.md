@@ -9,6 +9,21 @@ _Slice tag: Slice 14 — Events + Fluent setup. Demo focuses on a tiny trigger/r
 4) Find the hidden key.
 5) Unlock the gate.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Garden    │─────│ Courtyard  │
+│  S, K*     │  Out│            │
+└────────────┘     └────────────┘
+
+S = Stone
+K* = Gate key (revealed after lifting stone)
+```
+
 ## Example (fluent + events)
 ```csharp
 using MarcusMedina.TextAdventure.Commands;
@@ -18,6 +33,12 @@ using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+
+// Slice 14 — Story Logger
+// Tests:
+// - Story logger output to saga.txt
+// - Dev logger output to devlog.txt
 
 Location garden = (id: "garden", description: "A quiet garden with a flat stone near an old gate.");
 Location courtyard = (id: "courtyard", description: "A small courtyard where something waits.");
@@ -32,7 +53,7 @@ garden.AddItem(stone);
 
 garden.AddExit(Direction.Out, courtyard, gate);
 
-var state = new GameState(garden, worldLocations: new[] { garden, courtyard });
+GameState state = new(garden, worldLocations: [garden, courtyard]);
 
 state.Events.Subscribe(GameEventType.PickupItem, e =>
 {
@@ -46,11 +67,16 @@ state.Events.Subscribe(GameEventType.PickupItem, e =>
     }
 });
 
-var parser = new KeywordParser(KeywordParserConfig.Default);
+KeywordParser parser = new(KeywordParserConfig.Default);
+
+using StoryLogger storyLogger = new("saga.txt");
+using DevLogger devLogger = new("devlog.txt");
 
 var game = GameBuilder.Create()
     .UseState(state)
     .UseParser(parser)
+    .UseStoryLogger(storyLogger)
+    .UseDevLogger(devLogger)
     .AddTurnStart(g =>
     {
         var look = g.State.Look();
@@ -58,5 +84,6 @@ var game = GameBuilder.Create()
     })
     .Build();
 
+SetupC64("The Key Under the Stone - Text Adventure Sandbox");
 game.Run();
 ```

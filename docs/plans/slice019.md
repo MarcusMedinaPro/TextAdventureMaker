@@ -22,3 +22,12 @@ quest.AddStage("find_sword")
 ### Task 19.5: Sandbox — quest med 3 stages, optional hints
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IQuestStage`
+- [x] Optional vs required objectives
+- [x] Alternative completion paths
+- [x] Failure consequences / hidden objectives
+
+## Example checklist (docs/examples)
+- [x] Multi-stage quest demo (`19_First_Date_at_the_Cafe.md`)

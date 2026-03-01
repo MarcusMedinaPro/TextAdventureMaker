@@ -22,3 +22,11 @@ else
 ### Task 34.3: Sandbox — aktiv vs passiv protagonist
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IAgencyTracker`
+- [x] Agency score + weighted choices
+- [x] Story path unlocks based on agency
+
+## Example checklist (docs/examples)
+- [x] Agency tracking demo (`34_The_Power_Outage.md`)

@@ -17,7 +17,7 @@ A fluent, SOLID C# library for creating text adventures. Build interactive ficti
 - **Event System** - Subscribe to game events (pickup, enter room, etc.)
 - **Save/Load** - JSON-based game state persistence
 - **DSL Parser** - Define worlds in simple `.adventure` text files
-- **Localization** - Swap UI text via language files
+- **Localization** - Swap UI text via JSON language files (txt deprecated)
 
 ## Quick Start
 

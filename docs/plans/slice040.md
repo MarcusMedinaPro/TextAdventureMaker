@@ -198,6 +198,18 @@ kitchen.AddItem(spoon);
 
 **Från TADS:**
 
+---
+
+## Implementation checklist (docs)
+- [x] GitHub wiki created (`../TextAdventure.wiki`)
+- [x] Core wiki pages (Home, Getting Started, API Reference, Commands, DSL Guide, Examples)
+- [x] Localization + Extending guides
+- [x] Storytelling guides + narrative arcs
+- [x] Testing guide + Fluent API guide
+
+## Example checklist (docs/examples)
+- [x] Not applicable (wiki)
+
 ```tads
 kitchen: Room 'Kitchen'
     "A warm, cluttered space."

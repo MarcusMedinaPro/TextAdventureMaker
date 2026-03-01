@@ -8,13 +8,44 @@ _Slice tag: Slice 32 — Clue chain to meaning._
 3) Discover an old photograph.
 4) Follow the clue to a family room.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Archive   │─────┐
+│  Photo, Ar │     │
+└─────┬──────┘     │
+      │            │
+      │            │
+┌────────────┐  ┌────────────┐
+│ Classroom  │  │ FamilyRoom │
+│            │  │     Al     │
+└────────────┘  └────────────┘
+
+Photo = Photograph
+Ar = Archivist (NPC)
+Al = Album
+```
+
 ## Example (photograph clue)
 ```csharp
+using System;
+using System.Linq;
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+
+// Slice 32 — Bond System
+// Tests:
+// - Bond investment moments and payoff
+// - Warning when bond is unearned
 
 Location classroom = (id: "locked_classroom", description: "A classroom dark behind the glass.");
 Location archive = (id: "photo_archive", description: "A small archive with labeled boxes and old frames.");
@@ -34,18 +65,81 @@ var archivist = new Npc("archivist", "archivist")
 
 archive.AddNpc(archivist);
 
+var bond = archivist.CreateBond("archivist_bond")
+    .InvestmentMoments("share_memory", "return_photo")
+    .Payoff(ctx =>
+    {
+        if (!ctx.Bond.IsEstablished)
+        {
+            WriteLineC64("The loss lands flat. You never really knew them.");
+            return;
+        }
+
+        WriteLineC64("The archivist's absence leaves a deep, quiet ache.");
+    });
+
 var state = new GameState(classroom, worldLocations: new[] { classroom, archive, familyRoom });
 var parser = new KeywordParser(KeywordParserConfig.Default);
 
-var game = GameBuilder.Create()
-    .UseState(state)
-    .UseParser(parser)
-    .AddTurnStart(g =>
-    {
-        var look = g.State.Look();
-        g.Output.WriteLine($"\n{look.Message}");
-    })
-    .Build();
+SetupC64("The Old Photograph - Text Adventure Sandbox");
+WriteLineC64("=== THE OLD PHOTOGRAPH (Slice 32) ===");
+WriteLineC64("Goal: build a bond, then trigger the payoff.");
+WriteLineC64("Commands: talk archivist, share memory, return photo, sacrifice, look, go north/east, quit.");
+ShowRoom();
 
-game.Run();
+while (true)
+{
+    WriteLineC64();
+    WritePromptC64("> ");
+    var input = Console.ReadLine();
+    if (input is null)
+        break;
+
+    var trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
+        continue;
+
+    if (trimmed.Is("quit") || trimmed.Is("exit"))
+        break;
+
+    if (trimmed.TextCompare("share memory"))
+    {
+        bond.RecordInvestment("share_memory");
+        WriteLineC64("You share a memory. The archivist softens.");
+        continue;
+    }
+
+    if (trimmed.TextCompare("return photo"))
+    {
+        bond.RecordInvestment("return_photo");
+        WriteLineC64("You return a photograph to its place.");
+        continue;
+    }
+
+    if (trimmed.TextCompare("sacrifice"))
+    {
+        bond.TriggerPayoff(state, archivist);
+        if (!bond.IsEstablished)
+            WriteLineC64("Warning: a bond was not established before the payoff.");
+        break;
+    }
+
+    var command = parser.Parse(trimmed);
+    var result = state.Execute(command);
+    if (!string.IsNullOrWhiteSpace(result.Message))
+        WriteLineC64(result.Message);
+
+    foreach (var reaction in result.ReactionsList.Where(r => !string.IsNullOrWhiteSpace(r)))
+        WriteLineC64($"> {reaction}");
+
+    if (command is GoCommand && result.Success)
+        ShowRoom();
+}
+
+void ShowRoom()
+{
+    WriteLineC64();
+    WriteLineC64($"Room: {state.CurrentLocation.Id.ToProperCase()}");
+    WriteLineC64(state.CurrentLocation.GetDescription());
+}
 ```

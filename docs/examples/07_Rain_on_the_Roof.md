@@ -139,6 +139,13 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     })
     .Build());
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "RAIN UPON THE ROOF (Slice 7) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== RAIN UPON THE ROOF (Slice 7) ===");
 Console.WriteLine("Goal: shepherd the bucket beneath the leak, calm the rain, tease the dummy, and keep listening to the patter.");
 Console.WriteLine("Commands: look, examine, move bucket, attack dummy, flee, inventory, go south, quit.");

@@ -151,6 +151,13 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     })
     .Build());
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE KEY UNDER THE STONE (Slice 6) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE KEY UNDER THE STONE (Slice 6) ===");
 Console.WriteLine("Goal: reveal the hidden key, unlock the gate, and step into the courtyard.");
 Console.WriteLine("Commands: look, examine, move stone, take key, unlock gate, open gate, go north/south, inventory, quit.");

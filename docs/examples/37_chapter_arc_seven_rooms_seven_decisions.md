@@ -20,6 +20,29 @@ _Slice tag: Slice 37 — Chapter Arc (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Room 3   │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐
+│   Room 2   │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐
+│   Room 1   │
+│            │
+└────────────┘
+```
+
     ## Example (detailed setup)
 
 ```csharp

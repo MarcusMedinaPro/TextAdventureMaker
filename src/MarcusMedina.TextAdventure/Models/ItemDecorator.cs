@@ -3,30 +3,71 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Models;
-
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
-public abstract class ItemDecorator(IItem inner) : IItem
+namespace MarcusMedina.TextAdventure.Models;
+
+public abstract class ItemDecorator : IItem
 {
+    protected IItem Inner { get; }
 
-    public event Action<IItem>? OnDestroy
+    protected ItemDecorator(IItem inner)
     {
-        add => Inner.OnDestroy += value;
-        remove => Inner.OnDestroy -= value;
+        Inner = inner;
     }
 
-    public event Action<IItem>? OnDrop
+    public virtual string Id => Inner.Id;
+    public virtual string Name => Inner.Name;
+    public virtual string? Description => Inner.Description;
+    public virtual int? Amount => Inner.Amount;
+    public virtual bool IsStackable => Inner.IsStackable;
+    public virtual string? PresenceDescription => Inner.PresenceDescription;
+    public virtual bool IsFood => Inner.IsFood;
+    public virtual bool IsDrinkable => Inner.IsDrinkable;
+    public virtual bool IsPoisoned => Inner.IsPoisoned;
+    public virtual int HealAmount => Inner.HealAmount;
+    public virtual int PoisonDamagePerTurn => Inner.PoisonDamagePerTurn;
+    public virtual int PoisonDurationTurns => Inner.PoisonDurationTurns;
+    public virtual IDictionary<string, string> Properties => Inner.Properties;
+    public virtual bool Takeable => Inner.Takeable;
+    public virtual float Weight => Inner.Weight;
+    public virtual IReadOnlyList<string> Aliases => Inner.Aliases;
+    public virtual bool Readable => Inner.Readable;
+    public virtual bool RequiresTakeToRead => Inner.RequiresTakeToRead;
+    public virtual int ReadingCost => Inner.ReadingCost;
+    public virtual bool HiddenFromItemList => Inner.HiddenFromItemList;
+    public virtual int? Durability => Inner.Durability;
+    public virtual int? MaxDurability => Inner.MaxDurability;
+
+    public virtual string GetDescription()
     {
-        add => Inner.OnDrop += value;
-        remove => Inner.OnDrop -= value;
+        return Inner.GetDescription();
     }
 
-    public event Action<IItem>? OnMove
+    public virtual IItem SetTakeable(bool takeable)
     {
-        add => Inner.OnMove += value;
-        remove => Inner.OnMove -= value;
+        return Inner.SetTakeable(takeable);
+    }
+
+    public virtual IItem SetWeight(float weight)
+    {
+        return Inner.SetWeight(weight);
+    }
+
+    public virtual IItem SetDescription(string description)
+    {
+        return Inner.SetDescription(description);
+    }
+
+    public virtual IItem AddAliases(params string[] aliases)
+    {
+        return Inner.AddAliases(aliases);
+    }
+
+    public virtual string? GetReadText()
+    {
+        return Inner.GetReadText();
     }
 
     public event Action<IItem>? OnTake
@@ -35,65 +76,173 @@ public abstract class ItemDecorator(IItem inner) : IItem
         remove => Inner.OnTake -= value;
     }
 
+    public event Action<IItem>? OnDrop
+    {
+        add => Inner.OnDrop += value;
+        remove => Inner.OnDrop -= value;
+    }
+
     public event Action<IItem>? OnUse
     {
         add => Inner.OnUse += value;
         remove => Inner.OnUse -= value;
     }
 
-    public virtual IReadOnlyList<string> Aliases => Inner.Aliases;
-    public virtual bool HiddenFromItemList => Inner.HiddenFromItemList;
-    public virtual string Id => Inner.Id;
-    public virtual string Name => Inner.Name;
-    public virtual IDictionary<string, string> Properties => Inner.Properties;
-    public virtual bool Readable => Inner.Readable;
-    public virtual int ReadingCost => Inner.ReadingCost;
-    public virtual bool RequiresTakeToRead => Inner.RequiresTakeToRead;
-    public virtual bool Takeable => Inner.Takeable;
-    public virtual float Weight => Inner.Weight;
-    protected IItem Inner { get; } = inner;
+    public event Action<IItem>? OnMove
+    {
+        add => Inner.OnMove += value;
+        remove => Inner.OnMove -= value;
+    }
 
-    public virtual IItem AddAliases(params string[] aliases) => Inner.AddAliases(aliases);
+    public event Action<IItem>? OnDestroy
+    {
+        add => Inner.OnDestroy += value;
+        remove => Inner.OnDestroy -= value;
+    }
 
-    public virtual bool CanRead(IGameState state) => Inner.CanRead(state);
+    public event Action<IItem>? OnAmountEmpty
+    {
+        add => Inner.OnAmountEmpty += value;
+        remove => Inner.OnAmountEmpty -= value;
+    }
 
-    public virtual IItem Clone() => Inner.Clone();
+    public virtual bool Matches(string name)
+    {
+        return Inner.Matches(name);
+    }
 
-    public virtual IItem Description(string text) => Inner.Description(text);
+    public virtual string? GetReaction(ItemAction action)
+    {
+        return Inner.GetReaction(action);
+    }
 
-    public virtual void Destroy() => Inner.Destroy();
+    public virtual IItem SetReaction(ItemAction action, string text)
+    {
+        return Inner.SetReaction(action, text);
+    }
 
-    public virtual void Drop() => Inner.Drop();
+    public virtual IItem SetAmount(int amount)
+    {
+        return Inner.SetAmount(amount);
+    }
 
-    public virtual string GetDescription() => Inner.GetDescription();
+    public virtual bool DecreaseAmount(int amount = 1)
+    {
+        return Inner.DecreaseAmount(amount);
+    }
 
-    public virtual string? GetReaction(ItemAction action) => Inner.GetReaction(action);
+    public virtual IItem SetStackable(bool isStackable = true)
+    {
+        return Inner.SetStackable(isStackable);
+    }
 
-    public virtual string? GetReadText() => Inner.GetReadText();
+    public virtual IItem SetPresenceDescription(string text)
+    {
+        return Inner.SetPresenceDescription(text);
+    }
 
-    public virtual IItem HideFromItemList(bool hidden = true) => Inner.HideFromItemList(hidden);
+    public virtual IItem SetFood(bool isFood = true)
+    {
+        return Inner.SetFood(isFood);
+    }
 
-    public virtual bool Matches(string name) => Inner.Matches(name);
+    public virtual IItem SetDrinkable(bool isDrinkable = true)
+    {
+        return Inner.SetDrinkable(isDrinkable);
+    }
 
-    public virtual void Move() => Inner.Move();
+    public virtual IItem SetPoisoned(bool isPoisoned = true)
+    {
+        return Inner.SetPoisoned(isPoisoned);
+    }
 
-    public virtual IItem RequiresToRead(Func<IGameState, bool> predicate) => Inner.RequiresToRead(predicate);
+    public virtual IItem SetHealAmount(int amount)
+    {
+        return Inner.SetHealAmount(amount);
+    }
 
-    public virtual IItem RequireTakeToRead() => Inner.RequireTakeToRead();
+    public virtual IItem SetPoisonDamage(int damagePerTurn, int turns)
+    {
+        return Inner.SetPoisonDamage(damagePerTurn, turns);
+    }
 
-    public virtual IItem SetReaction(ItemAction action, string text) => Inner.SetReaction(action, text);
+    public virtual bool CanRead(IGameState state)
+    {
+        return Inner.CanRead(state);
+    }
 
-    public virtual IItem SetReadable(bool readable = true) => Inner.SetReadable(readable);
+    public virtual IItem SetReadable(bool readable = true)
+    {
+        return Inner.SetReadable(readable);
+    }
 
-    public virtual IItem SetReadingCost(int turns) => Inner.SetReadingCost(turns);
+    public virtual IItem SetReadText(string text)
+    {
+        return Inner.SetReadText(text);
+    }
 
-    public virtual IItem SetReadText(string text) => Inner.SetReadText(text);
+    public virtual IItem RequireTakeToRead()
+    {
+        return Inner.RequireTakeToRead();
+    }
 
-    public virtual IItem SetTakeable(bool takeable) => Inner.SetTakeable(takeable);
+    public virtual IItem SetReadingCost(int turns)
+    {
+        return Inner.SetReadingCost(turns);
+    }
 
-    public virtual IItem SetWeight(float weight) => Inner.SetWeight(weight);
+    public virtual IItem HideFromItemList(bool hidden = true)
+    {
+        return Inner.HideFromItemList(hidden);
+    }
 
-    public virtual void Take() => Inner.Take();
+    public virtual IItem RequiresToRead(Func<IGameState, bool> predicate)
+    {
+        return Inner.RequiresToRead(predicate);
+    }
 
-    public virtual void Use() => Inner.Use();
+    public virtual IItem Clone()
+    {
+        return Inner.Clone();
+    }
+
+    public virtual void Take()
+    {
+        Inner.Take();
+    }
+
+    public virtual void Drop()
+    {
+        Inner.Drop();
+    }
+
+    public virtual void Use()
+    {
+        Inner.Use();
+    }
+
+    public virtual void Move()
+    {
+        Inner.Move();
+    }
+
+    public virtual void Destroy()
+    {
+        Inner.Destroy();
+    }
+
+    public virtual IItem SetDurability(int current, int max)
+    {
+        return Inner.SetDurability(current, max);
+    }
+
+    public virtual bool DecreaseDurability(int amount = 1)
+    {
+        return Inner.DecreaseDurability(amount);
+    }
+
+    public virtual string GetCondition()
+    {
+        return Inner.GetCondition();
+    }
 }

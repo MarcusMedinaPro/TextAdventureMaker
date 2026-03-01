@@ -4,82 +4,51 @@
     "name": "English"
   },
   "commands": {
-    "quit": [ "quit", "exit", "q" ],
-    "look": [ "look", "l" ],
-    "examine": [ "examine", "x" ],
-    "inventory": [ "inventory", "inv", "i" ],
-    "stats": [ "stats", "stat", "hp", "health" ],
-    "open": [ "open" ],
-    "unlock": [ "unlock" ],
-    "take": [ "take", "get", "pickup", "pick" ],
-    "drop": [ "drop" ],
-    "use": [ "use" ],
-    "combine": [ "combine", "mix" ],
-    "pour": [ "pour" ],
-    "move": [ "move", "push", "shift", "lift", "slide" ],
-    "go": [ "go", "walk" ],
-    "read": [ "read" ],
-    "talk": [ "talk", "speak" ],
-    "attack": [ "attack", "fight", "hit" ],
-    "flee": [ "flee", "run", "escape" ],
-    "save": [ "save" ],
-    "load": [ "load" ],
-    "quest": [ "quests", "quest", "journal" ],
-    "all": [ "all", "everything" ]
+    "quit": ["quit", "exit", "q"],
+    "look": ["look", "l"],
+    "examine": ["examine", "x"],
+    "inventory": ["inventory", "inv", "i"],
+    "stats": ["stats", "stat", "hp", "health"],
+    "open": ["open"],
+    "unlock": ["unlock"],
+    "close": ["close"],
+    "lock": ["lock"],
+    "destroy": ["destroy", "smash", "break"],
+    "take": ["take", "get", "pickup", "pick"],
+    "drop": ["drop"],
+    "use": ["use"],
+    "combine": ["combine", "mix"],
+    "pour": ["pour"],
+    "move": ["move", "push", "shift", "lift", "slide"],
+    "go": ["go", "walk"],
+    "read": ["read"],
+    "talk": ["talk", "speak"],
+    "attack": ["attack", "fight", "hit"],
+    "flee": ["flee", "run", "escape"],
+    "save": ["save"],
+    "load": ["load"],
+    "quest": ["quests", "quest", "journal"],
+    "hint": ["hint", "path"],
+    "all": ["all", "everything"]
   },
   "directions": {
-    "north": {
-      "name": "North",
-      "aliases": [ "n", "north" ]
-    },
-    "south": {
-      "name": "South",
-      "aliases": [ "s", "south" ]
-    },
-    "east": {
-      "name": "East",
-      "aliases": [ "e", "east" ]
-    },
-    "west": {
-      "name": "West",
-      "aliases": [ "w", "west" ]
-    },
-    "up": {
-      "name": "Up",
-      "aliases": [ "u", "up" ]
-    },
-    "down": {
-      "name": "Down",
-      "aliases": [ "d", "down" ]
-    },
-    "northeast": {
-      "name": "Northeast",
-      "aliases": [ "ne", "northeast" ]
-    },
-    "northwest": {
-      "name": "Northwest",
-      "aliases": [ "nw", "northwest" ]
-    },
-    "southeast": {
-      "name": "Southeast",
-      "aliases": [ "se", "southeast" ]
-    },
-    "southwest": {
-      "name": "Southwest",
-      "aliases": [ "sw", "southwest" ]
-    },
-    "in": {
-      "name": "In",
-      "aliases": [ "in", "inside", "enter" ]
-    },
-    "out": {
-      "name": "Out",
-      "aliases": [ "out", "outside", "exit" ]
-    }
+    "north": { "name": "North", "aliases": ["n", "north"] },
+    "south": { "name": "South", "aliases": ["s", "south"] },
+    "east": { "name": "East", "aliases": ["e", "east"] },
+    "west": { "name": "West", "aliases": ["w", "west"] },
+    "up": { "name": "Up", "aliases": ["u", "up"] },
+    "down": { "name": "Down", "aliases": ["d", "down"] },
+    "northeast": { "name": "Northeast", "aliases": ["ne", "northeast"] },
+    "northwest": { "name": "Northwest", "aliases": ["nw", "northwest"] },
+    "southeast": { "name": "Southeast", "aliases": ["se", "southeast"] },
+    "southwest": { "name": "Southwest", "aliases": ["sw", "southwest"] },
+    "in": { "name": "In", "aliases": ["in", "inside", "enter"] },
+    "out": { "name": "Out", "aliases": ["out", "outside", "exit"] }
   },
   "labels": {
     "roomLabel": "Room:",
     "descriptionLabel": "Description:",
+    "roomDescriptionLabel": "Description:",
     "itemsHereLabel": "Items here:",
     "exitsLabel": "Exits:",
     "inventoryLabel": "Inventory:",
@@ -127,14 +96,26 @@
     "noOneToFight": "There's no one here to fight.",
     "noOneToFlee": "There's no one here to flee from.",
     "noQuests": "You have no quests.",
+    "nothingToDestroy": "There's nothing to destroy.",
+    "hintWhat": "Hint to where?",
+    "unknownLocation": "I don't know that place.",
+    "noPathFound": "No path found.",
     "goalIntro": "Load whichever language provider you prefer before heading to the meeting.",
-    "languageHint": "Type \"language <code>\" to switch languages."
+    "languageHint": "Type \"language <code>\" to switch languages.",
+    "youNeedAKeyToLockDoor": "You need a key to lock the door."
   },
   "templates": {
     "healthStatus": "Health: {0}/{1}",
     "doorAlreadyOpen": "The {0} is already open.",
+    "doorAlreadyClosed": "The {0} is already closed.",
+    "doorAlreadyLocked": "The {0} is already locked.",
+    "doorAlreadyDestroyed": "The {0} is already destroyed.",
     "doorLocked": "The {0} is locked.",
     "doorClosed": "The {0} is closed.",
+    "doorClosedByPlayer": "You close the {0}.",
+    "doorLockedByPlayer": "You lock the {0}.",
+    "doorDestroyed": "You destroy the {0}.",
+    "doorMustBeClosed": "The {0} must be closed first.",
     "doorWontBudge": "The {0} won't budge.",
     "doorOpened": "You open the {0}.",
     "doorUnlocked": "You unlock the {0}.",
@@ -149,7 +130,9 @@
     "itemWithWeight": "{0} ({1})",
     "itemDescription": "It's a {0}.",
     "moveItem": "You move the {0}.",
+    "destroyItem": "You destroy the {0}.",
     "canTakeInstead": "You can just take the {0}.",
+    "hintPath": "Path: {0}",
     "combineResult": "You combine {0} and {1}.",
     "pourResult": "You pour the {0} into the {1}.",
     "readingCost": "You spend {0} turns reading...\n{1}",
@@ -163,17 +146,24 @@
     "loadSuccess": "Game loaded from {0}.",
     "loadFailed": "Failed to load game from {0}.",
     "languageLoaded": "Loaded {0} ({1}) language file.",
+    "coatTakeFailed": "The coat is hopelessly out of fashion.",
+    "mirrorTakeFailed": "It is far too large to carry.",
+    "mirrorDestroy": "A terrible idea. Seven years of bad luck await. Better not do it!",
     "didYouMean": "I think you mean \"{0}\".",
     "questEntry": "- {0}"
   },
   "names": {
     "bedroom": "Bedroom",
     "hallway": "Hallway",
-    "coffee": "Coffee"
+    "coffee": "Coffee",
+    "coat": "Coat",
+    "mirror": "Mirror"
   },
   "descriptions": {
-    "bedroom": "Your alarm blinks 08:57. A coat hangs by the door.",
+    "bedroom": "Your alarm clock shows {0:D2}:{1:D2}. A coat hangs by the door.",
     "hallway": "A quiet hallway with a mirror.",
-    "coffee": "A hot cup of coffee."
+    "coffee": "A hot cup of coffee.",
+    "coat": "An old coat. Best donated to a thrift shop.",
+    "mirror": "You see yourself reflected."
   }
 }

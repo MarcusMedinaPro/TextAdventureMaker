@@ -48,7 +48,7 @@ location.AddItems("Sword", "Shield", "Torch");
 
 ### Random Extensions (int)
 
-- [ ] `Extensions/RandomExtensions.cs`
+- [x] `Extensions/RandomExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class RandomExtensions
@@ -87,7 +87,7 @@ var enemyCount = 5.Random(2);    // 2-5
 
 ### Probability Extensions
 
-- [ ] `Extensions/ProbabilityExtensions.cs`
+- [x] `Extensions/ProbabilityExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class ProbabilityExtensions
@@ -106,7 +106,7 @@ public static class ProbabilityExtensions
 
 ### Collection Extensions
 
-- [ ] `Extensions/CollectionExtensions.cs`
+- [x] `Extensions/CollectionExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class CollectionExtensions
@@ -137,7 +137,7 @@ public static class CollectionExtensions
 
 ### Time Extensions
 
-- [ ] `Extensions/TimeExtensions.cs`
+- [x] `Extensions/TimeExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class TimeExtensions
@@ -150,7 +150,7 @@ public static class TimeExtensions
 
 ### Console Extensions (OBS: Endast för Console.Write!)
 
-- [ ] `Extensions/ConsoleExtensions.cs`
+- [x] `Extensions/ConsoleExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 /// <summary>
@@ -173,7 +173,7 @@ public static class ConsoleExtensions
 
 ### Range/Clamp Extensions
 
-- [ ] `Extensions/RangeExtensions.cs`
+- [x] `Extensions/RangeExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class RangeExtensions
@@ -188,7 +188,7 @@ public static class RangeExtensions
 
 ### Conditional Fluent Extensions
 
-- [ ] `Extensions/ConditionalExtensions.cs`
+- [x] `Extensions/ConditionalExtensions.cs` (`docs/examples/Extensions_Helper_Methods.md`)
 
 ```csharp
 public static class ConditionalExtensions
@@ -204,6 +204,24 @@ public static class ConditionalExtensions
         if (condition) action();
     }
 }
+
+---
+
+## Implementation checklist (engine)
+- [x] `Description` property + `SetDescription(...)` on `Item`
+- [x] `Items.CreateMany(...)` helpers
+- [x] Inline DSL for items (`AddDSLItems`)
+- [x] Implicit `AddItems("Sword", ...)` helpers
+- [x] Random extensions
+- [x] Probability extensions
+- [x] Collection extensions
+- [x] Time extensions
+- [x] Console extensions (typewriter)
+- [x] Range/Clamp extensions
+- [x] Conditional fluent extensions
+
+## Example checklist (docs/examples)
+- [x] Fluent API showcase for these helpers (`docs/examples/Extensions_Helper_Methods.md`)
 
 public class ConditionalResult<T>
 {
@@ -237,8 +255,8 @@ isFirstVisit.Then(() => ShowIntro());
 
 ### Grammar Extensions (språkberoende - kräver ILanguage override!)
 
-- [ ] `Extensions/GrammarExtensions.cs`
-- [ ] `Interfaces/IGrammarProvider.cs`
+- [x] `Extensions/GrammarExtensions.cs`
+- [x] `Interfaces/IGrammarProvider.cs`
 
 ```csharp
 public interface IGrammarProvider

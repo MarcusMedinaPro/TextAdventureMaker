@@ -13,5 +13,10 @@ public enum GameEventType
     TalkToNpc = 4,
     CombatStart = 5,
     OpenDoor = 6,
-    UnlockDoor = 7
+    UnlockDoor = 7,
+    MoveItem = 8,
+    CloseDoor = 9,
+    LockDoor = 10,
+    DestroyDoor = 11,
+    NpcTriggered = 12
 }

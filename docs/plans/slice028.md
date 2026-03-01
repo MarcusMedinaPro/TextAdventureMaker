@@ -20,3 +20,11 @@ npc.DefineArc("CowardToHero")
 ### Task 28.4: Sandbox — NPC växer från feg till hjälte
 
 ---
+
+## Implementation checklist (engine)
+- [x] `ICharacterArc`
+- [x] Arc milestones + trait unlocks
+- [x] Dialog changes based on arc progress (`28_The_Bar_Fight.md`)
+
+## Example checklist (docs/examples)
+- [x] Character arc demo (`28_The_Bar_Fight.md`)

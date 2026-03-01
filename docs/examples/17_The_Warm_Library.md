@@ -8,6 +8,20 @@ _Slice tag: Slice 17 — Calm progression. Demo focuses on a locked door and a c
 3) Unlock the door.
 4) Step into the warmth.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│  Outside   │─────│  Library   │
+│     K      │  In │            │
+└────────────┘     └────────────┘
+
+K = Library key
+```
+
 ## Example (fluent, minimal loop)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;
@@ -41,5 +55,12 @@ var game = GameBuilder.Create()
     })
     .Build();
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "The Warm Library - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 game.Run();
 ```

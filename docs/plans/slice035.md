@@ -25,3 +25,11 @@ if (!player.WarnedKing())
 ### Task 35.3: Sandbox — förrädarscenario
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IDramaticIronySystem`
+- [x] Knowledge gap detection
+- [x] Player actions based on secrets
+
+## Example checklist (docs/examples)
+- [x] Dramatic irony demo (`35_The_Midnight_Phone_Call.md`)

@@ -1,0 +1,8 @@
+global using MarcusMedina.TextAdventure.AI.Contracts;
+global using MarcusMedina.TextAdventure.AI.Features;
+global using MarcusMedina.TextAdventure.AI.Models;
+global using MarcusMedina.TextAdventure.AI.Parsing;
+global using MarcusMedina.TextAdventure.AI.Policies;
+global using MarcusMedina.TextAdventure.AI.Providers;
+global using MarcusMedina.TextAdventure.AI.Router;
+global using MarcusMedina.TextAdventure.AI.Settings;

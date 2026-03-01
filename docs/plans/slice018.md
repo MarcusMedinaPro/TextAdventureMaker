@@ -18,3 +18,11 @@ game.AddStoryBranch("dragon_path")
 ### Task 18.4: Sandbox — två endings baserat på val
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IStoryBranch` + `IConsequence`
+- [x] `StoryState` tracking active/completed branches
+- [x] Branching conditions + consequences API
+
+## Example checklist (docs/examples)
+- [x] Branching endings demo (`18_Before_the_Meeting.md`)

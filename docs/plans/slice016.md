@@ -9,3 +9,11 @@
 ### Task 16.3: Sandbox — "go somewhere dark" → Cave
 
 ---
+
+## Implementation checklist (engine/AI)
+- [x] `OllamaCommandParser`
+- [x] AI configuration fluent API
+- [x] AI sandbox demo (`16_The_Forgotten_Password.md`)
+
+## Example checklist (docs/examples)
+- [x] AI parser demo (`16_The_Forgotten_Password.md`)

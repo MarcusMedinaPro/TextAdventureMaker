@@ -3,10 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Helpers;
-
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
+
+namespace MarcusMedina.TextAdventure.Helpers;
 
 public static class ItemFactory
 {
@@ -15,11 +15,10 @@ public static class ItemFactory
     /// </summary>
     public static Item NewItem(string name, float weight = 0f, params string[] aliases)
     {
-        var item = new Item(name.ToId(), name).SetWeight(weight);
+        var item = new Item(name.ToId(), name);
+        item.SetWeight(weight);
         if (aliases.Length > 0)
-        {
-            _ = item.AddAliases(aliases);
-        }
+            item.AddAliases(aliases);
 
         return item;
     }

@@ -8,6 +8,28 @@ _Slice tag: Slice 40 — Shelter, coordination, and calm under pressure._
 3) Listen to the radio.
 4) Decide how to help.
 
+## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Entrance   │
+│    R       │
+└─────┬──────┘
+      │
+┌────────────┐
+│    Hall    │
+│   B  C     │
+└────────────┘
+
+B = Blanket
+C = Coordinator
+R = Radio
+```
+
 ## Example (storm shelter)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;

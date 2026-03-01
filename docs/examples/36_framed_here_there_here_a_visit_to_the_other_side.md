@@ -20,6 +20,30 @@ _Slice tag: Slice 36 — Framed Narrative (Here-There-Here) (Creepypasta style, 
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ OtherSide  │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│ Storeroom  │
+│     Ch     │
+└─────┬──────┘
+      │ (one-way)
+      ▼
+┌────────────┐
+│ NewHouse   │
+└────────────┘
+
+Ch = Chalk
+```
+
     ## Example (detailed setup)
 
 ```csharp

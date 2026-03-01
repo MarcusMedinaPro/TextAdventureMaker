@@ -26,3 +26,11 @@ scene.Play();  // All dialog/events körs automatiskt
 ### Task 31.4: Sandbox — betrayal scene med två utgångar
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IScene`
+- [x] Scene beats + scripted playback
+- [x] Transitions based on player actions
+
+## Example checklist (docs/examples)
+- [x] Scene transitions demo (`31_The_Locked_Classroom.md`)

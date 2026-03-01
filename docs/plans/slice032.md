@@ -24,3 +24,11 @@ npc.CreateBond("childhood_friend")
 ### Task 32.4: Sandbox — vän som dör efter vi byggt relation
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IBond`
+- [x] Bond investment moments + payoff
+- [x] Warnings for unearned stakes
+
+## Example checklist (docs/examples)
+- [x] Bond system demo (`32_The_Old_Photograph.md`)

@@ -199,6 +199,23 @@ game.UseFramedNarrative()
     .ReturnHome();
 ```
 
+---
+
+## Implementation checklist (engine)
+- [x] `IHeroJourney` + `JourneyStage`
+- [x] `HeroJourneyBuilder`
+- [x] `JourneyValidator`
+- [x] `CharacterArchetype` system
+- [x] Alternative narrative template APIs (tragic, transformation, ensemble, descent, spiral, moral, caretaker, witness, world-shift, prescriptive, familiar-to-foreign, framed, layered)
+- [x] DSL support for journey templates
+- [x] Proppian structure builder
+- [x] Flashback system (memories + triggers)
+- [x] Layer-based descriptions
+- [x] Journey progress tracker
+
+## Example checklist (docs/examples)
+- [x] Narrative template examples documented (`docs/examples/36_*.md`)
+
 **Layered Stories**
 
 ```csharp

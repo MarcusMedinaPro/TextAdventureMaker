@@ -21,6 +21,27 @@ _Slice tag: Slice 36 — Witness Arc (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Archive   │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐      ┌────────────┐
+│ Side Street│──────│   Square   │
+│     W      │      │     C      │
+└────────────┘      └────────────┘
+
+C = Camera
+W = Witness
+```
+
     ## Example (detailed setup)
 
 ```csharp

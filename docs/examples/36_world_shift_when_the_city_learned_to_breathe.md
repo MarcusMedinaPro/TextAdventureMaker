@@ -21,6 +21,26 @@ _Slice tag: Slice 36 — World Shift (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Bridge   │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐      ┌────────────┐
+│   Alley    │──────│   Square   │
+│     V      │      │            │
+└────────────┘      └────────────┘
+
+V = Brass valve
+```
+
     ## Example (detailed setup)
 
 ```csharp

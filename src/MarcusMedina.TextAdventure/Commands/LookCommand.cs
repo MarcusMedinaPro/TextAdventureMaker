@@ -3,36 +3,45 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Commands;
-
-using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using MarcusMedina.TextAdventure.Models;
+using System.Text;
 
-public class LookCommand(string? target = null) : ICommand
+namespace MarcusMedina.TextAdventure.Commands;
+
+public class LookCommand : ICommand
 {
-    public string? Target { get; } = target;
+    public string? Target { get; }
+
+    public LookCommand(string? target = null)
+    {
+        Target = target;
+    }
 
     public CommandResult Execute(CommandContext context)
     {
-        var location = context.State.CurrentLocation;
+        ILocation location = context.State.CurrentLocation;
         if (!string.IsNullOrWhiteSpace(Target))
         {
             return ExecuteTarget(context, Target);
         }
 
-        var description = location.GetDescription();
-        var exitsSource = location.Exits
+        string description = location is Location loc
+            ? loc.GetDescription(context.State)
+            : location.GetDescription();
+        IEnumerable<KeyValuePair<Direction, Exit>> exitsSource = location.Exits
+            .Where(e => e.Value.IsVisible)
             .Where(e => !context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly ||
                         e.Value.Door == null ||
                         e.Value.Door.State != DoorState.Locked);
 
-        var exits = exitsSource
+        IEnumerable<string> exits = exitsSource
             .Select(e => e.Value.Door != null
-                ? $"{e.Key} ({e.Value.Door.Name}: {e.Value.Door.State})"
+                ? $"{e.Key} ({Language.EntityName(e.Value.Door)}: {e.Value.Door.State})"
                 : e.Key.ToString());
 
         StringBuilder builder = new();
@@ -43,19 +52,29 @@ public class LookCommand(string? target = null) : ICommand
 
         _ = builder.Append(builder.Length > 0 ? "\n" : string.Empty);
         _ = builder.Append(Language.HealthStatus(context.State.Stats.Health, context.State.Stats.MaxHealth));
-        _ = builder.Append('\n');
-        var items = location.Items
-            .Where(i => !i.HiddenFromItemList)
-            .Select(i => Language.ItemWithWeight(i.Name, i.Weight))
+        _ = builder.Append("\n");
+
+        List<string> presenceDescriptions = location.Items
+            .Select(i => i.PresenceDescription)
+            .Where(text => !string.IsNullOrWhiteSpace(text))
+            .Select(text => text!.Trim())
             .ToList();
+
+        foreach (string presence in presenceDescriptions)
+        {
+            _ = builder.Append(presence);
+            _ = builder.Append("\n");
+        }
+
+        List<string> items = FormatItems(location.Items.Where(i => !i.HiddenFromItemList)).ToList();
         if (!context.State.ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith || items.Count > 0)
         {
             _ = builder.Append(Language.ItemsHereLabel);
             _ = builder.Append(items.Count > 0 ? items.CommaJoin() : Language.None);
-            _ = builder.Append('\n');
+            _ = builder.Append("\n");
         }
 
-        var exitsList = exits.ToList();
+        List<string> exitsList = exits.ToList();
         if (!context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly || exitsList.Count > 0)
         {
             _ = builder.Append(Language.ExitsLabel);
@@ -67,86 +86,138 @@ public class LookCommand(string? target = null) : ICommand
 
     internal static CommandResult ExecuteTarget(CommandContext context, string target)
     {
-        var location = context.State.CurrentLocation;
-        var item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
+        ILocation location = context.State.CurrentLocation;
+        IItem? item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
         string? suggestion = null;
         if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
-            var candidates = location.Items.Concat(context.State.Inventory.Items);
-            var best = FuzzyMatcher.FindBestItem(candidates, target, context.State.FuzzyMaxDistance);
+            IEnumerable<IItem> candidates = location.Items.Concat(context.State.Inventory.Items);
+            IItem? best = FuzzyMatcher.FindBestItem(candidates, target, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 item = best;
-                suggestion = best.Name;
+                suggestion = Language.EntityName(best);
             }
         }
 
         if (item != null)
         {
-            var description = item.GetDescription();
-            var result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(item.Name)
+            string description = item.GetDescription();
+            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+                ? Language.ItemDescription(Language.EntityName(item))
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
 
-        var door = location.Exits.Values
+        INpc? npc = location.FindNpc(target);
+        if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
+        {
+            INpc? best = FuzzyMatcher.FindBestNpc(location.Npcs, target, context.State.FuzzyMaxDistance);
+            if (best != null)
+            {
+                npc = best;
+                suggestion = Language.EntityName(best);
+            }
+        }
+
+        if (npc != null)
+        {
+            string description = npc.GetDescription();
+            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+                ? Language.ItemDescription(Language.EntityName(npc))
+                : description);
+            return suggestion != null ? result.WithSuggestion(suggestion) : result;
+        }
+
+        IDoor? door = location.Exits.Values
             .Select(e => e.Door)
             .FirstOrDefault(d => d != null && (target.TextCompare("door") || d.Matches(target)));
 
         if (door == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
-            var doors = location.Exits.Values.Select(e => e.Door).Where(d => d != null).Cast<IDoor>();
+            IEnumerable<IDoor> doors = location.Exits.Values.Select(e => e.Door).Where(d => d != null).Cast<IDoor>();
             door = FuzzyMatcher.FindBestDoor(doors, target, context.State.FuzzyMaxDistance);
             if (door != null)
             {
-                suggestion = door.Name;
+                suggestion = Language.EntityName(door);
             }
         }
 
         if (door != null)
         {
-            var description = door.GetDescription();
-            var result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(door.Name)
+            string description = door.GetDescription();
+            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+                ? Language.ItemDescription(Language.EntityName(door))
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
 
-        var key = location.Exits.Values
+        IKey? key = location.Exits.Values
             .Select(e => e.Door?.RequiredKey)
             .FirstOrDefault(k => k != null && k.Name.TextCompare(target));
 
         if (key == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
-            var keys = location.Exits.Values
+            IEnumerable<IItem> keys = location.Exits.Values
                 .Select(e => e.Door?.RequiredKey)
                 .Where(k => k != null)
                 .Cast<IItem>();
             key = FuzzyMatcher.FindBestItem(keys, target, context.State.FuzzyMaxDistance) as IKey;
             if (key != null)
             {
-                suggestion = key.Name;
+                suggestion = Language.EntityName(key);
             }
         }
 
         if (key != null)
         {
-            var description = key.GetDescription();
-            var result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(key.Name)
+            string description = key.GetDescription();
+            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+                ? Language.ItemDescription(Language.EntityName(key))
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
 
         if (target.TextCompare(location.Id) || target.TextCompare("here") || target.TextCompare("room"))
         {
-            var description = location.GetDescription();
+            string description = location.GetDescription();
             return CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.NothingToLookAt
                 : description);
         }
 
         return CommandResult.Fail(Language.NothingToLookAt, GameError.ItemNotFound);
+    }
+
+    private static IEnumerable<string> FormatItems(IEnumerable<IItem> items)
+    {
+        List<IItem> materialised = items.ToList();
+        IEnumerable<IGrouping<string, IItem>> stacked = materialised
+            .Where(item => item.IsStackable)
+            .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase);
+
+        foreach (IGrouping<string, IItem> group in stacked)
+        {
+            IItem sample = group.First();
+            int amount = group.Sum(item => item.Amount ?? 1);
+            string name = Language.EntityName(sample);
+            if (amount > 1 || sample.Amount.HasValue)
+            {
+                name = $"{name} ({amount})";
+            }
+
+            yield return Language.ItemWithWeight(name, sample.Weight);
+        }
+
+        foreach (IItem item in materialised.Where(item => !item.IsStackable))
+        {
+            string name = Language.EntityName(item);
+            if (item.Amount.HasValue)
+            {
+                name = $"{name} ({item.Amount.Value})";
+            }
+
+            yield return Language.ItemWithWeight(name, item.Weight);
+        }
     }
 }

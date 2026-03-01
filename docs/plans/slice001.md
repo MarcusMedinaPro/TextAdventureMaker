@@ -198,6 +198,23 @@ public class Location : ILocation
 }
 ```
 
+---
+
+## Implementation checklist (engine)
+- [x] `Direction` enum
+- [x] `DirectionHelper.GetOpposite(...)`
+- [x] `ILocation` interface
+- [x] `Location` model with `Id`, `Description`, `Exits`
+- [x] `Location.AddExit(direction, target, oneWay)`
+- [x] `Location.GetExit(direction)`
+- [x] `GameState` with `CurrentLocation` and `Move(direction)`
+- [x] Basic console sandbox exists
+
+## Example checklist (docs/examples)
+- [x] Multiple rooms connected with exits (`01_Morning_Ritual.md`)
+- [x] Movement by cardinal directions (`01_Morning_Ritual.md`)
+- [x] `look`/room description in sandbox (`01_Morning_Ritual.md`)
+
 **Step 3: Run tests, verify pass**
 
 Run: `dotnet test tests/MarcusMedina.TextAdventure.Tests`

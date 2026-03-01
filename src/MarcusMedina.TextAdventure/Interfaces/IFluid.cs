@@ -8,8 +8,7 @@ public interface IFluid
 {
     string Id { get; }
     string Name { get; }
-
-    IFluid Description(string text);
-
+    string? Description { get; }
     string GetDescription();
+    IFluid SetDescription(string description);
 }

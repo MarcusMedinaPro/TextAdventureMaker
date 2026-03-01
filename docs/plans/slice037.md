@@ -109,3 +109,13 @@ chapters {
 ### Task 37.6: Sandbox — 3-chapter mini-adventure med branching
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IChapter` + `ChapterState`
+- [x] `ChapterBuilder`
+- [x] Chapter transitions + branching
+- [x] Chapter progress UI
+- [x] DSL for chapters
+
+## Example checklist (docs/examples)
+- [x] Chapter system demo (`37_The_Abandoned_Playground.md`)

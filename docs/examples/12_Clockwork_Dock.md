@@ -8,6 +8,21 @@ _Slice tag: Slice 12 — DSL Parser (.adventure). Demo focuses on loading a worl
 3) Open the gate.
 4) Step onto the clockwork ferry.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐     ┌────────────┐
+│    Dock    │─────│   Ferry    │
+│   T, G     │  In │            │
+└────────────┘     └────────────┘
+
+T = Brass token
+G = Iron gate (door)
+```
+
 ## Example (.adventure)
 ```text
 world: Clockwork Dock
@@ -52,6 +67,13 @@ var adventure = parser.ParseFile("clockwork.adventure");
 var state = adventure.State;
 var commandParser = new KeywordParser(KeywordParserConfig.Default);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "Clockwork Dock - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 while (true)
 {
     Console.Write("\n> ");

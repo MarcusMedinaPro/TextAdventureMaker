@@ -3,22 +3,28 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 using MarcusMedina.TextAdventure.Localization;
+
+namespace MarcusMedina.TextAdventure.Tests;
 
 public class LanguageProviderTests
 {
     [Fact]
-    public void FileLanguageProvider_IgnoresCommentsAndEmptyLines()
+    public void JsonLanguageProvider_LoadsKeys()
     {
-        var file = Path.GetTempFileName();
+        string file = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(file, "# comment\n\nkey=value\n");
-            FileLanguageProvider provider = new(file);
+            File.WriteAllText(file,
+                "{\n" +
+                "  \"meta\": { \"code\": \"sv\", \"name\": \"Swedish\" },\n" +
+                "  \"messages\": { \"hello\": \"Hej\" },\n" +
+                "  \"templates\": { \"doorLocked\": \"Låst: {0}\" }\n" +
+                "}");
+            JsonLanguageProvider provider = new(file);
 
-            Assert.Equal("value", provider.Get("key"));
+            Assert.Equal("Hej", provider.Get("hello"));
+            Assert.Equal("Låst: dörr", provider.Format("DoorLockedTemplate", "dörr"));
         }
         finally
         {
@@ -27,16 +33,19 @@ public class LanguageProviderTests
     }
 
     [Fact]
-    public void FileLanguageProvider_LoadsKeys()
+    public void JsonLanguageProvider_IgnoresCommentsAndEmptyLines()
     {
-        var file = Path.GetTempFileName();
+        string file = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(file, "hello=Hej\nDoorLockedTemplate=Låst: {0}\n");
-            FileLanguageProvider provider = new(file);
+            File.WriteAllText(file,
+                "{\n" +
+                "  // comment\n" +
+                "  \"messages\": { \"key\": \"value\" }\n" +
+                "}\n");
+            JsonLanguageProvider provider = new(file);
 
-            Assert.Equal("Hej", provider.Get("hello"));
-            Assert.Equal("Låst: dörr", provider.Format("DoorLockedTemplate", "dörr"));
+            Assert.Equal("value", provider.Get("key"));
         }
         finally
         {

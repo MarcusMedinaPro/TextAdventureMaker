@@ -3,41 +3,42 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Interfaces;
-
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Interfaces;
+
 public interface INpc : IGameEntity
 {
-    IDialogNode? DialogRoot { get; }
-    IReadOnlyList<DialogRule> DialogRules { get; }
     new string Id { get; }
-    bool IsAlive { get; }
-    NpcMemory Memory { get; }
-    INpcMovement Movement { get; }
     new string Name { get; }
+    string GetDescription();
     NpcState State { get; }
-
+    bool IsAlive { get; }
+    INpcMovement Movement { get; }
+    IDialogNode? DialogRoot { get; }
     IStats Stats { get; }
-
-    DialogRule AddDialogRule(string id);
+    NpcMemory Memory { get; }
+    IReadOnlyList<DialogRule> DialogRules { get; }
+    IReadOnlyList<NpcTrigger> Triggers { get; }
+    IReadOnlyDictionary<string, ICharacterArc> Arcs { get; }
+    IReadOnlyDictionary<string, IBond> Bonds { get; }
+    CharacterArchetype? Archetype { get; }
+    JourneyStage? FateStage { get; }
 
     INpc Description(string text);
-
-    INpc Dialog(string text);
-
-    string GetDescription();
-
-    ILocation? GetNextLocation(ILocation currentLocation, IGameState state);
-
-    string? GetRuleBasedDialog(IGameState state);
-
-    INpc SetDialog(IDialogNode? dialog);
-
-    INpc SetMovement(INpcMovement movement);
-
     INpc SetState(NpcState state);
-
+    INpc SetMovement(INpcMovement movement);
+    ILocation? GetNextLocation(ILocation currentLocation, IGameState state);
+    INpc Dialog(string text);
+    INpc SetDialog(IDialogNode? dialog);
     INpc SetStats(IStats stats);
+    DialogRule AddDialogRule(string id);
+    NpcTrigger OnSee(string target);
+    NpcTrigger OnHear(string target);
+    ICharacterArc DefineArc(string id);
+    IBond CreateBond(string id);
+    INpc SetArchetype(CharacterArchetype archetype);
+    INpc DiesAt(JourneyStage stage);
+    string? GetRuleBasedDialog(IGameState state);
 }

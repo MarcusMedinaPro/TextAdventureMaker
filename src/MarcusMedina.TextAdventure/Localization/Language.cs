@@ -3,162 +3,346 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Localization;
-
 using System.Globalization;
+using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Localization;
 
 public static class Language
 {
-    public const string DefaultLanguageCode = "en";
-    public static string ActiveQuestsLabel => Provider.Get("ActiveQuestsLabel");
-    public static string CannotCombineItems => Provider.Get("CannotCombineItems");
-    public static string CannotMoveItem => Provider.Get("CannotMoveItem");
-    public static string CannotPourThat => Provider.Get("CannotPourThat");
-    public static string CannotReadThat => Provider.Get("CannotReadThat");
-    public static string CannotTakeItem => Provider.Get("CannotTakeItem");
-    public static string CantGoThatWay => Provider.Get("CantGoThatWay");
-    public static string CompletedQuestsLabel => Provider.Get("CompletedQuestsLabel");
-    public static string DialogOptionsLabel => Provider.Get("DialogOptionsLabel");
-    public static string ExamineWhat => Provider.Get("ExamineWhat");
-    public static string ExitsLabel => Provider.Get("ExitsLabel");
-    public static string FleeSuccess => Provider.Get("FleeSuccess");
-    public static string GoalIntro => Provider.Get("GoalIntro");
-    public static string GoalLabel => Provider.Get("GoalLabel");
-    public static string InventoryEmpty => Provider.Get("InventoryEmpty");
-    public static string InventoryFull => Provider.Get("InventoryFull");
-    public static string InventoryLabel => Provider.Get("InventoryLabel");
-    public static string ItemsHereLabel => Provider.Get("ItemsHereLabel");
-    public static string LanguageHint => Provider.Get("LanguageHint");
-    public static string MustTakeToRead => Provider.Get("MustTakeToRead");
-    public static string NoDoorHere => Provider.Get("NoDoorHere");
-    public static string NoKeyRequired => Provider.Get("NoKeyRequired");
-    public static string None => Provider.Get("None");
-    public static string NoOneToFight => Provider.Get("NoOneToFight");
-    public static string NoOneToFlee => Provider.Get("NoOneToFlee");
-    public static string NoOneToTalkTo => Provider.Get("NoOneToTalkTo");
-    public static string NoQuests => Provider.Get("NoQuests");
-    public static string NoSuchItemHere => Provider.Get("NoSuchItemHere");
-    public static string NoSuchItemInventory => Provider.Get("NoSuchItemInventory");
-    public static string NoSuchNpcHere => Provider.Get("NoSuchNpcHere");
-    public static string NoTargetToAttack => Provider.Get("NoTargetToAttack");
-    public static string NothingToDrop => Provider.Get("NothingToDrop");
-    public static string NothingToLookAt => Provider.Get("NothingToLookAt");
-    public static string NothingToMove => Provider.Get("NothingToMove");
-    public static string NothingToRead => Provider.Get("NothingToRead");
-    public static string NothingToTake => Provider.Get("NothingToTake");
-    public static string NpcHasNothingToSay => Provider.Get("NpcHasNothingToSay");
-    public static string PlayerAlreadyDead => Provider.Get("PlayerAlreadyDead");
-    public static string PlayerDefeated => Provider.Get("PlayerDefeated");
     public static ILanguageProvider Provider { get; private set; } = new DefaultLanguageProvider();
 
-    public static string QuestsLabel => Provider.Get("QuestsLabel");
+    public static void SetProvider(ILanguageProvider provider)
+    {
+        Provider = provider ?? throw new ArgumentNullException(nameof(provider));
+    }
 
-    public static string RoomDescriptionLabel => Provider.Get("RoomDescriptionLabel");
-
-    public static string RoomLabel => Provider.Get("RoomLabel");
+    public const string DefaultLanguageCode = "en";
 
     public static IReadOnlyDictionary<string, (string File, string DisplayName)> SupportedLanguages { get; } = new Dictionary<string, (string File, string DisplayName)>(StringComparer.OrdinalIgnoreCase)
     {
-        ["en"] = ("gamelang.en.txt", "English"),
-        ["sv"] = ("gamelang.sv.txt", "Swedish")
+        ["en"] = ("gamelang.en.json", "English"),
+        ["sv"] = ("gamelang.sv.json", "Swedish")
     };
-
-    public static string TargetAlreadyDead => Provider.Get("TargetAlreadyDead");
-
-    public static string ThanksForPlaying => Provider.Get("ThanksForPlaying");
-
-    public static string ThatKeyDoesNotFit => Provider.Get("ThatKeyDoesNotFit");
-
-    public static string TooDarkToRead => Provider.Get("TooDarkToRead");
-
-    public static string TooHeavy => Provider.Get("TooHeavy");
-
-    public static string UnknownCommand => Provider.Get("UnknownCommand");
-
-    public static string YouNeedAKeyToOpenDoor => Provider.Get("YouNeedAKeyToOpenDoor");
-
-    public static string AttackDamage(int amount) => Provider.Format("AttackDamageTemplate", amount);
-
-    public static string AttackTarget(string targetName) => Provider.Format("AttackTargetTemplate", targetName);
-
-    public static string CanTakeInstead(string itemName) => Provider.Format("CanTakeInsteadTemplate", itemName);
-
-    public static string CombineResult(string left, string right) => Provider.Format("CombineResultTemplate", left, right);
-
-    public static string DialogOption(int index, string text) => Provider.Format("DialogOptionTemplate", index, text);
-
-    public static string DidYouMean(string suggestion) => Provider.Format("DidYouMeanTemplate", suggestion);
-
-    public static string DoorAlreadyOpenMessage(string doorName) => Provider.Format("DoorAlreadyOpen", doorName);
-
-    public static string DoorClosed(string doorName) => Provider.Format("DoorClosedTemplate", doorName);
-
-    public static string DoorLocked(string doorName) => Provider.Format("DoorLockedTemplate", doorName);
-
-    public static string DoorOpened(string doorName) => Provider.Format("DoorOpenedTemplate", doorName);
-
-    public static string DoorUnlocked(string doorName) => Provider.Format("DoorUnlockedTemplate", doorName);
-
-    public static string DoorWontBudge(string doorName) => Provider.Format("DoorWontBudgeTemplate", doorName);
-
-    public static string DropAll(string itemList) => Provider.Format("DropAllTemplate", itemList);
-
-    public static string DropItem(string itemName) => Provider.Format("DropItemTemplate", itemName);
-
-    public static string EnemyAttack(string targetName, int amount) => Provider.Format("EnemyAttackTemplate", targetName, amount);
 
     public static string GetLanguageFilePath(string code)
     {
-        var file = SupportedLanguages.TryGetValue(code, out var info)
+        string file = SupportedLanguages.TryGetValue(code, out (string File, string DisplayName) info)
             ? info.File
             : SupportedLanguages[DefaultLanguageCode].File;
 
         return Path.Combine(AppContext.BaseDirectory, "lang", file);
     }
 
-    public static string GoDirection(string direction) => Provider.Format("GoDirectionTemplate", direction);
+    public static bool TryGetLanguageInfo(string code, out (string File, string DisplayName) info)
+    {
+        return SupportedLanguages.TryGetValue(code, out info);
+    }
 
-    public static string HealthStatus(int current, int max) => Provider.Format("HealthStatusTemplate", current, max);
+    public static string CantGoThatWay => Provider.Get("CantGoThatWay");
+    public static string UnknownCommand => Provider.Get("UnknownCommand");
+    public static string ThanksForPlaying => Provider.Get("ThanksForPlaying");
+    public static string ExitsLabel => Provider.Get("ExitsLabel");
+    public static string None => Provider.Get("None");
+    public static string ItemsHereLabel => Provider.Get("ItemsHereLabel");
+    public static string InventoryLabel => Provider.Get("InventoryLabel");
+    public static string InventoryEmpty => Provider.Get("InventoryEmpty");
+    public static string NoDoorHere => Provider.Get("NoDoorHere");
+    public static string YouNeedAKeyToOpenDoor => Provider.Get("YouNeedAKeyToOpenDoor");
+    public static string ThatKeyDoesNotFit => Provider.Get("ThatKeyDoesNotFit");
+    public static string NoKeyRequired => Provider.Get("NoKeyRequired");
+    public static string InventoryFull => Provider.Get("InventoryFull");
+    public static string NoSuchItemHere => Provider.Get("NoSuchItemHere");
+    public static string NoSuchItemInventory => Provider.Get("NoSuchItemInventory");
+    public static string NothingToLookAt => Provider.Get("NothingToLookAt");
+    public static string ExamineWhat => Provider.Get("ExamineWhat");
+    public static string DidYouMean(string suggestion)
+    {
+        return Provider.Format("DidYouMeanTemplate", suggestion);
+    }
 
-    public static string ItemDescription(string itemName) => Provider.Format("ItemDescriptionTemplate", itemName);
+    public static string CannotTakeItem => Provider.Get("CannotTakeItem");
+    public static string TooHeavy => Provider.Get("TooHeavy");
+    public static string NothingToTake => Provider.Get("NothingToTake");
+    public static string NothingToDrop => Provider.Get("NothingToDrop");
+    public static string CannotCombineItems => Provider.Get("CannotCombineItems");
+    public static string CannotPourThat => Provider.Get("CannotPourThat");
+    public static string NothingToRead => Provider.Get("NothingToRead");
+    public static string CannotReadThat => Provider.Get("CannotReadThat");
+    public static string MustTakeToRead => Provider.Get("MustTakeToRead");
+    public static string TooDarkToRead => Provider.Get("TooDarkToRead");
+    public static string NothingToMove => Provider.Get("NothingToMove");
+    public static string CannotMoveItem => Provider.Get("CannotMoveItem");
+    public static string NoOneToTalkTo => Provider.Get("NoOneToTalkTo");
+    public static string NoSuchNpcHere => Provider.Get("NoSuchNpcHere");
+    public static string NpcHasNothingToSay => Provider.Get("NpcHasNothingToSay");
+    public static string DialogOptionsLabel => Provider.Get("DialogOptionsLabel");
+    public static string PlayerAlreadyDead => Provider.Get("PlayerAlreadyDead");
+    public static string TargetAlreadyDead => Provider.Get("TargetAlreadyDead");
+    public static string PlayerDefeated => Provider.Get("PlayerDefeated");
+    public static string FleeSuccess => Provider.Get("FleeSuccess");
+    public static string NoTargetToAttack => Provider.Get("NoTargetToAttack");
+    public static string NoOneToFight => Provider.Get("NoOneToFight");
+    public static string NoOneToFlee => Provider.Get("NoOneToFlee");
+    public static string NoQuests => Provider.Get("NoQuests");
+    public static string NothingToDestroy => Provider.Get("NothingToDestroy");
+    public static string YouNeedAKeyToLockDoor => Provider.Get("YouNeedAKeyToLockDoor");
+    public static string HintWhat => Provider.Get("HintWhat");
+    public static string UnknownLocation => Provider.Get("UnknownLocation");
+    public static string NoPathFound => Provider.Get("NoPathFound");
+    public static string QuestsLabel => Provider.Get("QuestsLabel");
+    public static string ActiveQuestsLabel => Provider.Get("ActiveQuestsLabel");
+    public static string CompletedQuestsLabel => Provider.Get("CompletedQuestsLabel");
+    public static string QuestEntry(string title)
+    {
+        return Provider.Format("QuestEntryTemplate", title);
+    }
 
-    public static string ItemWithWeight(string itemName, float weight) => weight > 0
+    public static string DoorLocked(string doorName)
+    {
+        return Provider.Format("DoorLockedTemplate", doorName);
+    }
+
+    public static string DoorClosed(string doorName)
+    {
+        return Provider.Format("DoorClosedTemplate", doorName);
+    }
+
+    public static string DoorClosedByPlayer(string doorName)
+    {
+        return Provider.Format("DoorClosedByPlayerTemplate", doorName);
+    }
+
+    public static string DoorLockedByPlayer(string doorName)
+    {
+        return Provider.Format("DoorLockedByPlayerTemplate", doorName);
+    }
+
+    public static string DoorDestroyed(string doorName)
+    {
+        return Provider.Format("DoorDestroyedTemplate", doorName);
+    }
+
+    public static string DoorWontBudge(string doorName)
+    {
+        return Provider.Format("DoorWontBudgeTemplate", doorName);
+    }
+
+    public static string DoorOpened(string doorName)
+    {
+        return Provider.Format("DoorOpenedTemplate", doorName);
+    }
+
+    public static string DoorUnlocked(string doorName)
+    {
+        return Provider.Format("DoorUnlockedTemplate", doorName);
+    }
+
+    public static string DoorAlreadyClosedMessage(string doorName)
+    {
+        return Provider.Format("DoorAlreadyClosed", doorName);
+    }
+
+    public static string DoorAlreadyLockedMessage(string doorName)
+    {
+        return Provider.Format("DoorAlreadyLocked", doorName);
+    }
+
+    public static string DoorAlreadyDestroyedMessage(string doorName)
+    {
+        return Provider.Format("DoorAlreadyDestroyed", doorName);
+    }
+
+    public static string DoorMustBeClosed(string doorName)
+    {
+        return Provider.Format("DoorMustBeClosedTemplate", doorName);
+    }
+
+    public static string GoDirection(string direction)
+    {
+        return Provider.Format("GoDirectionTemplate", direction);
+    }
+
+    public static string DirectionName(Direction direction)
+    {
+        return Provider is JsonLanguageProvider json ? json.GetDirectionName(direction) : direction.ToString();
+    }
+
+    public static string HealthStatus(int current, int max)
+    {
+        return Provider.Format("HealthStatusTemplate", current, max);
+    }
+
+    public static string TotalWeight(float totalWeight)
+    {
+        return Provider.Format("TotalWeightTemplate", totalWeight.ToString("0.##", CultureInfo.InvariantCulture));
+    }
+
+    public static string TakeItem(string itemName)
+    {
+        return Provider.Format("TakeItemTemplate", itemName);
+    }
+
+    public static string DropItem(string itemName)
+    {
+        return Provider.Format("DropItemTemplate", itemName);
+    }
+
+    public static string UseItem(string itemName)
+    {
+        return Provider.Format("UseItemTemplate", itemName);
+    }
+
+    public static string TakeAll(string itemList)
+    {
+        return Provider.Format("TakeAllTemplate", itemList);
+    }
+
+    public static string TakeAllSkipped(string itemList)
+    {
+        return Provider.Format("TakeAllSkippedTemplate", itemList);
+    }
+
+    public static string ItemWithWeight(string itemName, float weight)
+    {
+        return weight > 0
             ? Provider.Format("ItemWithWeightTemplate", itemName, weight.ToString("0.##", CultureInfo.InvariantCulture))
             : itemName;
+    }
 
-    public static string LanguageLoaded(string displayName, string code) => Provider.Format("LanguageLoadedTemplate", displayName, code);
+    public static string DropAll(string itemList)
+    {
+        return Provider.Format("DropAllTemplate", itemList);
+    }
 
-    public static string LoadFailed(string path) => Provider.Format("LoadFailedTemplate", path);
+    public static string ItemDescription(string itemName)
+    {
+        return Provider.Format("ItemDescriptionTemplate", itemName);
+    }
 
-    public static string LoadSuccess(string path) => Provider.Format("LoadSuccessTemplate", path);
+    public static string MoveItem(string itemName)
+    {
+        return Provider.Format("MoveItemTemplate", itemName);
+    }
 
-    public static string MoveItem(string itemName) => Provider.Format("MoveItemTemplate", itemName);
+    public static string DestroyedItem(string itemName)
+    {
+        return Provider.Format("DestroyItemTemplate", itemName);
+    }
 
-    public static string PourResult(string fluid, string container) => Provider.Format("PourResultTemplate", fluid, container);
+    public static string HintPath(string path)
+    {
+        return Provider.Format("HintPathTemplate", path);
+    }
 
-    public static string QuestEntry(string title) => Provider.Format("QuestEntryTemplate", title);
+    public static string CanTakeInstead(string itemName)
+    {
+        return Provider.Format("CanTakeInsteadTemplate", itemName);
+    }
 
-    public static string ReadingCost(int turns, string text) => Provider.Format("ReadingCostTemplate", turns, text);
+    public static string DoorAlreadyOpenMessage(string doorName)
+    {
+        return Provider.Format("DoorAlreadyOpen", doorName);
+    }
 
-    public static string SaveFailed(string path) => Provider.Format("SaveFailedTemplate", path);
+    public static string CombineResult(string left, string right)
+    {
+        return Provider.Format("CombineResultTemplate", left, right);
+    }
 
-    public static string SaveSuccess(string path) => Provider.Format("SaveSuccessTemplate", path);
+    public static string PourResult(string fluid, string container)
+    {
+        return Provider.Format("PourResultTemplate", fluid, container);
+    }
 
-    public static void SetProvider(ILanguageProvider provider) => Provider = provider ?? throw new ArgumentNullException(nameof(provider));
+    public static string EntityName(IGameEntity entity)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        return Provider is JsonLanguageProvider json ? json.GetName(entity.Id) : entity.Name;
+    }
 
-    public static string TakeAll(string itemList) => Provider.Format("TakeAllTemplate", itemList);
+    public static string EntityName(string id, string name)
+    {
+        return Provider is JsonLanguageProvider json ? json.GetName(id) : name;
+    }
 
-    public static string TakeAllSkipped(string itemList) => Provider.Format("TakeAllSkippedTemplate", itemList);
+    public static string ReadingCost(int turns, string text)
+    {
+        return Provider.Format("ReadingCostTemplate", turns, text);
+    }
 
-    public static string TakeItem(string itemName) => Provider.Format("TakeItemTemplate", itemName);
+    public static string DialogOption(int index, string text)
+    {
+        return Provider.Format("DialogOptionTemplate", index, text);
+    }
 
-    public static string TargetDefeated(string targetName) => Provider.Format("TargetDefeatedTemplate", targetName);
+    public static string AttackTarget(string targetName)
+    {
+        return Provider.Format("AttackTargetTemplate", targetName);
+    }
 
-    public static string TotalWeight(float totalWeight) => Provider.Format("TotalWeightTemplate", totalWeight.ToString("0.##", CultureInfo.InvariantCulture));
+    public static string AttackDamage(int amount)
+    {
+        return Provider.Format("AttackDamageTemplate", amount);
+    }
 
-    public static bool TryGetLanguageInfo(string code, out (string File, string DisplayName) info) => SupportedLanguages.TryGetValue(code, out info);
+    public static string EnemyAttack(string targetName, int amount)
+    {
+        return Provider.Format("EnemyAttackTemplate", targetName, amount);
+    }
 
-    public static string UseItem(string itemName) => Provider.Format("UseItemTemplate", itemName);
+    public static string TargetDefeated(string targetName)
+    {
+        return Provider.Format("TargetDefeatedTemplate", targetName);
+    }
+
+    public static string SaveSuccess(string path)
+    {
+        return Provider.Format("SaveSuccessTemplate", path);
+    }
+
+    public static string SaveFailed(string path)
+    {
+        return Provider.Format("SaveFailedTemplate", path);
+    }
+
+    public static string LoadSuccess(string path)
+    {
+        return Provider.Format("LoadSuccessTemplate", path);
+    }
+
+    public static string LoadFailed(string path)
+    {
+        return Provider.Format("LoadFailedTemplate", path);
+    }
+
+    public static string GoalLabel => Provider.Get("GoalLabel");
+    public static string GoalIntro => Provider.Get("GoalIntro");
+    public static string LanguageHint => Provider.Get("LanguageHint");
+    public static string LanguageLoaded(string displayName, string code)
+    {
+        return Provider.Format("LanguageLoadedTemplate", displayName, code);
+    }
+
+    public static string RoomLabel => Provider.Get("RoomLabel");
+    public static string RoomDescriptionLabel => Provider.Get("RoomDescriptionLabel");
+    public static string CannotEatThat => Provider.Get("CannotEatThat");
+    public static string CannotDrinkThat => Provider.Get("CannotDrinkThat");
+
+    public static string EatItem(string itemName) =>
+        Provider.Format("EatItemTemplate", itemName);
+
+    public static string DrinkItem(string itemName) =>
+        Provider.Format("DrinkItemTemplate", itemName);
+
+    public static string HealedAmount(int amount) =>
+        Provider.Format("HealedAmountTemplate", amount);
+
+    public static string PoisonedMessage => Provider.Get("PoisonedMessage");
+
+    public static string PoisonTick(string sourceName, int damage) =>
+        Provider.Format("PoisonTickTemplate", sourceName, damage);
 
     private sealed class DefaultLanguageProvider : ILanguageProvider
     {
@@ -210,6 +394,10 @@ public static class Language
             ["NoOneToFight"] = "There's no one here to fight.",
             ["NoOneToFlee"] = "There's no one here to flee from.",
             ["NoQuests"] = "You have no quests.",
+            ["NothingToDestroy"] = "There's nothing to destroy.",
+            ["HintWhat"] = "Hint to where?",
+            ["UnknownLocation"] = "I don't know that place.",
+            ["NoPathFound"] = "No path found.",
             ["QuestsLabel"] = "Quest log",
             ["ActiveQuestsLabel"] = "Active",
             ["CompletedQuestsLabel"] = "Completed",
@@ -220,9 +408,17 @@ public static class Language
             ["LoadFailedTemplate"] = "Failed to load game from {0}.",
             ["DoorLockedTemplate"] = "The {0} is locked.",
             ["DoorClosedTemplate"] = "The {0} is closed.",
+            ["DoorClosedByPlayerTemplate"] = "You close the {0}.",
+            ["DoorLockedByPlayerTemplate"] = "You lock the {0}.",
+            ["DoorDestroyedTemplate"] = "You destroy the {0}.",
             ["DoorWontBudgeTemplate"] = "The {0} won't budge.",
             ["DoorOpenedTemplate"] = "You open the {0}.",
             ["DoorUnlockedTemplate"] = "You unlock the {0}.",
+            ["DoorAlreadyClosed"] = "The {0} is already closed.",
+            ["DoorAlreadyLocked"] = "The {0} is already locked.",
+            ["DoorAlreadyDestroyed"] = "The {0} is already destroyed.",
+            ["DoorMustBeClosedTemplate"] = "The {0} must be closed first.",
+            ["YouNeedAKeyToLockDoor"] = "You need a key to lock the door.",
             ["GoDirectionTemplate"] = "You go {0}.",
             ["TotalWeightTemplate"] = "Total weight: {0}",
             ["TakeItemTemplate"] = "You take the {0}.",
@@ -233,10 +429,12 @@ public static class Language
             ["DropAllTemplate"] = "You drop: {0}.",
             ["ItemWithWeightTemplate"] = "{0} ({1})",
             ["ItemDescriptionTemplate"] = "It's a {0}.",
+            ["DestroyItemTemplate"] = "You destroy the {0}.",
             ["CombineResultTemplate"] = "You combine {0} and {1}.",
             ["PourResultTemplate"] = "You pour the {0} into the {1}.",
             ["ReadingCostTemplate"] = "You spend {0} turns reading...\\n{1}",
             ["DialogOptionTemplate"] = "{0}. {1}",
+            ["HintPathTemplate"] = "Path: {0}",
             ["AttackTargetTemplate"] = "You attack the {0}.",
             ["AttackDamageTemplate"] = "You hit for {0} damage.",
             ["EnemyAttackTemplate"] = "The {0} hits you for {1} damage.",
@@ -246,15 +444,25 @@ public static class Language
             ["LanguageHint"] = "Type 'language <code>' to switch languages.",
             ["LanguageLoadedTemplate"] = "Loaded {0} ({1}) language file.",
             ["RoomLabel"] = "Room:",
-            ["RoomDescriptionLabel"] = "Description:"
+            ["RoomDescriptionLabel"] = "Description:",
+            ["CannotEatThat"] = "You can't eat that.",
+            ["CannotDrinkThat"] = "You can't drink that.",
+            ["EatItemTemplate"] = "You eat the {0}.",
+            ["DrinkItemTemplate"] = "You drink the {0}.",
+            ["HealedAmountTemplate"] = "You feel better. (+{0} health)",
+            ["PoisonedMessage"] = "Something tastes wrong...",
+            ["PoisonTickTemplate"] = "The poison from the {0} courses through you. (-{1} health)"
         };
+
+        public string Get(string key)
+        {
+            return string.IsNullOrWhiteSpace(key) ? "" : _entries.TryGetValue(key, out string? value) ? value : $"[[{key}]]";
+        }
 
         public string Format(string key, params object[] args)
         {
-            var template = Get(key);
+            string template = Get(key);
             return string.Format(CultureInfo.InvariantCulture, template, args);
         }
-
-        public string Get(string key) => string.IsNullOrWhiteSpace(key) ? "" : _entries.TryGetValue(key, out var value) ? value : $"[[{key}]]";
     }
 }

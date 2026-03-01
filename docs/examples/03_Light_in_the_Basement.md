@@ -143,6 +143,13 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
     .Build();
 var parser = new KeywordParser(parserConfig);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "LIGHT IN THE BASEMENT (Slice 3) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== LIGHT IN THE BASEMENT (Slice 3) ===");
 Console.WriteLine("Goal: find the basement key, unlock the door, and go down.");
 Console.WriteLine("Commands: look, examine <item>, take <item>, move <item>, unlock/open door, go down, use/turn on/off torch, inventory, quit.");

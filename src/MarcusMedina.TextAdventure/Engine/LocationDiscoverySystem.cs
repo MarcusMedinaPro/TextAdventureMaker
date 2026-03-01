@@ -3,16 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Engine;
-
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
 {
     private readonly HashSet<string> _discovered = new(StringComparer.OrdinalIgnoreCase);
 
     public IReadOnlyCollection<string> DiscoveredLocations => _discovered;
+    public bool FogOfWarEnabled { get; set; }
 
     public void Attach(IGameState state, IEventSystem events)
     {
@@ -28,6 +29,11 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
         });
     }
 
+    public bool IsDiscovered(string locationId)
+    {
+        return !string.IsNullOrWhiteSpace(locationId) && _discovered.Contains(locationId);
+    }
+
     public void Discover(string locationId)
     {
         if (string.IsNullOrWhiteSpace(locationId))
@@ -38,5 +44,32 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
         _ = _discovered.Add(locationId.Trim());
     }
 
-    public bool IsDiscovered(string locationId) => !string.IsNullOrWhiteSpace(locationId) && _discovered.Contains(locationId);
+    public IEnumerable<ILocation> FilterVisible(IEnumerable<ILocation> locations, bool includeUndiscovered = false)
+    {
+        if (locations == null)
+        {
+            yield break;
+        }
+
+        if (!FogOfWarEnabled || includeUndiscovered)
+        {
+            foreach (ILocation location in locations)
+            {
+                if (location != null)
+                {
+                    yield return location;
+                }
+            }
+
+            yield break;
+        }
+
+        foreach (ILocation location in locations)
+        {
+            if (location != null && IsDiscovered(location.Id))
+            {
+                yield return location;
+            }
+        }
+    }
 }

@@ -77,6 +77,13 @@ kitchen.AddExit(Direction.South, livingRoom);
 // Game state
 var state = new GameState(bedroom, worldLocations: new[] { bedroom, hallway, kitchen, livingRoom });
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "MORNING RITUAL (Slice 1) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== MORNING RITUAL (Slice 1) ===");
 Console.WriteLine("Goal: make your way to the living room for a quiet start.");
 Console.WriteLine("Type 'look' to recheck your surroundings.");

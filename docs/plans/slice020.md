@@ -19,3 +19,13 @@ game.AddEventChain("village_rescue")
 ### Task 20.3: Sandbox — village rescue med tidslimit
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IEventChain` + `ICondition`
+- [x] Time/location/state triggers for event chains (`EventChainExtensions`)
+- [x] Entity hints (`SetHint` / `GetHint`)
+- [x] Entity properties (`SetProperty` / `GetProperty`)
+
+## Example checklist (docs/examples)
+- [x] Hints & properties demo (`20_Hints_and_Properties.md`)
+- [x] Conditional event chain demo (`20_Hints_and_Properties.md`)

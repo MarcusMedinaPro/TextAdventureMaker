@@ -21,6 +21,31 @@ _Slice tag: Slice 36 — Moral Labyrinth (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Left Room │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐
+│  Chamber   │
+│     T      │
+└─────┬──────┘
+      │
+┌────────────┐
+│ Right Room │
+│            │
+└────────────┘
+
+T = Bone token (in chamber)
+```
+
     ## Example (detailed setup)
 
 ```csharp

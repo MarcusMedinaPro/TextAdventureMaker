@@ -3,19 +3,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Models;
-
 using MarcusMedina.TextAdventure.Interfaces;
 
-public sealed class DialogOption
+namespace MarcusMedina.TextAdventure.Models;
+
+public sealed class DialogOption(string text, IDialogNode? next = null)
 {
-    public DialogOption(string text, IDialogNode? next = null)
+    public string Text { get; } = ValidateText(text);
+    public IDialogNode? Next { get; } = next;
+
+    private static string ValidateText(string text)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(text);
-        Text = text;
-        Next = next;
+        return text;
     }
-
-    public IDialogNode? Next { get; }
-    public string Text { get; }
 }

@@ -79,6 +79,13 @@ var parserConfig = KeywordParserConfigBuilder.BritishDefaults()
 
 var parser = new KeywordParser(parserConfig);
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE SYNONYM STUDIO (Slice 5.7) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE SYNONYM STUDIO (Slice 5.7) ===");
 Console.WriteLine("Goal: try synonyms like 'grab blade', 'inspect sword', 'walk east'.");
 Console.WriteLine("Type 'help' for a quick list.");

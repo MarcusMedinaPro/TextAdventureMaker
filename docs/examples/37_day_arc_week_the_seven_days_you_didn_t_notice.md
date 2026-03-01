@@ -20,6 +20,29 @@ _Slice tag: Slice 37 — Day Arc Week (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Wednesday  │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐
+│  Tuesday   │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐
+│   Monday   │
+│            │
+└────────────┘
+```
+
     ## Example (detailed setup)
 
 ```csharp

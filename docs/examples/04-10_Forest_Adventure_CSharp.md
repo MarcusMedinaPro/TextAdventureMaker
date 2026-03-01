@@ -4,6 +4,44 @@ _Slice tag: Slice 4–10 — Foundation demo spanning items, inventory, reaction
 
 This version is intentionally “plain C#”: explicit constructors, explicit collections, minimal fluent chaining, and no shortcuts.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌──────────┐            ┌──────────┐
+│   Shed   │            │ DeepCave │
+│   Sh     │            │          │
+└────┬─────┘            └────┬─────┘
+     │                       │
+┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│  Cabin   │──│ Clearing │──│  Forest  │──│   Cave   │
+│  Np      │  │ Sw,G,Tm  │  │ A,F,L,SK │  │ K,Lt     │
+└──────────┘  └──────────┘  └────┬─────┘  └──────────┘
+                                │
+                                │
+                           ┌──────────┐
+                           │ Entrance │
+                           │ I,Sg,Mp  │
+                           └──────────┘
+
+I = Ice
+Sg = Sign
+Mp = Map
+A = Apple
+F = Fire
+L = Lantern
+SK = Shed key
+Sw = Sword
+G = Glass
+Tm = Tome
+K = Cabin key
+Lt = Letter
+Np = Newspaper
+Sh = Shovel
+```
+
 ```csharp
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
@@ -265,6 +303,14 @@ var parserConfig = new KeywordParserConfig(
     fuzzyMaxDistance: 1);
 
 var parser = new KeywordParser(parserConfig);
+
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "FOREST ADVENTURE (C#) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 
 while (true)
 {

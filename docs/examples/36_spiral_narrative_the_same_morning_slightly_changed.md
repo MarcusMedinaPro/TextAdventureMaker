@@ -21,6 +21,28 @@ _Slice tag: Slice 36 — Spiral Narrative (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐      ┌────────────┐
+│  Kitchen   │      │  Hallway   │
+│            │      │            │
+└─────┬──────┘      └─────┬──────┘
+      │                   │
+      └─────────┬─────────┘
+                │
+         ┌────────────┐
+         │  Bedroom   │
+         │     S      │
+         └────────────┘
+
+S = Scrap of paper
+```
+
     ## Example (detailed setup)
 
 ```csharp

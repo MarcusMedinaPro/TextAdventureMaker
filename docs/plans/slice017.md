@@ -9,3 +9,11 @@
 ### Task 17.3: README + dokumentation
 
 ---
+
+## Implementation checklist (packaging)
+- [x] NuGet metadata in `.csproj` / `.nuspec`
+- [x] `dotnet pack` / publish pipeline (`scripts/pack.sh`, `scripts/pack.ps1`)
+- [x] README/docs for packages
+
+## Example checklist (docs/examples)
+- [x] Not applicable (packaging)

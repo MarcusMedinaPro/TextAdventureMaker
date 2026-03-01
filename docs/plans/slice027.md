@@ -20,3 +20,11 @@ location.Description()
 ### Task 27.4: Sandbox — rum beskrivs olika beroende på tid, quest, traits
 
 ---
+
+## Implementation checklist (engine)
+- [x] Context-aware location descriptions
+- [x] Variable substitution in descriptions
+- [x] Dialog templates with parameters (`27_Apartment_Viewing.md`)
+
+## Example checklist (docs/examples)
+- [x] Dynamic description demo (`27_Apartment_Viewing.md`)

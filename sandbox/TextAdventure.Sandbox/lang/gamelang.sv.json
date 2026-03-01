@@ -4,82 +4,51 @@
     "name": "Svenska"
   },
   "commands": {
-    "quit": [ "avsluta", "sluta", "q" ],
-    "look": [ "titta", "se", "l", "kolla" ],
-    "examine": [ "undersök", "granska", "x" ],
-    "inventory": [ "inventering", "inv", "i", "väska" ],
-    "stats": [ "statistik", "hälsa", "hp" ],
-    "open": [ "öppna" ],
-    "unlock": [ "lås upp" ],
-    "take": [ "ta", "plocka", "hämta" ],
-    "drop": [ "släpp", "lägg" ],
-    "use": [ "använd" ],
-    "combine": [ "kombinera", "blanda" ],
-    "pour": [ "häll" ],
-    "move": [ "flytta", "skjut", "lyft" ],
-    "go": [ "gå", "spring" ],
-    "read": [ "läs" ],
-    "talk": [ "prata", "tala", "snacka" ],
-    "attack": [ "attackera", "slå", "slåss" ],
-    "flee": [ "fly", "spring" ],
-    "save": [ "spara" ],
-    "load": [ "ladda" ],
-    "quest": [ "uppdrag", "journal" ],
-    "all": [ "allt", "alla" ]
+    "quit": ["avsluta", "stäng ner", "sluta", "q"],
+    "look": ["look", "titta", "se", "l", "kolla"],
+    "examine": ["undersök", "granska", "x"],
+    "inventory": ["inventering", "inv", "i", "väska"],
+    "stats": ["statistik", "hälsa", "hp"],
+    "open": ["öppna"],
+    "unlock": ["lås upp"],
+    "close": ["stäng"],
+    "lock": ["lås", "låsa"],
+    "destroy": ["förstör", "krossa", "slå sönder"],
+    "take": ["ta", "plocka", "hämta"],
+    "drop": ["släpp", "lägg"],
+    "use": ["använd"],
+    "combine": ["kombinera", "blanda"],
+    "pour": ["häll"],
+    "move": ["flytta", "skjut", "lyft"],
+    "go": ["gå", "spring"],
+    "read": ["läs"],
+    "talk": ["prata", "tala", "snacka"],
+    "attack": ["attackera", "slå", "slåss"],
+    "flee": ["fly", "spring"],
+    "save": ["spara"],
+    "load": ["ladda"],
+    "quest": ["uppdrag", "journal"],
+    "hint": ["tips", "väg"],
+    "all": ["allt", "alla"]
   },
   "directions": {
-    "north": {
-      "name": "Norr",
-      "aliases": [ "n", "norr", "norrut" ]
-    },
-    "south": {
-      "name": "Söder",
-      "aliases": [ "s", "söder", "söderut" ]
-    },
-    "east": {
-      "name": "Öst",
-      "aliases": [ "ö", "öst", "öster", "österut" ]
-    },
-    "west": {
-      "name": "Väst",
-      "aliases": [ "v", "väst", "väster", "västerut" ]
-    },
-    "up": {
-      "name": "Upp",
-      "aliases": [ "u", "upp", "uppåt" ]
-    },
-    "down": {
-      "name": "Ner",
-      "aliases": [ "d", "ner", "neråt" ]
-    },
-    "northeast": {
-      "name": "Nordöst",
-      "aliases": [ "no", "nordöst" ]
-    },
-    "northwest": {
-      "name": "Nordväst",
-      "aliases": [ "nv", "nordväst" ]
-    },
-    "southeast": {
-      "name": "Sydöst",
-      "aliases": [ "so", "sydöst" ]
-    },
-    "southwest": {
-      "name": "Sydväst",
-      "aliases": [ "sv", "sydväst" ]
-    },
-    "in": {
-      "name": "In",
-      "aliases": [ "in", "inåt", "gå in" ]
-    },
-    "out": {
-      "name": "Ut",
-      "aliases": [ "ut", "utåt", "gå ut" ]
-    }
+    "north": { "name": "Norr", "aliases": ["n", "norr", "norrut"] },
+    "south": { "name": "Söder", "aliases": ["s", "söder", "söderut"] },
+    "east": { "name": "Öst", "aliases": ["ö", "öst", "öster", "österut"] },
+    "west": { "name": "Väst", "aliases": ["v", "väst", "väster", "västerut"] },
+    "up": { "name": "Upp", "aliases": ["u", "upp", "uppåt"] },
+    "down": { "name": "Ner", "aliases": ["d", "ner", "neråt"] },
+    "northeast": { "name": "Nordöst", "aliases": ["no", "nordöst"] },
+    "northwest": { "name": "Nordväst", "aliases": ["nv", "nordväst"] },
+    "southeast": { "name": "Sydöst", "aliases": ["so", "sydöst"] },
+    "southwest": { "name": "Sydväst", "aliases": ["sv", "sydväst"] },
+    "in": { "name": "In", "aliases": ["in", "inåt", "gå in"] },
+    "out": { "name": "Ut", "aliases": ["ut", "utåt", "gå ut"] }
   },
   "labels": {
     "roomLabel": "Rum:",
     "descriptionLabel": "Beskrivning:",
+    "roomDescriptionLabel": "Beskrivning:",
     "itemsHereLabel": "Föremål här:",
     "exitsLabel": "Utgångar:",
     "inventoryLabel": "Inventering:",
@@ -127,14 +96,26 @@
     "noOneToFight": "Det finns ingen här att slåss mot.",
     "noOneToFlee": "Det finns ingen här att fly från.",
     "noQuests": "Du har inga uppdrag.",
-    "goalIntro": "Ladda det språk du föredrar innan du går till mötet.",
-    "languageHint": "Skriv \"language <kod>\" för att byta språk."
+    "nothingToDestroy": "Det finns inget att förstöra.",
+    "hintWhat": "Tips till vart?",
+    "unknownLocation": "Jag känner inte till den platsen.",
+    "noPathFound": "Ingen väg hittades.",
+    "goalIntro": "Ladda den språkleverantör du föredrar innan du går till mötet.",
+    "languageHint": "Skriv \"language <code>\" för att byta språk.",
+    "youNeedAKeyToLockDoor": "Du behöver en nyckel för att låsa dörren."
   },
   "templates": {
     "healthStatus": "Hälsa: {0}/{1}",
     "doorAlreadyOpen": "{0} är redan öppen.",
+    "doorAlreadyClosed": "{0} är redan stängd.",
+    "doorAlreadyLocked": "{0} är redan låst.",
+    "doorAlreadyDestroyed": "{0} är redan förstörd.",
     "doorLocked": "{0} är låst.",
     "doorClosed": "{0} är stängd.",
+    "doorClosedByPlayer": "Du stänger {0}.",
+    "doorLockedByPlayer": "Du låser {0}.",
+    "doorDestroyed": "Du förstör {0}.",
+    "doorMustBeClosed": "{0} måste stängas först.",
     "doorWontBudge": "{0} rör sig inte.",
     "doorOpened": "Du öppnar {0}.",
     "doorUnlocked": "Du låser upp {0}.",
@@ -149,7 +130,9 @@
     "itemWithWeight": "{0} ({1})",
     "itemDescription": "Det är en {0}.",
     "moveItem": "Du flyttar {0}.",
+    "destroyItem": "Du förstör {0}.",
     "canTakeInstead": "Du kan bara ta {0}.",
+    "hintPath": "Väg: {0}",
     "combineResult": "Du kombinerar {0} och {1}.",
     "pourResult": "Du häller {0} i {1}.",
     "readingCost": "Du läser i {0} turer...\n{1}",
@@ -162,18 +145,25 @@
     "saveFailed": "Misslyckades att spara spelet till {0}.",
     "loadSuccess": "Spelet laddades från {0}.",
     "loadFailed": "Misslyckades att ladda spelet från {0}.",
-    "languageLoaded": "Laddade {0} ({1}) språkfil.",
+    "languageLoaded": "Laddade språkfil {0} ({1}).",
+    "coatTakeFailed": "Kappan är hopplöst omodern.",
+    "mirrorTakeFailed": "Den är alldeles för stor att bära.",
+    "mirrorDestroy": "En fruktansvärd idé. Sju år av otur väntar. Bättre att låta bli!",
     "didYouMean": "Menade du \"{0}\"?",
     "questEntry": "- {0}"
   },
   "names": {
     "bedroom": "Sovrum",
-    "hallway": "Hall",
-    "coffee": "Kaffe"
+    "hallway": "Korridor",
+    "coffee": "Kaffe",
+    "coat": "Kappa",
+    "mirror": "Spegel"
   },
   "descriptions": {
-    "bedroom": "Din väckarklocka blinkar 08:57. En rock hänger vid dörren.",
-    "hallway": "En tyst hall med en spegel.",
-    "coffee": "En varm kopp kaffe."
+    "bedroom": "Din väckarklocka visar {0:D2}:{1:D2}. En kappa hänger vid dörren.",
+    "hallway": "En tyst korridor med en spegel.",
+    "coffee": "En het kopp kaffe.",
+    "coat": "En gammal kappa. Bäst att skänka den till en second hand-butik.",
+    "mirror": "Du ser din spegelbild."
   }
 }

@@ -16,3 +16,13 @@
 ### Task 25.4: Import befintlig DSL för visualisering
 
 ---
+
+## Implementation checklist (tooling)
+- [x] Story mapper app (web/desktop)
+- [x] Scene graph editing (nodes/edges/conditions)
+- [x] Quest/NPC relationship visualisation (`25_The_Hospital_Visit.md`)
+- [x] Export to `.adventure` DSL
+- [x] Import from `.adventure` DSL
+
+## Example checklist (docs/examples)
+- [x] Relationship visualisation demo (`25_The_Hospital_Visit.md`)

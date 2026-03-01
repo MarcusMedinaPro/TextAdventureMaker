@@ -106,6 +106,13 @@ var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults()
     .WithFuzzyMatching(true, 1)
     .Build());
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "THE LATE PLATFORM (Slice 5) - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 Console.WriteLine("=== THE LATE PLATFORM (Slice 5) ===");
 Console.WriteLine("Commands: Look, Examine <Item>, Move <Item>, Talk <Npc>, Take <Item>, Unlock/Open Gate, Go East/West, Inventory, Quit");
 

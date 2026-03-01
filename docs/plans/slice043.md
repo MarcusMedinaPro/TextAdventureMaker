@@ -13,3 +13,10 @@
 - Möjlig att använda i sandbox för att visa en karta vid `look`.
 
 ---
+
+## Implementation checklist (engine)
+- [x] `MapGenerator` (render from `GameState` or `ILocation`)
+- [x] ASCII map rendering
+
+## Example checklist (docs/examples)
+- [x] Map generator demo (`43_Map_Generator.md`)

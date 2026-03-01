@@ -27,3 +27,13 @@ location.SetMood(Mood.Foreboding)
 ### Task 26.6: Sandbox — grotta med ökande skräck ju djupare man går
 
 ---
+
+## Implementation checklist (engine)
+- [x] `IMoodSystem`
+- [x] `Mood` enum
+- [x] Environmental cues (lighting/sound/smell/temperature)
+- [x] Mood-modified descriptions (`26_The_Broken_Car.md`)
+- [x] Mood propagation
+
+## Example checklist (docs/examples)
+- [x] Mood system demo (`26_The_Broken_Car.md`)

@@ -9,3 +9,11 @@
 ### Task 13.3: Sandbox — hela spelet via GameBuilder
 
 ---
+
+## Implementation checklist (engine)
+- [x] `GameBuilder` fluent API
+- [x] `IGame` + `Game` main loop
+- [x] Hooks for turn start/end and NPC ticks
+
+## Example checklist (docs/examples)
+- [x] Game built with `GameBuilder` (`13_Midnight_Studio.md`)

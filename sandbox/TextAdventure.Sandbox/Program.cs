@@ -1,254 +1,196 @@
-using MarcusMedina.TextAdventure.Commands;
+using MarcusMedina.TextAdventure.AI.Models;
+using MarcusMedina.TextAdventure.AI.Plugin;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
-using MarcusMedina.TextAdventure.Helpers;
-using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
-using TextAdventure.Sandbox;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-var state = BuildGameState();
-var jsonProvider = LoadLanguage("en");
-Language.SetProvider(jsonProvider);
-var parser = BuildParser(jsonProvider);
+// AI Plugin Demo
+// Environment variables:
+// - TA_AI_PROVIDER (ollama|lmstudio|dockerai|openai|claude|mistral|openrouter|1minai|gemini)
+// - TA_AI_API_KEY
+// - TA_AI_MODEL
+// - TA_AI_ENDPOINT
+// - TA_AI_FALLBACK_PROVIDER (+ matching TA_AI_FALLBACK_API_KEY/MODEL/ENDPOINT)
+// - TA_AI_ENABLE_DESCRIPTION_CACHE_INVALIDATION (true/false)
+// - TA_AI_RUNTIME_TIMEOUT_MS
+// - TA_AI_NPC_MOVE_AI_EVERY_TURNS
+// - TA_AI_STORY_AI_EVERY_TURNS
+// - TA_AI_PREFER_LOCAL_PARSE_FIRST (true/false)
+// - TA_AI_SPINNER (true/false)
 
-Console.WriteLine("=== BEFORE THE MEETING (Slice 11) ===");
-Console.WriteLine($"{jsonProvider.Get("goalLabel")} {jsonProvider.Get("goalIntro")}");
-Console.WriteLine($"Language: {jsonProvider.Name} ({jsonProvider.Code.ToUpperInvariant()})");
-Console.WriteLine(jsonProvider.Get("languageHint"));
-ShowRoom();
+Location square = new("square", "A rain-soaked town square with a flickering lamp.");
+Location inn = new("inn", "A warm inn with polished oak tables and soft firelight.");
+Location alley = new("alley", "A narrow alley where loose shutters rattle in the wind.");
 
-while (true)
+square.AddExit(Direction.North, inn);
+square.AddExit(Direction.East, alley);
+inn.AddExit(Direction.South, square);
+alley.AddExit(Direction.West, square);
+
+Item map = new("map", "Town Map", "A weathered map of side streets and old service tunnels.");
+Item token = new("token", "Brass Token", "A stamped token from the inn cellar.");
+square.AddItem(map);
+inn.AddItem(token);
+
+var innkeeper = new Npc("innkeeper", "Innkeeper")
+    .Description("Pragmatic and observant. Speaks in short, careful sentences.")
+    .Dialog("Evening. Keep your voice down if you're planning trouble.");
+
+var watchman = new Npc("watchman", "Watchman")
+    .Description("Tired but dutiful. Keeps circling known trouble spots.")
+    .Dialog("Move along. No one lingers here without reason.");
+
+inn.AddNpc(innkeeper);
+square.AddNpc(watchman);
+
+GameState state = new(square, worldLocations: [square, inn, alley]);
+var baseParser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
+using var spinner = new AiConsoleSpinner(ReadEnvBool("TA_AI_SPINNER", true));
+AiPluginBootstrap bootstrap = CreateAiBootstrap(baseParser, spinner);
+
+Game game = GameBuilder.Create()
+    .UseState(state)
+    .UseParser(bootstrap.Parser)
+    .UsePrompt("> ")
+    .Build();
+
+bootstrap.EnableRuntime(game);
+state.EnableAiNpcMovement(bootstrap.Module, bootstrap.PluginOptions);
+
+SetupC64("AI Plugin Sandbox");
+WriteLineC64("=== AI PLUGIN SANDBOX ===");
+WriteLineC64($"Provider: {ReadEnv("TA_AI_PROVIDER", "openai")}");
+WriteLineC64("Goal: talk to NPCs and explore. AI can shape dialogue, movement, descriptions, and story timeline.");
+WriteLineC64();
+WriteLineC64("Try: look, talk innkeeper, go north, look map, go south, go east, talk watchman, quit");
+
+state.ShowRoom();
+game.Run();
+
+static AiPluginBootstrap CreateAiBootstrap(KeywordParser baseParser, AiConsoleSpinner spinner)
 {
-    Console.Write("\n> ");
-    var input = Console.ReadLine()?.Trim();
-    if (string.IsNullOrWhiteSpace(input))
+    try
     {
-        continue;
-    }
+        AiProviderInitOptions primary = BuildProvider("TA_AI_", defaultProvider: AiProviderKind.Ollama);
+        List<AiProviderInitOptions> fallbacks = [];
 
-    if (IsHelp(input))
-    {
-        ShowHelp();
-        continue;
-    }
+        string? fallbackRaw = Environment.GetEnvironmentVariable("TA_AI_FALLBACK_PROVIDER");
+        if (!string.IsNullOrWhiteSpace(fallbackRaw))
+            fallbacks.Add(BuildProvider("TA_AI_FALLBACK_", ParseProvider(fallbackRaw)));
 
-    if (TryHandleLanguageSwitch(input))
-    {
-        continue;
-    }
-
-    var command = parser.Parse(input);
-
-    // Handle look without target locally for proper localization
-    if (command is LookCommand look && string.IsNullOrWhiteSpace(look.Target))
-    {
-        ShowRoom();
-        continue;
-    }
-
-    var result = state.Execute(command);
-
-    DisplayResult(result);
-    if (ShouldShowRoom(command, result))
-    {
-        ShowRoom();
-    }
-
-    if (result.ShouldQuit)
-    {
-        Console.WriteLine(jsonProvider.Get("thanksForPlaying"));
-        break;
-    }
-}
-
-static GameState BuildGameState()
-{
-    Location bedroom = new("bedroom");
-    Location hallway = new("hallway");
-
-    _ = bedroom.AddExit(Direction.East, hallway);
-    _ = hallway.AddExit(Direction.West, bedroom);
-
-    Item coffee = new("coffee", "coffee");
-    bedroom.AddItem(coffee);
-
-    return new GameState(bedroom, worldLocations: [bedroom, hallway]);
-}
-
-JsonLanguageProvider LoadLanguage(string code)
-{
-    var langPath = Path.Combine(AppContext.BaseDirectory, "lang", $"gamelang.{code}.json");
-    JsonLanguageProvider provider = new(langPath);
-
-    // Update descriptions and aliases from language file
-    foreach (var loc in state.Locations.OfType<Location>())
-    {
-        var desc = provider.GetDescription(loc.Id);
-        if (!string.IsNullOrWhiteSpace(desc))
+        return AiPluginBootstrapFactory.Create(new AiPluginInitOptions
         {
-            _ = loc.Description(desc);
-        }
-
-        foreach (var item in loc.Items.OfType<Item>())
-        {
-            var desc2 = provider.GetDescription(item.Id);
-            if (!string.IsNullOrWhiteSpace(desc2))
+            PrimaryProvider = primary,
+            FallbackProviders = fallbacks,
+            BaseParser = baseParser,
+            RouterDecorator = router => new SpinnerAiProviderRouter(router, spinner),
+            PluginOptions = new AiPluginOptions
             {
-                _ = item.Description(desc2);
-            }
-
-            // Add translated name as alias so "ta kaffe" works
-            var translatedName = provider.GetName(item.Id);
-            if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+                EnableAiDialogue = ReadEnvBool("TA_AI_ENABLE_DIALOGUE", true),
+                EnableAiDescriptions = ReadEnvBool("TA_AI_ENABLE_DESCRIPTIONS", true),
+                EnableAiDescriptionCacheInvalidation = ReadEnvBool("TA_AI_ENABLE_DESCRIPTION_CACHE_INVALIDATION", true),
+                EnableAiNpcMovement = ReadEnvBool("TA_AI_ENABLE_NPC_MOVEMENT", true),
+                EnableAiStoryDirector = ReadEnvBool("TA_AI_ENABLE_STORY", true),
+                RuntimeFeatureTimeoutMs = ReadEnvInt("TA_AI_RUNTIME_TIMEOUT_MS", 1200),
+                NpcMovementAiEveryTurns = ReadEnvInt("TA_AI_NPC_MOVE_AI_EVERY_TURNS", 3),
+                StoryDirectorAiEveryTurns = ReadEnvInt("TA_AI_STORY_AI_EVERY_TURNS", 4)
+            },
+            ParserOptions = new MarcusMedina.TextAdventure.AI.Models.AiParserOptions
             {
-                _ = item.AddAliases(translatedName);
+                Enabled = ReadEnvBool("TA_AI_ENABLED", true),
+                PreferLocalCommandFirst = ReadEnvBool("TA_AI_PREFER_LOCAL_PARSE_FIRST", true),
+                StrictMode = ReadEnvBool("TA_AI_STRICT", false),
+                TimeoutMs = ReadEnvInt("TA_AI_TIMEOUT_MS", 8000),
+                EstimatedTokensPerRequest = ReadEnvInt("TA_AI_ESTIMATED_TOKENS", 128)
             }
-        }
+        });
     }
-
-    // Also update inventory items
-    foreach (var item in state.Inventory.Items.OfType<Item>())
+    catch (Exception ex)
     {
-        var desc = provider.GetDescription(item.Id);
-        if (!string.IsNullOrWhiteSpace(desc))
+        WriteLineC64($"AI bootstrap failed: {ex.Message}");
+        WriteLineC64("Falling back to Ollama defaults.");
+
+        return AiPluginBootstrapFactory.Create(new AiPluginInitOptions
         {
-            _ = item.Description(desc);
-        }
-
-        var translatedName = provider.GetName(item.Id);
-        if (!string.IsNullOrWhiteSpace(translatedName) && !translatedName.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
-        {
-            _ = item.AddAliases(translatedName);
-        }
+            PrimaryProvider = new AiProviderInitOptions { Provider = AiProviderKind.Ollama },
+            BaseParser = baseParser,
+            RouterDecorator = router => new SpinnerAiProviderRouter(router, spinner)
+        });
     }
-
-    return provider;
 }
 
-KeywordParser BuildParser(JsonLanguageProvider provider)
+static AiProviderInitOptions BuildProvider(string prefix, AiProviderKind defaultProvider)
 {
-    KeywordParserConfig config = new(
-        quit: provider.GetAllCommandAliases("quit"),
-        look: provider.GetAllCommandAliases("look"),
-        examine: provider.GetAllCommandAliases("examine"),
-        inventory: provider.GetAllCommandAliases("inventory"),
-        stats: provider.GetAllCommandAliases("stats"),
-        open: provider.GetAllCommandAliases("open"),
-        unlock: provider.GetAllCommandAliases("unlock"),
-        take: provider.GetAllCommandAliases("take"),
-        drop: provider.GetAllCommandAliases("drop"),
-        use: provider.GetAllCommandAliases("use"),
-        combine: provider.GetAllCommandAliases("combine"),
-        pour: provider.GetAllCommandAliases("pour"),
-        move: provider.GetAllCommandAliases("move"),
-        go: provider.GetAllCommandAliases("go"),
-        read: provider.GetAllCommandAliases("read"),
-        talk: provider.GetAllCommandAliases("talk"),
-        attack: provider.GetAllCommandAliases("attack"),
-        flee: provider.GetAllCommandAliases("flee"),
-        save: provider.GetAllCommandAliases("save"),
-        load: provider.GetAllCommandAliases("load"),
-        quest: provider.GetAllCommandAliases("quest"),
-        all: provider.GetAllCommandAliases("all"),
-        ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a", "på", "till", "en", "ett"),
-        combineSeparators: CommandHelper.NewCommands("and", "+", "och", "med"),
-        pourPrepositions: CommandHelper.NewCommands("into", "in", "i"),
-        directionAliases: provider.GetDirectionAliases(),
-        allowDirectionEnumNames: true);
+    string providerRaw = ReadEnv($"{prefix}PROVIDER", defaultProvider.ToString());
+    AiProviderKind provider = ParseProvider(providerRaw);
 
-    return new KeywordParser(config);
+    return new AiProviderInitOptions
+    {
+        Provider = provider,
+        ApiKey = ReadEnvOptional($"{prefix}API_KEY"),
+        Model = ReadEnvOptional($"{prefix}MODEL"),
+        Endpoint = ReadEnvOptional($"{prefix}ENDPOINT"),
+        SystemPrompt = ReadEnvOptional($"{prefix}SYSTEM_PROMPT"),
+        TimeoutMs = ReadEnvIntOptional($"{prefix}TIMEOUT_MS"),
+        Temperature = ReadEnvDoubleOptional($"{prefix}TEMPERATURE"),
+        DailyTokenLimit = ReadEnvIntOptional($"{prefix}DAILY_TOKEN_LIMIT"),
+        Enabled = ReadEnvBool($"{prefix}ENABLED", true)
+    };
 }
 
-void DisplayResult(CommandResult result)
+static AiProviderKind ParseProvider(string raw)
 {
-    if (!string.IsNullOrWhiteSpace(result.Message))
+    string key = raw.Trim().ToLowerInvariant();
+    return key switch
     {
-        var message = TranslateDirectionsInMessage(result.Message);
-        Console.WriteLine(message);
-    }
-
-    foreach (var reaction in result.ReactionsList)
-    {
-        if (!string.IsNullOrWhiteSpace(reaction))
-        {
-            Console.WriteLine($"> {reaction}");
-        }
-    }
+        "ollama" => AiProviderKind.Ollama,
+        "lmstudio" or "lm_studio" or "lm-studio" => AiProviderKind.LmStudio,
+        "dockerai" or "docker_ai" or "docker-ai" or "docker" => AiProviderKind.DockerAi,
+        "openai" => AiProviderKind.OpenAi,
+        "claude" or "anthropic" => AiProviderKind.Claude,
+        "mistral" => AiProviderKind.Mistral,
+        "openrouter" => AiProviderKind.OpenRouter,
+        "1minai" or "one_min_ai" or "oneminai" => AiProviderKind.OneMinAi,
+        "gemini" => AiProviderKind.Gemini,
+        _ => throw new ArgumentException($"Unknown provider: {raw}")
+    };
 }
 
-string TranslateDirectionsInMessage(string message)
+static string ReadEnv(string name, string fallback)
 {
-    // Replace English direction names with translated ones
-    foreach (var dir in Enum.GetValues<Direction>())
-    {
-        var englishName = dir.ToString();
-        var translatedName = jsonProvider.GetDirectionName(dir);
-        if (!englishName.Equals(translatedName, StringComparison.OrdinalIgnoreCase))
-        {
-            message = message.Replace(englishName, translatedName, StringComparison.OrdinalIgnoreCase);
-        }
-    }
-
-    return message;
+    string? value = Environment.GetEnvironmentVariable(name);
+    return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
 }
 
-void ShowRoom()
+static string? ReadEnvOptional(string name)
 {
-    var location = state.CurrentLocation;
-    Console.WriteLine();
-    Console.WriteLine($"{jsonProvider.Get("roomLabel")} {jsonProvider.GetName(location.Id)}");
-    Console.WriteLine($"{jsonProvider.Get("descriptionLabel")} {location.GetDescription()}");
-
-    List<string> items = [.. location.Items.Select(item => jsonProvider.GetName(item.Id))];
-    var itemsLabel = jsonProvider.Get("itemsHereLabel").TrimEnd();
-    Console.WriteLine(items.Count > 0
-        ? $"{itemsLabel} {items.CommaJoin()}"
-        : $"{itemsLabel} {jsonProvider.Get("none")}");
-
-    List<string> exits = [.. location.Exits.Keys.Select(dir => jsonProvider.GetDirectionName(dir))];
-    var exitsLabel = jsonProvider.Get("exitsLabel").TrimEnd();
-    Console.WriteLine(exits.Count > 0
-        ? $"{exitsLabel} {exits.CommaJoin()}"
-        : $"{exitsLabel} {jsonProvider.Get("none")}");
+    string? value = Environment.GetEnvironmentVariable(name);
+    return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }
 
-static void ShowHelp() => Console.WriteLine("Commands: look, take, go <direction>, inventory, save, load, language <code>, quit");
-
-static bool IsHelp(string input) => input.Lower() is "help" or "halp" or "?" or "hjälp";
-
-bool TryHandleLanguageSwitch(string input)
+static bool ReadEnvBool(string name, bool fallback)
 {
-    var tokens = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-    if (tokens.Length == 0 || (!tokens[0].TextCompare("language") && !tokens[0].TextCompare("språk")))
-    {
-        return false;
-    }
-
-    if (tokens.Length == 1)
-    {
-        Console.WriteLine("Usage: language <code> (supported: EN, SV).");
-        return true;
-    }
-
-    var chosen = tokens[1].ToLowerInvariant();
-    var langPath = Path.Combine(AppContext.BaseDirectory, "lang", $"gamelang.{chosen}.json");
-
-    if (!File.Exists(langPath))
-    {
-        Console.WriteLine($"Language file for '{chosen}' not found.");
-        return true;
-    }
-
-    jsonProvider = LoadLanguage(chosen);
-    Language.SetProvider(jsonProvider);
-    parser = BuildParser(jsonProvider);
-
-    Console.WriteLine(jsonProvider.Format("languageLoaded", jsonProvider.Name, jsonProvider.Code.ToUpperInvariant()));
-    ShowRoom();
-    return true;
+    string? value = ReadEnvOptional(name);
+    return bool.TryParse(value, out bool parsed) ? parsed : fallback;
 }
 
-static bool ShouldShowRoom(ICommand command, CommandResult result) => result.Success && !result.ShouldQuit && command is GoCommand or MoveCommand or LoadCommand;
+static int ReadEnvInt(string name, int fallback)
+{
+    string? value = ReadEnvOptional(name);
+    return int.TryParse(value, out int parsed) ? parsed : fallback;
+}
+
+static int? ReadEnvIntOptional(string name)
+{
+    string? value = ReadEnvOptional(name);
+    return int.TryParse(value, out int parsed) ? parsed : null;
+}
+
+static double? ReadEnvDoubleOptional(string name)
+{
+    string? value = ReadEnvOptional(name);
+    return double.TryParse(value, out double parsed) ? parsed : null;
+}

@@ -3,24 +3,29 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Commands;
-
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
-public class UseCommand(string itemName) : ICommand
+namespace MarcusMedina.TextAdventure.Commands;
+
+public class UseCommand : ICommand
 {
-    public string ItemName { get; } = itemName;
+    public string ItemName { get; }
+
+    public UseCommand(string itemName)
+    {
+        ItemName = itemName;
+    }
 
     public CommandResult Execute(CommandContext context)
     {
-        var item = context.State.Inventory.FindItem(ItemName);
+        IItem? item = context.State.Inventory.FindItem(ItemName);
         string? suggestion = null;
         if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
         {
-            var best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
+            IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 item = best;
@@ -34,10 +39,15 @@ public class UseCommand(string itemName) : ICommand
         }
 
         item.Use();
-        var onUse = item.GetReaction(ItemAction.Use);
-        var result = onUse != null
-            ? CommandResult.Ok(Language.UseItem(item.Name), onUse)
-            : CommandResult.Ok(Language.UseItem(item.Name));
+        if (item.Amount.HasValue && item.Amount.Value == 0)
+        {
+            _ = context.State.Inventory.Remove(item);
+        }
+        string displayName = Language.EntityName(item);
+        string? onUse = item.GetReaction(ItemAction.Use);
+        CommandResult result = onUse != null
+            ? CommandResult.Ok(Language.UseItem(displayName), onUse)
+            : CommandResult.Ok(Language.UseItem(displayName));
 
         return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }

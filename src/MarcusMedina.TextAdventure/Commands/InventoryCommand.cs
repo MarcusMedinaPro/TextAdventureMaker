@@ -3,20 +3,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Commands;
-
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+
+namespace MarcusMedina.TextAdventure.Commands;
 
 public class InventoryCommand : ICommand
 {
     public CommandResult Execute(CommandContext context)
     {
-        var inventory = context.State.Inventory;
+        IInventory inventory = context.State.Inventory;
         if (inventory.Count == 0)
         {
-            var emptyMessage = $"{Language.InventoryLabel}{Language.None}";
+            string emptyMessage = $"{Language.InventoryLabel}{Language.None}";
             if (inventory.TotalWeight > 0)
             {
                 emptyMessage += $"\n{Language.TotalWeight(inventory.TotalWeight)}";
@@ -25,15 +25,26 @@ public class InventoryCommand : ICommand
             return CommandResult.Ok(emptyMessage);
         }
 
-        var items = inventory.Items
-            .Select(i => Language.ItemWithWeight(i.Name, i.Weight));
+        IEnumerable<string> items = FormatItems(inventory.Items);
 
-        var message = $"{Language.InventoryLabel}{items.CommaJoin()}";
+        string message = $"{Language.InventoryLabel}{items.CommaJoin()}";
         if (inventory.TotalWeight > 0)
         {
             message += $"\n{Language.TotalWeight(inventory.TotalWeight)}";
         }
 
         return CommandResult.Ok(message);
+    }
+
+    private static IEnumerable<string> FormatItems(IEnumerable<IItem> items)
+    {
+        foreach (IItem item in items)
+        {
+            string name = item is { IsStackable: true, Amount: > 1 }
+                ? $"{Language.EntityName(item)} (x{item.Amount})"
+                : Language.EntityName(item);
+
+            yield return Language.ItemWithWeight(name, item.IsStackable ? item.Weight * (item.Amount ?? 1) : item.Weight);
+        }
     }
 }

@@ -3,14 +3,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Models;
-
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public class CombinationResult(bool success, IReadOnlyList<IItem> created)
 {
-    public IReadOnlyList<IItem> Created { get; } = created;
     public bool Success { get; } = success;
+    public IReadOnlyList<IItem> Created { get; } = created;
 
     public static CombinationResult Fail() => new(false, []);
 

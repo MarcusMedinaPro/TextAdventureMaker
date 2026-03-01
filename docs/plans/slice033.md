@@ -21,3 +21,12 @@ game.SetNarrativeVoice(Voice.SecondPerson)
 ### Task 33.4: Sandbox — byt perspektiv under spelet
 
 ---
+
+## Implementation checklist (engine)
+- [x] Narrative voice enum (1st/2nd/3rd)
+- [x] Tense enum (past/present)
+- [x] Voice/tense transforms for descriptions
+- [x] Flashback support
+
+## Example checklist (docs/examples)
+- [x] Narrative voice demo (`33_The_Elevator_Stuck.md`)

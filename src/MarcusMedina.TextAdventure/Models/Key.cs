@@ -3,10 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Models;
-
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
+
+namespace MarcusMedina.TextAdventure.Models;
 
 public class Key : Item, IKey
 {
@@ -18,7 +18,17 @@ public class Key : Item, IKey
     {
     }
 
-    public static implicit operator Key((string id, string name, string description) data) => new(data.id, data.name, data.description);
+    public new Key SetTakeable(bool takeable)
+    {
+        _ = base.SetTakeable(takeable);
+        return this;
+    }
+
+    public new Key SetWeight(float weight)
+    {
+        _ = base.SetWeight(weight);
+        return this;
+    }
 
     public new Key AddAliases(params string[] aliases)
     {
@@ -26,63 +36,9 @@ public class Key : Item, IKey
         return this;
     }
 
-    public override IItem Clone()
+    public new Key SetDescription(string text)
     {
-        var copy = new Key(Id, Name, GetDescription())
-            .SetTakeable(Takeable)
-            .SetWeight(Weight)
-            .SetReadable(Readable)
-            .SetReadingCost(ReadingCost)
-            .HideFromItemList(HiddenFromItemList);
-
-        if (Aliases.Count > 0)
-        {
-            _ = copy.AddAliases([..Aliases]);
-        }
-
-        foreach (ItemAction action in Enum.GetValues<ItemAction>())
-        {
-            var reaction = GetReaction(action);
-            if (!string.IsNullOrWhiteSpace(reaction))
-            {
-                _ = copy.SetReaction(action, reaction);
-            }
-        }
-
-        foreach (var entry in Properties)
-        {
-            copy.Properties[entry.Key] = entry.Value;
-        }
-
-        var readText = GetReadText();
-        if (readText != null)
-        {
-            _ = copy.SetReadText(readText);
-        }
-
-        if (RequiresTakeToRead)
-        {
-            _ = copy.RequireTakeToRead();
-        }
-
-        return copy;
-    }
-
-    public new Key Description(string text)
-    {
-        _ = base.Description(text);
-        return this;
-    }
-
-    public new Key RequiresToRead(Func<IGameState, bool> predicate)
-    {
-        _ = base.RequiresToRead(predicate);
-        return this;
-    }
-
-    public new Key RequireTakeToRead()
-    {
-        _ = base.RequireTakeToRead();
+        _ = base.SetDescription(text);
         return this;
     }
 
@@ -98,27 +54,74 @@ public class Key : Item, IKey
         return this;
     }
 
-    public new Key SetReadingCost(int turns)
-    {
-        _ = base.SetReadingCost(turns);
-        return this;
-    }
-
     public new Key SetReadText(string text)
     {
         _ = base.SetReadText(text);
         return this;
     }
 
-    public new Key SetTakeable(bool takeable)
+    public new Key RequireTakeToRead()
     {
-        _ = base.SetTakeable(takeable);
+        _ = base.RequireTakeToRead();
         return this;
     }
 
-    public new Key SetWeight(float weight)
+    public new Key SetReadingCost(int turns)
     {
-        _ = base.SetWeight(weight);
+        _ = base.SetReadingCost(turns);
         return this;
+    }
+
+    public new Key RequiresToRead(Func<IGameState, bool> predicate)
+    {
+        _ = base.RequiresToRead(predicate);
+        return this;
+    }
+
+    public override IItem Clone()
+    {
+        IItem copy = new Key(Id, Name, GetDescription())
+            .SetTakeable(Takeable)
+            .SetWeight(Weight)
+            .SetReadable(Readable)
+            .SetReadingCost(ReadingCost)
+            .HideFromItemList(HiddenFromItemList);
+
+        if (Aliases.Count > 0)
+        {
+            _ = copy.AddAliases(Aliases.ToArray());
+        }
+
+        foreach (ItemAction action in Enum.GetValues(typeof(ItemAction)))
+        {
+            string? reaction = GetReaction(action);
+            if (!string.IsNullOrWhiteSpace(reaction))
+            {
+                _ = copy.SetReaction(action, reaction);
+            }
+        }
+
+        foreach (KeyValuePair<string, string> entry in Properties)
+        {
+            copy.Properties[entry.Key] = entry.Value;
+        }
+
+        string? readText = GetReadText();
+        if (readText != null)
+        {
+            _ = copy.SetReadText(readText);
+        }
+
+        if (RequiresTakeToRead)
+        {
+            _ = copy.RequireTakeToRead();
+        }
+
+        return copy;
+    }
+
+    public static implicit operator Key((string id, string name, string description) data)
+    {
+        return new(data.id, data.name, data.description);
     }
 }

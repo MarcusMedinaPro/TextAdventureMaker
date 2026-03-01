@@ -3,65 +3,164 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Models;
-
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
-public class Item : IItem
-{
-    private readonly List<string> _aliases = [];
-    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<ItemAction, string> _reactions = [];
-    private string _description = "";
-    private Func<IGameState, bool>? _readCondition;
-    private string? _readText;
+namespace MarcusMedina.TextAdventure.Models;
 
-    public Item(string id, string name)
+public class Item(string id, string name, string description = "") : IItem
+{
+    public string Id { get; } = ValidateId(id);
+    public string Name { get; } = ValidateName(name);
+    private readonly List<string> _aliases = [];
+    private readonly Dictionary<ItemAction, string> _reactions = [];
+    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
+    private string? _readText;
+    private Func<IGameState, bool>? _readCondition;
+    private string _description = description ?? "";
+    private int? _amount;
+    private bool _isStackable;
+    private string? _presenceDescription;
+    private bool _isFood;
+    private bool _isDrinkable;
+    private bool _isPoisoned;
+    private int _healAmount;
+    private int _poisonDamagePerTurn;
+    private int _poisonDurationTurns;
+    private int? _durability;
+    private int? _maxDurability;
+
+    private static string ValidateId(string id)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Id = id;
-        Name = name;
-        Takeable = true;
-        Weight = 0f;
+        return id;
     }
 
-    public Item(string id, string name, string description) : this(id, name) => _description = description ?? "";
+    private static string ValidateName(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        return name;
+    }
+    public string? Description => _description;
+    public int? Amount => _amount;
+    public bool IsStackable => _isStackable;
+    public string? PresenceDescription => _presenceDescription;
+    public bool IsFood => _isFood;
+    public bool IsDrinkable => _isDrinkable;
+    public bool IsPoisoned => _isPoisoned;
+    public int HealAmount => _healAmount;
+    public int PoisonDamagePerTurn => _poisonDamagePerTurn;
+    public int PoisonDurationTurns => _poisonDurationTurns;
+    public IDictionary<string, string> Properties => _properties;
+    public string GetDescription() => _description;
 
-    public event Action<IItem>? OnDestroy;
-
-    public event Action<IItem>? OnDrop;
-
-    public event Action<IItem>? OnMove;
+    public bool Takeable { get; private set; } = true;
+    public float Weight { get; private set; } = 0f;
+    public IReadOnlyList<string> Aliases => _aliases;
+    public bool Readable { get; private set; }
+    public bool RequiresTakeToRead { get; private set; }
+    public int ReadingCost { get; private set; }
+    public bool HiddenFromItemList { get; private set; }
+    public int? Durability => _durability;
+    public int? MaxDurability => _maxDurability;
 
     public event Action<IItem>? OnTake;
-
+    public event Action<IItem>? OnDrop;
     public event Action<IItem>? OnUse;
+    public event Action<IItem>? OnMove;
+    public event Action<IItem>? OnDestroy;
+    public event Action<IItem>? OnAmountEmpty;
 
-    public IReadOnlyList<string> Aliases => _aliases;
-    public bool HiddenFromItemList { get; private set; }
-    public string Id { get; }
-    public string Name { get; }
-    public IDictionary<string, string> Properties => _properties;
-    public bool Readable { get; private set; }
+    public Item SetTakeable(bool takeable)
+    {
+        Takeable = takeable;
+        return this;
+    }
 
-    public int ReadingCost { get; private set; }
+    public Item SetWeight(float weight)
+    {
+        Weight = Math.Max(0f, weight);
+        return this;
+    }
 
-    public bool RequiresTakeToRead { get; private set; }
+    public Item SetDescription(string text)
+    {
+        _description = text;
+        return this;
+    }
 
-    public bool Takeable { get; private set; }
+    public Item SetAmount(int amount)
+    {
+        _amount = Math.Max(0, amount);
+        return this;
+    }
 
-    public float Weight { get; private set; }
+    public bool DecreaseAmount(int amount = 1)
+    {
+        if (!_amount.HasValue)
+        {
+            return true;
+        }
 
-    public static implicit operator Item(string name) => new(name.ToId(), name);
+        int next = Math.Max(0, _amount.Value - Math.Max(1, amount));
+        _amount = next;
 
-    public static implicit operator Item((string id, string name, string description) data) => new(data.id, data.name, data.description);
+        if (next == 0)
+        {
+            OnAmountEmpty?.Invoke(this);
+            return false;
+        }
+
+        return true;
+    }
+
+    public Item SetStackable(bool isStackable = true)
+    {
+        _isStackable = isStackable;
+        return this;
+    }
+
+    public Item SetPresenceDescription(string text)
+    {
+        _presenceDescription = text;
+        return this;
+    }
+
+    public Item SetFood(bool isFood = true)
+    {
+        _isFood = isFood;
+        return this;
+    }
+
+    public Item SetDrinkable(bool isDrinkable = true)
+    {
+        _isDrinkable = isDrinkable;
+        return this;
+    }
+
+    public Item SetPoisoned(bool isPoisoned = true)
+    {
+        _isPoisoned = isPoisoned;
+        return this;
+    }
+
+    public Item SetHealAmount(int amount)
+    {
+        _healAmount = Math.Max(0, amount);
+        return this;
+    }
+
+    public Item SetPoisonDamage(int damagePerTurn, int turns)
+    {
+        _poisonDamagePerTurn = Math.Max(0, damagePerTurn);
+        _poisonDurationTurns = Math.Max(0, turns);
+        return this;
+    }
 
     public Item AddAliases(params string[] aliases)
     {
-        foreach (var alias in aliases)
+        foreach (string alias in aliases)
         {
             if (!string.IsNullOrWhiteSpace(alias))
             {
@@ -72,20 +171,109 @@ public class Item : IItem
         return this;
     }
 
-    public bool CanRead(IGameState state) => _readCondition == null || _readCondition(state);
+    // Explicit interface implementations for IItem fluent methods
+    IItem IItem.SetTakeable(bool takeable) => SetTakeable(takeable);
+    IItem IItem.SetWeight(float weight) => SetWeight(weight);
+    IItem IItem.SetDescription(string description) => SetDescription(description);
+    IItem IItem.SetAmount(int amount) => SetAmount(amount);
+    bool IItem.DecreaseAmount(int amount) => DecreaseAmount(amount);
+    IItem IItem.SetStackable(bool isStackable) => SetStackable(isStackable);
+    IItem IItem.SetPresenceDescription(string text) => SetPresenceDescription(text);
+    IItem IItem.SetFood(bool isFood) => SetFood(isFood);
+    IItem IItem.SetDrinkable(bool isDrinkable) => SetDrinkable(isDrinkable);
+    IItem IItem.SetPoisoned(bool isPoisoned) => SetPoisoned(isPoisoned);
+    IItem IItem.SetHealAmount(int amount) => SetHealAmount(amount);
+    IItem IItem.SetPoisonDamage(int damagePerTurn, int turns) => SetPoisonDamage(damagePerTurn, turns);
+    IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
+
+    public bool Matches(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        string token = name.Trim();
+
+        return Name.TextCompare(token) || _aliases.Any(a => a.TextCompare(token));
+    }
+
+    public string? GetReaction(ItemAction action)
+    {
+        return _reactions.TryGetValue(action, out string? reaction) ? reaction : null;
+    }
+
+    public IItem SetReaction(ItemAction action, string text)
+    {
+        _reactions[action] = text;
+        return this;
+    }
+
+    public bool CanRead(IGameState state)
+    {
+        return _readCondition == null || _readCondition(state);
+    }
+
+    public IItem SetReadable(bool readable = true)
+    {
+        Readable = readable;
+        return this;
+    }
+
+    public IItem SetReadText(string text)
+    {
+        _readText = text;
+        Readable = true;
+        return this;
+    }
+
+    public string? GetReadText()
+    {
+        return _readText;
+    }
+
+    public IItem RequireTakeToRead()
+    {
+        RequiresTakeToRead = true;
+        return this;
+    }
+
+    public IItem SetReadingCost(int turns)
+    {
+        ReadingCost = Math.Max(0, turns);
+        return this;
+    }
+
+    public IItem HideFromItemList(bool hidden = true)
+    {
+        HiddenFromItemList = hidden;
+        return this;
+    }
+
+    public IItem RequiresToRead(Func<IGameState, bool> predicate)
+    {
+        _readCondition = predicate ?? throw new ArgumentNullException(nameof(predicate));
+        return this;
+    }
 
     public virtual IItem Clone()
     {
-        var copy = new Item(Id, Name, _description)
+        IItem copy = new Item(Id, Name, _description)
             .SetTakeable(Takeable)
             .SetWeight(Weight)
+            .SetStackable(_isStackable)
             .SetReadable(Readable)
             .SetReadingCost(ReadingCost)
             .HideFromItemList(HiddenFromItemList);
 
+        if (_amount.HasValue)
+        {
+            _ = copy.SetAmount(_amount.Value);
+        }
+
         if (_aliases.Count > 0)
         {
-            _ = copy.AddAliases([.._aliases]);
+            _ = copy.AddAliases(_aliases.ToArray());
         }
 
         if (_readText != null)
@@ -103,111 +291,122 @@ public class Item : IItem
             _ = copy.RequiresToRead(_readCondition);
         }
 
-        foreach (var reaction in _reactions)
+        foreach (KeyValuePair<ItemAction, string> reaction in _reactions)
         {
             _ = copy.SetReaction(reaction.Key, reaction.Value);
         }
 
-        foreach (var entry in _properties)
+        foreach (KeyValuePair<string, string> entry in _properties)
         {
             copy.Properties[entry.Key] = entry.Value;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_presenceDescription))
+        {
+            _ = copy.SetPresenceDescription(_presenceDescription);
+        }
+
+        if (_isFood)
+        {
+            _ = copy.SetFood();
+        }
+
+        if (_isDrinkable)
+        {
+            _ = copy.SetDrinkable();
+        }
+
+        if (_isPoisoned)
+        {
+            _ = copy.SetPoisoned();
+        }
+
+        if (_healAmount > 0)
+        {
+            _ = copy.SetHealAmount(_healAmount);
+        }
+
+        if (_poisonDamagePerTurn > 0 || _poisonDurationTurns > 0)
+        {
+            _ = copy.SetPoisonDamage(_poisonDamagePerTurn, _poisonDurationTurns);
+        }
+
+        if (_durability.HasValue && _maxDurability.HasValue)
+        {
+            _ = copy.SetDurability(_durability.Value, _maxDurability.Value);
         }
 
         return copy;
     }
 
-    public IItem Description(string text)
+    public void Take()
     {
-        _description = text;
+        OnTake?.Invoke(this);
+    }
+
+    public void Drop()
+    {
+        OnDrop?.Invoke(this);
+    }
+
+    public void Use()
+    {
+        OnUse?.Invoke(this);
+        _ = DecreaseAmount();
+        _ = DecreaseDurability();
+    }
+
+    public void Move()
+    {
+        OnMove?.Invoke(this);
+    }
+
+    public void Destroy()
+    {
+        OnDestroy?.Invoke(this);
+    }
+
+    public IItem SetDurability(int current, int max)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(max, 0);
+        _maxDurability = max;
+        _durability = Math.Min(current, max);
         return this;
     }
 
-    public void Destroy() => OnDestroy?.Invoke(this);
-
-    public void Drop() => OnDrop?.Invoke(this);
-
-    public string GetDescription() => _description;
-
-    public string? GetReaction(ItemAction action) => _reactions.TryGetValue(action, out var reaction) ? reaction : null;
-
-    public string? GetReadText() => _readText;
-
-    public IItem HideFromItemList(bool hidden = true)
+    public bool DecreaseDurability(int amount = 1)
     {
-        HiddenFromItemList = hidden;
-        return this;
+        if (!_durability.HasValue)
+            return true;
+
+        int next = Math.Max(0, _durability.Value - Math.Max(1, amount));
+        _durability = next;
+        return next > 0;
     }
 
-    public bool Matches(string name)
+    public string GetCondition()
     {
-        if (string.IsNullOrWhiteSpace(name))
+        if (!_durability.HasValue || !_maxDurability.HasValue)
+            return "";
+
+        int percent = (_durability.Value * 100) / _maxDurability.Value;
+        return percent switch
         {
-            return false;
-        }
-
-        var token = name.Trim();
-
-        return Name.TextCompare(token) || _aliases.Any(a => a.TextCompare(token));
+            >= 90 => "pristine",
+            >= 60 => "good",
+            >= 30 => "worn",
+            >= 10 => "damaged",
+            _ => "broken"
+        };
     }
 
-    public void Move() => OnMove?.Invoke(this);
-
-    public IItem RequiresToRead(Func<IGameState, bool> predicate)
+    public static implicit operator Item(string name)
     {
-        _readCondition = predicate ?? throw new ArgumentNullException(nameof(predicate));
-        return this;
+        return new(name.ToId(), name);
     }
 
-    public IItem RequireTakeToRead()
+    public static implicit operator Item((string id, string name, string description) data)
     {
-        RequiresTakeToRead = true;
-        return this;
+        return new(data.id, data.name, data.description);
     }
-
-    public IItem SetReaction(ItemAction action, string text)
-    {
-        _reactions[action] = text;
-        return this;
-    }
-
-    public IItem SetReadable(bool readable = true)
-    {
-        Readable = readable;
-        return this;
-    }
-
-    public IItem SetReadingCost(int turns)
-    {
-        ReadingCost = Math.Max(0, turns);
-        return this;
-    }
-
-    public IItem SetReadText(string text)
-    {
-        _readText = text;
-        Readable = true;
-        return this;
-    }
-
-    public Item SetTakeable(bool takeable)
-    {
-        Takeable = takeable;
-        return this;
-    }
-
-    public Item SetWeight(float weight)
-    {
-        Weight = Math.Max(0f, weight);
-        return this;
-    }
-
-    public void Take() => OnTake?.Invoke(this);
-
-    public void Use() => OnUse?.Invoke(this);
-
-    IItem IItem.AddAliases(params string[] aliases) => AddAliases(aliases);
-
-    IItem IItem.SetTakeable(bool takeable) => SetTakeable(takeable);
-
-    IItem IItem.SetWeight(float weight) => SetWeight(weight);
 }

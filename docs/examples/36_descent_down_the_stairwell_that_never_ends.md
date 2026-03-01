@@ -21,6 +21,34 @@ _Slice tag: Slice 36 — Descent (Creepypasta style, British English)._
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Landing   │
+│    M       │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Stair    │
+│    N       │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Lower    │
+│  Watcher   │
+└────────────┘
+
+M = Matchbook
+N = Note
+Watcher = NPC
+```
+
     ## Example (detailed setup)
 
 ```csharp

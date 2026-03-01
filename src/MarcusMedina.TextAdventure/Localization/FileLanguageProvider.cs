@@ -3,10 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Localization;
-
 using System.Globalization;
 
+namespace MarcusMedina.TextAdventure.Localization;
+
+[Obsolete("Text-based language files are deprecated. Use JsonLanguageProvider with .json language files instead.")]
 public sealed class FileLanguageProvider : ILanguageProvider
 {
     private readonly Dictionary<string, string> _entries = new(StringComparer.OrdinalIgnoreCase);
@@ -17,25 +18,28 @@ public sealed class FileLanguageProvider : ILanguageProvider
         Load(path);
     }
 
+    public string Get(string key)
+    {
+        return string.IsNullOrWhiteSpace(key) ? "" : _entries.TryGetValue(key, out string? value) ? value : $"[[{key}]]";
+    }
+
     public string Format(string key, params object[] args)
     {
-        var template = Get(key);
+        string template = Get(key);
         return string.Format(CultureInfo.InvariantCulture, template, args);
     }
 
-    public string Get(string key) => string.IsNullOrWhiteSpace(key) ? "" : _entries.TryGetValue(key, out var value) ? value : $"[[{key}]]";
-
     private void Load(string path)
     {
-        foreach (var rawLine in File.ReadAllLines(path))
+        foreach (string rawLine in File.ReadAllLines(path))
         {
-            var line = rawLine.Trim();
+            string line = rawLine.Trim();
             if (string.IsNullOrWhiteSpace(line))
             {
                 continue;
             }
 
-            if (line.StartsWith('#'))
+            if (line.StartsWith("#", StringComparison.Ordinal))
             {
                 continue;
             }
@@ -45,14 +49,14 @@ public sealed class FileLanguageProvider : ILanguageProvider
                 continue;
             }
 
-            var separatorIndex = line.IndexOf('=');
+            int separatorIndex = line.IndexOf('=');
             if (separatorIndex <= 0)
             {
                 continue;
             }
 
-            var key = line[..separatorIndex].Trim();
-            var value = line[(separatorIndex + 1)..].Trim();
+            string key = line[..separatorIndex].Trim();
+            string value = line[(separatorIndex + 1)..].Trim();
 
             if (key.Length == 0)
             {

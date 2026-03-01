@@ -8,6 +8,27 @@ _Slice tag: Slice 23 — Structured dialog. Demo focuses on a formal interview f
 3) Answer questions.
 4) Handle nerves.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│ Interview  │
+│   Room     │
+│ Interviewer│
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Lobby    │
+│            │
+└────────────┘
+
+Interviewer = NPC
+```
+
 ## Example (dialog choices)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;
@@ -64,5 +85,12 @@ var game = GameBuilder.Create()
     })
     .Build();
 
+// Console setup for C64 aesthetics
+Console.BackgroundColor = ConsoleColor.DarkBlue;
+Console.ForegroundColor = ConsoleColor.Cyan;
+Console.Title = "Job Interview - Text Adventure Sandbox";
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+Console.Clear();
+// End console setup
 game.Run();
 ```

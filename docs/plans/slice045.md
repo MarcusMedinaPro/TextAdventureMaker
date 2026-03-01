@@ -28,6 +28,21 @@
 
 **Mål:** Samla upp generella förbättringar som dyker upp under verifiering.
 
+### Task 45.3: Custom Commands via Language Files (Override + Extend)
+
+**Mål:** Tillåt användare att definiera egna kommandon i språkfiler utan att skriva C#‑kod, och även kunna ersätta/överskugga inbyggda kommandon om de vill.
+
+**Exempel:**
+- `"pull rubber chicken"` (Monkey Island‑stil)
+- `"shoot ant"` (spel från öknen)
+- Egna verb som inte finns i core
+
+**Krav:**
+- Kommando‑ord och alias ska kunna definieras helt i språkkonfigurationen.
+- Användare ska kunna **override** inbyggda kommandon (t.ex. byta ut standardverb).
+- Parsern ska kunna ruta custom commands till en registrerad handler‑callback.
+- Ska fungera i sandbox utan extra kod per kommando (data‑drivet).
+
 ### Förslag på funktioner
 
 - `IItem.Amount` (nullable int) + `Item.SetAmount(int amount)`
@@ -77,3 +92,17 @@
 
 - Backwards compatible: items utan amount fungerar som tidigare.
 - Inventory/Look visar amount när den finns (t.ex. “Tea Thermos (4)”).
+
+---
+
+## Implementation checklist (engine)
+- [x] Generic phrase/alias mapping for sandbox inputs
+- [x] Pronoun carry-over (`it`/`them`) + `again`
+- [x] Custom commands defined in language files (override/extend)
+- [x] Item amount/stacking system
+- [x] Presence description support
+- [x] Parser config: generic word registration (`WithWord`)
+- [x] Misc. QoL helpers listed above (phrases, vehicles, teleporters, weather, food/healing, economy, etc.)
+
+## Example checklist (docs/examples)
+- [x] Sandbox demo for aliases + pronouns + custom commands (`45_Custom_Commands.md`)

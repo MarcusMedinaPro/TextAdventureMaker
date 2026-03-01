@@ -21,6 +21,35 @@ _Slice tag: Slice 36 — Transformation Arc (Creepypasta style, British English)
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│   Choir    │
+│   T  C     │
+└─────┬──────┘
+      │
+┌────────────┐
+│ Corridor  │
+│     M     │
+└─────┬──────┘
+      │
+┌────────────┐
+│Silence Room│
+│   I  U     │
+└────────────┘
+
+C = Chorus
+I = Ink vial
+M = Mask
+T = Thread
+U = Glass cup
+```
+
     ## Example (detailed setup)
 
 ```csharp

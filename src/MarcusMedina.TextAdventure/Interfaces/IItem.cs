@@ -3,79 +3,75 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Interfaces;
-
 using MarcusMedina.TextAdventure.Enums;
+
+namespace MarcusMedina.TextAdventure.Interfaces;
 
 public interface IItem : IGameEntity
 {
-    event Action<IItem>? OnDestroy;
-
-    event Action<IItem>? OnDrop;
-
-    /// <summary>Raised when the item is moved.</summary>
-    event Action<IItem>? OnMove;
-
-    event Action<IItem>? OnTake;
-
-    event Action<IItem>? OnUse;
-
-    IReadOnlyList<string> Aliases { get; }
-    bool HiddenFromItemList { get; }
     new string Id { get; }
     new string Name { get; }
-    bool Readable { get; }
-
-    int ReadingCost { get; }
-
-    bool RequiresTakeToRead { get; }
-
-    bool Takeable { get; }
-
-    float Weight { get; }
-
-    IItem AddAliases(params string[] aliases);
-
-    bool CanRead(IGameState state);
-
-    IItem Clone();
-
-    IItem Description(string text);
-
-    void Destroy();
-
-    void Drop();
-
+    string? Description { get; }
     string GetDescription();
-
-    string? GetReaction(ItemAction action);
-
+    int? Amount { get; }
+    bool IsStackable { get; }
+    string? PresenceDescription { get; }
+    bool IsFood { get; }
+    bool IsDrinkable { get; }
+    bool IsPoisoned { get; }
+    int HealAmount { get; }
+    int PoisonDamagePerTurn { get; }
+    int PoisonDurationTurns { get; }
+    bool Takeable { get; }
+    float Weight { get; }
+    IReadOnlyList<string> Aliases { get; }
+    bool Readable { get; }
+    bool RequiresTakeToRead { get; }
+    int ReadingCost { get; }
     string? GetReadText();
+    int? Durability { get; }
+    int? MaxDurability { get; }
 
-    IItem HideFromItemList(bool hidden = true);
+    event Action<IItem>? OnTake;
+    event Action<IItem>? OnDrop;
+    event Action<IItem>? OnUse;
+    /// <summary>Raised when the item is moved.</summary>
+    event Action<IItem>? OnMove;
+    event Action<IItem>? OnDestroy;
+    event Action<IItem>? OnAmountEmpty;
 
     bool Matches(string name);
-
+    IItem SetTakeable(bool takeable);
+    IItem SetWeight(float weight);
+    IItem SetDescription(string description);
+    IItem SetAmount(int amount);
+    bool DecreaseAmount(int amount = 1);
+    IItem SetStackable(bool isStackable = true);
+    IItem SetPresenceDescription(string text);
+    IItem SetFood(bool isFood = true);
+    IItem SetDrinkable(bool isDrinkable = true);
+    IItem SetPoisoned(bool isPoisoned = true);
+    IItem SetHealAmount(int amount);
+    IItem SetPoisonDamage(int damagePerTurn, int turns);
+    IItem AddAliases(params string[] aliases);
+    string? GetReaction(ItemAction action);
+    IItem SetReaction(ItemAction action, string text);
+    bool CanRead(IGameState state);
+    IItem SetReadable(bool readable = true);
+    IItem SetReadText(string text);
+    IItem RequireTakeToRead();
+    IItem SetReadingCost(int turns);
+    IItem RequiresToRead(Func<IGameState, bool> predicate);
+    bool HiddenFromItemList { get; }
+    IItem HideFromItemList(bool hidden = true);
+    IItem Clone();
+    void Take();
+    void Drop();
+    void Use();
     /// <summary>Trigger the move event for this item.</summary>
     void Move();
-
-    IItem RequiresToRead(Func<IGameState, bool> predicate);
-
-    IItem RequireTakeToRead();
-
-    IItem SetReaction(ItemAction action, string text);
-
-    IItem SetReadable(bool readable = true);
-
-    IItem SetReadingCost(int turns);
-
-    IItem SetReadText(string text);
-
-    IItem SetTakeable(bool takeable);
-
-    IItem SetWeight(float weight);
-
-    void Take();
-
-    void Use();
+    void Destroy();
+    IItem SetDurability(int current, int max);
+    bool DecreaseDurability(int amount = 1);
+    string GetCondition();
 }

@@ -8,6 +8,19 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>MarcusMedina.TextAdventure.AI</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Marcus Ackre Medina</Authors>
+    <Company>Marcus Ackre Medina</Company>
+    <Description>AI command parser scaffolding for MarcusMedina.TextAdventure.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/MarcusMedina/TextAdventure</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>text-adventure;ai;parser</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 
 </Project>

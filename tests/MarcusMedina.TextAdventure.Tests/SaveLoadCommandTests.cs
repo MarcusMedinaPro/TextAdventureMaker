@@ -3,24 +3,39 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 public class SaveLoadCommandTests
 {
-    [Fact]
-    public void LoadCommand_UsesSaveSystem()
+    private sealed class StubSaveSystem : ISaveSystem
     {
-        StubSaveSystem saveSystem = new();
-        GameState state = new(new Location("start"), saveSystem: saveSystem);
+        public string? LastPath { get; private set; }
+        public GameMemento? LastMemento { get; private set; }
 
-        _ = new LoadCommand("slot1.json").Execute(new CommandContext(state));
+        public void Save(string path, GameMemento memento)
+        {
+            LastPath = path;
+            LastMemento = memento;
+        }
 
-        Assert.Equal("slot1.json", saveSystem.LastPath);
+        public GameMemento Load(string path)
+        {
+            LastPath = path;
+            return LastMemento ?? new GameMemento(
+                "start",
+                Array.Empty<string>(),
+                100,
+                100,
+                new Dictionary<string, bool>(),
+                new Dictionary<string, int>(),
+                new Dictionary<string, int>(),
+                []);
+        }
     }
 
     [Fact]
@@ -35,29 +50,14 @@ public class SaveLoadCommandTests
         Assert.NotNull(saveSystem.LastMemento);
     }
 
-    private sealed class StubSaveSystem : ISaveSystem
+    [Fact]
+    public void LoadCommand_UsesSaveSystem()
     {
-        public GameMemento? LastMemento { get; private set; }
-        public string? LastPath { get; private set; }
+        StubSaveSystem saveSystem = new();
+        GameState state = new(new Location("start"), saveSystem: saveSystem);
 
-        public GameMemento Load(string path)
-        {
-            LastPath = path;
-            return LastMemento ?? new GameMemento(
-                "start",
-                [],
-                100,
-                100,
-                [],
-                [],
-                [],
-                []);
-        }
+        _ = new LoadCommand("slot1.json").Execute(new CommandContext(state));
 
-        public void Save(string path, GameMemento memento)
-        {
-            LastPath = path;
-            LastMemento = memento;
-        }
+        Assert.Equal("slot1.json", saveSystem.LastPath);
     }
 }

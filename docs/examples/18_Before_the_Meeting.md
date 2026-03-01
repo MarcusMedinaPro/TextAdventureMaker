@@ -8,6 +8,28 @@ _Slice tag: Slice 18 — Quiet prep scene. Demo focuses on small actions and atm
 3) Check yourself in the mirror.
 4) Head into the meeting.
 
+## Map (rough layout)
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Meeting   │
+│     M      │
+└─────┬──────┘
+      │
+      │
+┌────────────┐
+│   Office   │
+│   C, P     │
+└────────────┘
+
+C = Coffee
+P = Papers
+M = Mirror
+```
+
 ## Example (fluent setup)
 ```csharp
 using MarcusMedina.TextAdventure.Engine;
@@ -15,6 +37,12 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
+using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+
+// Slice 18 — Story Branches
+// Tests:
+// - StoryBranch conditions + consequences
+// - Two endings based on player choices
 
 Location office = (id: "office", description: "A quiet office. Notes lie by a warm cup.");
 Location meeting = (id: "meeting", description: "A small meeting room. A mirror hangs by the door.");
@@ -30,8 +58,27 @@ office.AddItem(coffee);
 office.AddItem(papers);
 meeting.AddItem(mirror);
 
-var state = new GameState(office, worldLocations: new[] { office, meeting });
-var parser = new KeywordParser(KeywordParserConfig.Default);
+GameState state = new(office, worldLocations: [office, meeting]);
+KeywordParser parser = new(KeywordParserConfig.Default);
+
+bool endingReached = false;
+string endingMessage = "";
+
+_ = state.Story.AddBranch(new StoryBranch("prepared")
+    .Condition(s => s.IsCurrentRoomId("meeting") && s.Inventory.FindItem("coffee") != null)
+    .Consequence(_ =>
+    {
+        endingMessage = "You arrive with coffee in hand. The meeting starts on steady footing.";
+        endingReached = true;
+    }));
+
+_ = state.Story.AddBranch(new StoryBranch("unprepared")
+    .Condition(s => s.IsCurrentRoomId("meeting") && s.Inventory.FindItem("coffee") == null)
+    .Consequence(_ =>
+    {
+        endingMessage = "You arrive empty-handed. The meeting begins with a small awkward pause.";
+        endingReached = true;
+    }));
 
 var game = GameBuilder.Create()
     .UseState(state)
@@ -41,7 +88,19 @@ var game = GameBuilder.Create()
         var look = g.State.Look();
         g.Output.WriteLine($"\n{look.Message}");
     })
+    .AddTurnEnd((g, command, result) =>
+    {
+        _ = g.State.Story.Check(g.State).ToList();
+        if (!endingReached)
+        {
+            return;
+        }
+
+        g.Output.WriteLine(endingMessage);
+        g.RequestStop();
+    })
     .Build();
 
+SetupC64("Before the Meeting - Text Adventure Sandbox");
 game.Run();
 ```

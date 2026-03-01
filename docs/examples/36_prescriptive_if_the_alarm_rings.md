@@ -20,6 +20,32 @@ _Slice tag: Slice 36 — Prescriptive Structure (Creepypasta style, British Engl
 7) A price is paid, willingly or not.
 8) The ending leaves a lingering echo.
 
+    ## Map (rough layout)
+
+```
+          N
+    W           E
+          S
+
+┌────────────┐
+│  Safe Room │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐
+│   Stair    │
+│            │
+└─────┬──────┘
+      │
+┌────────────┐
+│   Lobby    │
+│     A B    │
+└────────────┘
+
+A = Alarm box
+B = Badge
+```
+
     ## Example (detailed setup)
 
 ```csharp

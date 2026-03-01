@@ -3,17 +3,60 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace MarcusMedina.TextAdventure.Engine;
-
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
+namespace MarcusMedina.TextAdventure.Engine;
+
 public class GameState : IGameState
 {
     private readonly Dictionary<string, ILocation> _locations = new(StringComparer.OrdinalIgnoreCase);
+
+    public ILocation CurrentLocation { get; private set; }
+    public string? LastMoveError { get; private set; }
+    public GameError LastMoveErrorCode { get; private set; }
+    public IStats Stats { get; }
+    public IInventory Inventory { get; }
+    public RecipeBook RecipeBook { get; }
+    public IEventSystem Events { get; }
+    public ICombatSystem CombatSystem { get; }
+    public ITimeSystem TimeSystem { get; private set; }
+    public IFactionSystem Factions { get; private set; }
+    public IRandomEventPool RandomEvents { get; private set; }
+    public IPathfinder Pathfinder { get; private set; }
+    public ILocationDiscoverySystem LocationDiscovery { get; private set; }
+    public IForeshadowingSystem Foreshadowing { get; private set; }
+    public INarrativeVoiceSystem NarrativeVoice { get; private set; }
+    public IAgencyTracker Agency { get; private set; }
+    public IDramaticIronySystem DramaticIrony { get; private set; }
+    public ITensionSystem Tension { get; private set; }
+    public IFlashbackSystem Flashbacks { get; private set; }
+    public IChapterSystem Chapters { get; private set; }
+    public IScheduleQueue Schedule { get; private set; }
+    public IActionTriggerSystem ActionTriggers { get; private set; }
+    public IWorldState WorldState { get; }
+    public ISaveSystem SaveSystem { get; }
+    public IQuestLog Quests { get; }
+    public StoryState Story { get; }
+    private readonly NpcTriggerSystem _npcTriggers = new();
+    private readonly List<PoisonEffect> _activePoisons = [];
+    public IReadOnlyList<PoisonEffect> ActivePoisons => _activePoisons;
+    public MementoCaretaker History { get; }
+    public IWeatherSystem? Weather { get; private set; }
+    public IAccessibilitySystem? Accessibility { get; private set; }
+    public IMoodSystem? MoodSystem { get; private set; }
+    public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
+    public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
+    /// <summary>Enable fuzzy matching for commands and targets.</summary>
+    public bool EnableFuzzyMatching { get; set; }
+    /// <summary>Maximum edit distance for fuzzy matching.</summary>
+    public int FuzzyMaxDistance { get; set; } = 1;
+    public IReadOnlyCollection<ILocation> Locations => _locations.Values;
+    public bool TestingModeEnabled { get; set; }
+    public bool DebugMode { get; set; }
 
     public GameState(
         ILocation startLocation,
@@ -25,7 +68,17 @@ public class GameState : IGameState
         ITimeSystem? timeSystem = null,
         IFactionSystem? factionSystem = null,
         IRandomEventPool? randomEventPool = null,
+        IPathfinder? pathfinder = null,
         ILocationDiscoverySystem? locationDiscovery = null,
+        IForeshadowingSystem? foreshadowingSystem = null,
+        INarrativeVoiceSystem? narrativeVoiceSystem = null,
+        IAgencyTracker? agencyTracker = null,
+        IDramaticIronySystem? dramaticIronySystem = null,
+        ITensionSystem? tensionSystem = null,
+        IFlashbackSystem? flashbackSystem = null,
+        IChapterSystem? chapterSystem = null,
+        IScheduleQueue? scheduleQueue = null,
+        IActionTriggerSystem? actionTriggerSystem = null,
         IWorldState? worldState = null,
         ISaveSystem? saveSystem = null,
         IEnumerable<ILocation>? worldLocations = null)
@@ -40,76 +93,235 @@ public class GameState : IGameState
         TimeSystem = timeSystem ?? new TimeSystem();
         Factions = factionSystem ?? new FactionSystem();
         RandomEvents = randomEventPool ?? new RandomEventPool();
+        Pathfinder = pathfinder ?? new AStarPathfinder();
         LocationDiscovery = locationDiscovery ?? new LocationDiscoverySystem();
+        Foreshadowing = foreshadowingSystem ?? new ForeshadowingSystem();
+        NarrativeVoice = narrativeVoiceSystem ?? new NarrativeVoiceSystem();
+        Agency = agencyTracker ?? new AgencyTracker();
+        DramaticIrony = dramaticIronySystem ?? new DramaticIronySystem();
+        Tension = tensionSystem ?? new TensionSystem();
+        Flashbacks = flashbackSystem ?? new FlashbackSystem();
+        Chapters = chapterSystem ?? new ChapterSystem();
+        Schedule = scheduleQueue ?? new ScheduleQueue(this);
+        ActionTriggers = actionTriggerSystem ?? new ActionTriggerSystem();
         WorldState = worldState ?? new WorldState();
         SaveSystem = saveSystem ?? new JsonSaveSystem();
         Quests = new QuestLog();
+        Story = new StoryState();
+        History = new MementoCaretaker();
+        Accessibility = new AccessibilitySystem();
+        MoodSystem = new MoodSystem();
 
-        RegisterLocations(worldLocations ?? [startLocation]);
+        RegisterLocations(worldLocations ?? new[] { startLocation });
         if (LocationDiscovery is LocationDiscoverySystem discovery)
+        {
+            discovery.Attach(this, Events);
+        }
+        _npcTriggers.Attach(this, Events);
+    }
+
+    public void RegisterLocations(IEnumerable<ILocation> locations)
+    {
+        if (locations is null)
+            return;
+
+        foreach (var location in locations)
+        {
+            if (location is null)
+                continue;
+
+            _locations[location.Id] = location;
+        }
+    }
+
+    public void SetTimeSystem(ITimeSystem timeSystem)
+    {
+        if (timeSystem == null)
+        {
+            return;
+        }
+
+        TimeSystem = timeSystem;
+    }
+
+    public void SetFactionSystem(IFactionSystem factionSystem)
+    {
+        if (factionSystem == null)
+        {
+            return;
+        }
+
+        Factions = factionSystem;
+    }
+
+    public void SetRandomEventPool(IRandomEventPool randomEventPool)
+    {
+        if (randomEventPool == null)
+        {
+            return;
+        }
+
+        RandomEvents = randomEventPool;
+    }
+
+    public void SetPathfinder(IPathfinder pathfinder)
+    {
+        if (pathfinder == null)
+        {
+            return;
+        }
+
+        Pathfinder = pathfinder;
+    }
+
+    public void TickNpcTriggers()
+    {
+        _npcTriggers.Tick(this);
+    }
+
+    public void AddPoison(PoisonEffect poison)
+    {
+        ArgumentNullException.ThrowIfNull(poison);
+        _activePoisons.Add(poison);
+    }
+
+    public List<(string SourceName, int Damage)> TickPoisons()
+    {
+        List<(string, int)> results = [];
+        for (int i = _activePoisons.Count - 1; i >= 0; i--)
+        {
+            PoisonEffect poison = _activePoisons[i];
+            int damage = poison.Tick();
+            if (damage > 0)
+            {
+                Stats.Damage(damage);
+                results.Add((poison.SourceName, damage));
+            }
+
+            if (poison.IsExpired)
+                _activePoisons.RemoveAt(i);
+        }
+
+        return results;
+    }
+
+    public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)
+    {
+        if (locationDiscovery == null)
+        {
+            return;
+        }
+
+        LocationDiscovery = locationDiscovery;
+        if (locationDiscovery is LocationDiscoverySystem discovery)
         {
             discovery.Attach(this, Events);
         }
     }
 
-    public ICombatSystem CombatSystem { get; }
-    public ILocation CurrentLocation { get; private set; }
-
-    /// <summary>Enable fuzzy matching for commands and targets.</summary>
-    public bool EnableFuzzyMatching { get; set; }
-
-    public IEventSystem Events { get; }
-    public IFactionSystem Factions { get; private set; }
-
-    /// <summary>Maximum edit distance for fuzzy matching.</summary>
-    public int FuzzyMaxDistance { get; set; } = 1;
-
-    public IInventory Inventory { get; }
-    public string? LastMoveError { get; private set; }
-    public GameError LastMoveErrorCode { get; private set; }
-    public ILocationDiscoverySystem LocationDiscovery { get; private set; }
-    public IReadOnlyCollection<ILocation> Locations => _locations.Values;
-    public IQuestLog Quests { get; }
-    public IRandomEventPool RandomEvents { get; private set; }
-    public RecipeBook RecipeBook { get; }
-    public ISaveSystem SaveSystem { get; }
-    public bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
-    public bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
-    public IStats Stats { get; }
-    public ITimeSystem TimeSystem { get; private set; }
-    public IWorldState WorldState { get; }
-
-    public void ApplyMemento(GameMemento memento)
+    public void SetForeshadowingSystem(IForeshadowingSystem foreshadowingSystem)
     {
-        ArgumentNullException.ThrowIfNull(memento);
-
-        if (_locations.TryGetValue(memento.CurrentLocationId, out var location))
+        if (foreshadowingSystem == null)
         {
-            CurrentLocation = location;
+            return;
         }
 
-        Stats.SetMaxHealth(memento.MaxHealth);
-        Stats.SetHealth(memento.Health);
+        Foreshadowing = foreshadowingSystem;
+    }
 
-        Inventory.Clear();
-        var allLocations = _locations.Values.ToList();
-        foreach (var itemId in memento.InventoryItemIds)
+    public void SetNarrativeVoiceSystem(INarrativeVoiceSystem narrativeVoiceSystem)
+    {
+        if (narrativeVoiceSystem == null)
         {
-            var item = FindItemById(itemId, allLocations);
-            if (item == null)
-            {
-                continue;
-            }
-
-            var itemLocation = allLocations.FirstOrDefault(l => l.Items.Contains(item));
-            _ = (itemLocation?.RemoveItem(item));
-            _ = Inventory.Add(item);
+            return;
         }
 
-        if (WorldState is WorldState worldState)
+        NarrativeVoice = narrativeVoiceSystem;
+    }
+
+    public void SetAgencyTracker(IAgencyTracker agencyTracker)
+    {
+        if (agencyTracker == null)
         {
-            worldState.Apply(memento.Flags, memento.Counters, memento.Relationships, memento.Timeline);
+            return;
         }
+
+        Agency = agencyTracker;
+    }
+
+    public void SetDramaticIronySystem(IDramaticIronySystem dramaticIronySystem)
+    {
+        if (dramaticIronySystem == null)
+        {
+            return;
+        }
+
+        DramaticIrony = dramaticIronySystem;
+    }
+
+    public void SetTensionSystem(ITensionSystem tensionSystem)
+    {
+        if (tensionSystem == null)
+        {
+            return;
+        }
+
+        Tension = tensionSystem;
+    }
+
+    public void SetFlashbackSystem(IFlashbackSystem flashbackSystem)
+    {
+        if (flashbackSystem == null)
+        {
+            return;
+        }
+
+        Flashbacks = flashbackSystem;
+    }
+
+    public void SetChapterSystem(IChapterSystem chapterSystem)
+    {
+        if (chapterSystem == null)
+        {
+            return;
+        }
+
+        Chapters = chapterSystem;
+    }
+
+    public void SetScheduleQueue(IScheduleQueue scheduleQueue)
+    {
+        if (scheduleQueue == null)
+        {
+            return;
+        }
+
+        Schedule = scheduleQueue;
+    }
+
+    public void SetActionTriggerSystem(IActionTriggerSystem actionTriggerSystem)
+    {
+        if (actionTriggerSystem == null)
+        {
+            return;
+        }
+
+        ActionTriggers = actionTriggerSystem;
+    }
+
+    public void SetWeatherSystem(IWeatherSystem? weatherSystem)
+    {
+        Weather = weatherSystem;
+    }
+
+    public void SetAccessibilitySystem(IAccessibilitySystem? accessibilitySystem)
+    {
+        Accessibility = accessibilitySystem;
+    }
+
+    public void SetMoodSystem(IMoodSystem? moodSystem)
+    {
+        MoodSystem = moodSystem;
     }
 
     public GameMemento CreateMemento()
@@ -138,13 +350,58 @@ public class GameState : IGameState
             timeline);
     }
 
-    public bool IsCurrentRoomId(string id) => !string.IsNullOrWhiteSpace(id) && CurrentLocation.Id.TextCompare(id);
+    public void ApplyMemento(GameMemento memento)
+    {
+        ArgumentNullException.ThrowIfNull(memento);
+
+        if (_locations.TryGetValue(memento.CurrentLocationId, out ILocation? location))
+        {
+            CurrentLocation = location;
+        }
+
+        Stats.SetMaxHealth(memento.MaxHealth);
+        Stats.SetHealth(memento.Health);
+
+        Inventory.Clear();
+        List<ILocation> allLocations = _locations.Values.ToList();
+        foreach (string itemId in memento.InventoryItemIds)
+        {
+            IItem? item = FindItemById(itemId, allLocations);
+            if (item == null)
+            {
+                continue;
+            }
+
+            ILocation? itemLocation = allLocations.FirstOrDefault(l => l.Items.Contains(item));
+            _ = (itemLocation?.RemoveItem(item));
+            _ = Inventory.Add(item);
+        }
+
+        if (WorldState is WorldState worldState)
+        {
+            worldState.Apply(memento.Flags, memento.Counters, memento.Relationships, memento.Timeline);
+        }
+    }
+
+    private static IItem? FindItemById(string id, IEnumerable<ILocation> locations)
+    {
+        foreach (ILocation location in locations)
+        {
+            IItem? item = location.Items.FirstOrDefault(i => i.Id.TextCompare(id));
+            if (item != null)
+            {
+                return item;
+            }
+        }
+
+        return null;
+    }
 
     public bool Move(Direction direction)
     {
         LastMoveError = null;
         LastMoveErrorCode = GameError.None;
-        var exit = CurrentLocation.GetExit(direction);
+        Exit? exit = CurrentLocation.GetExit(direction);
 
         if (exit == null)
         {
@@ -169,86 +426,26 @@ public class GameState : IGameState
             return false;
         }
 
-        var previousLocation = CurrentLocation;
+        ILocation previousLocation = CurrentLocation;
         Events.Publish(new GameEvent(GameEventType.ExitLocation, this, previousLocation));
         CurrentLocation = exit.Target;
         Events.Publish(new GameEvent(GameEventType.EnterLocation, this, CurrentLocation));
+        if (CurrentLocation is Location location)
+        {
+            _ = location.DiscoverHiddenExits(this);
+        }
         return true;
     }
 
-    public void RegisterLocations(IEnumerable<ILocation> locations)
+    public bool IsCurrentRoomId(string id)
     {
-        if (locations == null)
-        {
-            return;
-        }
-
-        foreach (var location in locations)
-        {
-            if (location == null)
-            {
-                continue;
-            }
-
-            _locations[location.Id] = location;
-        }
+        return !string.IsNullOrWhiteSpace(id) && CurrentLocation.Id.TextCompare(id);
     }
 
-    public void SetFactionSystem(IFactionSystem factionSystem)
+    /// <summary>Debug method to teleport directly to a location.</summary>
+    public void Teleport(ILocation location)
     {
-        if (factionSystem == null)
-        {
-            return;
-        }
-
-        Factions = factionSystem;
-    }
-
-    public void SetLocationDiscoverySystem(ILocationDiscoverySystem locationDiscovery)
-    {
-        if (locationDiscovery == null)
-        {
-            return;
-        }
-
-        LocationDiscovery = locationDiscovery;
-        if (locationDiscovery is LocationDiscoverySystem discovery)
-        {
-            discovery.Attach(this, Events);
-        }
-    }
-
-    public void SetRandomEventPool(IRandomEventPool randomEventPool)
-    {
-        if (randomEventPool == null)
-        {
-            return;
-        }
-
-        RandomEvents = randomEventPool;
-    }
-
-    public void SetTimeSystem(ITimeSystem timeSystem)
-    {
-        if (timeSystem == null)
-        {
-            return;
-        }
-
-        TimeSystem = timeSystem;
-    }
-
-    private static IItem? FindItemById(string id, IEnumerable<ILocation> locations)
-    {
-        foreach (var location in locations)
-        {
-            var item = location.Items.FirstOrDefault(i => i.Id.TextCompare(id));
-            if (item != null)
-            {
-                return item;
-            }
-        }
-
-        return null;
+        ArgumentNullException.ThrowIfNull(location);
+        CurrentLocation = location;
     }
 }

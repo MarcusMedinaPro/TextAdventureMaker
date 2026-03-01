@@ -167,6 +167,22 @@ public class AiProviderAdapterTests
     }
 
     [Fact]
+    public async Task OllamaCommandProvider_ParseAsync_MapsTokenUsage()
+    {
+        StubHttpMessageHandler handler = new((_, _) =>
+            JsonResponse(HttpStatusCode.OK, """{"response":"look","prompt_eval_count":4,"eval_count":2}"""));
+
+        using HttpClient client = new(handler);
+        OllamaCommandProvider provider = new(new OllamaSettings("http://localhost:11434"), client);
+
+        AiProviderResult result = await provider.ParseAsync(new AiParseRequest("inspect room"), TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("look", result.CommandText);
+        Assert.Equal(6, result.TokenUsage?.TotalTokens);
+    }
+
+    [Fact]
     public async Task Provider_NonSuccessStatus_ReturnsFailed()
     {
         StubHttpMessageHandler handler = new((_, _) => JsonResponse(HttpStatusCode.BadGateway, """{"error":"upstream failed"}"""));

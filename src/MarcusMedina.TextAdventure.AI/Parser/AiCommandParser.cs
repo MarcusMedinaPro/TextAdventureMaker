@@ -50,6 +50,11 @@ public class AiCommandParser : ICommandParser
 
     public ICommand Parse(string input)
     {
+        return ParseAsync(input).GetAwaiter().GetResult();
+    }
+
+    public async Task<ICommand> ParseAsync(string input, CancellationToken cancellationToken = default)
+    {
         if (!_options.Enabled || string.IsNullOrWhiteSpace(input))
             return _fallback.Parse(input);
 
@@ -64,18 +69,17 @@ public class AiCommandParser : ICommandParser
             }
         }
 
-        AiRoutingResult? routingResult = null;
-
         try
         {
-            using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(Math.Max(250, _options.TimeoutMs)));
+            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromMilliseconds(Math.Max(250, _options.TimeoutMs)));
             AiParseRequest request = new(
                 Input: input,
                 SystemPrompt: _systemPrompt,
                 EstimatedTokens: _options.EstimatedTokensPerRequest);
 
             Probe("parser.ai.call", input);
-            routingResult = _router.RouteAsync(request, cts.Token).GetAwaiter().GetResult();
+            AiRoutingResult routingResult = await _router.RouteAsync(request, cts.Token).ConfigureAwait(false);
             LastRoutingResult = routingResult;
             Probe("parser.ai.response", routingResult.CommandText ?? string.Empty);
 

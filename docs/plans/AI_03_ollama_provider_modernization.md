@@ -38,9 +38,14 @@
 ## Implementation Checklist (engine/AI)
 
 - [x] `OllamaCommandProvider`
-- [ ] Async refactor in parser/provider pipeline
-- [ ] Typed payload/response models
+- [x] Async refactor in parser/provider pipeline
+- [x] Typed payload/response models
 - [x] Compatibility tests
+
+## Validation Notes (2026-03-01)
+
+- `AiCommandParser` now exposes async parsing flow internally (`ParseAsync`) and keeps sync interface compatibility.
+- `OllamaCommandProvider` now uses typed request/response models with token usage mapping from `prompt_eval_count` + `eval_count`.
 
 ## Definition of Done
 

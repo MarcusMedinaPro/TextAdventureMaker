@@ -78,6 +78,11 @@ public class LookCommand(string? target = null) : ICommand
     internal static CommandResult ExecuteTarget(CommandContext context, string target)
     {
         ILocation location = context.State.CurrentLocation;
+
+        // Check if target is a direction (for "look north" style commands)
+        if (DirectionHelper.TryParse(target, out var direction))
+            return LookInDirection(context, direction);
+
         IItem? item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
         string? suggestion = null;
         if (item is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
@@ -178,6 +183,27 @@ public class LookCommand(string? target = null) : ICommand
         }
 
         return CommandResult.Fail(Language.NothingToLookAt, GameError.ItemNotFound);
+    }
+
+    private static CommandResult LookInDirection(CommandContext context, Direction direction)
+    {
+        var location = context.State.CurrentLocation;
+
+        if (!location.Exits.TryGetValue(direction, out var exit))
+            return CommandResult.Fail($"There is no exit to the {direction.ToString().ToLowerInvariant()}.", GameError.NoExitInDirection);
+
+        // Closed door blocks view
+        if (exit.Door is not null && exit.Door.State != DoorState.Open)
+        {
+            var doorDesc = exit.Door.GetProperty<bool>("transparent", false) ? "frosted " : string.Empty;
+            var stateText = exit.Door.State.ToString().ToLowerInvariant();
+            return CommandResult.Ok($"A {doorDesc}{stateText} {exit.Door.Name.ToLowerInvariant()} blocks your view.");
+        }
+
+        // Can see into adjacent room
+        var targetLocation = exit.Target;
+        var glimpse = targetLocation.GetRoomGlimpse();
+        return CommandResult.Ok($"Looking {direction.ToString().ToLowerInvariant()}, you see:\n{glimpse}");
     }
 
     private static IEnumerable<string> FormatItems(IEnumerable<IItem> items)

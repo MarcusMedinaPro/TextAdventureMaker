@@ -25,6 +25,7 @@ public static class AiPluginBootstrapFactory
             .WithTimeoutMs(options.ParserOptions.TimeoutMs)
             .WithEstimatedTokensPerRequest(options.ParserOptions.EstimatedTokensPerRequest)
             .WithDebugProbe(options.ParserOptions.DebugProbe)
+            .WithTelemetrySink(options.ParserOptions.TelemetrySink)
             .WithRouterDecorator(options.RouterDecorator);
 
         AddProvider(builder, options.PrimaryProvider);

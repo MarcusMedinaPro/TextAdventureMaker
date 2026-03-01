@@ -46,9 +46,15 @@
 
 - [x] `AiContextBuilder`
 - [x] Safety policy implementation + strict mode
-- [ ] Telemetry hooks and counters
+- [x] Telemetry hooks and counters
 - [x] Provider-chain sandbox demo
-- [ ] Documentation update
+- [x] Documentation update
+
+## Validation Notes (2026-03-01)
+
+- Telemetry hooks now exist in router attempts with pluggable sink (`IAiTelemetrySink`), including budget skips and token collection.
+- In-memory counters are provided via `InMemoryAiTelemetrySink`.
+- Provider setup and fallback usage docs are captured in `docs/plans/AI_PROVIDER_SETUP.md`.
 
 ## Definition of Done
 

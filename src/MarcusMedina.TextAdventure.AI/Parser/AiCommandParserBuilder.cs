@@ -16,6 +16,7 @@ public class AiCommandParserBuilder
     private ICommandParser? _fallback;
     private IAiCommandSafetyPolicy? _safetyPolicy;
     private ITokenBudgetPolicy? _tokenBudgetPolicy;
+    private IAiTelemetrySink? _telemetrySink;
     private Func<IAiProviderRouter, IAiProviderRouter>? _routerDecorator;
 
     public AiCommandParserBuilder WithEndpoint(string endpoint)
@@ -101,6 +102,12 @@ public class AiCommandParserBuilder
     public AiCommandParserBuilder WithTokenBudgetPolicy(ITokenBudgetPolicy policy)
     {
         _tokenBudgetPolicy = policy;
+        return this;
+    }
+
+    public AiCommandParserBuilder WithTelemetrySink(IAiTelemetrySink? telemetrySink)
+    {
+        _telemetrySink = telemetrySink;
         return this;
     }
 
@@ -196,7 +203,7 @@ public class AiCommandParserBuilder
             : [.. _providers];
 
         _options.Enabled = _settings.Enabled;
-        IAiProviderRouter router = new AiProviderRouter(providers, _tokenBudgetPolicy);
+        IAiProviderRouter router = new AiProviderRouter(providers, _tokenBudgetPolicy, _telemetrySink);
         IAiProviderRouter? decorated = _routerDecorator?.Invoke(router);
         return decorated ?? router;
     }

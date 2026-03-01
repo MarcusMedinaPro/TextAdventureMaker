@@ -18,11 +18,8 @@ public sealed class QuestLog : IQuestLog
     public IQuest Add(IQuest quest)
     {
         ArgumentNullException.ThrowIfNull(quest);
-        var existing = Find(quest.Id);
-        if (existing != null)
-        {
+        if (Find(quest.Id) is { } existing)
             return existing;
-        }
 
         _quests.Add(quest);
         return quest;
@@ -30,34 +27,26 @@ public sealed class QuestLog : IQuestLog
 
     public void AddRange(IEnumerable<IQuest> quests)
     {
-        if (quests == null)
-        {
+        if (quests is null)
             return;
-        }
 
         foreach (var quest in quests)
         {
-            if (quest != null)
-            {
+            if (quest is not null)
                 _ = Add(quest);
-            }
         }
     }
 
     public bool CheckAll(IGameState state)
     {
-        if (state == null)
-        {
+        if (state is null)
             return false;
-        }
 
         var anyCompleted = false;
         foreach (var quest in _quests)
         {
             if (quest.CheckProgress(state))
-            {
                 anyCompleted = true;
-            }
         }
 
         return anyCompleted;

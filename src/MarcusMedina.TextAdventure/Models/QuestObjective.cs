@@ -7,21 +7,11 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public sealed class QuestObjective : IQuestObjective
+public sealed class QuestObjective(string id, bool isOptional) : IQuestObjective
 {
-    public string Id { get; }
-    public bool IsOptional { get; }
+    public string Id { get; } = id is not null && id.Trim().Length > 0 ? id : throw new ArgumentException("Value cannot be null or whitespace.", nameof(id));
+    public bool IsOptional { get; } = isOptional;
     public bool IsCompleted { get; private set; }
 
-    public QuestObjective(string id, bool isOptional)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        Id = id;
-        IsOptional = isOptional;
-    }
-
-    public void Complete()
-    {
-        IsCompleted = true;
-    }
+    public void Complete() => IsCompleted = true;
 }

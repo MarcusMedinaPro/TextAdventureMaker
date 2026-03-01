@@ -33,75 +33,36 @@ public sealed class TimedDoor(string doorId) : ITimedDoor
     public ITimedDoor OpensAt(int tick)
     {
         if (tick >= 0)
-        {
             _openTicks.Add(tick);
-        }
-
         return this;
     }
 
     public ITimedDoor ClosesAt(int tick)
     {
         if (tick >= 0)
-        {
             _closeTicks.Add(tick);
-        }
-
         return this;
     }
 
-    public ITimedDoor OpensAt(TimePhase phase)
-    {
-        _openPhases.Add(phase);
-        return this;
-    }
-
-    public ITimedDoor ClosesAt(TimePhase phase)
-    {
-        _closePhases.Add(phase);
-        return this;
-    }
+    public ITimedDoor OpensAt(TimePhase phase) { _openPhases.Add(phase); return this; }
+    public ITimedDoor ClosesAt(TimePhase phase) { _closePhases.Add(phase); return this; }
 
     public ITimedDoor OpensWhen(Func<IGameState, bool> predicate)
     {
-        if (predicate != null)
-        {
+        if (predicate is not null)
             _openConditions.Add(predicate);
-        }
-
         return this;
     }
 
     public ITimedDoor ClosesWhen(Func<IGameState, bool> predicate)
     {
-        if (predicate != null)
-        {
+        if (predicate is not null)
             _closeConditions.Add(predicate);
-        }
-
         return this;
     }
 
-    public ITimedDoor PermanentlyOpensWhen(Func<IGameState, bool> predicate)
-    {
-        _permanentOpenCondition = predicate;
-        return this;
-    }
-
-    public ITimedDoor Message(string text)
-    {
-        MessageText = text ?? "";
-        return this;
-    }
-
-    public ITimedDoor ClosedMessage(string text)
-    {
-        ClosedMessageText = text ?? "";
-        return this;
-    }
-
-    public ITimedDoor Or()
-    {
-        return this;
-    }
+    public ITimedDoor PermanentlyOpensWhen(Func<IGameState, bool> predicate) { _permanentOpenCondition = predicate; return this; }
+    public ITimedDoor Message(string text) { MessageText = text ?? ""; return this; }
+    public ITimedDoor ClosedMessage(string text) { ClosedMessageText = text ?? ""; return this; }
+    public ITimedDoor Or() => this;
 }

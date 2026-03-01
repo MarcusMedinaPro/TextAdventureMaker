@@ -52,11 +52,8 @@ public sealed class Chapter(string id, string title) : IChapter
 
     public Chapter ConvergesFrom(params string[] chapterIds)
     {
-        if (chapterIds != null)
-        {
+        if (chapterIds is not null)
             _convergesFrom.AddRange(chapterIds.Where(id => !string.IsNullOrWhiteSpace(id)));
-        }
-
         return this;
     }
 
@@ -66,15 +63,10 @@ public sealed class Chapter(string id, string title) : IChapter
         return this;
     }
 
-    public bool CanActivate(IChapterSystem system)
-    {
-        return _unlockCondition?.Invoke(system) ?? true;
-    }
+    public bool CanActivate(IChapterSystem system) =>
+        _unlockCondition?.Invoke(system) ?? true;
 
-    public void Activate()
-    {
-        State = ChapterState.Active;
-    }
+    public void Activate() => State = ChapterState.Active;
 
     public void Complete(IChapterSystem system)
     {
@@ -82,20 +74,13 @@ public sealed class Chapter(string id, string title) : IChapter
         _onComplete?.Invoke(new ChapterContext(system, this));
     }
 
-    public void Skip()
-    {
-        State = ChapterState.Skipped;
-    }
+    public void Skip() => State = ChapterState.Skipped;
 
-    public bool IsComplete(string objectiveId)
-    {
-        return _objectives.Any(obj => obj.Id.Equals(objectiveId, StringComparison.OrdinalIgnoreCase) && obj.IsComplete);
-    }
+    public bool IsComplete(string objectiveId) =>
+        _objectives.Any(obj => obj.Id.Equals(objectiveId, StringComparison.OrdinalIgnoreCase) && obj.IsComplete);
 
-    public ChapterObjective? FindObjective(string objectiveId)
-    {
-        return _objectives.FirstOrDefault(obj => obj.Id.Equals(objectiveId, StringComparison.OrdinalIgnoreCase));
-    }
+    public ChapterObjective? FindObjective(string objectiveId) =>
+        _objectives.FirstOrDefault(obj => obj.Id.Equals(objectiveId, StringComparison.OrdinalIgnoreCase));
 
     public IReadOnlyCollection<string> ConvergeSources => _convergesFrom;
 }

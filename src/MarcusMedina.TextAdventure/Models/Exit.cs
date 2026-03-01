@@ -23,8 +23,7 @@ public class Exit
 
     public Exit(ILocation target, IDoor? door = null, bool isOneWay = false)
     {
-        ArgumentNullException.ThrowIfNull(target);
-        Target = target;
+        Target = target ?? throw new ArgumentNullException(nameof(target));
         Door = door;
         IsOneWay = isOneWay;
     }
@@ -52,30 +51,18 @@ public class Exit
     public bool TryDiscover(IGameState state)
     {
         if (!IsHidden || IsDiscovered)
-        {
             return false;
-        }
 
-        if (DiscoverCondition != null && !DiscoverCondition(state))
-        {
+        if (DiscoverCondition is not null && !DiscoverCondition(state))
             return false;
-        }
 
-        if (PerceptionDifficulty.HasValue)
-        {
-            int roll = Random.Shared.Next(1, 101);
-            if (roll < PerceptionDifficulty.Value)
-            {
-                return false;
-            }
-        }
+        if (PerceptionDifficulty.HasValue && Random.Shared.Next(1, 101) < PerceptionDifficulty.Value)
+            return false;
 
-        if (DiscoverCondition == null || DiscoverCondition(state))
-        {
-            IsDiscovered = true;
-            return true;
-        }
+        if (DiscoverCondition is not null && !DiscoverCondition(state))
+            return false;
 
-        return false;
+        IsDiscovered = true;
+        return true;
     }
 }

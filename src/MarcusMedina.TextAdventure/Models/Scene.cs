@@ -27,17 +27,13 @@ public sealed class Scene(string id) : IScene
 
     public IScene SetParticipants(params string[] participants)
     {
-        if (participants == null)
-        {
+        if (participants is null)
             return this;
-        }
 
-        foreach (string participant in participants)
+        foreach (var participant in participants)
         {
             if (!string.IsNullOrWhiteSpace(participant))
-            {
                 _participants.Add(participant);
-            }
         }
 
         return this;
@@ -46,25 +42,16 @@ public sealed class Scene(string id) : IScene
     public IScene Beat(int order, string eventId)
     {
         if (string.IsNullOrWhiteSpace(eventId))
-        {
             return this;
-        }
 
         _beats.Add(new SceneBeat(order, eventId));
         return this;
     }
 
-    public SceneTransitionBuilder Transition()
-    {
-        return new SceneTransitionBuilder(this);
-    }
+    public SceneTransitionBuilder Transition() => new(this);
 
-    public IEnumerable<SceneBeat> Play()
-    {
-        return _beats
-            .OrderBy(beat => beat.Order)
-            .ToArray();
-    }
+    public IEnumerable<SceneBeat> Play() =>
+        [.. _beats.OrderBy(beat => beat.Order)];
 
     public bool TryGetTransition(string trigger, out SceneTransition transition)
     {
@@ -74,25 +61,20 @@ public sealed class Scene(string id) : IScene
             return false;
         }
 
-        SceneTransition? match = _transitions
-            .FirstOrDefault(t => string.Equals(t.Trigger, trigger, StringComparison.OrdinalIgnoreCase));
-
-        if (match == null)
+        if (_transitions.FirstOrDefault(t => string.Equals(t.Trigger, trigger, StringComparison.OrdinalIgnoreCase)) is { } match)
         {
-            transition = new SceneTransition("", "");
-            return false;
+            transition = match;
+            return true;
         }
 
-        transition = match;
-        return true;
+        transition = new SceneTransition("", "");
+        return false;
     }
 
     internal void AddTransition(SceneTransition transition)
     {
         if (!string.IsNullOrWhiteSpace(transition.TargetSceneId) &&
             !string.IsNullOrWhiteSpace(transition.Trigger))
-        {
             _transitions.Add(transition);
-        }
     }
 }

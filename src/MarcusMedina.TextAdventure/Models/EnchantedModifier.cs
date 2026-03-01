@@ -11,11 +11,8 @@ public class EnchantedModifier(IItem inner) : ItemDecorator(inner)
 {
     public override string Name => $"enchanted {Inner.Name}";
 
-    public override string GetDescription()
-    {
-        var baseDescription = Inner.GetDescription();
-        return string.IsNullOrWhiteSpace(baseDescription)
-            ? "It hums with a faint magical glow."
-            : $"{baseDescription} It hums with a faint magical glow.";
-    }
+    public override string GetDescription() =>
+        Inner.GetDescription() is { Length: > 0 } desc
+            ? $"{desc} It hums with a faint magical glow."
+            : "It hums with a faint magical glow.";
 }

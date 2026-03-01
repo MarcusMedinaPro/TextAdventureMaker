@@ -20,14 +20,6 @@ public sealed class StoryState
         return this;
     }
 
-    public IEnumerable<IStoryBranch> Check(IGameState state)
-    {
-        foreach (IStoryBranch branch in _branches)
-        {
-            if (branch.Evaluate(state))
-            {
-                yield return branch;
-            }
-        }
-    }
+    public IEnumerable<IStoryBranch> Check(IGameState state) =>
+        _branches.Where(branch => branch.Evaluate(state));
 }

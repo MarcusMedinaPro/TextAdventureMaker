@@ -81,11 +81,8 @@ public class UserProfile
     /// <summary>
     /// Gets the default profile path.
     /// </summary>
-    public static string GetDefaultProfilePath()
-    {
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        return Path.Combine(home, ".textadventure", "profile.json");
-    }
+    public static string GetDefaultProfilePath() =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".textadventure", "profile.json");
 
     /// <summary>
     /// Loads a profile from a JSON file.
@@ -94,9 +91,7 @@ public class UserProfile
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         if (!File.Exists(path))
-        {
             return new UserProfile();
-        }
 
         var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<UserProfile>(json, JsonOptions) ?? new UserProfile();
@@ -105,28 +100,20 @@ public class UserProfile
     /// <summary>
     /// Loads profile from default location (~/.textadventure/profile.json).
     /// </summary>
-    public static UserProfile LoadDefault()
-    {
-        var defaultPath = GetDefaultProfilePath();
-        return Load(defaultPath);
-    }
+    public static UserProfile LoadDefault() => Load(GetDefaultProfilePath());
 
     /// <summary>
     /// Gets the player's current age based on birthdate.
     /// </summary>
     public int? GetCalculatedAge()
     {
-        if (Birthdate == null)
-        {
+        if (Birthdate is null)
             return Age;
-        }
 
         var today = DateOnly.FromDateTime(DateTime.Today);
         var age = today.Year - Birthdate.Value.Year;
         if (Birthdate.Value > today.AddYears(-age))
-        {
             age--;
-        }
 
         return age;
     }
@@ -136,37 +123,16 @@ public class UserProfile
     /// </summary>
     /// <param name="originalNpcGender">The NPC's original gender in the story.</param>
     /// <returns>The gender the NPC should present as for this player.</returns>
-    public Gender GetRomanceNpcGender(Gender originalNpcGender)
-    {
-        // If no preference set, use original
-        if (RomancePreference == Gender.Unspecified)
-        {
-            return originalNpcGender;
-        }
-
-        // If preference is "any", use original
-        if (RomancePreference == Gender.Any)
-        {
-            return originalNpcGender;
-        }
-
-        // Otherwise, use player's preference
-        return RomancePreference;
-    }
+    public Gender GetRomanceNpcGender(Gender originalNpcGender) =>
+        RomancePreference is Gender.Unspecified or Gender.Any
+            ? originalNpcGender
+            : RomancePreference;
 
     /// <summary>
     /// Checks if today is the player's birthday.
     /// </summary>
-    public bool IsBirthday()
-    {
-        if (Birthdate == null)
-        {
-            return false;
-        }
-
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        return Birthdate.Value.Month == today.Month && Birthdate.Value.Day == today.Day;
-    }
+    public bool IsBirthday() =>
+        Birthdate is { } bd && bd.Month == DateTime.Today.Month && bd.Day == DateTime.Today.Day;
 
     /// <summary>
     /// Saves the profile to a JSON file.

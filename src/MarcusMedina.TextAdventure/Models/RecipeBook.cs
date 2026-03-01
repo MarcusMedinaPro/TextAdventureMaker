@@ -7,7 +7,7 @@ namespace MarcusMedina.TextAdventure.Models;
 
 using MarcusMedina.TextAdventure.Interfaces;
 
-public class RecipeBook
+public sealed class RecipeBook
 {
     private readonly List<ItemCombinationRecipe> _recipes = [];
 
@@ -17,16 +17,8 @@ public class RecipeBook
         return this;
     }
 
-    public CombinationResult Combine(IItem a, IItem b)
-    {
-        foreach (var recipe in _recipes)
-        {
-            if (recipe.Matches(a, b))
-            {
-                return CombinationResult.Ok(recipe.Create());
-            }
-        }
-
-        return CombinationResult.Fail();
-    }
+    public CombinationResult Combine(IItem a, IItem b) =>
+        _recipes.FirstOrDefault(r => r.Matches(a, b)) is { } recipe
+            ? CombinationResult.Ok(recipe.Create())
+            : CombinationResult.Fail();
 }

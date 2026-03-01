@@ -16,21 +16,17 @@ public sealed class PuzzleGraph
     public void AddEdge(string from, string to)
     {
         if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
-        {
             return;
-        }
 
         _edges.Add((from, to));
     }
 
     public string ToMermaid()
     {
-        StringBuilder builder = new();
-        _ = builder.AppendLine("graph LR");
-        foreach ((string from, string to) in _edges)
-        {
-            _ = builder.AppendLine($"    {from} --> {to}");
-        }
+        var builder = new StringBuilder();
+        builder.AppendLine("graph LR");
+        foreach (var (from, to) in _edges)
+            builder.AppendLine($"    {from} --> {to}");
 
         return builder.ToString().TrimEnd();
     }

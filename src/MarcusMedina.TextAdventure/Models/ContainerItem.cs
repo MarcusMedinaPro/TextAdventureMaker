@@ -17,9 +17,7 @@ public class ContainerItem<T>(string id, string name, int maxCount = 0) : Item(i
     public bool Add(T item)
     {
         if (!CanAdd(item))
-        {
             return false;
-        }
 
         _contents.Add(item);
         return true;

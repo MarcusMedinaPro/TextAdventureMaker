@@ -28,53 +28,27 @@ public sealed class TimedSpawn(string itemId) : ITimedSpawn
     public ITimedSpawn AppearsAt(int tick)
     {
         if (tick >= 0)
-        {
             _appearTicks.Add(tick);
-        }
-
         return this;
     }
 
-    public ITimedSpawn AppearsAt(TimePhase phase)
-    {
-        _appearPhases.Add(phase);
-        return this;
-    }
+    public ITimedSpawn AppearsAt(TimePhase phase) { _appearPhases.Add(phase); return this; }
 
     public ITimedSpawn AppearsWhen(Func<IGameState, bool> predicate)
     {
-        if (predicate != null)
-        {
+        if (predicate is not null)
             _appearConditions.Add(predicate);
-        }
-
         return this;
     }
 
     public ITimedSpawn DisappearsAfter(int ticks)
     {
         if (ticks > 0)
-        {
             _disappearAfterTicks.Add(ticks);
-        }
-
         return this;
     }
 
-    public ITimedSpawn DisappearsAt(TimePhase phase)
-    {
-        _disappearPhases.Add(phase);
-        return this;
-    }
-
-    public ITimedSpawn Message(string text)
-    {
-        MessageText = text ?? "";
-        return this;
-    }
-
-    public ITimedSpawn Or()
-    {
-        return this;
-    }
+    public ITimedSpawn DisappearsAt(TimePhase phase) { _disappearPhases.Add(phase); return this; }
+    public ITimedSpawn Message(string text) { MessageText = text ?? ""; return this; }
+    public ITimedSpawn Or() => this;
 }

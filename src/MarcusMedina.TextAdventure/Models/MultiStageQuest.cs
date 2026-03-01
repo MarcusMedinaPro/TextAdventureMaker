@@ -30,23 +30,18 @@ public sealed class MultiStageQuest
 
     public QuestStage AddStage(string id)
     {
-        QuestStage stage = new(id);
+        var stage = new QuestStage(id);
         _stages.Add(stage);
         return stage;
     }
 
     public bool CheckProgress(IGameState state)
     {
-        QuestStage? stage = CurrentStage;
-        if (stage == null)
-        {
+        if (CurrentStage is not { } stage)
             return false;
-        }
 
         if (!stage.CheckCompleted(state))
-        {
             return false;
-        }
 
         _currentIndex++;
         return true;

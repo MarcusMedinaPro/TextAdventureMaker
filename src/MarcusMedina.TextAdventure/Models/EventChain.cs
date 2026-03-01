@@ -23,15 +23,11 @@ public sealed class EventChain : IEventChain
     public bool Check(IGameState state)
     {
         if (_currentIndex >= _steps.Count)
-        {
             return false;
-        }
 
-        (Func<IGameState, bool> condition, Action<IGameState> action) = _steps[_currentIndex];
+        var (condition, action) = _steps[_currentIndex];
         if (!condition(state))
-        {
             return false;
-        }
 
         action(state);
         _currentIndex++;

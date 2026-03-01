@@ -7,22 +7,16 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public sealed class QuestStage : IQuestStage
+public sealed class QuestStage(string id) : IQuestStage
 {
     private readonly List<QuestObjective> _objectives = [];
     private readonly HashSet<string> _alternativePaths = new(StringComparer.OrdinalIgnoreCase);
     private Action<IGameState>? _onFailure;
     private Action<IGameState>? _onComplete;
 
-    public string Id { get; }
+    public string Id { get; } = id is not null && id.Trim().Length > 0 ? id : throw new ArgumentException("Value cannot be null or whitespace.", nameof(id));
     public bool IsCompleted { get; private set; }
     public IReadOnlyList<IQuestObjective> Objectives => _objectives;
-
-    public QuestStage(string id)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        Id = id;
-    }
 
     public QuestStage RequireObjective(string id)
     {
@@ -54,43 +48,27 @@ public sealed class QuestStage : IQuestStage
         return this;
     }
 
-    public void CompleteObjective(string id)
-    {
-        QuestObjective? objective = _objectives.FirstOrDefault(o => o.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-        objective?.Complete();
-    }
+    public void CompleteObjective(string id) =>
+        _objectives.FirstOrDefault(o => o.Id.Equals(id, StringComparison.OrdinalIgnoreCase))?.Complete();
 
     public void CompleteAlternative(string id)
     {
         if (_alternativePaths.Contains(id))
-        {
             IsCompleted = true;
-        }
     }
 
     public bool CheckCompleted(IGameState state)
     {
         if (IsCompleted)
-        {
             return true;
-        }
 
-        bool requiredMet = _objectives
-            .Where(o => !o.IsOptional)
-            .All(o => o.IsCompleted);
+        if (!_objectives.Where(o => !o.IsOptional).All(o => o.IsCompleted))
+            return false;
 
-        if (requiredMet)
-        {
-            IsCompleted = true;
-            _onComplete?.Invoke(state);
-            return true;
-        }
-
-        return false;
+        IsCompleted = true;
+        _onComplete?.Invoke(state);
+        return true;
     }
 
-    public void Fail(IGameState state)
-    {
-        _onFailure?.Invoke(state);
-    }
+    public void Fail(IGameState state) => _onFailure?.Invoke(state);
 }

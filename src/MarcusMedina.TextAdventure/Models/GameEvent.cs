@@ -8,32 +8,20 @@ namespace MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
-public sealed class GameEvent
+public sealed class GameEvent(
+    GameEventType type,
+    IGameState state,
+    ILocation? location = null,
+    IItem? item = null,
+    INpc? npc = null,
+    IDoor? door = null,
+    string? detail = null)
 {
-    public GameEvent(
-        GameEventType type,
-        IGameState state,
-        ILocation? location = null,
-        IItem? item = null,
-        INpc? npc = null,
-        IDoor? door = null,
-        string? detail = null)
-    {
-        ArgumentNullException.ThrowIfNull(state);
-        Type = type;
-        State = state;
-        Location = location;
-        Item = item;
-        Npc = npc;
-        Door = door;
-        Detail = detail;
-    }
-
-    public string? Detail { get; }
-    public IDoor? Door { get; }
-    public IItem? Item { get; }
-    public ILocation? Location { get; }
-    public INpc? Npc { get; }
-    public IGameState State { get; }
-    public GameEventType Type { get; }
+    public GameEventType Type { get; } = type;
+    public IGameState State { get; } = state ?? throw new ArgumentNullException(nameof(state));
+    public ILocation? Location { get; } = location;
+    public IItem? Item { get; } = item;
+    public INpc? Npc { get; } = npc;
+    public IDoor? Door { get; } = door;
+    public string? Detail { get; } = detail;
 }

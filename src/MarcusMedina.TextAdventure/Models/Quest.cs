@@ -38,19 +38,15 @@ public class Quest : IQuest
 
     public bool CheckProgress(IGameState state)
     {
-        if (State != QuestState.Active || _conditions.Count == 0)
-        {
+        if (State is not QuestState.Active || _conditions.Count == 0)
             return false;
-        }
 
         QuestConditionEvaluator evaluator = new(state);
-        if (_conditions.All(condition => condition.Accept(evaluator)))
-        {
-            State = QuestState.Completed;
-            return true;
-        }
+        if (!_conditions.All(condition => condition.Accept(evaluator)))
+            return false;
 
-        return false;
+        State = QuestState.Completed;
+        return true;
     }
 
     public IQuest Complete()
@@ -67,10 +63,8 @@ public class Quest : IQuest
 
     public IQuest Start()
     {
-        if (State == QuestState.Inactive)
-        {
+        if (State is QuestState.Inactive)
             State = QuestState.Active;
-        }
 
         return this;
     }

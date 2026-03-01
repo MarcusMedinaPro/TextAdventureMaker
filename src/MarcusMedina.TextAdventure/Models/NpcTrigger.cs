@@ -8,25 +8,18 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-public sealed class NpcTrigger
+public sealed class NpcTrigger(NpcSense sense, string target)
 {
     private Action<DialogContext>? _then;
 
-    public NpcSense Sense { get; }
-    public string Target { get; }
+    public NpcSense Sense { get; } = sense;
+    public string Target { get; } = target is not null && target.Trim().Length > 0 ? target.Trim() : throw new ArgumentException("Value cannot be null or whitespace.", nameof(target));
     public int DelayTicks { get; private set; }
     public int? ScheduledTick { get; set; }
     public bool SayOnlyOnce { get; private set; }
     public bool HasFired { get; set; }
     public bool ShouldFlee { get; private set; }
     public string? Message { get; private set; }
-
-    public NpcTrigger(NpcSense sense, string target)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(target);
-        Sense = sense;
-        Target = target.Trim();
-    }
 
     public NpcTrigger AfterTicks(int ticks)
     {
@@ -63,13 +56,8 @@ public sealed class NpcTrigger
         return this;
     }
 
-    public bool Matches(NpcSense sense, string target)
-    {
-        return Sense == sense && Target.Equals(target, StringComparison.OrdinalIgnoreCase);
-    }
+    public bool Matches(NpcSense sense, string target) =>
+        Sense == sense && Target.Equals(target, StringComparison.OrdinalIgnoreCase);
 
-    public void Apply(DialogContext context)
-    {
-        _then?.Invoke(context);
-    }
+    public void Apply(DialogContext context) => _then?.Invoke(context);
 }

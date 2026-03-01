@@ -8,7 +8,7 @@ namespace MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
 
-public interface ILocation
+public interface ILocation : IPropertyBag
 {
     IReadOnlyDictionary<Direction, Exit> Exits { get; }
     string Id { get; }

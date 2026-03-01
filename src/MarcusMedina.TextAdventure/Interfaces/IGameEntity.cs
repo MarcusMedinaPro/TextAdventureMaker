@@ -4,9 +4,8 @@
 // </copyright>
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface IGameEntity
+public interface IGameEntity : IPropertyBag
 {
     string Id { get; }
     string Name { get; }
-    IDictionary<string, string> Properties { get; }
 }

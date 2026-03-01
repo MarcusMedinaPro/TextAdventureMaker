@@ -9,6 +9,30 @@ using MarcusMedina.TextAdventure.Enums;
 
 public static class DirectionHelper
 {
+    private static readonly Dictionary<string, Direction> Aliases = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["n"] = Direction.North, ["s"] = Direction.South,
+        ["e"] = Direction.East, ["w"] = Direction.West,
+        ["ne"] = Direction.NorthEast, ["nw"] = Direction.NorthWest,
+        ["se"] = Direction.SouthEast, ["sw"] = Direction.SouthWest,
+        ["u"] = Direction.Up, ["d"] = Direction.Down,
+        ["in"] = Direction.In, ["out"] = Direction.Out
+    };
+
+    /// <summary>
+    /// Attempts to parse a direction from text, supporting both full names and abbreviations.
+    /// </summary>
+    public static bool TryParse(string? input, out Direction direction)
+    {
+        direction = default;
+        if (string.IsNullOrWhiteSpace(input))
+            return false;
+        var trimmed = input.Trim();
+        if (Enum.TryParse(trimmed, ignoreCase: true, out direction))
+            return true;
+        return Aliases.TryGetValue(trimmed, out direction);
+    }
+
     public static Direction GetOpposite(Direction direction) => direction switch
     {
         Direction.North => Direction.South,

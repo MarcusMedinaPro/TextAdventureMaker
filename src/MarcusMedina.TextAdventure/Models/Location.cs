@@ -25,6 +25,7 @@ public class Location(string id) : ILocation
     private readonly List<TimedSpawn> _timedSpawns = [];
     private LocationTransform? _transform;
 
+    public IDictionary<string, string> Properties { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
     public IReadOnlyList<IItem> Items => _items;
     public IReadOnlyList<INpc> Npcs => _npcs;

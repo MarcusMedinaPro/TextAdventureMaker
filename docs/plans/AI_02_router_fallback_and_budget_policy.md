@@ -52,3 +52,7 @@
 - Fallback path is deterministic.
 - Budget controls are configurable and testable.
 - Telemetry includes provider sequence and stop reason.
+
+## Validation Notes (2026-03-01)
+
+- Router order, fallback handling, and daily budget gating are implemented and covered by routing tests.

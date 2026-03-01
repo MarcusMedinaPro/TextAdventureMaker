@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class FluidItem : Item, IFluid
 {
@@ -17,19 +17,13 @@ public class FluidItem : Item, IFluid
     {
     }
 
+    public static implicit operator FluidItem((string id, string name, string description) data) => new(data.id, data.name, data.description);
+
     public new FluidItem Description(string text)
     {
         _ = base.Description(text);
         return this;
     }
 
-    IFluid IFluid.Description(string text)
-    {
-        return Description(text);
-    }
-
-    public static implicit operator FluidItem((string id, string name, string description) data)
-    {
-        return new(data.id, data.name, data.description);
-    }
+    IFluid IFluid.Description(string text) => Description(text);
 }

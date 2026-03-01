@@ -3,28 +3,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
-public class PourCommand : ICommand
+public class PourCommand(string fluidName, string containerName) : ICommand
 {
-    public string FluidName { get; }
-    public string ContainerName { get; }
-
-    public PourCommand(string fluidName, string containerName)
-    {
-        FluidName = fluidName;
-        ContainerName = containerName;
-    }
+    public string ContainerName { get; } = containerName;
+    public string FluidName { get; } = fluidName;
 
     public CommandResult Execute(CommandContext context)
     {
-        IInventory inventory = context.State.Inventory;
-        IFluid? fluidItem = inventory.FindItem(FluidName) as IFluid;
+        var inventory = context.State.Inventory;
+        var fluidItem = inventory.FindItem(FluidName) as IFluid;
         string? suggestion = null;
         if (fluidItem == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(FluidName))
         {
@@ -40,10 +34,10 @@ public class PourCommand : ICommand
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
         }
 
-        IItem? containerItem = inventory.FindItem(ContainerName);
+        var containerItem = inventory.FindItem(ContainerName);
         if (containerItem == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ContainerName))
         {
-            IItem? best = FuzzyMatcher.FindBestItem(inventory.Items, ContainerName, context.State.FuzzyMaxDistance);
+            var best = FuzzyMatcher.FindBestItem(inventory.Items, ContainerName, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 containerItem = best;
@@ -62,7 +56,7 @@ public class PourCommand : ICommand
         }
 
         _ = inventory.Remove((IItem)fluidItem);
-        CommandResult ok = CommandResult.Ok(Language.PourResult(fluidItem.Name, containerItem.Name));
+        var ok = CommandResult.Ok(Language.PourResult(fluidItem.Name, containerItem.Name));
         return suggestion != null ? ok.WithSuggestion(suggestion) : ok;
     }
 }

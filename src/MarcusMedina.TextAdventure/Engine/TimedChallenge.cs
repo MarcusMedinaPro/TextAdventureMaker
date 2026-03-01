@@ -3,24 +3,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Engine;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class TimedChallenge : ITimedChallenge
 {
+    private readonly List<Action<IGameState>> _failureHandlers = [];
+    private readonly HashSet<int> _movesRemainingFired = [];
     private readonly Dictionary<int, List<Action<IGameState>>> _movesRemainingHandlers = [];
     private readonly List<Action<IGameState>> _startHandlers = [];
     private readonly List<Action<IGameState>> _successHandlers = [];
-    private readonly List<Action<IGameState>> _failureHandlers = [];
     private bool _exhaustedFired;
-    private readonly HashSet<int> _movesRemainingFired = [];
-
-    public string Id { get; }
-    public int MaxMoves { get; private set; } = 10;
-    public int MovesUsed { get; private set; }
-    public int MovesRemaining => Math.Max(0, MaxMoves - MovesUsed);
-    public bool IsActive { get; private set; }
 
     public TimedChallenge(string id)
     {
@@ -28,37 +22,30 @@ public sealed class TimedChallenge : ITimedChallenge
         Id = id;
     }
 
+    public string Id { get; }
+    public bool IsActive { get; private set; }
+    public int MaxMoves { get; private set; } = 10;
+    public int MovesRemaining => Math.Max(0, MaxMoves - MovesUsed);
+    public int MovesUsed { get; private set; }
+
+    public void Fail(IGameState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        if (!IsActive)
+        {
+            return;
+        }
+
+        IsActive = false;
+        foreach (var handler in _failureHandlers)
+        {
+            handler(state);
+        }
+    }
+
     public ITimedChallenge MaxMovesLimit(int maxMoves)
     {
         MaxMoves = Math.Max(1, maxMoves);
-        return this;
-    }
-
-    public ITimedChallenge OnStart(Action<IGameState> handler)
-    {
-        ArgumentNullException.ThrowIfNull(handler);
-        _startHandlers.Add(handler);
-        return this;
-    }
-
-    public ITimedChallenge OnMovesRemaining(int movesRemaining, Action<IGameState> handler)
-    {
-        ArgumentNullException.ThrowIfNull(handler);
-        int key = Math.Max(0, movesRemaining);
-        if (!_movesRemainingHandlers.TryGetValue(key, out List<Action<IGameState>>? handlers))
-        {
-            handlers = [];
-            _movesRemainingHandlers[key] = handlers;
-        }
-
-        handlers.Add(handler);
-        return this;
-    }
-
-    public ITimedChallenge OnSuccess(Action<IGameState> handler)
-    {
-        ArgumentNullException.ThrowIfNull(handler);
-        _successHandlers.Add(handler);
         return this;
     }
 
@@ -69,6 +56,34 @@ public sealed class TimedChallenge : ITimedChallenge
         return this;
     }
 
+    public ITimedChallenge OnMovesRemaining(int movesRemaining, Action<IGameState> handler)
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+        var key = Math.Max(0, movesRemaining);
+        if (!_movesRemainingHandlers.TryGetValue(key, out var handlers))
+        {
+            handlers = [];
+            _movesRemainingHandlers[key] = handlers;
+        }
+
+        handlers.Add(handler);
+        return this;
+    }
+
+    public ITimedChallenge OnStart(Action<IGameState> handler)
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+        _startHandlers.Add(handler);
+        return this;
+    }
+
+    public ITimedChallenge OnSuccess(Action<IGameState> handler)
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+        _successHandlers.Add(handler);
+        return this;
+    }
+
     public void Start(IGameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
@@ -76,7 +91,7 @@ public sealed class TimedChallenge : ITimedChallenge
         MovesUsed = 0;
         _exhaustedFired = false;
         _movesRemainingFired.Clear();
-        foreach (Action<IGameState> handler in _startHandlers)
+        foreach (var handler in _startHandlers)
         {
             handler(state);
         }
@@ -91,22 +106,7 @@ public sealed class TimedChallenge : ITimedChallenge
         }
 
         IsActive = false;
-        foreach (Action<IGameState> handler in _successHandlers)
-        {
-            handler(state);
-        }
-    }
-
-    public void Fail(IGameState state)
-    {
-        ArgumentNullException.ThrowIfNull(state);
-        if (!IsActive)
-        {
-            return;
-        }
-
-        IsActive = false;
-        foreach (Action<IGameState> handler in _failureHandlers)
+        foreach (var handler in _successHandlers)
         {
             handler(state);
         }
@@ -121,10 +121,10 @@ public sealed class TimedChallenge : ITimedChallenge
 
         MovesUsed++;
 
-        if (_movesRemainingHandlers.TryGetValue(MovesRemaining, out List<Action<IGameState>>? handlers) && !_movesRemainingFired.Contains(MovesRemaining))
+        if (_movesRemainingHandlers.TryGetValue(MovesRemaining, out var handlers) && !_movesRemainingFired.Contains(MovesRemaining))
         {
             _ = _movesRemainingFired.Add(MovesRemaining);
-            foreach (Action<IGameState> handler in handlers)
+            foreach (var handler in handlers)
             {
                 handler(state);
             }

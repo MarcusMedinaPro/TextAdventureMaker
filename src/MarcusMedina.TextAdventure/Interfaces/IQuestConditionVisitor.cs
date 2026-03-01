@@ -3,17 +3,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Interfaces;
+
+using MarcusMedina.TextAdventure.Models;
 
 public interface IQuestConditionVisitor
 {
     bool Visit(HasItemCondition condition);
+
     bool Visit(NpcStateCondition condition);
+
     bool Visit(AllOfCondition condition);
+
     bool Visit(AnyOfCondition condition);
+
     bool Visit(WorldFlagCondition condition);
+
     bool Visit(WorldCounterCondition condition);
+
     bool Visit(RelationshipCondition condition);
 }

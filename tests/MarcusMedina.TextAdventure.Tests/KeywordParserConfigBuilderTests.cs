@@ -3,11 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Parsing;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class KeywordParserConfigBuilderTests
 {
@@ -20,20 +20,20 @@ public class KeywordParserConfigBuilderTests
         _ = Assert.IsType<InventoryCommand>(parser.Parse("inventory"));
         _ = Assert.IsType<QuitCommand>(parser.Parse("quit"));
 
-        TakeCommand take = Assert.IsType<TakeCommand>(parser.Parse("take key"));
+        var take = Assert.IsType<TakeCommand>(parser.Parse("take key"));
         Assert.Equal("key", take.ItemName);
 
-        UseCommand use = Assert.IsType<UseCommand>(parser.Parse("use lamp"));
+        var use = Assert.IsType<UseCommand>(parser.Parse("use lamp"));
         Assert.Equal("lamp", use.ItemName);
 
-        GoCommand go = Assert.IsType<GoCommand>(parser.Parse("n"));
+        var go = Assert.IsType<GoCommand>(parser.Parse("n"));
         Assert.Equal(Direction.North, go.Direction);
     }
 
     [Fact]
     public void Builder_OverridesDirectionAliases()
     {
-        KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+        var config = KeywordParserConfigBuilder.BritishDefaults()
             .WithDirectionAliases(new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
             {
                 ["in"] = Direction.In
@@ -41,7 +41,7 @@ public class KeywordParserConfigBuilderTests
             .Build();
         KeywordParser parser = new(config);
 
-        GoCommand go = Assert.IsType<GoCommand>(parser.Parse("in"));
+        var go = Assert.IsType<GoCommand>(parser.Parse("in"));
         Assert.Equal(Direction.In, go.Direction);
 
         _ = Assert.IsType<UnknownCommand>(parser.Parse("n"));
@@ -50,13 +50,13 @@ public class KeywordParserConfigBuilderTests
     [Fact]
     public void Builder_OverridesUseKeywords()
     {
-        KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+        var config = KeywordParserConfigBuilder.BritishDefaults()
             .WithUse("ignite")
             .Build();
         KeywordParser parser = new(config);
 
         _ = Assert.IsType<UnknownCommand>(parser.Parse("use lamp"));
-        UseCommand use = Assert.IsType<UseCommand>(parser.Parse("ignite lamp"));
+        var use = Assert.IsType<UseCommand>(parser.Parse("ignite lamp"));
         Assert.Equal("lamp", use.ItemName);
     }
 }

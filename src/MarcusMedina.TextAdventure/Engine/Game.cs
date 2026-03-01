@@ -3,11 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Engine;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
-
-namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class Game(
     GameState state,
@@ -16,21 +16,15 @@ public sealed class Game(
     TextWriter? output = null,
     string? prompt = null) : IGame
 {
-    private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
+    private readonly List<Action<Game>> _turnStartHandlers = [];
     private bool _stopRequested;
 
-    public GameState State { get; } = state ?? throw new ArgumentNullException(nameof(state));
-    public ICommandParser Parser { get; } = parser ?? throw new ArgumentNullException(nameof(parser));
     public TextReader Input { get; } = input ?? Console.In;
     public TextWriter Output { get; } = output ?? Console.Out;
+    public ICommandParser Parser { get; } = parser ?? throw new ArgumentNullException(nameof(parser));
     public string Prompt { get; set; } = prompt ?? "> ";
-
-    public void AddTurnStartHandler(Action<Game> handler)
-    {
-        ArgumentNullException.ThrowIfNull(handler);
-        _turnStartHandlers.Add(handler);
-    }
+    public GameState State { get; } = state ?? throw new ArgumentNullException(nameof(state));
 
     public void AddTurnEndHandler(Action<Game, ICommand, CommandResult> handler)
     {
@@ -38,15 +32,16 @@ public sealed class Game(
         _turnEndHandlers.Add(handler);
     }
 
-    public void RequestStop()
+    public void AddTurnStartHandler(Action<Game> handler)
     {
-        _stopRequested = true;
+        ArgumentNullException.ThrowIfNull(handler);
+        _turnStartHandlers.Add(handler);
     }
 
     public CommandResult Execute(string input)
     {
-        ICommand command = Parser.Parse(input);
-        CommandResult result = State.Execute(command);
+        var command = Parser.Parse(input);
+        var result = State.Execute(command);
         if (!result.ShouldQuit)
         {
             TickNpcs();
@@ -55,40 +50,19 @@ public sealed class Game(
         return result;
     }
 
-    public void TickNpcs()
-    {
-        List<(INpc npc, ILocation from, ILocation to)> moves = [];
-
-        foreach (ILocation location in State.Locations)
-        {
-            foreach (INpc? npc in location.Npcs.ToList())
-            {
-                ILocation? next = npc.GetNextLocation(location, State);
-                if (next != null && !ReferenceEquals(next, location))
-                {
-                    moves.Add((npc, location, next));
-                }
-            }
-        }
-
-        foreach ((INpc? npc, ILocation? from, ILocation? to) in moves)
-        {
-            _ = from.RemoveNpc(npc);
-            to.AddNpc(npc);
-        }
-    }
+    public void RequestStop() => _stopRequested = true;
 
     public void Run()
     {
         while (true)
         {
-            foreach (Action<Game> handler in _turnStartHandlers)
+            foreach (var handler in _turnStartHandlers)
             {
                 handler(this);
             }
 
             Output.Write(Prompt);
-            string? input = Input.ReadLine();
+            var input = Input.ReadLine();
             if (input == null)
             {
                 break;
@@ -100,15 +74,15 @@ public sealed class Game(
                 continue;
             }
 
-            ICommand command = Parser.Parse(input);
-            CommandResult result = State.Execute(command);
+            var command = Parser.Parse(input);
+            var result = State.Execute(command);
 
             if (!string.IsNullOrWhiteSpace(result.Message))
             {
                 Output.WriteLine(result.Message);
             }
 
-            foreach (string reaction in result.ReactionsList)
+            foreach (var reaction in result.ReactionsList)
             {
                 if (!string.IsNullOrWhiteSpace(reaction))
                 {
@@ -123,7 +97,7 @@ public sealed class Game(
 
             TickNpcs();
 
-            foreach (Action<Game, ICommand, CommandResult> handler in _turnEndHandlers)
+            foreach (var handler in _turnEndHandlers)
             {
                 handler(this, command, result);
             }
@@ -132,6 +106,29 @@ public sealed class Game(
             {
                 break;
             }
+        }
+    }
+
+    public void TickNpcs()
+    {
+        List<(INpc npc, ILocation from, ILocation to)> moves = [];
+
+        foreach (var location in State.Locations)
+        {
+            foreach (var npc in location.Npcs.ToList())
+            {
+                var next = npc.GetNextLocation(location, State);
+                if (next != null && !ReferenceEquals(next, location))
+                {
+                    moves.Add((npc, location, next));
+                }
+            }
+        }
+
+        foreach ((var npc, var from, var to) in moves)
+        {
+            _ = from.RemoveNpc(npc);
+            to.AddNpc(npc);
         }
     }
 }

@@ -7,10 +7,12 @@ namespace MarcusMedina.TextAdventure.Interfaces;
 public interface IFaction
 {
     string Id { get; }
-    int Reputation { get; }
     IReadOnlyCollection<string> NpcIds { get; }
+    int Reputation { get; }
+
+    bool HasNpc(string npcId);
+
+    IFaction OnReputationThreshold(int threshold, Action<IGameState> handler);
 
     IFaction WithNpcs(params string[] npcIds);
-    IFaction OnReputationThreshold(int threshold, Action<IGameState> handler);
-    bool HasNpc(string npcId);
 }

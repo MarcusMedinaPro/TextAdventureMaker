@@ -3,33 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 public class GameStateTests
 {
     [Fact]
-    public void Move_WhenNoExit_SetsErrorMessage()
-    {
-        Location start = new("start");
-        GameState state = new(start);
-
-        bool moved = state.Move(Direction.North);
-
-        Assert.False(moved);
-        Assert.Equal(Language.CantGoThatWay, state.LastMoveError);
-        Assert.Equal(start, state.CurrentLocation);
-    }
-
-    [Fact]
-    public void GameState_NullStartLocation_Throws()
-    {
-        _ = Assert.Throws<ArgumentNullException>(() => new GameState(null!));
-    }
+    public void GameState_NullStartLocation_Throws() => _ = Assert.Throws<ArgumentNullException>(() => new GameState(null!));
 
     [Fact]
     public void Move_ClosedDoor_SetsClosedErrorMessage()
@@ -40,7 +24,7 @@ public class GameStateTests
         _ = start.AddExit(Direction.East, next, door);
 
         GameState state = new(start);
-        bool moved = state.Move(Direction.East);
+        var moved = state.Move(Direction.East);
 
         Assert.False(moved);
         Assert.Equal(Language.DoorClosed("oak door"), state.LastMoveError);
@@ -56,7 +40,7 @@ public class GameStateTests
         _ = start.AddExit(Direction.East, next, door);
 
         GameState state = new(start);
-        bool moved = state.Move(Direction.East);
+        var moved = state.Move(Direction.East);
 
         Assert.False(moved);
         Assert.Equal(Language.DoorLocked("iron gate"), state.LastMoveError);
@@ -79,5 +63,18 @@ public class GameStateTests
         Assert.True(state.Move(Direction.East));
         Assert.Null(state.LastMoveError);
         Assert.Equal(next, state.CurrentLocation);
+    }
+
+    [Fact]
+    public void Move_WhenNoExit_SetsErrorMessage()
+    {
+        Location start = new("start");
+        GameState state = new(start);
+
+        var moved = state.Move(Direction.North);
+
+        Assert.False(moved);
+        Assert.Equal(Language.CantGoThatWay, state.LastMoveError);
+        Assert.Equal(start, state.CurrentLocation);
     }
 }

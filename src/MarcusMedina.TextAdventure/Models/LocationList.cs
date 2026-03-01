@@ -3,15 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class LocationList
 {
     private readonly Dictionary<string, Location> _locations = new(StringComparer.OrdinalIgnoreCase);
 
     public IReadOnlyCollection<Location> Items => _locations.Values;
+
+    public Location this[string token] => Get(token);
 
     public Location Add(string name)
     {
@@ -39,7 +41,7 @@ public sealed class LocationList
             return this;
         }
 
-        foreach (string name in names)
+        foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -57,7 +59,7 @@ public sealed class LocationList
             return this;
         }
 
-        foreach (string name in names)
+        foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -68,39 +70,29 @@ public sealed class LocationList
         return this;
     }
 
-    public Location? Find(string token)
-    {
-        return string.IsNullOrWhiteSpace(token)
+    public Location Call(string token) => Get(token);
+
+    public void Clear() => _locations.Clear();
+
+    public Location? Find(string token) => string.IsNullOrWhiteSpace(token)
             ? null
-            : _locations.TryGetValue(token, out Location? location) ? location : _locations.Values.FirstOrDefault(l => l.Id.TextCompare(token));
-    }
+            : _locations.TryGetValue(token, out var location) ? location : _locations.Values.FirstOrDefault(l => l.Id.TextCompare(token));
 
     public Location Get(string token)
     {
-        Location? location = Find(token);
+        var location = Find(token);
         return location ?? throw new KeyNotFoundException($"No location found for '{token}'.");
+    }
+
+    public bool Remove(string token)
+    {
+        var location = Find(token);
+        return location != null && _locations.Remove(location.Id);
     }
 
     public bool TryGet(string token, out Location location)
     {
         location = Find(token) ?? null!;
         return location != null;
-    }
-
-    public bool Remove(string token)
-    {
-        Location? location = Find(token);
-        return location != null && _locations.Remove(location.Id);
-    }
-
-    public void Clear()
-    {
-        _locations.Clear();
-    }
-
-    public Location this[string token] => Get(token);
-    public Location Call(string token)
-    {
-        return Get(token);
     }
 }

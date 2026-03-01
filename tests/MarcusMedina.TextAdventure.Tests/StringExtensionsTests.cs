@@ -3,29 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public class StringExtensionsTests
 {
     [Fact]
-    public void LevenshteinDistanceTo_KnownExample_ReturnsExpected()
-    {
-        Assert.Equal(3, "kitten".LevenshteinDistanceTo("sitting"));
-    }
+    public void CollapseRepeats_RemovesConsecutiveDuplicates() => Assert.Equal("balon", "baallooon".CollapseRepeats());
 
     [Fact]
-    public void SimilarTo_UsesLevenshteinDistance()
-    {
-        Assert.Equal(3, "kitten".SimilarTo("sitting"));
-    }
-
-    [Fact]
-    public void FuzzyDistanceTo_CollapsesRepeats()
-    {
-        Assert.Equal(1, "loook".FuzzyDistanceTo("look", 1));
-    }
+    public void FuzzyDistanceTo_CollapsesRepeats() => Assert.Equal(1, "loook".FuzzyDistanceTo("look", 1));
 
     [Fact]
     public void FuzzyMatch_RespectsMaxDistance()
@@ -35,10 +23,10 @@ public class StringExtensionsTests
     }
 
     [Fact]
-    public void CollapseRepeats_RemovesConsecutiveDuplicates()
-    {
-        Assert.Equal("balon", "baallooon".CollapseRepeats());
-    }
+    public void LevenshteinDistanceTo_KnownExample_ReturnsExpected() => Assert.Equal(3, "kitten".LevenshteinDistanceTo("sitting"));
+
+    [Fact]
+    public void SimilarTo_UsesLevenshteinDistance() => Assert.Equal(3, "kitten".SimilarTo("sitting"));
 
     [Fact]
     public void SoundexKey_ReturnsStableFourChars()
@@ -48,8 +36,5 @@ public class StringExtensionsTests
     }
 
     [Fact]
-    public void SoundsLike_MatchesCommonVariants()
-    {
-        Assert.True("Steven".SoundsLike("Stephen"));
-    }
+    public void SoundsLike_MatchesCommonVariants() => Assert.True("Steven".SoundsLike("Stephen"));
 }

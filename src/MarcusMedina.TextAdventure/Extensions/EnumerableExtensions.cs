@@ -3,27 +3,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Extensions;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public static class EnumerableExtensions
 {
     /// <summary>
     /// Joins strings with ", ".
     /// </summary>
-    public static string CommaJoin(this IEnumerable<string> values)
-    {
-        return string.Join(", ", values);
-    }
-
-    /// <summary>
-    /// Joins strings with a single space.
-    /// </summary>
-    public static string SpaceJoin(this IEnumerable<string> values)
-    {
-        return string.Join(' ', values);
-    }
+    public static string CommaJoin(this IEnumerable<string> values) => string.Join(", ", values);
 
     /// <summary>
     /// Joins entity names with ", ".
@@ -35,7 +24,7 @@ public static class EnumerableExtensions
             return string.Empty;
         }
 
-        IEnumerable<string> names = entities
+        var names = entities
             .Where(entity => entity != null && !string.IsNullOrWhiteSpace(entity.Name))
             .Select(entity => entity.Name.Trim());
 
@@ -46,4 +35,9 @@ public static class EnumerableExtensions
 
         return names.CommaJoin();
     }
+
+    /// <summary>
+    /// Joins strings with a single space.
+    /// </summary>
+    public static string SpaceJoin(this IEnumerable<string> values) => string.Join(' ', values);
 }

@@ -3,17 +3,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGameEntity
 {
-    private readonly Dictionary<string, T> _items = new(StringComparer.OrdinalIgnoreCase);
     private readonly Func<string, T> _factoryFromName = factoryFromName ?? throw new ArgumentNullException(nameof(factoryFromName));
-
+    private readonly Dictionary<string, T> _items = new(StringComparer.OrdinalIgnoreCase);
     public IReadOnlyCollection<T> Items => _items.Values;
+
+    public T this[string token] => Get(token);
 
     public T Add(string name)
     {
@@ -35,7 +36,7 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
             return this;
         }
 
-        foreach (string name in names)
+        foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -53,7 +54,7 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
             return this;
         }
 
-        foreach (string name in names)
+        foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -71,7 +72,7 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
             return this;
         }
 
-        foreach (T item in items)
+        foreach (var item in items)
         {
             if (item != null)
             {
@@ -82,17 +83,24 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
         return this;
     }
 
-    public T? Find(string token)
-    {
-        return string.IsNullOrWhiteSpace(token)
+    public T Call(string token) => Get(token);
+
+    public void Clear() => _items.Clear();
+
+    public T? Find(string token) => string.IsNullOrWhiteSpace(token)
             ? default
-            : _items.TryGetValue(token, out T? item) ? item : _items.Values.FirstOrDefault(i => Matches(i, token));
-    }
+            : _items.TryGetValue(token, out var item) ? item : _items.Values.FirstOrDefault(i => Matches(i, token));
 
     public T Get(string token)
     {
-        T? item = Find(token);
+        var item = Find(token);
         return item == null ? throw new KeyNotFoundException($"No item found for '{token}'.") : item;
+    }
+
+    public bool Remove(string token)
+    {
+        var item = Find(token);
+        return item != null && _items.Remove(item.Id);
     }
 
     public bool TryGet(string token, out T item)
@@ -101,28 +109,7 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
         return item != null;
     }
 
-    public bool Remove(string token)
-    {
-        T? item = Find(token);
-        return item != null && _items.Remove(item.Id);
-    }
-
-    public void Clear()
-    {
-        _items.Clear();
-    }
-
-    public T this[string token] => Get(token);
-
-    public T Call(string token)
-    {
-        return Get(token);
-    }
-
-    private static bool Matches(T item, string token)
-    {
-        return item is IItem itemWithAliases
+    private static bool Matches(T item, string token) => item is IItem itemWithAliases
             ? itemWithAliases.Matches(token)
             : item is IDoor doorWithAliases ? doorWithAliases.Matches(token) : item.Id.TextCompare(token) || item.Name.TextCompare(token);
-    }
 }

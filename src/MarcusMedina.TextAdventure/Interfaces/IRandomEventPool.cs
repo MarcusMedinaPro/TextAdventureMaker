@@ -9,10 +9,13 @@ public interface IRandomEventPool
     bool Enabled { get; }
     double TriggerChance { get; }
 
-    IRandomEventPool Enable();
-    IRandomEventPool SetTriggerChance(double chance);
     IRandomEventPool AddEvent(string id, int weight, Action<IGameState> handler, Func<IGameState, bool>? condition = null);
+
+    IRandomEventPool Enable();
+
     IRandomEventPool SetCooldown(string id, int cooldownTicks);
+
+    IRandomEventPool SetTriggerChance(double chance);
 
     void Tick(IGameState state);
 }

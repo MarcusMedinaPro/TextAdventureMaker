@@ -3,21 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Models;
 
 public class ExitTests
 {
-    [Fact]
-    public void Exit_IsPassable_WhenNoDoor()
-    {
-        Location target = new("target");
-        Exit exit = new(target);
-
-        Assert.True(exit.IsPassable);
-    }
-
     [Fact]
     public void Exit_IsNotPassable_WhenDoorClosed()
     {
@@ -40,8 +31,14 @@ public class ExitTests
     }
 
     [Fact]
-    public void Exit_NullTarget_Throws()
+    public void Exit_IsPassable_WhenNoDoor()
     {
-        _ = Assert.Throws<ArgumentNullException>(() => new Exit(null!));
+        Location target = new("target");
+        Exit exit = new(target);
+
+        Assert.True(exit.IsPassable);
     }
+
+    [Fact]
+    public void Exit_NullTarget_Throws() => _ = Assert.Throws<ArgumentNullException>(() => new Exit(null!));
 }

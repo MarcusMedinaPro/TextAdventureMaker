@@ -7,21 +7,32 @@ namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class NpcMemory
 {
-    private readonly HashSet<string> _said = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, string> _knowledge = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _counters = new(StringComparer.OrdinalIgnoreCase);
-
+    private readonly Dictionary<string, string> _knowledge = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _said = new(StringComparer.OrdinalIgnoreCase);
     public bool HasMet { get; private set; }
 
-    public void MarkMet()
+    public string? Get(string key) => _knowledge.TryGetValue(key, out var value) ? value : null;
+
+    public int GetCounter(string key) => _counters.TryGetValue(key, out var value) ? value : 0;
+
+    public bool HasSaid(string id) => _said.Contains(id);
+
+    public int Increment(string key, int amount = 1)
     {
-        HasMet = true;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return 0;
+        }
+
+        var next = GetCounter(key) + amount;
+        _counters[key] = next;
+        return next;
     }
 
-    public bool HasSaid(string id)
-    {
-        return _said.Contains(id);
-    }
+    public bool Knows(string key) => _knowledge.ContainsKey(key);
+
+    public void MarkMet() => HasMet = true;
 
     public void MarkSaid(string id)
     {
@@ -29,16 +40,6 @@ public sealed class NpcMemory
         {
             _ = _said.Add(id);
         }
-    }
-
-    public bool Knows(string key)
-    {
-        return _knowledge.ContainsKey(key);
-    }
-
-    public string? Get(string key)
-    {
-        return _knowledge.TryGetValue(key, out string? value) ? value : null;
     }
 
     public void Remember(string key, string value)
@@ -49,22 +50,5 @@ public sealed class NpcMemory
         }
 
         _knowledge[key] = value ?? "";
-    }
-
-    public int GetCounter(string key)
-    {
-        return _counters.TryGetValue(key, out int value) ? value : 0;
-    }
-
-    public int Increment(string key, int amount = 1)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            return 0;
-        }
-
-        int next = GetCounter(key) + amount;
-        _counters[key] = next;
-        return next;
     }
 }

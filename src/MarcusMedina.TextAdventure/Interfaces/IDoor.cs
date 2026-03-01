@@ -3,34 +3,49 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Enums;
-
 namespace MarcusMedina.TextAdventure.Interfaces;
+
+using MarcusMedina.TextAdventure.Enums;
 
 public interface IDoor : IGameEntity
 {
-    new string Id { get; }
-    new string Name { get; }
-    string GetDescription();
-    DoorState State { get; }
-    IKey? RequiredKey { get; }
-    IReadOnlyList<string> Aliases { get; }
-
-    event Action<IDoor>? OnOpen;
     event Action<IDoor>? OnClose;
-    event Action<IDoor>? OnLock;
-    event Action<IDoor>? OnUnlock;
+
     event Action<IDoor>? OnDestroy;
 
+    event Action<IDoor>? OnLock;
+
+    event Action<IDoor>? OnOpen;
+
+    event Action<IDoor>? OnUnlock;
+
+    IReadOnlyList<string> Aliases { get; }
+    new string Id { get; }
     bool IsPassable { get; }
-    IDoor Description(string text);
-    bool Matches(string name);
+    new string Name { get; }
+    IKey? RequiredKey { get; }
+
+    DoorState State { get; }
+
     IDoor AddAliases(params string[] aliases);
-    string? GetReaction(DoorAction action);
-    IDoor SetReaction(DoorAction action, string text);
-    bool Open();
+
     bool Close();
-    bool Lock(IKey key);
-    bool Unlock(IKey key);
+
+    IDoor Description(string text);
+
     bool Destroy();
+
+    string GetDescription();
+
+    string? GetReaction(DoorAction action);
+
+    bool Lock(IKey key);
+
+    bool Matches(string name);
+
+    bool Open();
+
+    IDoor SetReaction(DoorAction action, string text);
+
+    bool Unlock(IKey key);
 }

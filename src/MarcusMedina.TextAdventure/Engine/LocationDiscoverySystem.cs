@@ -3,10 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Engine;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
-
-namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
 {
@@ -28,11 +28,6 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
         });
     }
 
-    public bool IsDiscovered(string locationId)
-    {
-        return !string.IsNullOrWhiteSpace(locationId) && _discovered.Contains(locationId);
-    }
-
     public void Discover(string locationId)
     {
         if (string.IsNullOrWhiteSpace(locationId))
@@ -42,4 +37,6 @@ public sealed class LocationDiscoverySystem : ILocationDiscoverySystem
 
         _ = _discovered.Add(locationId.Trim());
     }
+
+    public bool IsDiscovered(string locationId) => !string.IsNullOrWhiteSpace(locationId) && _discovered.Contains(locationId);
 }

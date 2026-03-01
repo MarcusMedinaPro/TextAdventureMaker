@@ -3,29 +3,24 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
-public class UseCommand : ICommand
+public class UseCommand(string itemName) : ICommand
 {
-    public string ItemName { get; }
-
-    public UseCommand(string itemName)
-    {
-        ItemName = itemName;
-    }
+    public string ItemName { get; } = itemName;
 
     public CommandResult Execute(CommandContext context)
     {
-        IItem? item = context.State.Inventory.FindItem(ItemName);
+        var item = context.State.Inventory.FindItem(ItemName);
         string? suggestion = null;
         if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
         {
-            IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
+            var best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 item = best;
@@ -39,8 +34,8 @@ public class UseCommand : ICommand
         }
 
         item.Use();
-        string? onUse = item.GetReaction(ItemAction.Use);
-        CommandResult result = onUse != null
+        var onUse = item.GetReaction(ItemAction.Use);
+        var result = onUse != null
             ? CommandResult.Ok(Language.UseItem(item.Name), onUse)
             : CommandResult.Ok(Language.UseItem(item.Name));
 

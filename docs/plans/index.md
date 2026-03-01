@@ -49,3 +49,62 @@
 | 043 | Map Generator | Skapa en enkel map generator som kan rendera en ASCII-karta baserat på location-grafen och exits. | `slice043.md` |
 | 044 | String Case Utilities | Enkla stränghelpers för casing i UI/texter. | `slice044.md` |
 | 045 | Generic Fixes | Ersätt hårdkodade input-checkar (t.ex. `IsSitInput`) med en generisk, fluent alias‑lösning. | `slice045.md` |
+
+## Framtida Slices (050+)
+
+*Importerade idéer från MarcusTextAdventureMaker*
+
+| Slice | Title | Goal | File |
+| --- | --- | --- | --- |
+| 050 | Directional Looking | "look north" - se in i angränsande rum genom öppna dörrar. | `slice050.md` |
+| 051 | Directional Actions | "throw wallet north", "shout east" - agera mot angränsande rum. | `slice051.md` |
+| 052 | Spatial Awareness System | Komplett rumsmedvetenhet - sikt, ljud och interaktion mellan rum. | `slice052.md` |
+| 053 | Advanced Map Generator | Procedural kartgenerering och ASCII-visualisering. | `slice053.md` |
+| 054 | Player History System | Spåra spelarens resa, achievements och analytics. | `slice054.md` |
+| 055 | Economic & Store System | Valutor, butiker, handel och dynamiska priser. | `slice055.md` |
+| 056 | Advanced NPC Communication | NPC-minne, personlighet, relationer och kontextmedveten dialog. | `slice056.md` |
+| 057 | Advanced Semantic Parser | Naturligt språk, kontext och komplexa kommandon. | `slice057.md` |
+| 058 | Cinematic Presentation | Typewriter-effekter, pauser, ASCII-art och atmosfär. | `slice058.md` |
+| 059 | Procedural Storytelling | Generera sidouppdrag, events, lore och textvariation. | `slice059.md` |
+| 060 | Puzzle Toolkit | Återanvändbara pusselmönster (kombinationslås, gåtor, sekvenser). | `slice060.md` |
+| 061 | Debug Console & Dev Tools | /teleport, /give, /inspect, undo/redo, testrunner. | `slice061.md` |
+| 062 | Countdown & Deadline Events | Tidsbegränsade utmaningar med nedräkning och konsekvenser. | `slice062.md` |
+| 063 | Chase & Pursuit System | NPCs som jagar, följer eller flyr från spelaren. | `slice063.md` |
+| 064 | Status Effects System | Temporära tillståndseffekter (poison, burning, blessed). | `slice064.md` |
+| 065 | Test Helpers & Infrastructure | TestWorldBuilder, GameAssert, fixtures, kategorisering. | `slice065.md` |
+| 066 | Weather & Environment System | Dynamiskt väder som påverkar gameplay och visibility. | `slice066.md` |
+| 067 | Vehicles & Teleporters | Fordon och teleporters som transportmedel. | `slice067.md` |
+| 068 | Stealth & Detection System | Smyg- och upptäcktssystem för att passera NPCs. | `slice068.md` |
+| 069 | Light & Darkness System | Ljus och mörker som påverkar synlighet och gameplay. | `slice069.md` |
+| 070 | Food, Hunger & Survival | Mat, hunger, törst och överlevnadsmekanik. | `slice070.md` |
+| 071 | Crafting System | Kombinera items för att skapa nya föremål. | `slice071.md` |
+| 072 | Machines & Electronics | Elektriska och mekaniska maskiner. | `slice072.md` |
+
+---
+
+## Systemslices (900+)
+
+| Slice | Title | Goal | File |
+| --- | --- | --- | --- |
+| 900 | Plugin System | Utbyggbart plugin-system för externa moduler, mods och integrationer. | `slice900.md` |
+
+---
+
+## Importerade Planer
+
+Detaljerade designdokument från tidigare projekt finns i `docs/plans/imported/`:
+
+- `Directional_Looking_System.md` - Design för "look north"
+- `Directional_Actions_System.md` - Design för riktade actions
+- `Spatial_Awareness_Revolution.md` - Komplett spatial awareness-koncept
+- `Map_Generator_System.md` - Kartgenereringsalgoritmer
+- `Player_History_System.md` - Journey tracking och achievements
+- `Economic_Store_System.md` - Butiker och ekonomi
+- `NPC_Communication_System.md` - Avancerad NPC-dialog
+- `Semantic_Parser_Design.md` - Natural language parsing
+- `Semantic_Parser_Advanced.md` - Kontextmedveten parser
+- `API_Design.md` - Fluent API-mönster
+- `Architecture_Plan.md` - Övergripande arkitektur
+- `Pathway_Connection_Design.md` - Kopplingar mellan rum
+- `Event_System_Dynamic_Economics.md` - Eventdriven ekonomi
+- `Future_Development_Ideas.md` - Framtida funktioner

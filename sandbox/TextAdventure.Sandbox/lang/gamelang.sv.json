@@ -4,42 +4,78 @@
     "name": "Svenska"
   },
   "commands": {
-    "quit": ["avsluta", "sluta", "q"],
-    "look": ["titta", "se", "l", "kolla"],
-    "examine": ["undersök", "granska", "x"],
-    "inventory": ["inventering", "inv", "i", "väska"],
-    "stats": ["statistik", "hälsa", "hp"],
-    "open": ["öppna"],
-    "unlock": ["lås upp"],
-    "take": ["ta", "plocka", "hämta"],
-    "drop": ["släpp", "lägg"],
-    "use": ["använd"],
-    "combine": ["kombinera", "blanda"],
-    "pour": ["häll"],
-    "move": ["flytta", "skjut", "lyft"],
-    "go": ["gå", "spring"],
-    "read": ["läs"],
-    "talk": ["prata", "tala", "snacka"],
-    "attack": ["attackera", "slå", "slåss"],
-    "flee": ["fly", "spring"],
-    "save": ["spara"],
-    "load": ["ladda"],
-    "quest": ["uppdrag", "journal"],
-    "all": ["allt", "alla"]
+    "quit": [ "avsluta", "sluta", "q" ],
+    "look": [ "titta", "se", "l", "kolla" ],
+    "examine": [ "undersök", "granska", "x" ],
+    "inventory": [ "inventering", "inv", "i", "väska" ],
+    "stats": [ "statistik", "hälsa", "hp" ],
+    "open": [ "öppna" ],
+    "unlock": [ "lås upp" ],
+    "take": [ "ta", "plocka", "hämta" ],
+    "drop": [ "släpp", "lägg" ],
+    "use": [ "använd" ],
+    "combine": [ "kombinera", "blanda" ],
+    "pour": [ "häll" ],
+    "move": [ "flytta", "skjut", "lyft" ],
+    "go": [ "gå", "spring" ],
+    "read": [ "läs" ],
+    "talk": [ "prata", "tala", "snacka" ],
+    "attack": [ "attackera", "slå", "slåss" ],
+    "flee": [ "fly", "spring" ],
+    "save": [ "spara" ],
+    "load": [ "ladda" ],
+    "quest": [ "uppdrag", "journal" ],
+    "all": [ "allt", "alla" ]
   },
   "directions": {
-    "north": { "name": "Norr", "aliases": ["n", "norr", "norrut"] },
-    "south": { "name": "Söder", "aliases": ["s", "söder", "söderut"] },
-    "east": { "name": "Öst", "aliases": ["ö", "öst", "öster", "österut"] },
-    "west": { "name": "Väst", "aliases": ["v", "väst", "väster", "västerut"] },
-    "up": { "name": "Upp", "aliases": ["u", "upp", "uppåt"] },
-    "down": { "name": "Ner", "aliases": ["d", "ner", "neråt"] },
-    "northeast": { "name": "Nordöst", "aliases": ["no", "nordöst"] },
-    "northwest": { "name": "Nordväst", "aliases": ["nv", "nordväst"] },
-    "southeast": { "name": "Sydöst", "aliases": ["so", "sydöst"] },
-    "southwest": { "name": "Sydväst", "aliases": ["sv", "sydväst"] },
-    "in": { "name": "In", "aliases": ["in", "inåt", "gå in"] },
-    "out": { "name": "Ut", "aliases": ["ut", "utåt", "gå ut"] }
+    "north": {
+      "name": "Norr",
+      "aliases": [ "n", "norr", "norrut" ]
+    },
+    "south": {
+      "name": "Söder",
+      "aliases": [ "s", "söder", "söderut" ]
+    },
+    "east": {
+      "name": "Öst",
+      "aliases": [ "ö", "öst", "öster", "österut" ]
+    },
+    "west": {
+      "name": "Väst",
+      "aliases": [ "v", "väst", "väster", "västerut" ]
+    },
+    "up": {
+      "name": "Upp",
+      "aliases": [ "u", "upp", "uppåt" ]
+    },
+    "down": {
+      "name": "Ner",
+      "aliases": [ "d", "ner", "neråt" ]
+    },
+    "northeast": {
+      "name": "Nordöst",
+      "aliases": [ "no", "nordöst" ]
+    },
+    "northwest": {
+      "name": "Nordväst",
+      "aliases": [ "nv", "nordväst" ]
+    },
+    "southeast": {
+      "name": "Sydöst",
+      "aliases": [ "so", "sydöst" ]
+    },
+    "southwest": {
+      "name": "Sydväst",
+      "aliases": [ "sv", "sydväst" ]
+    },
+    "in": {
+      "name": "In",
+      "aliases": [ "in", "inåt", "gå in" ]
+    },
+    "out": {
+      "name": "Ut",
+      "aliases": [ "ut", "utåt", "gå ut" ]
+    }
   },
   "labels": {
     "roomLabel": "Rum:",

@@ -3,20 +3,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
-
-namespace MarcusMedina.TextAdventure.Models;
 
 public class Quest : IQuest
 {
     private readonly List<IQuestCondition> _conditions = [];
-
-    public string Id { get; }
-    public string Title { get; }
-    public string Description { get; }
-    public QuestState State { get; private set; }
-    public IReadOnlyList<IQuestCondition> Conditions => _conditions;
 
     public Quest(string id, string title, string description, QuestState state = QuestState.Inactive)
     {
@@ -29,27 +23,11 @@ public class Quest : IQuest
         State = state;
     }
 
-    public IQuest Start()
-    {
-        if (State == QuestState.Inactive)
-        {
-            State = QuestState.Active;
-        }
-
-        return this;
-    }
-
-    public IQuest Complete()
-    {
-        State = QuestState.Completed;
-        return this;
-    }
-
-    public IQuest Fail()
-    {
-        State = QuestState.Failed;
-        return this;
-    }
+    public IReadOnlyList<IQuestCondition> Conditions => _conditions;
+    public string Description { get; }
+    public string Id { get; }
+    public QuestState State { get; private set; }
+    public string Title { get; }
 
     public IQuest AddCondition(IQuestCondition condition)
     {
@@ -73,5 +51,27 @@ public class Quest : IQuest
         }
 
         return false;
+    }
+
+    public IQuest Complete()
+    {
+        State = QuestState.Completed;
+        return this;
+    }
+
+    public IQuest Fail()
+    {
+        State = QuestState.Failed;
+        return this;
+    }
+
+    public IQuest Start()
+    {
+        if (State == QuestState.Inactive)
+        {
+            State = QuestState.Active;
+        }
+
+        return this;
     }
 }

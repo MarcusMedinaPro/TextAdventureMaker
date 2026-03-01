@@ -3,23 +3,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class AllOfCondition : IQuestCondition
 {
     private readonly List<IQuestCondition> _conditions;
-    public IReadOnlyList<IQuestCondition> Conditions => _conditions;
 
     public AllOfCondition(IEnumerable<IQuestCondition> conditions)
     {
         ArgumentNullException.ThrowIfNull(conditions);
-        _conditions = conditions.Where(c => c != null).ToList();
+        _conditions = [..conditions.Where(c => c != null)];
     }
 
-    public bool Accept(IQuestConditionVisitor visitor)
-    {
-        return visitor.Visit(this);
-    }
+    public IReadOnlyList<IQuestCondition> Conditions => _conditions;
+
+    public bool Accept(IQuestConditionVisitor visitor) => visitor.Visit(this);
 }

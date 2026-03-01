@@ -3,15 +3,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Dsl;
 
+using System.Globalization;
+using System.Text;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-using System.Globalization;
-using System.Text;
 
-namespace MarcusMedina.TextAdventure.Dsl;
 /// <summary>
 /// Exports game state to .adventure DSL format.
 /// </summary>
@@ -42,13 +42,26 @@ public class AdventureDslExporter
         _ = sb.AppendLine();
 
         // Export all locations
-        foreach (ILocation location in state.Locations)
+        foreach (var location in state.Locations)
         {
             ExportLocation(sb, location, exportedDoors);
             _ = sb.AppendLine();
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Exports a DslAdventure back to DSL format.
+    /// </summary>
+    public string Export(DslAdventure adventure)
+    {
+        ArgumentNullException.ThrowIfNull(adventure);
+
+        var worldTitle = adventure.Metadata.TryGetValue("world", out var w) ? w : null;
+        var goal = adventure.Metadata.TryGetValue("goal", out var g) ? g : null;
+
+        return Export(adventure.State, worldTitle, goal);
     }
 
     /// <summary>
@@ -59,66 +72,58 @@ public class AdventureDslExporter
         ArgumentNullException.ThrowIfNull(state);
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-        string content = Export(state, worldTitle, goal);
+        var content = Export(state, worldTitle, goal);
         File.WriteAllText(path, content);
     }
 
-    /// <summary>
-    /// Exports a DslAdventure back to DSL format.
-    /// </summary>
-    public string Export(DslAdventure adventure)
+    private static void ExportDoor(StringBuilder sb, IDoor door)
     {
-        ArgumentNullException.ThrowIfNull(adventure);
+        List<string> parts = [door.Id, door.Name];
 
-        string? worldTitle = adventure.Metadata.TryGetValue("world", out string? w) ? w : null;
-        string? goal = adventure.Metadata.TryGetValue("goal", out string? g) ? g : null;
+        var description = door.GetDescription();
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            parts.Add(description);
+        }
 
-        return Export(adventure.State, worldTitle, goal);
+        List<string> options = [];
+
+        if (door.RequiredKey != null)
+        {
+            options.Add($"key={door.RequiredKey.Id}");
+        }
+
+        var line = string.Join(" | ", parts);
+        if (options.Count > 0)
+        {
+            line += " | " + string.Join(" | ", options);
+        }
+
+        _ = sb.AppendLine($"door: {line}");
     }
 
-    private void ExportLocation(StringBuilder sb, ILocation location, HashSet<string> exportedDoors)
+    private static void ExportExit(StringBuilder sb, Direction direction, Exit exit)
     {
-        // Location header
-        string desc = location.GetDescription();
-        _ = !string.IsNullOrWhiteSpace(desc)
-            ? sb.AppendLine($"location: {location.Id} | {desc}")
-            : sb.AppendLine($"location: {location.Id}");
+        List<string> parts = [$"{direction.ToString().ToLowerInvariant()} -> {exit.Target.Id}"];
 
-        // Export items in this location
-        foreach (IItem item in location.Items)
+        if (exit.Door != null)
         {
-            if (item is Key key)
-            {
-                ExportKey(sb, key);
-            }
-            else
-            {
-                ExportItem(sb, item);
-            }
+            parts.Add($"door={exit.Door.Id}");
         }
 
-        // Export doors (only once per door)
-        foreach (KeyValuePair<Direction, Exit> exit in location.Exits)
+        if (exit.IsOneWay)
         {
-            if (exit.Value.Door != null && !exportedDoors.Contains(exit.Value.Door.Id))
-            {
-                ExportDoor(sb, exit.Value.Door);
-                _ = exportedDoors.Add(exit.Value.Door.Id);
-            }
+            parts.Add("oneway");
         }
 
-        // Export exits
-        foreach (KeyValuePair<Direction, Exit> exit in location.Exits)
-        {
-            ExportExit(sb, exit.Key, exit.Value);
-        }
+        _ = sb.AppendLine($"exit: {string.Join(" | ", parts)}");
     }
 
-    private void ExportItem(StringBuilder sb, IItem item)
+    private static void ExportItem(StringBuilder sb, IItem item)
     {
         List<string> parts = [item.Id, item.Name];
 
-        string description = item.GetDescription();
+        var description = item.GetDescription();
         if (!string.IsNullOrWhiteSpace(description))
         {
             parts.Add(description);
@@ -142,7 +147,7 @@ public class AdventureDslExporter
             options.Add($"aliases={string.Join(",", item.Aliases)}");
         }
 
-        string line = string.Join(" | ", parts);
+        var line = string.Join(" | ", parts);
         if (options.Count > 0)
         {
             line += " | " + string.Join(" | ", options);
@@ -151,11 +156,11 @@ public class AdventureDslExporter
         _ = sb.AppendLine($"item: {line}");
     }
 
-    private void ExportKey(StringBuilder sb, Key key)
+    private static void ExportKey(StringBuilder sb, Key key)
     {
         List<string> parts = [key.Id, key.Name];
 
-        string description = key.GetDescription();
+        var description = key.GetDescription();
         if (!string.IsNullOrWhiteSpace(description))
         {
             parts.Add(description);
@@ -173,7 +178,7 @@ public class AdventureDslExporter
             options.Add($"aliases={string.Join(",", key.Aliases)}");
         }
 
-        string line = string.Join(" | ", parts);
+        var line = string.Join(" | ", parts);
         if (options.Count > 0)
         {
             line += " | " + string.Join(" | ", options);
@@ -182,46 +187,41 @@ public class AdventureDslExporter
         _ = sb.AppendLine($"key: {line}");
     }
 
-    private void ExportDoor(StringBuilder sb, IDoor door)
+    private static void ExportLocation(StringBuilder sb, ILocation location, HashSet<string> exportedDoors)
     {
-        List<string> parts = [door.Id, door.Name];
+        // Location header
+        var desc = location.GetDescription();
+        _ = !string.IsNullOrWhiteSpace(desc)
+            ? sb.AppendLine($"location: {location.Id} | {desc}")
+            : sb.AppendLine($"location: {location.Id}");
 
-        string description = door.GetDescription();
-        if (!string.IsNullOrWhiteSpace(description))
+        // Export items in this location
+        foreach (var item in location.Items)
         {
-            parts.Add(description);
+            if (item is Key key)
+            {
+                ExportKey(sb, key);
+            }
+            else
+            {
+                ExportItem(sb, item);
+            }
         }
 
-        List<string> options = [];
-
-        if (door.RequiredKey != null)
+        // Export doors (only once per door)
+        foreach (var exit in location.Exits)
         {
-            options.Add($"key={door.RequiredKey.Id}");
+            if (exit.Value.Door != null && !exportedDoors.Contains(exit.Value.Door.Id))
+            {
+                ExportDoor(sb, exit.Value.Door);
+                _ = exportedDoors.Add(exit.Value.Door.Id);
+            }
         }
 
-        string line = string.Join(" | ", parts);
-        if (options.Count > 0)
+        // Export exits
+        foreach (var exit in location.Exits)
         {
-            line += " | " + string.Join(" | ", options);
+            ExportExit(sb, exit.Key, exit.Value);
         }
-
-        _ = sb.AppendLine($"door: {line}");
-    }
-
-    private void ExportExit(StringBuilder sb, Direction direction, Exit exit)
-    {
-        List<string> parts = [$"{direction.ToString().ToLowerInvariant()} -> {exit.Target.Id}"];
-
-        if (exit.Door != null)
-        {
-            parts.Add($"door={exit.Door.Id}");
-        }
-
-        if (exit.IsOneWay)
-        {
-            parts.Add("oneway");
-        }
-
-        _ = sb.AppendLine($"exit: {string.Join(" | ", parts)}");
     }
 }

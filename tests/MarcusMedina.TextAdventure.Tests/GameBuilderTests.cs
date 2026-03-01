@@ -3,12 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class GameBuilderTests
 {
@@ -19,7 +19,7 @@ public class GameBuilderTests
         Location other = new("other");
         StubParser parser = new(new LookCommand());
 
-        Game game = GameBuilder.Create()
+        var game = GameBuilder.Create()
             .AddLocation(start, isStart: true)
             .AddLocation(other)
             .UseParser(parser)
@@ -34,12 +34,12 @@ public class GameBuilderTests
     {
         Location start = new("start");
         Location other = new("other");
-        INpc npc = new Npc("ghost", "ghost")
+        var npc = new Npc("ghost", "ghost")
             .SetMovement(new FixedMovement(other));
 
         start.AddNpc(npc);
 
-        GameState state = new(start, worldLocations: new[] { start, other });
+        GameState state = new(start, worldLocations: [start, other]);
         Game game = new(state, new StubParser(new LookCommand()));
 
         game.TickNpcs();
@@ -48,33 +48,17 @@ public class GameBuilderTests
         Assert.Contains(npc, other.Npcs);
     }
 
-    private sealed class StubParser : ICommandParser
+    private sealed class FixedMovement(ILocation target) : INpcMovement
     {
-        private readonly ICommand _command;
+        private readonly ILocation _target = target;
 
-        public StubParser(ICommand command)
-        {
-            _command = command;
-        }
-
-        public ICommand Parse(string input)
-        {
-            return _command;
-        }
+        public ILocation? GetNextLocation(ILocation currentLocation, IGameState state) => _target;
     }
 
-    private sealed class FixedMovement : INpcMovement
+    private sealed class StubParser(ICommand command) : ICommandParser
     {
-        private readonly ILocation _target;
+        private readonly ICommand _command = command;
 
-        public FixedMovement(ILocation target)
-        {
-            _target = target;
-        }
-
-        public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
-        {
-            return _target;
-        }
+        public ICommand Parse(string input) => _command;
     }
 }

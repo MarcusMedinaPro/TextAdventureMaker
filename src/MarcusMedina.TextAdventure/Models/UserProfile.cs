@@ -3,10 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Models;
 
 using System.Text.Json;
 
-namespace MarcusMedina.TextAdventure.Models;
 /// <summary>
 /// Represents the player's persistent profile across all games.
 /// Used for personalization and NPC romance customization.
@@ -19,31 +19,6 @@ public class UserProfile
     };
 
     /// <summary>
-    /// Player's name.
-    /// </summary>
-    public string Name { get; set; } = "";
-
-    /// <summary>
-    /// Player's gender identity.
-    /// </summary>
-    public Gender Gender { get; set; } = Gender.Unspecified;
-
-    /// <summary>
-    /// Preferred gender for romantic NPCs. Used to customize romance sequences.
-    /// </summary>
-    public Gender RomancePreference { get; set; } = Gender.Unspecified;
-
-    /// <summary>
-    /// Player's hair color for character descriptions.
-    /// </summary>
-    public string HairColor { get; set; } = "";
-
-    /// <summary>
-    /// Player's eye color for character descriptions.
-    /// </summary>
-    public string EyeColor { get; set; } = "";
-
-    /// <summary>
     /// Player's age.
     /// </summary>
     public int? Age { get; set; }
@@ -54,9 +29,19 @@ public class UserProfile
     public DateOnly? Birthdate { get; set; }
 
     /// <summary>
-    /// Player's music taste for personalization.
+    /// Custom properties for game-specific personalization.
     /// </summary>
-    public string MusicTaste { get; set; } = "";
+    public Dictionary<string, string> CustomProperties { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Player's eye color for character descriptions.
+    /// </summary>
+    public string EyeColor { get; set; } = "";
+
+    /// <summary>
+    /// Player's favorite programming language.
+    /// </summary>
+    public string FavoriteLanguage { get; set; } = "";
 
     /// <summary>
     /// Player's film/movie preferences.
@@ -69,57 +54,37 @@ public class UserProfile
     public string GameTaste { get; set; } = "";
 
     /// <summary>
-    /// Player's favorite programming language.
+    /// Player's gender identity.
     /// </summary>
-    public string FavoriteLanguage { get; set; } = "";
+    public Gender Gender { get; set; } = Gender.Unspecified;
 
     /// <summary>
-    /// Custom properties for game-specific personalization.
+    /// Player's hair color for character descriptions.
     /// </summary>
-    public Dictionary<string, string> CustomProperties { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public string HairColor { get; set; } = "";
 
     /// <summary>
-    /// Checks if today is the player's birthday.
+    /// Player's music taste for personalization.
     /// </summary>
-    public bool IsBirthday()
+    public string MusicTaste { get; set; } = "";
+
+    /// <summary>
+    /// Player's name.
+    /// </summary>
+    public string Name { get; set; } = "";
+
+    /// <summary>
+    /// Preferred gender for romantic NPCs. Used to customize romance sequences.
+    /// </summary>
+    public Gender RomancePreference { get; set; } = Gender.Unspecified;
+
+    /// <summary>
+    /// Gets the default profile path.
+    /// </summary>
+    public static string GetDefaultProfilePath()
     {
-        if (Birthdate == null)
-        {
-            return false;
-        }
-
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-        return Birthdate.Value.Month == today.Month && Birthdate.Value.Day == today.Day;
-    }
-
-    /// <summary>
-    /// Gets the player's current age based on birthdate.
-    /// </summary>
-    public int? GetCalculatedAge()
-    {
-        if (Birthdate == null)
-        {
-            return Age;
-        }
-
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-        int age = today.Year - Birthdate.Value.Year;
-        if (Birthdate.Value > today.AddYears(-age))
-        {
-            age--;
-        }
-
-        return age;
-    }
-
-    /// <summary>
-    /// Saves the profile to a JSON file.
-    /// </summary>
-    public void Save(string path)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        string json = JsonSerializer.Serialize(this, JsonOptions);
-        File.WriteAllText(path, json);
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return Path.Combine(home, ".textadventure", "profile.json");
     }
 
     /// <summary>
@@ -133,7 +98,7 @@ public class UserProfile
             return new UserProfile();
         }
 
-        string json = File.ReadAllText(path);
+        var json = File.ReadAllText(path);
         return JsonSerializer.Deserialize<UserProfile>(json, JsonOptions) ?? new UserProfile();
     }
 
@@ -142,32 +107,28 @@ public class UserProfile
     /// </summary>
     public static UserProfile LoadDefault()
     {
-        string defaultPath = GetDefaultProfilePath();
+        var defaultPath = GetDefaultProfilePath();
         return Load(defaultPath);
     }
 
     /// <summary>
-    /// Saves profile to default location (~/.textadventure/profile.json).
+    /// Gets the player's current age based on birthdate.
     /// </summary>
-    public void SaveDefault()
+    public int? GetCalculatedAge()
     {
-        string defaultPath = GetDefaultProfilePath();
-        string? directory = Path.GetDirectoryName(defaultPath);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        if (Birthdate == null)
         {
-            _ = Directory.CreateDirectory(directory);
+            return Age;
         }
 
-        Save(defaultPath);
-    }
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var age = today.Year - Birthdate.Value.Year;
+        if (Birthdate.Value > today.AddYears(-age))
+        {
+            age--;
+        }
 
-    /// <summary>
-    /// Gets the default profile path.
-    /// </summary>
-    public static string GetDefaultProfilePath()
-    {
-        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        return Path.Combine(home, ".textadventure", "profile.json");
+        return age;
     }
 
     /// <summary>
@@ -191,6 +152,45 @@ public class UserProfile
 
         // Otherwise, use player's preference
         return RomancePreference;
+    }
+
+    /// <summary>
+    /// Checks if today is the player's birthday.
+    /// </summary>
+    public bool IsBirthday()
+    {
+        if (Birthdate == null)
+        {
+            return false;
+        }
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        return Birthdate.Value.Month == today.Month && Birthdate.Value.Day == today.Day;
+    }
+
+    /// <summary>
+    /// Saves the profile to a JSON file.
+    /// </summary>
+    public void Save(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        var json = JsonSerializer.Serialize(this, JsonOptions);
+        File.WriteAllText(path, json);
+    }
+
+    /// <summary>
+    /// Saves profile to default location (~/.textadventure/profile.json).
+    /// </summary>
+    public void SaveDefault()
+    {
+        var defaultPath = GetDefaultProfilePath();
+        var directory = Path.GetDirectoryName(defaultPath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            _ = Directory.CreateDirectory(directory);
+        }
+
+        Save(defaultPath);
     }
 }
 

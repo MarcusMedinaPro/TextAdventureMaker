@@ -3,10 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
-
-namespace MarcusMedina.TextAdventure.Models;
 
 public sealed class PatrolNpcMovement : INpcMovement
 {
@@ -16,7 +16,7 @@ public sealed class PatrolNpcMovement : INpcMovement
     public PatrolNpcMovement(IEnumerable<ILocation> route)
     {
         ArgumentNullException.ThrowIfNull(route);
-        _route = route.Where(location => location != null).ToList();
+        _route = [..route.Where(location => location != null)];
 
         if (_route.Count == 0)
         {
@@ -26,13 +26,13 @@ public sealed class PatrolNpcMovement : INpcMovement
 
     public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
     {
-        int matchIndex = _route.FindIndex(location => location.Id.TextCompare(currentLocation.Id));
+        var matchIndex = _route.FindIndex(location => location.Id.TextCompare(currentLocation.Id));
         if (matchIndex >= 0)
         {
             _index = matchIndex;
         }
 
-        int nextIndex = (_index + 1) % _route.Count;
+        var nextIndex = (_index + 1) % _route.Count;
         _index = nextIndex;
         return _route[_index];
     }

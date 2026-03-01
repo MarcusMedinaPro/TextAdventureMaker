@@ -3,23 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 public class GameEntityPropertyTests
 {
-    [Fact]
-    public void SetProperty_StoresValueOnItem()
-    {
-        Item item = new("cup", "cup");
-
-        _ = item.SetProperty("hint", "A plain cup.");
-
-        Assert.Equal("A plain cup.", item.GetHint());
-    }
-
     [Fact]
     public void SetProperty_StoresValueOnDoor()
     {
@@ -28,6 +18,16 @@ public class GameEntityPropertyTests
         _ = door.SetHint("It needs a key.");
 
         Assert.Equal("It needs a key.", door.GetHint());
+    }
+
+    [Fact]
+    public void SetProperty_StoresValueOnItem()
+    {
+        Item item = new("cup", "cup");
+
+        _ = item.SetProperty("hint", "A plain cup.");
+
+        Assert.Equal("A plain cup.", item.GetHint());
     }
 
     [Fact]

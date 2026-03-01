@@ -3,21 +3,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Enums;
-
 namespace MarcusMedina.TextAdventure.Interfaces;
+
+using MarcusMedina.TextAdventure.Enums;
 
 public interface IQuest
 {
-    string Id { get; }
-    string Title { get; }
-    string Description { get; }
-    QuestState State { get; }
     IReadOnlyList<IQuestCondition> Conditions { get; }
+    string Description { get; }
+    string Id { get; }
+    QuestState State { get; }
+    string Title { get; }
+
+    IQuest AddCondition(IQuestCondition condition);
+
+    bool CheckProgress(IGameState state);
+
+    IQuest Complete();
+
+    IQuest Fail();
 
     IQuest Start();
-    IQuest Complete();
-    IQuest Fail();
-    IQuest AddCondition(IQuestCondition condition);
-    bool CheckProgress(IGameState state);
 }

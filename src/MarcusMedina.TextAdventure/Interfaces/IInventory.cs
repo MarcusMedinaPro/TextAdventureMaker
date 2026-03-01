@@ -3,22 +3,26 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Enums;
-
 namespace MarcusMedina.TextAdventure.Interfaces;
+
+using MarcusMedina.TextAdventure.Enums;
 
 public interface IInventory
 {
+    int Count { get; }
+    IReadOnlyList<IItem> Items { get; }
     InventoryLimitType LimitType { get; }
     int MaxCount { get; }
     float MaxWeight { get; }
-    int Count { get; }
     float TotalWeight { get; }
-    IReadOnlyList<IItem> Items { get; }
+
+    bool Add(IItem item);
 
     bool CanAdd(IItem item);
-    bool Add(IItem item);
-    bool Remove(IItem item);
-    IItem? FindItem(string name);
+
     void Clear();
+
+    IItem? FindItem(string name);
+
+    bool Remove(IItem item);
 }

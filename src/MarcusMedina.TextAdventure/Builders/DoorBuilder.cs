@@ -3,28 +3,32 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Builders;
 
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Builders;
 
 public sealed class DoorBuilder
 {
     private readonly Door _door;
 
-    private DoorBuilder(Door door)
-    {
-        _door = door;
-    }
+    private DoorBuilder(Door door) => _door = door;
 
     public static DoorBuilder Create(string id, string name, string description = "", DoorState initialState = DoorState.Closed)
     {
-        Door door = string.IsNullOrWhiteSpace(description)
+        var door = string.IsNullOrWhiteSpace(description)
             ? new Door(id, name, initialState)
             : new Door(id, name, description, initialState);
         return new DoorBuilder(door);
     }
+
+    public DoorBuilder AddAliases(params string[] aliases)
+    {
+        _ = _door.AddAliases(aliases);
+        return this;
+    }
+
+    public Door Build() => _door;
 
     public DoorBuilder Description(string text)
     {
@@ -42,16 +46,5 @@ public sealed class DoorBuilder
     {
         _ = _door.SetReaction(action, text);
         return this;
-    }
-
-    public DoorBuilder AddAliases(params string[] aliases)
-    {
-        _ = _door.AddAliases(aliases);
-        return this;
-    }
-
-    public Door Build()
-    {
-        return _door;
     }
 }

@@ -3,22 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
 
-public sealed class RandomNpcMovement : INpcMovement
-{
-    private readonly Random _random;
+using MarcusMedina.TextAdventure.Interfaces;
 
-    public RandomNpcMovement(Random? random = null)
-    {
-        _random = random ?? new Random();
-    }
+public sealed class RandomNpcMovement(Random? random = null) : INpcMovement
+{
+    private readonly Random _random = random ?? new Random();
 
     public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
     {
-        List<Exit> exits = currentLocation.Exits.Values
+        var exits = currentLocation.Exits.Values
             .Where(exit => exit.IsPassable)
             .ToList();
 
@@ -27,7 +22,7 @@ public sealed class RandomNpcMovement : INpcMovement
             return null;
         }
 
-        Exit nextExit = exits[_random.Next(exits.Count)];
+        var nextExit = exits[_random.Next(exits.Count)];
         return nextExit.Target;
     }
 }

@@ -3,26 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Enums;
-using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Models;
 
 public class NpcTests
 {
-    [Fact]
-    public void Npc_TracksStateAndDescription()
-    {
-        INpc npc = new Npc("fox", "Fox")
-            .Description("A friendly forest fox.")
-            .SetState(NpcState.Friendly);
-
-        Assert.Equal(NpcState.Friendly, npc.State);
-        Assert.True(npc.IsAlive);
-        Assert.Equal("A friendly forest fox.", npc.GetDescription());
-    }
-
     [Fact]
     public void Location_CanFindNpcByName()
     {
@@ -31,5 +18,17 @@ public class NpcTests
         location.AddNpc(npc);
 
         Assert.Equal(npc, location.FindNpc("fox"));
+    }
+
+    [Fact]
+    public void Npc_TracksStateAndDescription()
+    {
+        var npc = new Npc("fox", "Fox")
+            .Description("A friendly forest fox.")
+            .SetState(NpcState.Friendly);
+
+        Assert.Equal(NpcState.Friendly, npc.State);
+        Assert.True(npc.IsAlive);
+        Assert.Equal("A friendly forest fox.", npc.GetDescription());
     }
 }

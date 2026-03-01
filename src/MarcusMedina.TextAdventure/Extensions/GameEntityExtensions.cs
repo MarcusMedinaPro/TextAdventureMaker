@@ -3,12 +3,31 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Extensions;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public static class GameEntityExtensions
 {
+    /// <summary>
+    /// Gets a hint for a game entity.
+    /// </summary>
+    public static string? GetHint(this IGameEntity entity) => entity.GetProperty("hint");
+
+    /// <summary>
+    /// Gets an arbitrary string property from a game entity.
+    /// </summary>
+    public static string? GetProperty(this IGameEntity entity, string key)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        return string.IsNullOrWhiteSpace(key) ? null : entity.Properties.TryGetValue(key.Trim(), out var value) ? value : null;
+    }
+
+    /// <summary>
+    /// Sets a hint for a game entity.
+    /// </summary>
+    public static T SetHint<T>(this T entity, string text) where T : IGameEntity => entity.SetProperty("hint", text);
+
     /// <summary>
     /// Sets an arbitrary string property on any game entity.
     /// </summary>
@@ -22,30 +41,5 @@ public static class GameEntityExtensions
 
         entity.Properties[key.Trim()] = value ?? "";
         return entity;
-    }
-
-    /// <summary>
-    /// Gets an arbitrary string property from a game entity.
-    /// </summary>
-    public static string? GetProperty(this IGameEntity entity, string key)
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-        return string.IsNullOrWhiteSpace(key) ? null : entity.Properties.TryGetValue(key.Trim(), out string? value) ? value : null;
-    }
-
-    /// <summary>
-    /// Sets a hint for a game entity.
-    /// </summary>
-    public static T SetHint<T>(this T entity, string text) where T : IGameEntity
-    {
-        return entity.SetProperty("hint", text);
-    }
-
-    /// <summary>
-    /// Gets a hint for a game entity.
-    /// </summary>
-    public static string? GetHint(this IGameEntity entity)
-    {
-        return entity.GetProperty("hint");
     }
 }

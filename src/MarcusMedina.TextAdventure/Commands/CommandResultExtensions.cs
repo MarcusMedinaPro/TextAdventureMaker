@@ -3,17 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Localization;
-
 namespace MarcusMedina.TextAdventure.Commands;
+
+using MarcusMedina.TextAdventure.Localization;
 
 public static class CommandResultExtensions
 {
     /// <summary>Prefix a "did you mean" hint to the result message.</summary>
     public static CommandResult WithSuggestion(this CommandResult result, string suggestion)
     {
-        string hint = Language.DidYouMean(suggestion);
-        string message = string.IsNullOrWhiteSpace(result.Message)
+        var hint = Language.DidYouMean(suggestion);
+        var message = string.IsNullOrWhiteSpace(result.Message)
             ? hint
             : $"{hint}\n{result.Message}";
 

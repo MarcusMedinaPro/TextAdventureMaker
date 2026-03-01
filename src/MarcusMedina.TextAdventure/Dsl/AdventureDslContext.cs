@@ -3,76 +3,54 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Dsl;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Dsl;
-
 public sealed class AdventureDslContext
 {
-    private readonly Dictionary<string, Location> _locations = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Door> _doors = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Item> _items = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Key> _keys = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, Door> _doors = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Location> _locations = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> _metadata = new(StringComparer.OrdinalIgnoreCase);
 
-    internal List<PendingExit> PendingExits { get; } = [];
-    internal List<PendingDoorKey> PendingDoorKeys { get; } = [];
-
     public Location? CurrentLocation { get; private set; }
-    public IReadOnlyDictionary<string, Location> Locations => _locations;
+    public IReadOnlyDictionary<string, Door> Doors => _doors;
     public IReadOnlyDictionary<string, Item> Items => _items;
     public IReadOnlyDictionary<string, Key> Keys => _keys;
-    public IReadOnlyDictionary<string, Door> Doors => _doors;
+    public IReadOnlyDictionary<string, Location> Locations => _locations;
     public IReadOnlyDictionary<string, string> Metadata => _metadata;
     public string? StartLocationId { get; set; }
+    internal List<PendingDoorKey> PendingDoorKeys { get; } = [];
+    internal List<PendingExit> PendingExits { get; } = [];
 
-    public void SetMetadata(string key, string value)
+    public string? GetMetadata(string key) => string.IsNullOrWhiteSpace(key) ? null : _metadata.TryGetValue(key.Trim(), out var value) ? value : null;
+
+    public Door GetOrCreateDoor(string id, string name, string? description = null)
     {
-        if (string.IsNullOrWhiteSpace(key))
+        if (_doors.TryGetValue(id, out var door))
         {
-            return;
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                _ = door.Description(description);
+            }
+
+            return door;
         }
 
-        _metadata[key.Trim()] = value ?? "";
-    }
+        door = string.IsNullOrWhiteSpace(description)
+            ? new Door(id, name)
+            : new Door(id, name, description);
 
-    public string? GetMetadata(string key)
-    {
-        return string.IsNullOrWhiteSpace(key) ? null : _metadata.TryGetValue(key.Trim(), out string? value) ? value : null;
-    }
-
-    public Location GetOrCreateLocation(string id)
-    {
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            throw new ArgumentException("Location id is required.", nameof(id));
-        }
-
-        if (_locations.TryGetValue(id, out Location? location))
-        {
-            return location;
-        }
-
-        location = new Location(id);
-        _locations[id] = location;
-        return location;
-    }
-
-    public void SetCurrentLocation(string id, string? description = null)
-    {
-        Location location = GetOrCreateLocation(id);
-        if (!string.IsNullOrWhiteSpace(description))
-        {
-            _ = location.Description(description);
-        }
-
-        CurrentLocation = location;
+        _doors[id] = door;
+        return door;
     }
 
     public Item GetOrCreateItem(string id, string name, string? description = null)
     {
-        if (_items.TryGetValue(id, out Item? item))
+        if (_items.TryGetValue(id, out var item))
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
@@ -92,7 +70,7 @@ public sealed class AdventureDslContext
 
     public Key GetOrCreateKey(string id, string name, string? description = null)
     {
-        if (_keys.TryGetValue(id, out Key? key))
+        if (_keys.TryGetValue(id, out var key))
         {
             if (!string.IsNullOrWhiteSpace(description))
             {
@@ -110,24 +88,21 @@ public sealed class AdventureDslContext
         return key;
     }
 
-    public Door GetOrCreateDoor(string id, string name, string? description = null)
+    public Location GetOrCreateLocation(string id)
     {
-        if (_doors.TryGetValue(id, out Door? door))
+        if (string.IsNullOrWhiteSpace(id))
         {
-            if (!string.IsNullOrWhiteSpace(description))
-            {
-                _ = door.Description(description);
-            }
-
-            return door;
+            throw new ArgumentException("Location id is required.", nameof(id));
         }
 
-        door = string.IsNullOrWhiteSpace(description)
-            ? new Door(id, name)
-            : new Door(id, name, description);
+        if (_locations.TryGetValue(id, out var location))
+        {
+            return location;
+        }
 
-        _doors[id] = door;
-        return door;
+        location = new Location(id);
+        _locations[id] = location;
+        return location;
     }
 
     public void RequireCurrentLocation()
@@ -136,6 +111,27 @@ public sealed class AdventureDslContext
         {
             throw new InvalidOperationException("No current location set for DSL entries.");
         }
+    }
+
+    public void SetCurrentLocation(string id, string? description = null)
+    {
+        var location = GetOrCreateLocation(id);
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            _ = location.Description(description);
+        }
+
+        CurrentLocation = location;
+    }
+
+    public void SetMetadata(string key, string value)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return;
+        }
+
+        _metadata[key.Trim()] = value ?? "";
     }
 }
 

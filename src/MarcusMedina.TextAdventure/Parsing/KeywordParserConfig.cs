@@ -3,13 +3,45 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Parsing;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 
-namespace MarcusMedina.TextAdventure.Parsing;
 /// <summary>Configuration for the keyword-based command parser.</summary>
-public sealed class KeywordParserConfig
+public sealed class KeywordParserConfig(
+        ISet<string> quit,
+        ISet<string> look,
+        ISet<string> examine,
+        ISet<string> inventory,
+        ISet<string> stats,
+        ISet<string> open,
+        ISet<string> unlock,
+        ISet<string> take,
+        ISet<string> drop,
+        ISet<string> use,
+        ISet<string> combine,
+        ISet<string> pour,
+        ISet<string> move,
+        ISet<string> go,
+        ISet<string> read,
+        ISet<string> talk,
+        ISet<string> attack,
+        ISet<string> flee,
+        ISet<string> save,
+        ISet<string> load,
+        ISet<string> quest,
+        ISet<string> all,
+        ISet<string> ignoreItemTokens,
+        ISet<string> combineSeparators,
+        ISet<string> pourPrepositions,
+        IReadOnlyDictionary<string, Direction> directionAliases,
+        IReadOnlyDictionary<string, string>? synonyms = null,
+        bool allowDirectionEnumNames = false,
+        bool enableFuzzyMatching = false,
+        int fuzzyMaxDistance = 1)
 {
+
     /// <summary>Default configuration with common command keywords and direction aliases.</summary>
     public static KeywordParserConfig Default { get; } = new(
         quit: CommandHelper.NewCommands("quit", "exit", "q"),
@@ -54,130 +86,94 @@ public sealed class KeywordParserConfig
         },
         synonyms: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         allowDirectionEnumNames: true);
-    /// <summary>Keywords used to quit the game.</summary>
-    public ISet<string> Quit { get; }
-    /// <summary>Keywords used to look around or at a target.</summary>
-    public ISet<string> Look { get; }
-    /// <summary>Keywords used to examine a target.</summary>
-    public ISet<string> Examine { get; }
-    /// <summary>Keywords used to show inventory.</summary>
-    public ISet<string> Inventory { get; }
-    /// <summary>Keywords used to show stats.</summary>
-    public ISet<string> Stats { get; }
-    /// <summary>Keywords used to open a door.</summary>
-    public ISet<string> Open { get; }
-    /// <summary>Keywords used to unlock a door.</summary>
-    public ISet<string> Unlock { get; }
-    /// <summary>Keywords used to take items.</summary>
-    public ISet<string> Take { get; }
-    /// <summary>Keywords used to drop items.</summary>
-    public ISet<string> Drop { get; }
-    /// <summary>Keywords used to use items.</summary>
-    public ISet<string> Use { get; }
-    /// <summary>Keywords used to combine items.</summary>
-    public ISet<string> Combine { get; }
-    /// <summary>Keywords used to pour items.</summary>
-    public ISet<string> Pour { get; }
-    /// <summary>Keywords used to move objects.</summary>
-    public ISet<string> Move { get; }
-    /// <summary>Keywords used to move.</summary>
-    public ISet<string> Go { get; }
-    /// <summary>Keywords used to read items.</summary>
-    public ISet<string> Read { get; }
-    /// <summary>Keywords used to talk to NPCs.</summary>
-    public ISet<string> Talk { get; }
-    /// <summary>Keywords used to attack NPCs.</summary>
-    public ISet<string> Attack { get; }
-    /// <summary>Keywords used to flee combat.</summary>
-    public ISet<string> Flee { get; }
-    /// <summary>Keywords used to save the game.</summary>
-    public ISet<string> Save { get; }
-    /// <summary>Keywords used to load the game.</summary>
-    public ISet<string> Load { get; }
-    /// <summary>Keywords used to show quest log.</summary>
-    public ISet<string> Quest { get; }
-    /// <summary>Synonym map for command keywords.</summary>
-    public IReadOnlyDictionary<string, string> Synonyms { get; }
 
     /// <summary>Keywords that indicate "all" in take/drop commands.</summary>
-    public ISet<string> All { get; }
-    /// <summary>Tokens to ignore when parsing item names.</summary>
-    public ISet<string> IgnoreItemTokens { get; }
+    public ISet<string> All { get; } = all ?? throw new ArgumentNullException(nameof(all));
+
+    /// <summary>Allow enum names like "North" as directions.</summary>
+    public bool AllowDirectionEnumNames { get; } = allowDirectionEnumNames;
+
+    /// <summary>Keywords used to attack NPCs.</summary>
+    public ISet<string> Attack { get; } = attack ?? throw new ArgumentNullException(nameof(attack));
+
+    /// <summary>Keywords used to combine items.</summary>
+    public ISet<string> Combine { get; } = combine ?? throw new ArgumentNullException(nameof(combine));
+
     /// <summary>Tokens that separate items in combine commands.</summary>
-    public ISet<string> CombineSeparators { get; }
-    /// <summary>Prepositions used for pour commands.</summary>
-    public ISet<string> PourPrepositions { get; }
+    public ISet<string> CombineSeparators { get; } = combineSeparators ?? throw new ArgumentNullException(nameof(combineSeparators));
 
     /// <summary>Direction aliases used for movement.</summary>
-    public IReadOnlyDictionary<string, Direction> DirectionAliases { get; }
-    /// <summary>Allow enum names like "North" as directions.</summary>
-    public bool AllowDirectionEnumNames { get; }
-    /// <summary>Enable fuzzy matching for command keywords and directions.</summary>
-    public bool EnableFuzzyMatching { get; }
-    /// <summary>Maximum edit distance for fuzzy matching.</summary>
-    public int FuzzyMaxDistance { get; }
+    public IReadOnlyDictionary<string, Direction> DirectionAliases { get; } = directionAliases ?? throw new ArgumentNullException(nameof(directionAliases));
 
-    public KeywordParserConfig(
-        ISet<string> quit,
-        ISet<string> look,
-        ISet<string> examine,
-        ISet<string> inventory,
-        ISet<string> stats,
-        ISet<string> open,
-        ISet<string> unlock,
-        ISet<string> take,
-        ISet<string> drop,
-        ISet<string> use,
-        ISet<string> combine,
-        ISet<string> pour,
-        ISet<string> move,
-        ISet<string> go,
-        ISet<string> read,
-        ISet<string> talk,
-        ISet<string> attack,
-        ISet<string> flee,
-        ISet<string> save,
-        ISet<string> load,
-        ISet<string> quest,
-        ISet<string> all,
-        ISet<string> ignoreItemTokens,
-        ISet<string> combineSeparators,
-        ISet<string> pourPrepositions,
-        IReadOnlyDictionary<string, Direction> directionAliases,
-        IReadOnlyDictionary<string, string>? synonyms = null,
-        bool allowDirectionEnumNames = false,
-        bool enableFuzzyMatching = false,
-        int fuzzyMaxDistance = 1)
-    {
-        Quit = quit ?? throw new ArgumentNullException(nameof(quit));
-        Look = look ?? throw new ArgumentNullException(nameof(look));
-        Examine = examine ?? throw new ArgumentNullException(nameof(examine));
-        Inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
-        Stats = stats ?? throw new ArgumentNullException(nameof(stats));
-        Open = open ?? throw new ArgumentNullException(nameof(open));
-        Unlock = unlock ?? throw new ArgumentNullException(nameof(unlock));
-        Take = take ?? throw new ArgumentNullException(nameof(take));
-        Drop = drop ?? throw new ArgumentNullException(nameof(drop));
-        Use = use ?? throw new ArgumentNullException(nameof(use));
-        Combine = combine ?? throw new ArgumentNullException(nameof(combine));
-        Pour = pour ?? throw new ArgumentNullException(nameof(pour));
-        Move = move ?? throw new ArgumentNullException(nameof(move));
-        Go = go ?? throw new ArgumentNullException(nameof(go));
-        Read = read ?? throw new ArgumentNullException(nameof(read));
-        Talk = talk ?? throw new ArgumentNullException(nameof(talk));
-        Attack = attack ?? throw new ArgumentNullException(nameof(attack));
-        Flee = flee ?? throw new ArgumentNullException(nameof(flee));
-        Save = save ?? throw new ArgumentNullException(nameof(save));
-        Load = load ?? throw new ArgumentNullException(nameof(load));
-        Quest = quest ?? throw new ArgumentNullException(nameof(quest));
-        Synonyms = synonyms ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        All = all ?? throw new ArgumentNullException(nameof(all));
-        IgnoreItemTokens = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
-        CombineSeparators = combineSeparators ?? throw new ArgumentNullException(nameof(combineSeparators));
-        PourPrepositions = pourPrepositions ?? throw new ArgumentNullException(nameof(pourPrepositions));
-        DirectionAliases = directionAliases ?? throw new ArgumentNullException(nameof(directionAliases));
-        AllowDirectionEnumNames = allowDirectionEnumNames;
-        EnableFuzzyMatching = enableFuzzyMatching;
-        FuzzyMaxDistance = Math.Max(0, fuzzyMaxDistance);
-    }
+    /// <summary>Keywords used to drop items.</summary>
+    public ISet<string> Drop { get; } = drop ?? throw new ArgumentNullException(nameof(drop));
+
+    /// <summary>Enable fuzzy matching for command keywords and directions.</summary>
+    public bool EnableFuzzyMatching { get; } = enableFuzzyMatching;
+
+    /// <summary>Keywords used to examine a target.</summary>
+    public ISet<string> Examine { get; } = examine ?? throw new ArgumentNullException(nameof(examine));
+
+    /// <summary>Keywords used to flee combat.</summary>
+    public ISet<string> Flee { get; } = flee ?? throw new ArgumentNullException(nameof(flee));
+
+    /// <summary>Maximum edit distance for fuzzy matching.</summary>
+    public int FuzzyMaxDistance { get; } = Math.Max(0, fuzzyMaxDistance);
+
+    /// <summary>Keywords used to move.</summary>
+    public ISet<string> Go { get; } = go ?? throw new ArgumentNullException(nameof(go));
+
+    /// <summary>Tokens to ignore when parsing item names.</summary>
+    public ISet<string> IgnoreItemTokens { get; } = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
+
+    /// <summary>Keywords used to show inventory.</summary>
+    public ISet<string> Inventory { get; } = inventory ?? throw new ArgumentNullException(nameof(inventory));
+
+    /// <summary>Keywords used to load the game.</summary>
+    public ISet<string> Load { get; } = load ?? throw new ArgumentNullException(nameof(load));
+
+    /// <summary>Keywords used to look around or at a target.</summary>
+    public ISet<string> Look { get; } = look ?? throw new ArgumentNullException(nameof(look));
+
+    /// <summary>Keywords used to move objects.</summary>
+    public ISet<string> Move { get; } = move ?? throw new ArgumentNullException(nameof(move));
+
+    /// <summary>Keywords used to open a door.</summary>
+    public ISet<string> Open { get; } = open ?? throw new ArgumentNullException(nameof(open));
+
+    /// <summary>Keywords used to pour items.</summary>
+    public ISet<string> Pour { get; } = pour ?? throw new ArgumentNullException(nameof(pour));
+
+    /// <summary>Prepositions used for pour commands.</summary>
+    public ISet<string> PourPrepositions { get; } = pourPrepositions ?? throw new ArgumentNullException(nameof(pourPrepositions));
+
+    /// <summary>Keywords used to show quest log.</summary>
+    public ISet<string> Quest { get; } = quest ?? throw new ArgumentNullException(nameof(quest));
+
+    /// <summary>Keywords used to quit the game.</summary>
+    public ISet<string> Quit { get; } = quit ?? throw new ArgumentNullException(nameof(quit));
+
+    /// <summary>Keywords used to read items.</summary>
+    public ISet<string> Read { get; } = read ?? throw new ArgumentNullException(nameof(read));
+
+    /// <summary>Keywords used to save the game.</summary>
+    public ISet<string> Save { get; } = save ?? throw new ArgumentNullException(nameof(save));
+
+    /// <summary>Keywords used to show stats.</summary>
+    public ISet<string> Stats { get; } = stats ?? throw new ArgumentNullException(nameof(stats));
+
+    /// <summary>Synonym map for command keywords.</summary>
+    public IReadOnlyDictionary<string, string> Synonyms { get; } = synonyms ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Keywords used to take items.</summary>
+    public ISet<string> Take { get; } = take ?? throw new ArgumentNullException(nameof(take));
+
+    /// <summary>Keywords used to talk to NPCs.</summary>
+    public ISet<string> Talk { get; } = talk ?? throw new ArgumentNullException(nameof(talk));
+
+    /// <summary>Keywords used to unlock a door.</summary>
+    public ISet<string> Unlock { get; } = unlock ?? throw new ArgumentNullException(nameof(unlock));
+
+    /// <summary>Keywords used to use items.</summary>
+    public ISet<string> Use { get; } = use ?? throw new ArgumentNullException(nameof(use));
 }

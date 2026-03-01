@@ -3,21 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public sealed class GameEvent
 {
-    public GameEventType Type { get; }
-    public IGameState State { get; }
-    public ILocation? Location { get; }
-    public IItem? Item { get; }
-    public INpc? Npc { get; }
-    public IDoor? Door { get; }
-    public string? Detail { get; }
-
     public GameEvent(
         GameEventType type,
         IGameState state,
@@ -36,4 +28,12 @@ public sealed class GameEvent
         Door = door;
         Detail = detail;
     }
+
+    public string? Detail { get; }
+    public IDoor? Door { get; }
+    public IItem? Item { get; }
+    public ILocation? Location { get; }
+    public INpc? Npc { get; }
+    public IGameState State { get; }
+    public GameEventType Type { get; }
 }

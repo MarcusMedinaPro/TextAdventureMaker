@@ -3,13 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Parsing;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
-
-namespace MarcusMedina.TextAdventure.Parsing;
 
 public class KeywordParser(KeywordParserConfig config) : ICommandParser
 {
@@ -22,13 +22,13 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             return new UnknownCommand();
         }
 
-        string[] tokens = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var tokens = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length == 0)
         {
             return new UnknownCommand();
         }
 
-        string keyword = NormalizeKeyword(tokens[0]);
+        var keyword = NormalizeKeyword(tokens[0]);
 
         if (_config.Quit.Contains(keyword))
         {
@@ -37,13 +37,13 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Examine.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return new ExamineCommand(target);
         }
 
         if (_config.Look.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return new LookCommand(target);
         }
 
@@ -74,7 +74,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new TakeAllCommand();
             }
 
-            string? itemName = ParseItemName(tokens, 1);
+            var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
         }
 
@@ -85,13 +85,13 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new DropAllCommand();
             }
 
-            string? itemName = ParseItemName(tokens, 1);
+            var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new DropCommand(itemName) : new UnknownCommand();
         }
 
         if (_config.Use.Contains(keyword))
         {
-            string? itemName = ParseItemName(tokens, 1);
+            var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
         }
 
@@ -107,48 +107,48 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Move.Contains(keyword))
         {
-            if (tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction moveDirection))
+            if (tokens.Length >= 2 && TryParseDirection(tokens[1], out var moveDirection))
             {
                 return new GoCommand(moveDirection);
             }
 
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
         }
 
         if (_config.Read.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return target != null ? new ReadCommand(target) : new UnknownCommand();
         }
 
         if (_config.Talk.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return new TalkCommand(target);
         }
 
         if (_config.Attack.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return new AttackCommand(target);
         }
 
         if (_config.Flee.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return new FleeCommand(target);
         }
 
         if (_config.Save.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return new SaveCommand(target);
         }
 
         if (_config.Load.Contains(keyword))
         {
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return new LoadCommand(target);
         }
 
@@ -159,63 +159,23 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Go.Contains(keyword))
         {
-            return tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction direction)
+            return tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
                 ? new GoCommand(direction)
                 : ParseGoTarget(tokens);
         }
 
         if (_config.EnableFuzzyMatching)
         {
-            ICommand? fuzzy = TryParseFuzzyKeyword(keyword, tokens);
+            var fuzzy = TryParseFuzzyKeyword(keyword, tokens);
             if (fuzzy != null)
             {
                 return fuzzy;
             }
         }
 
-        return TryParseDirection(keyword, out Direction directDirection)
+        return TryParseDirection(keyword, out var directDirection)
             ? new GoCommand(directDirection)
             : new UnknownCommand();
-    }
-
-    private bool TryParseDirection(string token, out Direction direction)
-    {
-        if (_config.DirectionAliases.TryGetValue(token, out direction))
-        {
-            return true;
-        }
-
-        if (_config.AllowDirectionEnumNames)
-        {
-            return Enum.TryParse(token, true, out direction);
-        }
-
-        if (_config.EnableFuzzyMatching)
-        {
-            string? best = FuzzyMatcher.FindBestToken(token, _config.DirectionAliases.Keys, _config.FuzzyMaxDistance);
-            if (!string.IsNullOrWhiteSpace(best) && _config.DirectionAliases.TryGetValue(best, out direction))
-            {
-                return true;
-            }
-        }
-
-        direction = default;
-        return false;
-    }
-
-    private ICommand? TryParseFuzzyKeyword(string keyword, string[] tokens)
-    {
-        var candidates = GetAllCommandKeywords();
-        string? best = FuzzyMatcher.FindBestToken(keyword, candidates, _config.FuzzyMaxDistance);
-        if (string.IsNullOrWhiteSpace(best))
-        {
-            return null;
-        }
-
-        ICommand? command = BuildCommandForKeyword(best, tokens);
-        return command == null
-            ? null
-            : new FuzzyCommand(command, best.ToProperCase());
     }
 
     private ICommand? BuildCommandForKeyword(string keyword, string[] tokens)
@@ -263,7 +223,7 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new TakeAllCommand();
             }
 
-            string? itemName = ParseItemName(tokens, 1);
+            var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new TakeCommand(itemName) : new UnknownCommand();
         }
 
@@ -274,13 +234,13 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 return new DropAllCommand();
             }
 
-            string? itemName = ParseItemName(tokens, 1);
+            var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new DropCommand(itemName) : new UnknownCommand();
         }
 
         if (_config.Use.Contains(keyword))
         {
-            string? itemName = ParseItemName(tokens, 1);
+            var itemName = ParseItemName(tokens, 1);
             return itemName != null ? new UseCommand(itemName) : new UnknownCommand();
         }
 
@@ -302,12 +262,12 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Move.Contains(keyword))
         {
-            if (tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction moveDirection))
+            if (tokens.Length >= 2 && TryParseDirection(tokens[1], out var moveDirection))
             {
                 return new GoCommand(moveDirection);
             }
 
-            string? target = ParseItemName(tokens, 1);
+            var target = ParseItemName(tokens, 1);
             return target != null ? new MoveCommand(target) : new MoveCommand(string.Empty);
         }
 
@@ -324,26 +284,13 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             : _config.Quest.Contains(keyword)
             ? new QuestCommand()
             : _config.Go.Contains(keyword)
-            ? tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction direction)
+            ? tokens.Length >= 2 && TryParseDirection(tokens[1], out var direction)
                 ? new GoCommand(direction)
                 : ParseGoTarget(tokens)
             : null;
     }
 
-    private string NormalizeKeyword(string token)
-    {
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            return string.Empty;
-        }
-
-        string keyword = token.ToLowerInvariant();
-        return _config.Synonyms.TryGetValue(keyword, out string? canonical) ? canonical : keyword;
-    }
-
-    private IEnumerable<string> GetAllCommandKeywords()
-    {
-        return _config.Quit
+    private List<string> GetAllCommandKeywords() => _config.Quit
             .Concat(_config.Examine)
             .Concat(_config.Look)
             .Concat(_config.Inventory)
@@ -364,27 +311,18 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .Concat(_config.Save)
             .Concat(_config.Load)
             .Concat(_config.Quest)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-    }
-
-    private string? ParseItemName(string[] tokens, int startIndex)
-    {
-        if (tokens.Length <= startIndex)
-        {
-            return null;
-        }
-
-        var parts = tokens.Skip(startIndex)
-            .Where(t => !_config.IgnoreItemTokens.Contains(t))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        return parts.Count == 0 ? null : parts.SpaceJoin();
-    }
-
-    private ICommand ParseGoTarget(string[] tokens)
+    private string NormalizeKeyword(string token)
     {
-        string? target = ParseItemName(tokens, 1);
-        return target != null ? new GoToCommand(target) : new UnknownCommand();
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return string.Empty;
+        }
+
+        var keyword = token.ToLowerInvariant();
+        return _config.Synonyms.TryGetValue(keyword, out var canonical) ? canonical : keyword;
     }
 
     private ICommand ParseCombine(string[] tokens)
@@ -401,21 +339,81 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (parts.Count < 2)
             return new UnknownCommand();
 
-        string right = parts[^1];
-        string left = parts.Take(parts.Count - 1).SpaceJoin();
+        var right = parts[^1];
+        var left = parts.Take(parts.Count - 1).SpaceJoin();
         return new CombineCommand(left, right);
+    }
+
+    private ICommand ParseGoTarget(string[] tokens)
+    {
+        var target = ParseItemName(tokens, 1);
+        return target != null ? new GoToCommand(target) : new UnknownCommand();
+    }
+
+    private string? ParseItemName(string[] tokens, int startIndex)
+    {
+        if (tokens.Length <= startIndex)
+        {
+            return null;
+        }
+
+        var parts = tokens.Skip(startIndex)
+            .Where(t => !_config.IgnoreItemTokens.Contains(t))
+            .ToList();
+
+        return parts.Count == 0 ? null : parts.SpaceJoin();
     }
 
     private ICommand ParsePour(string[] tokens)
     {
-        int index = Array.FindIndex(tokens, _config.PourPrepositions.Contains);
+        var index = Array.FindIndex(tokens, _config.PourPrepositions.Contains);
         if (index <= 1 || index >= tokens.Length - 1)
         {
             return new UnknownCommand();
         }
 
-        string fluid = tokens.Skip(1).Take(index - 1).SpaceJoin();
-        string container = tokens.Skip(index + 1).SpaceJoin();
+        var fluid = tokens.Skip(1).Take(index - 1).SpaceJoin();
+        var container = tokens.Skip(index + 1).SpaceJoin();
         return new PourCommand(fluid, container);
+    }
+
+    private bool TryParseDirection(string token, out Direction direction)
+    {
+        if (_config.DirectionAliases.TryGetValue(token, out direction))
+        {
+            return true;
+        }
+
+        if (_config.AllowDirectionEnumNames)
+        {
+            return Enum.TryParse(token, true, out direction);
+        }
+
+        if (_config.EnableFuzzyMatching)
+        {
+            var best = FuzzyMatcher.FindBestToken(token, _config.DirectionAliases.Keys, _config.FuzzyMaxDistance);
+            if (!string.IsNullOrWhiteSpace(best) && _config.DirectionAliases.TryGetValue(best, out direction))
+            {
+                return true;
+            }
+        }
+
+        direction = default;
+        return false;
+    }
+
+    private ICommand? TryParseFuzzyKeyword(string keyword, string[] tokens)
+    {
+        var candidates = GetAllCommandKeywords();
+        var best = FuzzyMatcher.FindBestToken(keyword, candidates, _config.FuzzyMaxDistance);
+        if (string.IsNullOrWhiteSpace(best))
+        {
+            return null;
+        }
+
+        var command = BuildCommandForKeyword(best, tokens);
+        return command == null
+            ? null
+            : new FuzzyCommand(command, best.ToProperCase());
     }
 }

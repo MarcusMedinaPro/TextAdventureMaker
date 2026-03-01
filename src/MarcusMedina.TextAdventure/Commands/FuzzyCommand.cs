@@ -3,29 +3,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
-public sealed class FuzzyCommand : ICommand
+public sealed class FuzzyCommand(ICommand inner, string suggestion) : ICommand
 {
-    private readonly ICommand _inner;
-    private readonly string _suggestion;
-
-    /// <summary>Create a wrapper that prefixes a "did you mean" hint.</summary>
-    public FuzzyCommand(ICommand inner, string suggestion)
-    {
-        _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-        _suggestion = suggestion ?? throw new ArgumentNullException(nameof(suggestion));
-    }
+    private readonly ICommand _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+    private readonly string _suggestion = suggestion ?? throw new ArgumentNullException(nameof(suggestion));
 
     /// <summary>Execute the inner command and prefix a suggestion message.</summary>
     public CommandResult Execute(CommandContext context)
     {
-        CommandResult result = _inner.Execute(context);
-        string hint = Language.DidYouMean(_suggestion);
-        string message = string.IsNullOrWhiteSpace(result.Message)
+        var result = _inner.Execute(context);
+        var hint = Language.DidYouMean(_suggestion);
+        var message = string.IsNullOrWhiteSpace(result.Message)
             ? hint
             : $"{hint}\n{result.Message}";
 

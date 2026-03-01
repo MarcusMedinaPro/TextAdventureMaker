@@ -3,23 +3,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Commands;
+
+using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
-using System.Text;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
-public class TalkCommand : ICommand
+public class TalkCommand(string? target) : ICommand
 {
-    public string? Target { get; }
-
-    public TalkCommand(string? target)
-    {
-        Target = target;
-    }
+    public string? Target { get; } = target;
 
     public CommandResult Execute(CommandContext context)
     {
@@ -28,12 +23,12 @@ public class TalkCommand : ICommand
             return CommandResult.Fail(Language.NoOneToTalkTo, GameError.MissingArgument);
         }
 
-        ILocation location = context.State.CurrentLocation;
-        INpc? npc = location.FindNpc(Target);
+        var location = context.State.CurrentLocation;
+        var npc = location.FindNpc(Target);
         string? suggestion = null;
         if (npc == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
         {
-            INpc? best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
+            var best = FuzzyMatcher.FindBestNpc(location.Npcs, Target, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 npc = best;
@@ -48,14 +43,14 @@ public class TalkCommand : ICommand
 
         context.State.Events.Publish(new GameEvent(GameEventType.TalkToNpc, context.State, location, npc: npc));
 
-        string? ruleBased = npc.GetRuleBasedDialog(context.State);
+        var ruleBased = npc.GetRuleBasedDialog(context.State);
         if (!string.IsNullOrWhiteSpace(ruleBased))
         {
-            CommandResult ruleResult = CommandResult.Ok(ruleBased);
+            var ruleResult = CommandResult.Ok(ruleBased);
             return suggestion != null ? ruleResult.WithSuggestion(suggestion) : ruleResult;
         }
 
-        IDialogNode? dialog = npc.DialogRoot;
+        var dialog = npc.DialogRoot;
         if (dialog == null)
         {
             npc.Memory.MarkMet();
@@ -67,21 +62,21 @@ public class TalkCommand : ICommand
 
         if (dialog.Options.Count > 0)
         {
-            _ = builder.Append("\n");
+            _ = builder.Append('\n');
             _ = builder.Append(Language.DialogOptionsLabel);
-            _ = builder.Append("\n");
-            for (int i = 0; i < dialog.Options.Count; i++)
+            _ = builder.Append('\n');
+            for (var i = 0; i < dialog.Options.Count; i++)
             {
                 _ = builder.Append(Language.DialogOption(i + 1, dialog.Options[i].Text));
                 if (i < dialog.Options.Count - 1)
                 {
-                    _ = builder.Append("\n");
+                    _ = builder.Append('\n');
                 }
             }
         }
 
         npc.Memory.MarkMet();
-        CommandResult result = CommandResult.Ok(builder.ToString());
+        var result = CommandResult.Ok(builder.ToString());
         return suggestion != null ? result.WithSuggestion(suggestion) : result;
     }
 }

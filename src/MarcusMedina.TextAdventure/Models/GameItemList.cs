@@ -3,15 +3,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class GameItemList
 {
     private readonly Dictionary<string, Item> _items = new(StringComparer.OrdinalIgnoreCase);
 
     public IReadOnlyCollection<Item> Items => _items.Values;
+
+    public Item this[string token] => Get(token);
 
     public Item Add(string name)
     {
@@ -47,7 +49,7 @@ public sealed class GameItemList
             return this;
         }
 
-        foreach (string name in names)
+        foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -65,7 +67,7 @@ public sealed class GameItemList
             return this;
         }
 
-        foreach (string name in names)
+        foreach (var name in names)
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -76,40 +78,29 @@ public sealed class GameItemList
         return this;
     }
 
-    public Item? Find(string token)
-    {
-        return string.IsNullOrWhiteSpace(token)
+    public Item Call(string token) => Get(token);
+
+    public void Clear() => _items.Clear();
+
+    public Item? Find(string token) => string.IsNullOrWhiteSpace(token)
             ? null
-            : _items.TryGetValue(token, out Item? item) ? item : _items.Values.FirstOrDefault(i => i.Matches(token));
-    }
+            : _items.TryGetValue(token, out var item) ? item : _items.Values.FirstOrDefault(i => i.Matches(token));
 
     public Item Get(string token)
     {
-        Item? item = Find(token);
+        var item = Find(token);
         return item ?? throw new KeyNotFoundException($"No item found for '{token}'.");
+    }
+
+    public bool Remove(string token)
+    {
+        var item = Find(token);
+        return item != null && _items.Remove(item.Id);
     }
 
     public bool TryGet(string token, out Item item)
     {
         item = Find(token) ?? null!;
         return item != null;
-    }
-
-    public bool Remove(string token)
-    {
-        Item? item = Find(token);
-        return item != null && _items.Remove(item.Id);
-    }
-
-    public void Clear()
-    {
-        _items.Clear();
-    }
-
-    public Item this[string token] => Get(token);
-
-    public Item Call(string token)
-    {
-        return Get(token);
     }
 }

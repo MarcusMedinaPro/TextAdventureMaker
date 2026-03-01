@@ -3,16 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class Fluid : IFluid
 {
     private string _description = "";
-
-    public string Id { get; }
-    public string Name { get; }
 
     public Fluid(string id, string name)
     {
@@ -22,15 +19,12 @@ public class Fluid : IFluid
         Name = name;
     }
 
-    public Fluid(string id, string name, string description) : this(id, name)
-    {
-        _description = description ?? "";
-    }
+    public Fluid(string id, string name, string description) : this(id, name) => _description = description ?? "";
 
-    public string GetDescription()
-    {
-        return _description;
-    }
+    public string Id { get; }
+    public string Name { get; }
+
+    public static implicit operator Fluid((string id, string name, string description) data) => new(data.id, data.name, data.description);
 
     public IFluid Description(string text)
     {
@@ -38,8 +32,5 @@ public class Fluid : IFluid
         return this;
     }
 
-    public static implicit operator Fluid((string id, string name, string description) data)
-    {
-        return new(data.id, data.name, data.description);
-    }
+    public string GetDescription() => _description;
 }

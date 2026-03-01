@@ -11,20 +11,37 @@ public sealed class DialogRule
     private Func<DialogContext, string>? _say;
     private Action<DialogContext>? _then;
 
-    public string Id { get; }
-    public int PriorityValue { get; private set; }
-    public int CriteriaCount => _conditions.Count;
-
     public DialogRule(string id)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         Id = id;
     }
 
-    public DialogRule When(Func<DialogContext, bool> predicate)
+    public int CriteriaCount => _conditions.Count;
+    public string Id { get; }
+    public int PriorityValue { get; private set; }
+
+    public void Apply(DialogContext context)
     {
-        ArgumentNullException.ThrowIfNull(predicate);
-        _conditions.Add(predicate);
+        ArgumentNullException.ThrowIfNull(context);
+        _then?.Invoke(context);
+    }
+
+    public string? GetText(DialogContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return _say?.Invoke(context);
+    }
+
+    public bool Matches(DialogContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return _conditions.All(condition => condition(context));
+    }
+
+    public DialogRule Priority(int priority)
+    {
+        PriorityValue = priority;
         return this;
     }
 
@@ -48,27 +65,10 @@ public sealed class DialogRule
         return this;
     }
 
-    public DialogRule Priority(int priority)
+    public DialogRule When(Func<DialogContext, bool> predicate)
     {
-        PriorityValue = priority;
+        ArgumentNullException.ThrowIfNull(predicate);
+        _conditions.Add(predicate);
         return this;
-    }
-
-    public bool Matches(DialogContext context)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        return _conditions.All(condition => condition(context));
-    }
-
-    public string? GetText(DialogContext context)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        return _say?.Invoke(context);
-    }
-
-    public void Apply(DialogContext context)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        _then?.Invoke(context);
     }
 }

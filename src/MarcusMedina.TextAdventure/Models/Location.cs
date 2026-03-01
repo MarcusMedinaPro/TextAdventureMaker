@@ -3,24 +3,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public class Location : ILocation
 {
-    public string Id { get; }
-    private string _description = "";
     private readonly Dictionary<Direction, Exit> _exits = [];
     private readonly List<IItem> _items = [];
     private readonly List<INpc> _npcs = [];
-
-    public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
-    public IReadOnlyList<IItem> Items => _items;
-    public IReadOnlyList<INpc> Npcs => _npcs;
+    private string _description = "";
 
     public Location(string id)
     {
@@ -28,21 +23,16 @@ public class Location : ILocation
         Id = id;
     }
 
-    public Location(string id, string description) : this(id)
-    {
-        _description = description ?? "";
-    }
+    public Location(string id, string description) : this(id) => _description = description ?? "";
 
-    public Location Description(string text)
-    {
-        _description = text;
-        return this;
-    }
+    public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
+    public string Id { get; }
+    public IReadOnlyList<IItem> Items => _items;
+    public IReadOnlyList<INpc> Npcs => _npcs;
 
-    public string GetDescription()
-    {
-        return _description;
-    }
+    public static implicit operator Location(string id) => new(id);
+
+    public static implicit operator Location((string id, string description) data) => new(data.id, data.description);
 
     public Location AddExit(Direction direction, ILocation target, bool oneWay = false)
     {
@@ -50,7 +40,7 @@ public class Location : ILocation
 
         if (!oneWay && target is Location targetLoc)
         {
-            Direction opposite = DirectionHelper.GetOpposite(direction);
+            var opposite = DirectionHelper.GetOpposite(direction);
             targetLoc._exits[opposite] = new Exit(this);
         }
 
@@ -63,55 +53,32 @@ public class Location : ILocation
 
         if (!oneWay && target is Location targetLoc)
         {
-            Direction opposite = DirectionHelper.GetOpposite(direction);
+            var opposite = DirectionHelper.GetOpposite(direction);
             targetLoc._exits[opposite] = new Exit(this, door); // Same door from other side
         }
 
         return this;
     }
 
-    public Exit? GetExit(Direction direction)
+    public void AddItem(IItem item) => _items.Add(item);
+
+    public void AddNpc(INpc npc) => _npcs.Add(npc);
+
+    public Location Description(string text)
     {
-        return _exits.TryGetValue(direction, out Exit? exit) ? exit : null;
+        _description = text;
+        return this;
     }
 
-    public void AddItem(IItem item)
-    {
-        _items.Add(item);
-    }
+    public IItem? FindItem(string name) => string.IsNullOrWhiteSpace(name) ? null : _items.FirstOrDefault(i => i.Matches(name));
 
-    public bool RemoveItem(IItem item)
-    {
-        return _items.Remove(item);
-    }
+    public INpc? FindNpc(string name) => string.IsNullOrWhiteSpace(name) ? null : _npcs.FirstOrDefault(n => n.Name.TextCompare(name));
 
-    public IItem? FindItem(string name)
-    {
-        return string.IsNullOrWhiteSpace(name) ? null : _items.FirstOrDefault(i => i.Matches(name));
-    }
+    public string GetDescription() => _description;
 
-    public void AddNpc(INpc npc)
-    {
-        _npcs.Add(npc);
-    }
+    public Exit? GetExit(Direction direction) => _exits.TryGetValue(direction, out var exit) ? exit : null;
 
-    public bool RemoveNpc(INpc npc)
-    {
-        return _npcs.Remove(npc);
-    }
+    public bool RemoveItem(IItem item) => _items.Remove(item);
 
-    public INpc? FindNpc(string name)
-    {
-        return string.IsNullOrWhiteSpace(name) ? null : _npcs.FirstOrDefault(n => n.Name.TextCompare(name));
-    }
-
-    public static implicit operator Location(string id)
-    {
-        return new(id);
-    }
-
-    public static implicit operator Location((string id, string description) data)
-    {
-        return new(data.id, data.description);
-    }
+    public bool RemoveNpc(INpc npc) => _npcs.Remove(npc);
 }

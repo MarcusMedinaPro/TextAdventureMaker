@@ -3,18 +3,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Engine;
+
+using System.Text;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-using System.Text;
-
-namespace MarcusMedina.TextAdventure.Engine;
 
 public sealed class TurnBasedCombat(int playerDamage = 10, int npcDamage = 4) : ICombatSystem
 {
-    private readonly int _playerDamage = Math.Max(1, playerDamage);
     private readonly int _npcDamage = Math.Max(1, npcDamage);
+    private readonly int _playerDamage = Math.Max(1, playerDamage);
 
     public CommandResult Attack(IGameState state, INpc target)
     {
@@ -30,25 +30,25 @@ public sealed class TurnBasedCombat(int playerDamage = 10, int npcDamage = 4) : 
 
         StringBuilder builder = new();
         _ = builder.Append(Language.AttackTarget(target.Name));
-        _ = builder.Append("\n");
+        _ = builder.Append('\n');
         _ = builder.Append(Language.AttackDamage(_playerDamage));
 
         target.Stats.Damage(_playerDamage);
         if (target.Stats.Health <= 0)
         {
             _ = target.SetState(NpcState.Dead);
-            _ = builder.Append("\n");
+            _ = builder.Append('\n');
             _ = builder.Append(Language.TargetDefeated(target.Name));
             return CommandResult.Ok(builder.ToString());
         }
 
         state.Stats.Damage(_npcDamage);
-        _ = builder.Append("\n");
+        _ = builder.Append('\n');
         _ = builder.Append(Language.EnemyAttack(target.Name, _npcDamage));
 
         if (state.Stats.Health <= 0)
         {
-            _ = builder.Append("\n");
+            _ = builder.Append('\n');
             _ = builder.Append(Language.PlayerDefeated);
             return CommandResult.Fail(builder.ToString(), GameError.AlreadyDead);
         }
@@ -56,8 +56,5 @@ public sealed class TurnBasedCombat(int playerDamage = 10, int npcDamage = 4) : 
         return CommandResult.Ok(builder.ToString());
     }
 
-    public CommandResult Flee(IGameState state, INpc? target = null)
-    {
-        return CommandResult.Ok(Language.FleeSuccess);
-    }
+    public CommandResult Flee(IGameState state, INpc? target = null) => CommandResult.Ok(Language.FleeSuccess);
 }

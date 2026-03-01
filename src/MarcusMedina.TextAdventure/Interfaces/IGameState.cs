@@ -3,35 +3,54 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Interfaces;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Interfaces;
-
 public interface IGameState
 {
-    ILocation CurrentLocation { get; }
-    bool Move(Direction direction);
-    bool IsCurrentRoomId(string id);
-    GameError LastMoveErrorCode { get; }
-    RecipeBook RecipeBook { get; }
-    IInventory Inventory { get; }
-    IStats Stats { get; }
-    IEventSystem Events { get; }
     ICombatSystem CombatSystem { get; }
-    ITimeSystem TimeSystem { get; }
-    IFactionSystem Factions { get; }
-    IRandomEventPool RandomEvents { get; }
-    ILocationDiscoverySystem LocationDiscovery { get; }
-    IWorldState WorldState { get; }
-    ISaveSystem SaveSystem { get; }
-    /// <summary>Quest log for tracking active and completed quests.</summary>
-    IQuestLog Quests { get; }
-    bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
-    bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
+    ILocation CurrentLocation { get; }
+
     /// <summary>Enable fuzzy matching for commands and targets.</summary>
     bool EnableFuzzyMatching { get; set; }
+
+    IEventSystem Events { get; }
+
+    IFactionSystem Factions { get; }
+
     /// <summary>Maximum edit distance for fuzzy matching.</summary>
     int FuzzyMaxDistance { get; set; }
+
+    IInventory Inventory { get; }
+
+    GameError LastMoveErrorCode { get; }
+
+    ILocationDiscoverySystem LocationDiscovery { get; }
+
     IReadOnlyCollection<ILocation> Locations { get; }
+
+    /// <summary>Quest log for tracking active and completed quests.</summary>
+    IQuestLog Quests { get; }
+
+    IRandomEventPool RandomEvents { get; }
+
+    RecipeBook RecipeBook { get; }
+
+    ISaveSystem SaveSystem { get; }
+
+    bool ShowDirectionsWhenThereAreDirectionsVisibleOnly { get; set; }
+
+    bool ShowItemsListOnlyWhenThereAreActuallyThingsToInteractWith { get; set; }
+
+    IStats Stats { get; }
+
+    ITimeSystem TimeSystem { get; }
+
+    IWorldState WorldState { get; }
+
+    bool IsCurrentRoomId(string id);
+
+    bool Move(Direction direction);
 }

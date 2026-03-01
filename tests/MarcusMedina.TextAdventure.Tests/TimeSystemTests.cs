@@ -1,34 +1,42 @@
+namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class TimeSystemTests
 {
     [Fact]
-    public void Tick_DoesNothing_WhenDisabled()
+    public void MoveLimits_TriggerRemainingAndExhaustedHandlers()
     {
-        TimeSystem time = new();
+        var time = new TimeSystem()
+            .Enable()
+            .SetMaxMoves(2);
+
         GameState state = new(new Location("start"), timeSystem: time);
+        var remainingFired = false;
+        var exhaustedFired = false;
+
+        _ = time.OnMovesRemaining(1, _ => remainingFired = true);
+        _ = time.OnMovesExhausted(_ => exhaustedFired = true);
 
         time.Tick(state);
+        time.Tick(state);
 
-        Assert.Equal(0, time.MovesUsed);
+        Assert.True(remainingFired);
+        Assert.True(exhaustedFired);
     }
 
     [Fact]
     public void PhaseHandlers_FireOnPhaseChange()
     {
-        ITimeSystem time = new TimeSystem()
+        var time = new TimeSystem()
             .Enable()
             .SetTicksPerDay(4)
             .SetStartTime(TimeOfDay.Dawn);
 
         GameState state = new(new Location("start"), timeSystem: time);
-        bool fired = false;
+        var fired = false;
         _ = time.OnPhase(TimeOfDay.Night, _ => fired = true);
 
         time.Tick(state);
@@ -39,23 +47,13 @@ public class TimeSystemTests
     }
 
     [Fact]
-    public void MoveLimits_TriggerRemainingAndExhaustedHandlers()
+    public void Tick_DoesNothing_WhenDisabled()
     {
-        ITimeSystem time = new TimeSystem()
-            .Enable()
-            .SetMaxMoves(2);
-
+        TimeSystem time = new();
         GameState state = new(new Location("start"), timeSystem: time);
-        bool remainingFired = false;
-        bool exhaustedFired = false;
-
-        _ = time.OnMovesRemaining(1, _ => remainingFired = true);
-        _ = time.OnMovesExhausted(_ => exhaustedFired = true);
 
         time.Tick(state);
-        time.Tick(state);
 
-        Assert.True(remainingFired);
-        Assert.True(exhaustedFired);
+        Assert.Equal(0, time.MovesUsed);
     }
 }

@@ -3,15 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class WorldFlagCondition : IQuestCondition
 {
-    public string Key { get; }
-    public bool Expected { get; }
-
     public WorldFlagCondition(string key, bool expected = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -19,8 +16,8 @@ public sealed class WorldFlagCondition : IQuestCondition
         Expected = expected;
     }
 
-    public bool Accept(IQuestConditionVisitor visitor)
-    {
-        return visitor.Visit(this);
-    }
+    public bool Expected { get; }
+    public string Key { get; }
+
+    public bool Accept(IQuestConditionVisitor visitor) => visitor.Visit(this);
 }

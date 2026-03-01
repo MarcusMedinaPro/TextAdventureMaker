@@ -7,6 +7,8 @@ namespace MarcusMedina.TextAdventure.Interfaces;
 public interface ILocationDiscoverySystem
 {
     IReadOnlyCollection<string> DiscoveredLocations { get; }
-    bool IsDiscovered(string locationId);
+
     void Discover(string locationId);
+
+    bool IsDiscovered(string locationId);
 }

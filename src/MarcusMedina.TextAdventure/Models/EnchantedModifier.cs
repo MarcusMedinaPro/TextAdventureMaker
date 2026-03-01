@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class EnchantedModifier(IItem inner) : ItemDecorator(inner)
 {
@@ -13,7 +13,7 @@ public class EnchantedModifier(IItem inner) : ItemDecorator(inner)
 
     public override string GetDescription()
     {
-        string baseDescription = Inner.GetDescription();
+        var baseDescription = Inner.GetDescription();
         return string.IsNullOrWhiteSpace(baseDescription)
             ? "It hums with a faint magical glow."
             : $"{baseDescription} It hums with a faint magical glow.";

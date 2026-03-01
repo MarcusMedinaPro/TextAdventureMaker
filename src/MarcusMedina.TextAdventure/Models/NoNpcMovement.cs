@@ -3,14 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class NoNpcMovement : INpcMovement
 {
-    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
-    {
-        return null;
-    }
+    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state) => null;
 }

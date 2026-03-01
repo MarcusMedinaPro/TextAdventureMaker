@@ -3,23 +3,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Localization;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Localization;
 
 public class LanguageProviderTests
 {
     [Fact]
-    public void FileLanguageProvider_LoadsKeys()
+    public void FileLanguageProvider_IgnoresCommentsAndEmptyLines()
     {
-        string file = Path.GetTempFileName();
+        var file = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(file, "hello=Hej\nDoorLockedTemplate=Låst: {0}\n");
+            File.WriteAllText(file, "# comment\n\nkey=value\n");
             FileLanguageProvider provider = new(file);
 
-            Assert.Equal("Hej", provider.Get("hello"));
-            Assert.Equal("Låst: dörr", provider.Format("DoorLockedTemplate", "dörr"));
+            Assert.Equal("value", provider.Get("key"));
         }
         finally
         {
@@ -28,15 +27,16 @@ public class LanguageProviderTests
     }
 
     [Fact]
-    public void FileLanguageProvider_IgnoresCommentsAndEmptyLines()
+    public void FileLanguageProvider_LoadsKeys()
     {
-        string file = Path.GetTempFileName();
+        var file = Path.GetTempFileName();
         try
         {
-            File.WriteAllText(file, "# comment\n\nkey=value\n");
+            File.WriteAllText(file, "hello=Hej\nDoorLockedTemplate=Låst: {0}\n");
             FileLanguageProvider provider = new(file);
 
-            Assert.Equal("value", provider.Get("key"));
+            Assert.Equal("Hej", provider.Get("hello"));
+            Assert.Equal("Låst: dörr", provider.Format("DoorLockedTemplate", "dörr"));
         }
         finally
         {

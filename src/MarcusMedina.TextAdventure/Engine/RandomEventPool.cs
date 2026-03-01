@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Engine;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class RandomEventPool : IRandomEventPool
 {
@@ -15,18 +15,6 @@ public sealed class RandomEventPool : IRandomEventPool
 
     public bool Enabled { get; private set; }
     public double TriggerChance { get; private set; } = 0.15;
-
-    public IRandomEventPool Enable()
-    {
-        Enabled = true;
-        return this;
-    }
-
-    public IRandomEventPool SetTriggerChance(double chance)
-    {
-        TriggerChance = Math.Clamp(chance, 0.0, 1.0);
-        return this;
-    }
 
     public IRandomEventPool AddEvent(string id, int weight, Action<IGameState> handler, Func<IGameState, bool>? condition = null)
     {
@@ -41,10 +29,22 @@ public sealed class RandomEventPool : IRandomEventPool
         return this;
     }
 
+    public IRandomEventPool Enable()
+    {
+        Enabled = true;
+        return this;
+    }
+
     public IRandomEventPool SetCooldown(string id, int cooldownTicks)
     {
-        RandomEvent? ev = _events.FirstOrDefault(e => e.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+        var ev = _events.FirstOrDefault(e => e.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
         _ = ev?.CooldownTicks = Math.Max(0, cooldownTicks);
+        return this;
+    }
+
+    public IRandomEventPool SetTriggerChance(double chance)
+    {
+        TriggerChance = Math.Clamp(chance, 0.0, 1.0);
         return this;
     }
 
@@ -62,8 +62,8 @@ public sealed class RandomEventPool : IRandomEventPool
             return;
         }
 
-        int now = state.TimeSystem.Enabled ? state.TimeSystem.CurrentTick : ++_tick;
-        List<RandomEvent> candidates = _events
+        var now = state.TimeSystem.Enabled ? state.TimeSystem.CurrentTick : ++_tick;
+        var candidates = _events
             .Where(e => e.CanTrigger(state, now))
             .ToList();
 
@@ -72,10 +72,10 @@ public sealed class RandomEventPool : IRandomEventPool
             return;
         }
 
-        int totalWeight = candidates.Sum(e => e.Weight);
-        int roll = _random.Next(0, totalWeight);
-        int cursor = 0;
-        foreach (RandomEvent? ev in candidates)
+        var totalWeight = candidates.Sum(e => e.Weight);
+        var roll = _random.Next(0, totalWeight);
+        var cursor = 0;
+        foreach (var ev in candidates)
         {
             cursor += ev.Weight;
             if (roll < cursor)
@@ -88,17 +88,14 @@ public sealed class RandomEventPool : IRandomEventPool
 
     private sealed class RandomEvent(string id, int weight, Action<IGameState> handler, Func<IGameState, bool>? condition)
     {
-        public string Id { get; } = id;
-        public int Weight { get; } = weight;
-        public int CooldownTicks { get; set; }
-        public int LastTriggeredTick { get; private set; } = int.MinValue;
-        public Action<IGameState> Handler { get; } = handler;
         public Func<IGameState, bool>? Condition { get; } = condition;
+        public int CooldownTicks { get; set; }
+        public Action<IGameState> Handler { get; } = handler;
+        public string Id { get; } = id;
+        public int LastTriggeredTick { get; private set; } = int.MinValue;
+        public int Weight { get; } = weight;
 
-        public bool CanTrigger(IGameState state, int now)
-        {
-            return (CooldownTicks <= 0 || (long)now - LastTriggeredTick >= CooldownTicks) && (Condition == null || Condition(state));
-        }
+        public bool CanTrigger(IGameState state, int now) => (CooldownTicks <= 0 || (long)now - LastTriggeredTick >= CooldownTicks) && (Condition == null || Condition(state));
 
         public void Trigger(IGameState state, int now)
         {

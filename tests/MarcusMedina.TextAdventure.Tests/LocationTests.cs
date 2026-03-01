@@ -3,35 +3,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class LocationTests
 {
     [Fact]
-    public void Location_ShouldHaveId()
+    public void AddExit_OneWay_ShouldNotCreateReturnPath()
     {
-        Location loc = new("cave");
-        Assert.Equal("cave", loc.Id);
-    }
+        Location hall = new("hall");
+        Location pit = new("pit");
 
-    [Fact]
-    public void Location_InvalidId_Throws()
-    {
-        _ = Assert.Throws<ArgumentException>(() => new Location(""));
-        _ = Assert.Throws<ArgumentException>(() => new Location(" "));
-        _ = Assert.Throws<ArgumentNullException>(() => new Location(null!));
-    }
+        _ = hall.AddExit(Direction.Down, pit, oneWay: true);
 
-    [Fact]
-    public void Location_ShouldHaveDescription()
-    {
-        Location loc = new Location("cave")
-            .Description("A dark cave with glowing mushrooms");
-
-        Assert.Equal("A dark cave with glowing mushrooms", loc.GetDescription());
+        Assert.Equal(pit, hall.GetExit(Direction.Down)?.Target);
+        Assert.Null(pit.GetExit(Direction.Up));
     }
 
     [Fact]
@@ -47,18 +35,6 @@ public class LocationTests
     }
 
     [Fact]
-    public void AddExit_OneWay_ShouldNotCreateReturnPath()
-    {
-        Location hall = new("hall");
-        Location pit = new("pit");
-
-        _ = hall.AddExit(Direction.Down, pit, oneWay: true);
-
-        Assert.Equal(pit, hall.GetExit(Direction.Down)?.Target);
-        Assert.Null(pit.GetExit(Direction.Up));
-    }
-
-    [Fact]
     public void Location_CanUseDescriptionConstructorAndTuple()
     {
         Location cave = new("cave", "A dark cave.");
@@ -66,5 +42,29 @@ public class LocationTests
 
         Assert.Equal("A dark cave.", cave.GetDescription());
         Assert.Equal("A damp cellar.", cellar.GetDescription());
+    }
+
+    [Fact]
+    public void Location_InvalidId_Throws()
+    {
+        _ = Assert.Throws<ArgumentException>(() => new Location(""));
+        _ = Assert.Throws<ArgumentException>(() => new Location(" "));
+        _ = Assert.Throws<ArgumentNullException>(() => new Location(null!));
+    }
+
+    [Fact]
+    public void Location_ShouldHaveDescription()
+    {
+        var loc = new Location("cave")
+            .Description("A dark cave with glowing mushrooms");
+
+        Assert.Equal("A dark cave with glowing mushrooms", loc.GetDescription());
+    }
+
+    [Fact]
+    public void Location_ShouldHaveId()
+    {
+        Location loc = new("cave");
+        Assert.Equal("cave", loc.Id);
     }
 }

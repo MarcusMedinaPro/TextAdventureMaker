@@ -3,18 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class Exit
 {
-    public ILocation Target { get; }
-    public IDoor? Door { get; }
-    public bool IsOneWay { get; }
-
-    public bool IsPassable => Door == null || Door.IsPassable;
-
     public Exit(ILocation target, IDoor? door = null, bool isOneWay = false)
     {
         ArgumentNullException.ThrowIfNull(target);
@@ -22,4 +16,9 @@ public class Exit
         Door = door;
         IsOneWay = isOneWay;
     }
+
+    public IDoor? Door { get; }
+    public bool IsOneWay { get; }
+    public bool IsPassable => Door == null || Door.IsPassable;
+    public ILocation Target { get; }
 }

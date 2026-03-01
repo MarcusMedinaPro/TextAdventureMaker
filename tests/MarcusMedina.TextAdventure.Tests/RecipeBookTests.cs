@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Models;
-
 namespace MarcusMedina.TextAdventure.Tests;
+
+using MarcusMedina.TextAdventure.Models;
 
 public class RecipeBookTests
 {
@@ -14,10 +14,10 @@ public class RecipeBookTests
     {
         Item ice = new("ice", "ice");
         Item fire = new("fire", "fire");
-        RecipeBook book = new RecipeBook()
+        var book = new RecipeBook()
             .Add(new ItemCombinationRecipe("ice", "fire", () => new Item("water", "water")));
 
-        CombinationResult result = book.Combine(ice, fire);
+        var result = book.Combine(ice, fire);
 
         Assert.True(result.Success);
         _ = Assert.Single(result.Created);
@@ -31,7 +31,7 @@ public class RecipeBookTests
         Item fire = new("fire", "fire");
         RecipeBook book = new();
 
-        CombinationResult result = book.Combine(ice, fire);
+        var result = book.Combine(ice, fire);
 
         Assert.False(result.Success);
         Assert.Empty(result.Created);

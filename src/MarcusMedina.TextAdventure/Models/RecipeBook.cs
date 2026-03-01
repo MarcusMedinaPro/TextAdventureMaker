@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class RecipeBook
 {
@@ -19,7 +19,7 @@ public class RecipeBook
 
     public CombinationResult Combine(IItem a, IItem b)
     {
-        foreach (ItemCombinationRecipe recipe in _recipes)
+        foreach (var recipe in _recipes)
         {
             if (recipe.Matches(a, b))
             {

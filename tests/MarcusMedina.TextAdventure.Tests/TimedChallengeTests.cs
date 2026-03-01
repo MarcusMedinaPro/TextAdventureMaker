@@ -1,19 +1,17 @@
+namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Engine;
-using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class TimedChallengeTests
 {
     [Fact]
     public void Challenge_FailsWhenMovesRunOut()
     {
-        ITimeSystem time = new TimeSystem().Enable();
+        var time = new TimeSystem().Enable();
         GameState state = new(new Location("start"), timeSystem: time);
-        TimedChallenge challenge = (TimedChallenge)time.CreateTimedChallenge("bomb");
-        bool failed = false;
+        var challenge = (TimedChallenge)time.CreateTimedChallenge("bomb");
+        var failed = false;
 
         _ = challenge.MaxMovesLimit(2)
             .OnFailure(_ => failed = true);

@@ -3,15 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class RelationshipCondition : IQuestCondition
 {
-    public string NpcId { get; }
-    public int Minimum { get; }
-
     public RelationshipCondition(string npcId, int minimum)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(npcId);
@@ -19,8 +16,8 @@ public sealed class RelationshipCondition : IQuestCondition
         Minimum = minimum;
     }
 
-    public bool Accept(IQuestConditionVisitor visitor)
-    {
-        return visitor.Visit(this);
-    }
+    public int Minimum { get; }
+    public string NpcId { get; }
+
+    public bool Accept(IQuestConditionVisitor visitor) => visitor.Visit(this);
 }

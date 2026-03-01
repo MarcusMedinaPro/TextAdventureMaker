@@ -17,7 +17,7 @@ public static class CommandHelper
             return set;
         }
 
-        foreach (string command in commands)
+        foreach (var command in commands)
         {
             if (!string.IsNullOrWhiteSpace(command))
             {

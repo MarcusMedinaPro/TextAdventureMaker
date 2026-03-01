@@ -3,23 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 public class ContainerTests
 {
-    [Fact]
-    public void Glass_HoldsFluids()
-    {
-        Glass glass = new("glass", "glass");
-        IFluid water = new Fluid("water", "water");
-
-        Assert.True(glass.Add(water));
-        _ = Assert.Single(glass.Contents);
-    }
-
     [Fact]
     public void Chest_HoldsItems()
     {
@@ -36,5 +26,15 @@ public class ContainerTests
         Chest chest = new("chest", "chest", maxCount: 1);
         Assert.True(chest.Add(new Item("coin", "coin")));
         Assert.False(chest.Add(new Item("gem", "gem")));
+    }
+
+    [Fact]
+    public void Glass_HoldsFluids()
+    {
+        Glass glass = new("glass", "glass");
+        IFluid water = new Fluid("water", "water");
+
+        Assert.True(glass.Add(water));
+        _ = Assert.Single(glass.Contents);
     }
 }

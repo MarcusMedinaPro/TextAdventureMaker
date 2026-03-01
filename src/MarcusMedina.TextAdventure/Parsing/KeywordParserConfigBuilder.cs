@@ -3,43 +3,44 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Parsing;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 
-namespace MarcusMedina.TextAdventure.Parsing;
 /// <summary>Fluent builder for <see cref="KeywordParserConfig"/>.</summary>
 public sealed class KeywordParserConfigBuilder
 {
-    private ISet<string> _quit;
-    private ISet<string> _look;
-    private ISet<string> _examine;
-    private ISet<string> _inventory;
-    private ISet<string> _stats;
-    private ISet<string> _open;
-    private ISet<string> _unlock;
-    private ISet<string> _take;
-    private ISet<string> _drop;
-    private ISet<string> _use;
-    private ISet<string> _combine;
-    private ISet<string> _pour;
-    private ISet<string> _move;
-    private ISet<string> _go;
-    private ISet<string> _read;
-    private ISet<string> _talk;
-    private ISet<string> _attack;
-    private ISet<string> _flee;
-    private ISet<string> _save;
-    private ISet<string> _load;
-    private ISet<string> _quest;
-    private ISet<string> _all;
-    private ISet<string> _ignoreItemTokens;
-    private ISet<string> _combineSeparators;
-    private ISet<string> _pourPrepositions;
-    private IReadOnlyDictionary<string, Direction> _directionAliases;
     private readonly Dictionary<string, string> _synonyms;
+    private ISet<string> _all;
     private bool _allowDirectionEnumNames;
+    private ISet<string> _attack;
+    private ISet<string> _combine;
+    private ISet<string> _combineSeparators;
+    private IReadOnlyDictionary<string, Direction> _directionAliases;
+    private ISet<string> _drop;
     private bool _enableFuzzyMatching;
+    private ISet<string> _examine;
+    private ISet<string> _flee;
     private int _fuzzyMaxDistance;
+    private ISet<string> _go;
+    private ISet<string> _ignoreItemTokens;
+    private ISet<string> _inventory;
+    private ISet<string> _load;
+    private ISet<string> _look;
+    private ISet<string> _move;
+    private ISet<string> _open;
+    private ISet<string> _pour;
+    private ISet<string> _pourPrepositions;
+    private ISet<string> _quest;
+    private ISet<string> _quit;
+    private ISet<string> _read;
+    private ISet<string> _save;
+    private ISet<string> _stats;
+    private ISet<string> _take;
+    private ISet<string> _talk;
+    private ISet<string> _unlock;
+    private ISet<string> _use;
 
     private KeywordParserConfigBuilder()
     {
@@ -90,157 +91,7 @@ public sealed class KeywordParserConfigBuilder
     }
 
     /// <summary>Create a builder with British English defaults.</summary>
-    public static KeywordParserConfigBuilder BritishDefaults()
-    {
-        return new();
-    }
-
-    /// <summary>Set keywords for quit/exit.</summary>
-    public KeywordParserConfigBuilder WithQuit(params string[] commands)
-    {
-        _quit = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for look.</summary>
-    public KeywordParserConfigBuilder WithLook(params string[] commands)
-    {
-        _look = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for examine.</summary>
-    public KeywordParserConfigBuilder WithExamine(params string[] commands)
-    {
-        _examine = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for inventory.</summary>
-    public KeywordParserConfigBuilder WithInventory(params string[] commands)
-    {
-        _inventory = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for stats/health.</summary>
-    public KeywordParserConfigBuilder WithStats(params string[] commands)
-    {
-        _stats = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for open.</summary>
-    public KeywordParserConfigBuilder WithOpen(params string[] commands)
-    {
-        _open = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for unlock.</summary>
-    public KeywordParserConfigBuilder WithUnlock(params string[] commands)
-    {
-        _unlock = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for take/pick up.</summary>
-    public KeywordParserConfigBuilder WithTake(params string[] commands)
-    {
-        _take = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for drop.</summary>
-    public KeywordParserConfigBuilder WithDrop(params string[] commands)
-    {
-        _drop = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for use.</summary>
-    public KeywordParserConfigBuilder WithUse(params string[] commands)
-    {
-        _use = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for combine.</summary>
-    public KeywordParserConfigBuilder WithCombine(params string[] commands)
-    {
-        _combine = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for pour.</summary>
-    public KeywordParserConfigBuilder WithPour(params string[] commands)
-    {
-        _pour = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for move.</summary>
-    public KeywordParserConfigBuilder WithMove(params string[] commands)
-    {
-        _move = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for movement.</summary>
-    public KeywordParserConfigBuilder WithGo(params string[] commands)
-    {
-        _go = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for read.</summary>
-    public KeywordParserConfigBuilder WithRead(params string[] commands)
-    {
-        _read = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for talk/speak.</summary>
-    public KeywordParserConfigBuilder WithTalk(params string[] commands)
-    {
-        _talk = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for attack/fight.</summary>
-    public KeywordParserConfigBuilder WithAttack(params string[] commands)
-    {
-        _attack = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for flee/run.</summary>
-    public KeywordParserConfigBuilder WithFlee(params string[] commands)
-    {
-        _flee = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for save.</summary>
-    public KeywordParserConfigBuilder WithSave(params string[] commands)
-    {
-        _save = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for load.</summary>
-    public KeywordParserConfigBuilder WithLoad(params string[] commands)
-    {
-        _load = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set keywords for quest log.</summary>
-    public KeywordParserConfigBuilder WithQuest(params string[] commands)
-    {
-        _quest = CommandHelper.NewCommands(commands);
-        return this;
-    }
+    public static KeywordParserConfigBuilder BritishDefaults() => new();
 
     /// <summary>Add synonyms that map to a canonical command keyword.</summary>
     public KeywordParserConfigBuilder AddSynonyms(string canonical, params string[] synonyms)
@@ -250,10 +101,10 @@ public sealed class KeywordParserConfigBuilder
             return this;
         }
 
-        string canonicalToken = canonical.Trim().ToLowerInvariant();
+        var canonicalToken = canonical.Trim().ToLowerInvariant();
         _synonyms[canonicalToken] = canonicalToken;
 
-        foreach (string synonym in synonyms)
+        foreach (var synonym in synonyms)
         {
             if (string.IsNullOrWhiteSpace(synonym))
             {
@@ -266,41 +117,6 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
-    /// <summary>Set keywords for "all".</summary>
-    public KeywordParserConfigBuilder WithAll(params string[] commands)
-    {
-        _all = CommandHelper.NewCommands(commands);
-        return this;
-    }
-
-    /// <summary>Set tokens to ignore when parsing item names.</summary>
-    public KeywordParserConfigBuilder WithIgnoreItemTokens(params string[] tokens)
-    {
-        _ignoreItemTokens = CommandHelper.NewCommands(tokens);
-        return this;
-    }
-
-    /// <summary>Set separators for combine commands.</summary>
-    public KeywordParserConfigBuilder WithCombineSeparators(params string[] separators)
-    {
-        _combineSeparators = CommandHelper.NewCommands(separators);
-        return this;
-    }
-
-    /// <summary>Set prepositions used for pour commands.</summary>
-    public KeywordParserConfigBuilder WithPourPrepositions(params string[] prepositions)
-    {
-        _pourPrepositions = CommandHelper.NewCommands(prepositions);
-        return this;
-    }
-
-    /// <summary>Set aliases for direction tokens.</summary>
-    public KeywordParserConfigBuilder WithDirectionAliases(IReadOnlyDictionary<string, Direction> aliases)
-    {
-        _directionAliases = aliases;
-        return this;
-    }
-
     /// <summary>Allow enum direction names like "North".</summary>
     public KeywordParserConfigBuilder AllowDirectionEnumNames(bool allow = true)
     {
@@ -308,18 +124,8 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
-    /// <summary>Enable fuzzy matching for command keywords and directions.</summary>
-    public KeywordParserConfigBuilder WithFuzzyMatching(bool enabled = true, int maxDistance = 1)
-    {
-        _enableFuzzyMatching = enabled;
-        _fuzzyMaxDistance = Math.Max(0, maxDistance);
-        return this;
-    }
-
     /// <summary>Build the parser configuration.</summary>
-    public KeywordParserConfig Build()
-    {
-        return new(
+    public KeywordParserConfig Build() => new(
             quit: _quit,
             look: _look,
             examine: _examine,
@@ -350,5 +156,194 @@ public sealed class KeywordParserConfigBuilder
             allowDirectionEnumNames: _allowDirectionEnumNames,
             enableFuzzyMatching: _enableFuzzyMatching,
             fuzzyMaxDistance: _fuzzyMaxDistance);
+
+    /// <summary>Set keywords for "all".</summary>
+    public KeywordParserConfigBuilder WithAll(params string[] commands)
+    {
+        _all = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for attack/fight.</summary>
+    public KeywordParserConfigBuilder WithAttack(params string[] commands)
+    {
+        _attack = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for combine.</summary>
+    public KeywordParserConfigBuilder WithCombine(params string[] commands)
+    {
+        _combine = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set separators for combine commands.</summary>
+    public KeywordParserConfigBuilder WithCombineSeparators(params string[] separators)
+    {
+        _combineSeparators = CommandHelper.NewCommands(separators);
+        return this;
+    }
+
+    /// <summary>Set aliases for direction tokens.</summary>
+    public KeywordParserConfigBuilder WithDirectionAliases(IReadOnlyDictionary<string, Direction> aliases)
+    {
+        _directionAliases = aliases;
+        return this;
+    }
+
+    /// <summary>Set keywords for drop.</summary>
+    public KeywordParserConfigBuilder WithDrop(params string[] commands)
+    {
+        _drop = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for examine.</summary>
+    public KeywordParserConfigBuilder WithExamine(params string[] commands)
+    {
+        _examine = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for flee/run.</summary>
+    public KeywordParserConfigBuilder WithFlee(params string[] commands)
+    {
+        _flee = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Enable fuzzy matching for command keywords and directions.</summary>
+    public KeywordParserConfigBuilder WithFuzzyMatching(bool enabled = true, int maxDistance = 1)
+    {
+        _enableFuzzyMatching = enabled;
+        _fuzzyMaxDistance = Math.Max(0, maxDistance);
+        return this;
+    }
+
+    /// <summary>Set keywords for movement.</summary>
+    public KeywordParserConfigBuilder WithGo(params string[] commands)
+    {
+        _go = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set tokens to ignore when parsing item names.</summary>
+    public KeywordParserConfigBuilder WithIgnoreItemTokens(params string[] tokens)
+    {
+        _ignoreItemTokens = CommandHelper.NewCommands(tokens);
+        return this;
+    }
+
+    /// <summary>Set keywords for inventory.</summary>
+    public KeywordParserConfigBuilder WithInventory(params string[] commands)
+    {
+        _inventory = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for load.</summary>
+    public KeywordParserConfigBuilder WithLoad(params string[] commands)
+    {
+        _load = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for look.</summary>
+    public KeywordParserConfigBuilder WithLook(params string[] commands)
+    {
+        _look = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for move.</summary>
+    public KeywordParserConfigBuilder WithMove(params string[] commands)
+    {
+        _move = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for open.</summary>
+    public KeywordParserConfigBuilder WithOpen(params string[] commands)
+    {
+        _open = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for pour.</summary>
+    public KeywordParserConfigBuilder WithPour(params string[] commands)
+    {
+        _pour = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set prepositions used for pour commands.</summary>
+    public KeywordParserConfigBuilder WithPourPrepositions(params string[] prepositions)
+    {
+        _pourPrepositions = CommandHelper.NewCommands(prepositions);
+        return this;
+    }
+
+    /// <summary>Set keywords for quest log.</summary>
+    public KeywordParserConfigBuilder WithQuest(params string[] commands)
+    {
+        _quest = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for quit/exit.</summary>
+    public KeywordParserConfigBuilder WithQuit(params string[] commands)
+    {
+        _quit = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for read.</summary>
+    public KeywordParserConfigBuilder WithRead(params string[] commands)
+    {
+        _read = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for save.</summary>
+    public KeywordParserConfigBuilder WithSave(params string[] commands)
+    {
+        _save = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for stats/health.</summary>
+    public KeywordParserConfigBuilder WithStats(params string[] commands)
+    {
+        _stats = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for take/pick up.</summary>
+    public KeywordParserConfigBuilder WithTake(params string[] commands)
+    {
+        _take = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for talk/speak.</summary>
+    public KeywordParserConfigBuilder WithTalk(params string[] commands)
+    {
+        _talk = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for unlock.</summary>
+    public KeywordParserConfigBuilder WithUnlock(params string[] commands)
+    {
+        _unlock = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for use.</summary>
+    public KeywordParserConfigBuilder WithUse(params string[] commands)
+    {
+        _use = CommandHelper.NewCommands(commands);
+        return this;
     }
 }

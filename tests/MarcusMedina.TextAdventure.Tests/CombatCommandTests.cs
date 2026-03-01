@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
@@ -10,35 +12,15 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 public class CombatCommandTests
 {
-    private sealed class StubCombatSystem : ICombatSystem
-    {
-        public CommandResult Result { get; set; } = CommandResult.Ok("ok");
-        public INpc? LastTarget { get; private set; }
-
-        public CommandResult Attack(IGameState state, INpc target)
-        {
-            LastTarget = target;
-            return Result;
-        }
-
-        public CommandResult Flee(IGameState state, INpc? target = null)
-        {
-            LastTarget = target;
-            return Result;
-        }
-    }
-
     [Fact]
     public void AttackCommand_RequiresTarget()
     {
         Location location = new("arena");
         GameState state = new(location);
 
-        CommandResult result = new AttackCommand(null).Execute(new CommandContext(state));
+        var result = new AttackCommand(null).Execute(new CommandContext(state));
 
         Assert.False(result.Success);
         Assert.Equal(Language.NoTargetToAttack, result.Message);
@@ -58,7 +40,7 @@ public class CombatCommandTests
         GameEvent? combatEvent = null;
         events.Subscribe(GameEventType.CombatStart, e => combatEvent = e);
 
-        CommandResult result = new AttackCommand("rat").Execute(new CommandContext(state));
+        var result = new AttackCommand("rat").Execute(new CommandContext(state));
 
         Assert.True(result.Success);
         Assert.Equal("strike", result.Message);
@@ -72,7 +54,7 @@ public class CombatCommandTests
         Location location = new("arena");
         GameState state = new(location);
 
-        CommandResult result = new FleeCommand().Execute(new CommandContext(state));
+        var result = new FleeCommand().Execute(new CommandContext(state));
 
         Assert.False(result.Success);
         Assert.Equal(Language.NoOneToFlee, result.Message);
@@ -88,10 +70,28 @@ public class CombatCommandTests
         location.AddNpc(npc);
         GameState state = new(location, combatSystem: combat);
 
-        CommandResult result = new FleeCommand().Execute(new CommandContext(state));
+        var result = new FleeCommand().Execute(new CommandContext(state));
 
         Assert.True(result.Success);
         Assert.Equal("escape", result.Message);
         Assert.Equal(npc, combat.LastTarget);
+    }
+
+    private sealed class StubCombatSystem : ICombatSystem
+    {
+        public INpc? LastTarget { get; private set; }
+        public CommandResult Result { get; set; } = CommandResult.Ok("ok");
+
+        public CommandResult Attack(IGameState state, INpc target)
+        {
+            LastTarget = target;
+            return Result;
+        }
+
+        public CommandResult Flee(IGameState state, INpc? target = null)
+        {
+            LastTarget = target;
+            return Result;
+        }
     }
 }

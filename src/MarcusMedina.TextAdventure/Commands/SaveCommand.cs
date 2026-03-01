@@ -3,29 +3,24 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Commands;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-using MarcusMedina.TextAdventure.Models;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
-public class SaveCommand : ICommand
+public class SaveCommand(string? target = null) : ICommand
 {
     public const string DefaultFileName = "savegame.json";
-    public string? Target { get; }
 
-    public SaveCommand(string? target = null)
-    {
-        Target = target;
-    }
+    public string? Target { get; } = target;
 
     public CommandResult Execute(CommandContext context)
     {
-        string path = string.IsNullOrWhiteSpace(Target) ? DefaultFileName : Target!;
+        var path = string.IsNullOrWhiteSpace(Target) ? DefaultFileName : Target!;
         try
         {
-            GameMemento memento = context.State.CreateMemento();
+            var memento = context.State.CreateMemento();
             context.State.SaveSystem.Save(path, memento);
             return CommandResult.Ok(Language.SaveSuccess(path));
         }

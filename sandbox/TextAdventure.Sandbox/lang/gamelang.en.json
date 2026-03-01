@@ -4,42 +4,78 @@
     "name": "English"
   },
   "commands": {
-    "quit": ["quit", "exit", "q"],
-    "look": ["look", "l"],
-    "examine": ["examine", "x"],
-    "inventory": ["inventory", "inv", "i"],
-    "stats": ["stats", "stat", "hp", "health"],
-    "open": ["open"],
-    "unlock": ["unlock"],
-    "take": ["take", "get", "pickup", "pick"],
-    "drop": ["drop"],
-    "use": ["use"],
-    "combine": ["combine", "mix"],
-    "pour": ["pour"],
-    "move": ["move", "push", "shift", "lift", "slide"],
-    "go": ["go", "walk"],
-    "read": ["read"],
-    "talk": ["talk", "speak"],
-    "attack": ["attack", "fight", "hit"],
-    "flee": ["flee", "run", "escape"],
-    "save": ["save"],
-    "load": ["load"],
-    "quest": ["quests", "quest", "journal"],
-    "all": ["all", "everything"]
+    "quit": [ "quit", "exit", "q" ],
+    "look": [ "look", "l" ],
+    "examine": [ "examine", "x" ],
+    "inventory": [ "inventory", "inv", "i" ],
+    "stats": [ "stats", "stat", "hp", "health" ],
+    "open": [ "open" ],
+    "unlock": [ "unlock" ],
+    "take": [ "take", "get", "pickup", "pick" ],
+    "drop": [ "drop" ],
+    "use": [ "use" ],
+    "combine": [ "combine", "mix" ],
+    "pour": [ "pour" ],
+    "move": [ "move", "push", "shift", "lift", "slide" ],
+    "go": [ "go", "walk" ],
+    "read": [ "read" ],
+    "talk": [ "talk", "speak" ],
+    "attack": [ "attack", "fight", "hit" ],
+    "flee": [ "flee", "run", "escape" ],
+    "save": [ "save" ],
+    "load": [ "load" ],
+    "quest": [ "quests", "quest", "journal" ],
+    "all": [ "all", "everything" ]
   },
   "directions": {
-    "north": { "name": "North", "aliases": ["n", "north"] },
-    "south": { "name": "South", "aliases": ["s", "south"] },
-    "east": { "name": "East", "aliases": ["e", "east"] },
-    "west": { "name": "West", "aliases": ["w", "west"] },
-    "up": { "name": "Up", "aliases": ["u", "up"] },
-    "down": { "name": "Down", "aliases": ["d", "down"] },
-    "northeast": { "name": "Northeast", "aliases": ["ne", "northeast"] },
-    "northwest": { "name": "Northwest", "aliases": ["nw", "northwest"] },
-    "southeast": { "name": "Southeast", "aliases": ["se", "southeast"] },
-    "southwest": { "name": "Southwest", "aliases": ["sw", "southwest"] },
-    "in": { "name": "In", "aliases": ["in", "inside", "enter"] },
-    "out": { "name": "Out", "aliases": ["out", "outside", "exit"] }
+    "north": {
+      "name": "North",
+      "aliases": [ "n", "north" ]
+    },
+    "south": {
+      "name": "South",
+      "aliases": [ "s", "south" ]
+    },
+    "east": {
+      "name": "East",
+      "aliases": [ "e", "east" ]
+    },
+    "west": {
+      "name": "West",
+      "aliases": [ "w", "west" ]
+    },
+    "up": {
+      "name": "Up",
+      "aliases": [ "u", "up" ]
+    },
+    "down": {
+      "name": "Down",
+      "aliases": [ "d", "down" ]
+    },
+    "northeast": {
+      "name": "Northeast",
+      "aliases": [ "ne", "northeast" ]
+    },
+    "northwest": {
+      "name": "Northwest",
+      "aliases": [ "nw", "northwest" ]
+    },
+    "southeast": {
+      "name": "Southeast",
+      "aliases": [ "se", "southeast" ]
+    },
+    "southwest": {
+      "name": "Southwest",
+      "aliases": [ "sw", "southwest" ]
+    },
+    "in": {
+      "name": "In",
+      "aliases": [ "in", "inside", "enter" ]
+    },
+    "out": {
+      "name": "Out",
+      "aliases": [ "out", "outside", "exit" ]
+    }
   },
   "labels": {
     "roomLabel": "Room:",

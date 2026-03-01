@@ -3,40 +3,34 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Commands;
+
+using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-using MarcusMedina.TextAdventure.Models;
-using System.Text;
 
-namespace MarcusMedina.TextAdventure.Commands;
-
-public class LookCommand : ICommand
+public class LookCommand(string? target = null) : ICommand
 {
-    public string? Target { get; }
-
-    public LookCommand(string? target = null)
-    {
-        Target = target;
-    }
+    public string? Target { get; } = target;
 
     public CommandResult Execute(CommandContext context)
     {
-        ILocation location = context.State.CurrentLocation;
+        var location = context.State.CurrentLocation;
         if (!string.IsNullOrWhiteSpace(Target))
         {
             return ExecuteTarget(context, Target);
         }
 
-        string description = location.GetDescription();
-        IEnumerable<KeyValuePair<Direction, Exit>> exitsSource = location.Exits
+        var description = location.GetDescription();
+        var exitsSource = location.Exits
             .Where(e => !context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly ||
                         e.Value.Door == null ||
                         e.Value.Door.State != DoorState.Locked);
 
-        IEnumerable<string> exits = exitsSource
+        var exits = exitsSource
             .Select(e => e.Value.Door != null
                 ? $"{e.Key} ({e.Value.Door.Name}: {e.Value.Door.State})"
                 : e.Key.ToString());
@@ -49,8 +43,8 @@ public class LookCommand : ICommand
 
         _ = builder.Append(builder.Length > 0 ? "\n" : string.Empty);
         _ = builder.Append(Language.HealthStatus(context.State.Stats.Health, context.State.Stats.MaxHealth));
-        _ = builder.Append("\n");
-        List<string> items = location.Items
+        _ = builder.Append('\n');
+        var items = location.Items
             .Where(i => !i.HiddenFromItemList)
             .Select(i => Language.ItemWithWeight(i.Name, i.Weight))
             .ToList();
@@ -58,10 +52,10 @@ public class LookCommand : ICommand
         {
             _ = builder.Append(Language.ItemsHereLabel);
             _ = builder.Append(items.Count > 0 ? items.CommaJoin() : Language.None);
-            _ = builder.Append("\n");
+            _ = builder.Append('\n');
         }
 
-        List<string> exitsList = exits.ToList();
+        var exitsList = exits.ToList();
         if (!context.State.ShowDirectionsWhenThereAreDirectionsVisibleOnly || exitsList.Count > 0)
         {
             _ = builder.Append(Language.ExitsLabel);
@@ -73,13 +67,13 @@ public class LookCommand : ICommand
 
     internal static CommandResult ExecuteTarget(CommandContext context, string target)
     {
-        ILocation location = context.State.CurrentLocation;
-        IItem? item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
+        var location = context.State.CurrentLocation;
+        var item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
         string? suggestion = null;
         if (item == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
-            IEnumerable<IItem> candidates = location.Items.Concat(context.State.Inventory.Items);
-            IItem? best = FuzzyMatcher.FindBestItem(candidates, target, context.State.FuzzyMaxDistance);
+            var candidates = location.Items.Concat(context.State.Inventory.Items);
+            var best = FuzzyMatcher.FindBestItem(candidates, target, context.State.FuzzyMaxDistance);
             if (best != null)
             {
                 item = best;
@@ -89,20 +83,20 @@ public class LookCommand : ICommand
 
         if (item != null)
         {
-            string description = item.GetDescription();
-            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+            var description = item.GetDescription();
+            var result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(item.Name)
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
 
-        IDoor? door = location.Exits.Values
+        var door = location.Exits.Values
             .Select(e => e.Door)
             .FirstOrDefault(d => d != null && (target.TextCompare("door") || d.Matches(target)));
 
         if (door == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
-            IEnumerable<IDoor> doors = location.Exits.Values.Select(e => e.Door).Where(d => d != null).Cast<IDoor>();
+            var doors = location.Exits.Values.Select(e => e.Door).Where(d => d != null).Cast<IDoor>();
             door = FuzzyMatcher.FindBestDoor(doors, target, context.State.FuzzyMaxDistance);
             if (door != null)
             {
@@ -112,20 +106,20 @@ public class LookCommand : ICommand
 
         if (door != null)
         {
-            string description = door.GetDescription();
-            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+            var description = door.GetDescription();
+            var result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(door.Name)
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
         }
 
-        IKey? key = location.Exits.Values
+        var key = location.Exits.Values
             .Select(e => e.Door?.RequiredKey)
             .FirstOrDefault(k => k != null && k.Name.TextCompare(target));
 
         if (key == null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
         {
-            IEnumerable<IItem> keys = location.Exits.Values
+            var keys = location.Exits.Values
                 .Select(e => e.Door?.RequiredKey)
                 .Where(k => k != null)
                 .Cast<IItem>();
@@ -138,8 +132,8 @@ public class LookCommand : ICommand
 
         if (key != null)
         {
-            string description = key.GetDescription();
-            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+            var description = key.GetDescription();
+            var result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(key.Name)
                 : description);
             return suggestion != null ? result.WithSuggestion(suggestion) : result;
@@ -147,7 +141,7 @@ public class LookCommand : ICommand
 
         if (target.TextCompare(location.Id) || target.TextCompare("here") || target.TextCompare("room"))
         {
-            string description = location.GetDescription();
+            var description = location.GetDescription();
             return CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.NothingToLookAt
                 : description);

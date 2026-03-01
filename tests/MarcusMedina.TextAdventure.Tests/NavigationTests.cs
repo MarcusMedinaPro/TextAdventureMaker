@@ -3,11 +3,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
+
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
-
-namespace MarcusMedina.TextAdventure.Tests;
 
 public class NavigationTests
 {
@@ -19,7 +19,7 @@ public class NavigationTests
         _ = entrance.AddExit(Direction.North, forest);
 
         GameState state = new(entrance);
-        bool moved = state.Move(Direction.North);
+        var moved = state.Move(Direction.North);
 
         Assert.True(moved);
         Assert.Equal(forest, state.CurrentLocation);
@@ -30,7 +30,7 @@ public class NavigationTests
     {
         Location entrance = new("entrance");
         GameState state = new(entrance);
-        bool moved = state.Move(Direction.North);
+        var moved = state.Move(Direction.North);
 
         Assert.False(moved);
         Assert.Equal(entrance, state.CurrentLocation);

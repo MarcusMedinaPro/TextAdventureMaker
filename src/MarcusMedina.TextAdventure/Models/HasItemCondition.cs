@@ -3,22 +3,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class HasItemCondition : IQuestCondition
 {
-    public string ItemId { get; }
-
     public HasItemCondition(string itemId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(itemId);
         ItemId = itemId;
     }
 
-    public bool Accept(IQuestConditionVisitor visitor)
-    {
-        return visitor.Visit(this);
-    }
+    public string ItemId { get; }
+
+    public bool Accept(IQuestConditionVisitor visitor) => visitor.Visit(this);
 }

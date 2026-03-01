@@ -3,27 +3,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Models;
+
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Interfaces;
 
-namespace MarcusMedina.TextAdventure.Models;
-
 public class Npc : INpc
 {
-    private string _description = "";
-    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<DialogRule> _dialogRules = [];
-
-    public string Id { get; }
-    public string Name { get; }
-    public IDictionary<string, string> Properties => _properties;
-    public NpcState State { get; private set; }
-    public INpcMovement Movement { get; private set; } = new NoNpcMovement();
-    public IDialogNode? DialogRoot { get; private set; }
-    public IStats Stats { get; private set; }
-    public NpcMemory Memory { get; } = new();
-    public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
-    public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
+    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
+    private string _description = "";
 
     public Npc(string id, string name, NpcState state = NpcState.Friendly, IStats? stats = null)
     {
@@ -35,9 +24,22 @@ public class Npc : INpc
         Stats = stats ?? new Stats(20);
     }
 
-    public string GetDescription()
+    public IDialogNode? DialogRoot { get; private set; }
+    public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
+    public string Id { get; }
+    public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
+    public NpcMemory Memory { get; } = new();
+    public INpcMovement Movement { get; private set; } = new NoNpcMovement();
+    public string Name { get; }
+    public IDictionary<string, string> Properties => _properties;
+    public NpcState State { get; private set; }
+    public IStats Stats { get; private set; }
+
+    public DialogRule AddDialogRule(string id)
     {
-        return _description;
+        DialogRule rule = new(id);
+        _dialogRules.Add(rule);
+        return rule;
     }
 
     public INpc Description(string text)
@@ -46,50 +48,19 @@ public class Npc : INpc
         return this;
     }
 
-    public INpc SetState(NpcState state)
-    {
-        State = state;
-        return this;
-    }
-
-    public INpc SetMovement(INpcMovement movement)
-    {
-        ArgumentNullException.ThrowIfNull(movement);
-        Movement = movement;
-        return this;
-    }
-
-    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
-    {
-        ArgumentNullException.ThrowIfNull(currentLocation);
-        ArgumentNullException.ThrowIfNull(state);
-        return Movement.GetNextLocation(currentLocation, state);
-    }
-
     public INpc Dialog(string text)
     {
         DialogRoot = new DialogNode(text);
         return this;
     }
 
-    public INpc SetDialog(IDialogNode? dialog)
-    {
-        DialogRoot = dialog;
-        return this;
-    }
+    public string GetDescription() => _description;
 
-    public INpc SetStats(IStats stats)
+    public ILocation? GetNextLocation(ILocation currentLocation, IGameState state)
     {
-        ArgumentNullException.ThrowIfNull(stats);
-        Stats = stats;
-        return this;
-    }
-
-    public DialogRule AddDialogRule(string id)
-    {
-        DialogRule rule = new(id);
-        _dialogRules.Add(rule);
-        return rule;
+        ArgumentNullException.ThrowIfNull(currentLocation);
+        ArgumentNullException.ThrowIfNull(state);
+        return Movement.GetNextLocation(currentLocation, state);
     }
 
     public string? GetRuleBasedDialog(IGameState state)
@@ -101,7 +72,7 @@ public class Npc : INpc
         }
 
         DialogContext context = new(state, this, Memory);
-        List<DialogRule> matching = _dialogRules
+        var matching = _dialogRules
             .Where(rule => rule.Matches(context) && rule.GetText(context) != null)
             .ToList();
 
@@ -110,12 +81,12 @@ public class Npc : INpc
             return null;
         }
 
-        DialogRule selected = matching
+        var selected = matching
             .OrderByDescending(rule => rule.CriteriaCount)
             .ThenByDescending(rule => rule.PriorityValue)
             .First();
 
-        string? text = selected.GetText(context);
+        var text = selected.GetText(context);
         if (string.IsNullOrWhiteSpace(text))
         {
             return null;
@@ -124,5 +95,31 @@ public class Npc : INpc
         selected.Apply(context);
         Memory.MarkMet();
         return text;
+    }
+
+    public INpc SetDialog(IDialogNode? dialog)
+    {
+        DialogRoot = dialog;
+        return this;
+    }
+
+    public INpc SetMovement(INpcMovement movement)
+    {
+        ArgumentNullException.ThrowIfNull(movement);
+        Movement = movement;
+        return this;
+    }
+
+    public INpc SetState(NpcState state)
+    {
+        State = state;
+        return this;
+    }
+
+    public INpc SetStats(IStats stats)
+    {
+        ArgumentNullException.ThrowIfNull(stats);
+        Stats = stats;
+        return this;
     }
 }

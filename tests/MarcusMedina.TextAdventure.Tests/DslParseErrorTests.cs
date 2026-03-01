@@ -3,66 +3,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+namespace MarcusMedina.TextAdventure.Tests;
 
 using MarcusMedina.TextAdventure.Dsl;
 
-namespace MarcusMedina.TextAdventure.Tests;
-
 public class DslParseErrorTests
 {
-    [Theory]
-    [InlineData("locaton", "location")]
-    [InlineData("loction", "location")]
-    [InlineData("iem", "item")]
-    [InlineData("itm", "item")]
-    [InlineData("dor", "door")]
-    [InlineData("exi", "exit")]
-    [InlineData("wold", "world")]
-    [InlineData("gol", "goal")]
-    public void SuggestKeyword_SuggestsCorrectKeyword(string input, string expected)
-    {
-        string? suggestion = DslErrorHelper.SuggestKeyword(input);
-
-        Assert.Equal(expected, suggestion);
-    }
-
-    [Fact]
-    public void SuggestKeyword_ReturnsNull_ForVeryDifferentInput()
-    {
-        string? suggestion = DslErrorHelper.SuggestKeyword("xyz123");
-
-        Assert.Null(suggestion);
-    }
-
-    [Fact]
-    public void UnknownKeyword_CreatesErrorWithSuggestion()
-    {
-        DslParseError error = DslErrorHelper.UnknownKeyword(5, "locaton: test", "locaton");
-
-        Assert.Equal(5, error.Line);
-        Assert.Contains("Unknown keyword", error.Message);
-        Assert.Contains("location", error.Suggestion);
-    }
-
-    [Fact]
-    public void NoCurrentLocation_CreatesHelpfulError()
-    {
-        DslParseError error = DslErrorHelper.NoCurrentLocation(3, "item: sword | sword | A sword.", "item");
-
-        Assert.Equal(3, error.Line);
-        Assert.Contains("requires a location", error.Message);
-        Assert.Contains("Add a 'location:'", error.Suggestion);
-    }
-
-    [Fact]
-    public void InvalidExitSyntax_CreatesHelpfulError()
-    {
-        DslParseError error = DslErrorHelper.InvalidExitSyntax(7, "exit: north forest");
-
-        Assert.Contains("Invalid exit syntax", error.Message);
-        Assert.Contains("direction -> target", error.Suggestion);
-    }
-
     [Fact]
     public void DslParseError_ToString_FormatsCorrectly()
     {
@@ -73,12 +19,26 @@ public class DslParseErrorTests
             suggestion: "Did you mean 'location'?",
             column: 1);
 
-        string result = error.ToString();
+        var result = error.ToString();
 
         Assert.Contains("Line 10:", result);
         Assert.Contains("Unknown keyword", result);
         Assert.Contains("Did you mean 'location'?", result);
         Assert.Contains("locaton: test_room", result);
+    }
+
+    [Fact]
+    public void DslParseException_WithMultipleErrors_FormatsCorrectly()
+    {
+        var errors = new[]
+        {
+            new DslParseError(1, "error 1", "First error"),
+            new DslParseError(5, "error 2", "Second error")
+        };
+        DslParseException exception = new(errors);
+
+        Assert.Contains("2 errors", exception.Message);
+        Assert.Equal(2, exception.Errors.Count);
     }
 
     [Fact]
@@ -92,16 +52,55 @@ public class DslParseErrorTests
     }
 
     [Fact]
-    public void DslParseException_WithMultipleErrors_FormatsCorrectly()
+    public void InvalidExitSyntax_CreatesHelpfulError()
     {
-        DslParseError[] errors = new[]
-        {
-            new DslParseError(1, "error 1", "First error"),
-            new DslParseError(5, "error 2", "Second error")
-        };
-        DslParseException exception = new(errors);
+        var error = DslErrorHelper.InvalidExitSyntax(7, "exit: north forest");
 
-        Assert.Contains("2 errors", exception.Message);
-        Assert.Equal(2, exception.Errors.Count);
+        Assert.Contains("Invalid exit syntax", error.Message);
+        Assert.Contains("direction -> target", error.Suggestion);
+    }
+
+    [Fact]
+    public void NoCurrentLocation_CreatesHelpfulError()
+    {
+        var error = DslErrorHelper.NoCurrentLocation(3, "item: sword | sword | A sword.", "item");
+
+        Assert.Equal(3, error.Line);
+        Assert.Contains("requires a location", error.Message);
+        Assert.Contains("Add a 'location:'", error.Suggestion);
+    }
+
+    [Fact]
+    public void SuggestKeyword_ReturnsNull_ForVeryDifferentInput()
+    {
+        var suggestion = DslErrorHelper.SuggestKeyword("xyz123");
+
+        Assert.Null(suggestion);
+    }
+
+    [Theory]
+    [InlineData("locaton", "location")]
+    [InlineData("loction", "location")]
+    [InlineData("iem", "item")]
+    [InlineData("itm", "item")]
+    [InlineData("dor", "door")]
+    [InlineData("exi", "exit")]
+    [InlineData("wold", "world")]
+    [InlineData("gol", "goal")]
+    public void SuggestKeyword_SuggestsCorrectKeyword(string input, string expected)
+    {
+        var suggestion = DslErrorHelper.SuggestKeyword(input);
+
+        Assert.Equal(expected, suggestion);
+    }
+
+    [Fact]
+    public void UnknownKeyword_CreatesErrorWithSuggestion()
+    {
+        var error = DslErrorHelper.UnknownKeyword(5, "locaton: test", "locaton");
+
+        Assert.Equal(5, error.Line);
+        Assert.Contains("Unknown keyword", error.Message);
+        Assert.Contains("location", error.Suggestion);
     }
 }

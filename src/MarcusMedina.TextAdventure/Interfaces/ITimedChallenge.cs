@@ -7,18 +7,24 @@ namespace MarcusMedina.TextAdventure.Interfaces;
 public interface ITimedChallenge
 {
     string Id { get; }
-    int MaxMoves { get; }
-    int MovesUsed { get; }
-    int MovesRemaining { get; }
     bool IsActive { get; }
+    int MaxMoves { get; }
+    int MovesRemaining { get; }
+    int MovesUsed { get; }
+
+    void Fail(IGameState state);
 
     ITimedChallenge MaxMovesLimit(int maxMoves);
-    ITimedChallenge OnStart(Action<IGameState> handler);
-    ITimedChallenge OnMovesRemaining(int movesRemaining, Action<IGameState> handler);
-    ITimedChallenge OnSuccess(Action<IGameState> handler);
+
     ITimedChallenge OnFailure(Action<IGameState> handler);
 
+    ITimedChallenge OnMovesRemaining(int movesRemaining, Action<IGameState> handler);
+
+    ITimedChallenge OnStart(Action<IGameState> handler);
+
+    ITimedChallenge OnSuccess(Action<IGameState> handler);
+
     void Start(IGameState state);
+
     void Succeed(IGameState state);
-    void Fail(IGameState state);
 }

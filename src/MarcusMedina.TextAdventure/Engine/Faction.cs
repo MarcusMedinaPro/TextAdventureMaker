@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Engine;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public sealed class Faction : IFaction
 {
@@ -13,59 +13,31 @@ public sealed class Faction : IFaction
     private readonly List<(int threshold, Action<IGameState> handler)> _thresholds = [];
     private readonly HashSet<int> _thresholdsFired = [];
 
-    public string Id { get; }
-    public int Reputation { get; private set; }
-    public IReadOnlyCollection<string> NpcIds => _npcIds;
-
     public Faction(string id)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         Id = id;
     }
 
-    public IFaction WithNpcs(params string[] npcIds)
-    {
-        if (npcIds == null)
-        {
-            return this;
-        }
+    public string Id { get; }
+    public IReadOnlyCollection<string> NpcIds => _npcIds;
+    public int Reputation { get; private set; }
 
-        foreach (string npcId in npcIds)
-        {
-            if (!string.IsNullOrWhiteSpace(npcId))
-            {
-                _ = _npcIds.Add(npcId.Trim());
-            }
-        }
-
-        return this;
-    }
-
-    public IFaction OnReputationThreshold(int threshold, Action<IGameState> handler)
-    {
-        ArgumentNullException.ThrowIfNull(handler);
-        _thresholds.Add((threshold, handler));
-        return this;
-    }
-
-    public bool HasNpc(string npcId)
-    {
-        return !string.IsNullOrWhiteSpace(npcId) && _npcIds.Contains(npcId);
-    }
+    public bool HasNpc(string npcId) => !string.IsNullOrWhiteSpace(npcId) && _npcIds.Contains(npcId);
 
     public int ModifyReputation(int amount, IGameState state)
     {
-        int previous = Reputation;
+        var previous = Reputation;
         Reputation += amount;
 
-        foreach ((int threshold, Action<IGameState>? handler) in _thresholds)
+        foreach ((var threshold, var handler) in _thresholds)
         {
             if (_thresholdsFired.Contains(threshold))
             {
                 continue;
             }
 
-            bool crossed = threshold >= 0
+            var crossed = threshold >= 0
                 ? previous < threshold && Reputation >= threshold
                 : previous > threshold && Reputation <= threshold;
 
@@ -77,5 +49,30 @@ public sealed class Faction : IFaction
         }
 
         return Reputation;
+    }
+
+    public IFaction OnReputationThreshold(int threshold, Action<IGameState> handler)
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+        _thresholds.Add((threshold, handler));
+        return this;
+    }
+
+    public IFaction WithNpcs(params string[] npcIds)
+    {
+        if (npcIds == null)
+        {
+            return this;
+        }
+
+        foreach (var npcId in npcIds)
+        {
+            if (!string.IsNullOrWhiteSpace(npcId))
+            {
+                _ = _npcIds.Add(npcId.Trim());
+            }
+        }
+
+        return this;
     }
 }

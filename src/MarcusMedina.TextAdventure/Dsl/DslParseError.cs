@@ -11,14 +11,14 @@ namespace MarcusMedina.TextAdventure.Dsl;
 public class DslParseError(int line, string lineContent, string message, string? suggestion = null, int? column = null)
 {
     /// <summary>
-    /// Line number where the error occurred (1-based).
-    /// </summary>
-    public int Line { get; } = line;
-
-    /// <summary>
     /// Column where the error occurred (1-based), if known.
     /// </summary>
     public int? Column { get; } = column;
+
+    /// <summary>
+    /// Line number where the error occurred (1-based).
+    /// </summary>
+    public int Line { get; } = line;
 
     /// <summary>
     /// The problematic line content.
@@ -37,7 +37,7 @@ public class DslParseError(int line, string lineContent, string message, string?
 
     public override string ToString()
     {
-        string result = $"Line {Line}: {Message}";
+        var result = $"Line {Line}: {Message}";
         if (!string.IsNullOrWhiteSpace(Suggestion))
         {
             result += $"\n  Suggestion: {Suggestion}";
@@ -58,25 +58,22 @@ public class DslParseError(int line, string lineContent, string message, string?
 /// </summary>
 public class DslParseException(IReadOnlyList<DslParseError> errors) : Exception(FormatMessage(errors))
 {
+    public DslParseException(DslParseError error)
+            : this([error])
+    {
+    }
+
     /// <summary>
     /// The parsing errors encountered.
     /// </summary>
     public IReadOnlyList<DslParseError> Errors { get; } = errors;
 
-    public DslParseException(DslParseError error)
-        : this(new[] { error })
-    {
-    }
-
-    private static string FormatMessage(IReadOnlyList<DslParseError> errors)
-    {
-        return errors.Count == 0
+    private static string FormatMessage(IReadOnlyList<DslParseError> errors) => errors.Count == 0
             ? "DSL parsing failed."
             : errors.Count == 1
             ? $"DSL parsing error:\n{errors[0]}"
             : $"DSL parsing failed with {errors.Count} errors:\n" +
                string.Join("\n\n", errors.Select(e => e.ToString()));
-    }
 }
 
 /// <summary>
@@ -90,6 +87,33 @@ public static class DslErrorHelper
     };
 
     /// <summary>
+    /// Creates an error for invalid exit syntax.
+    /// </summary>
+    public static DslParseError InvalidExitSyntax(int line, string lineContent) => new(
+            line,
+            lineContent,
+            "Invalid exit syntax",
+            "Use format: exit: direction -> target (e.g., 'exit: north -> forest')");
+
+    /// <summary>
+    /// Creates an error for missing required field.
+    /// </summary>
+    public static DslParseError MissingField(int line, string lineContent, string keyword, string field) => new(
+            line,
+            lineContent,
+            $"'{keyword}' is missing required field: {field}",
+            $"Format: {keyword}: {GetFormatExample(keyword)}");
+
+    /// <summary>
+    /// Creates an error for missing location context.
+    /// </summary>
+    public static DslParseError NoCurrentLocation(int line, string lineContent, string keyword) => new(
+            line,
+            lineContent,
+            $"'{keyword}' requires a location context",
+            "Add a 'location:' line before this");
+
+    /// <summary>
     /// Suggests a correction for a misspelled keyword.
     /// </summary>
     public static string? SuggestKeyword(string input)
@@ -99,7 +123,7 @@ public static class DslErrorHelper
             return null;
         }
 
-        (string? Keyword, int Distance) = ValidKeywords
+        (var Keyword, var Distance) = ValidKeywords
             .Select(k => (Keyword: k, Distance: LevenshteinDistance(input.ToLowerInvariant(), k)))
             .Where(x => x.Distance <= 3)
             .OrderBy(x => x.Distance)
@@ -113,8 +137,8 @@ public static class DslErrorHelper
     /// </summary>
     public static DslParseError UnknownKeyword(int line, string lineContent, string keyword)
     {
-        string? suggestion = SuggestKeyword(keyword);
-        string suggestionText = suggestion != null
+        var suggestion = SuggestKeyword(keyword);
+        var suggestionText = suggestion != null
             ? $"Did you mean '{suggestion}'?"
             : $"Valid keywords: {string.Join(", ", ValidKeywords.OrderBy(k => k))}";
 
@@ -126,54 +150,15 @@ public static class DslErrorHelper
             1);
     }
 
-    /// <summary>
-    /// Creates an error for missing location context.
-    /// </summary>
-    public static DslParseError NoCurrentLocation(int line, string lineContent, string keyword)
+    private static string GetFormatExample(string keyword) => keyword.ToLowerInvariant() switch
     {
-        return new(
-            line,
-            lineContent,
-            $"'{keyword}' requires a location context",
-            "Add a 'location:' line before this");
-    }
-
-    /// <summary>
-    /// Creates an error for invalid exit syntax.
-    /// </summary>
-    public static DslParseError InvalidExitSyntax(int line, string lineContent)
-    {
-        return new(
-            line,
-            lineContent,
-            "Invalid exit syntax",
-            "Use format: exit: direction -> target (e.g., 'exit: north -> forest')");
-    }
-
-    /// <summary>
-    /// Creates an error for missing required field.
-    /// </summary>
-    public static DslParseError MissingField(int line, string lineContent, string keyword, string field)
-    {
-        return new(
-            line,
-            lineContent,
-            $"'{keyword}' is missing required field: {field}",
-            $"Format: {keyword}: {GetFormatExample(keyword)}");
-    }
-
-    private static string GetFormatExample(string keyword)
-    {
-        return keyword.ToLowerInvariant() switch
-        {
-            "location" => "id | description",
-            "item" => "id | name | description",
-            "key" => "id | name | description",
-            "door" => "id | name | description | key=keyid",
-            "exit" => "direction -> target | door=doorid | oneway",
-            _ => "value"
-        };
-    }
+        "location" => "id | description",
+        "item" => "id | name | description",
+        "key" => "id | name | description",
+        "door" => "id | name | description | key=keyid",
+        "exit" => "direction -> target | door=doorid | oneway",
+        _ => "value"
+    };
 
     private static int LevenshteinDistance(string a, string b)
     {
@@ -187,23 +172,23 @@ public static class DslErrorHelper
             return a.Length;
         }
 
-        int[,] dp = new int[a.Length + 1, b.Length + 1];
+        var dp = new int[a.Length + 1, b.Length + 1];
 
-        for (int i = 0; i <= a.Length; i++)
+        for (var i = 0; i <= a.Length; i++)
         {
             dp[i, 0] = i;
         }
 
-        for (int j = 0; j <= b.Length; j++)
+        for (var j = 0; j <= b.Length; j++)
         {
             dp[0, j] = j;
         }
 
-        for (int i = 1; i <= a.Length; i++)
+        for (var i = 1; i <= a.Length; i++)
         {
-            for (int j = 1; j <= b.Length; j++)
+            for (var j = 1; j <= b.Length; j++)
             {
-                int cost = a[i - 1] == b[j - 1] ? 0 : 1;
+                var cost = a[i - 1] == b[j - 1] ? 0 : 1;
                 dp[i, j] = Math.Min(
                     Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1),
                     dp[i - 1, j - 1] + cost);

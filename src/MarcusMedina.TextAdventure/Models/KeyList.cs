@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Extensions;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Extensions;
 
 public sealed class KeyList
 {
@@ -13,55 +13,33 @@ public sealed class KeyList
 
     public IReadOnlyCollection<Key> Items => _keys.Items;
 
-    public Key Add(string name)
-    {
-        return _keys.Add(name);
-    }
+    public Key this[string token] => _keys[token];
 
-    public Key Add(Key key)
-    {
-        return _keys.Add(key);
-    }
+    public Key Add(string name) => _keys.Add(name);
+
+    public Key Add(Key key) => _keys.Add(key);
 
     public KeyList AddMany(params string[] names)
     {
         _ = _keys.AddMany(names);
         return this;
     }
+
     public KeyList AddMany(IEnumerable<string> names)
     {
         _ = _keys.AddMany(names);
         return this;
     }
 
-    public Key? Find(string token)
-    {
-        return _keys.Find(token);
-    }
+    public Key Call(string token) => _keys.Call(token);
 
-    public Key Get(string token)
-    {
-        return _keys.Get(token);
-    }
+    public void Clear() => _keys.Clear();
 
-    public bool TryGet(string token, out Key key)
-    {
-        return _keys.TryGet(token, out key);
-    }
+    public Key? Find(string token) => _keys.Find(token);
 
-    public bool Remove(string token)
-    {
-        return _keys.Remove(token);
-    }
+    public Key Get(string token) => _keys.Get(token);
 
-    public void Clear()
-    {
-        _keys.Clear();
-    }
+    public bool Remove(string token) => _keys.Remove(token);
 
-    public Key this[string token] => _keys[token];
-    public Key Call(string token)
-    {
-        return _keys.Call(token);
-    }
+    public bool TryGet(string token, out Key key) => _keys.TryGet(token, out key);
 }

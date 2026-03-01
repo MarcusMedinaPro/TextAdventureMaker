@@ -3,21 +3,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Interfaces;
-
 namespace MarcusMedina.TextAdventure.Models;
+
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class ContainerItem<T>(string id, string name, int maxCount = 0) : Item(id, name), IContainer<T>
 {
     private readonly List<T> _contents = [];
 
-    public int MaxCount { get; private set; } = maxCount;
     public IReadOnlyList<T> Contents => _contents;
-
-    public bool CanAdd(T item)
-    {
-        return MaxCount <= 0 || _contents.Count + 1 <= MaxCount;
-    }
+    public int MaxCount { get; private set; } = maxCount;
 
     public bool Add(T item)
     {
@@ -30,8 +25,7 @@ public class ContainerItem<T>(string id, string name, int maxCount = 0) : Item(i
         return true;
     }
 
-    public bool Remove(T item)
-    {
-        return _contents.Remove(item);
-    }
+    public bool CanAdd(T item) => MaxCount <= 0 || _contents.Count + 1 <= MaxCount;
+
+    public bool Remove(T item) => _contents.Remove(item);
 }

@@ -9,7 +9,10 @@ public interface IFactionSystem
     IReadOnlyDictionary<string, IFaction> Factions { get; }
 
     IFaction AddFaction(string id);
+
     IFaction? GetFaction(string id);
+
     int GetReputation(string id);
+
     int ModifyReputation(string id, int amount, IGameState state);
 }

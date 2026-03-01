@@ -40,3 +40,7 @@
 
 - Gemini is a first-class provider in the router.
 - Low-cost deployment presets can be enabled with minimal code.
+
+## Validation Notes (2026-03-01)
+
+- Gemini provider and deterministic cost-profile builders are implemented and covered by routing-profile tests.

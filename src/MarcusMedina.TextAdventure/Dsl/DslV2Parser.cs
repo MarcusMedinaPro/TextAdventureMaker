@@ -47,6 +47,9 @@ public sealed class DslV2Parser : AdventureDslParser
     private DslRandomSettings _randomSettings = new();
     private readonly List<DslRandomEvent> _randomEvents = [];
     private int _scheduleId = 0;
+    private readonly DslStorySystem _storySystem = new();
+    private string _currentBranchId = "";
+    private string _currentChapterId = "";
 
     public DslV2Parser()
     {
@@ -119,6 +122,16 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("schedule_when", HandleScheduleWhen);
         RegisterKeyword("random_settings", HandleRandomSettings);
         RegisterKeyword("random_event", HandleRandomEvent);
+
+        // Story and chapters (Slice 083)
+        RegisterKeyword("branch", HandleBranch);
+        RegisterKeyword("branch_when", HandleBranchWhen);
+        RegisterKeyword("branch_then", HandleBranchThen);
+        RegisterKeyword("chapter", HandleChapter);
+        RegisterKeyword("chapter_objective", HandleChapterObjective);
+        RegisterKeyword("chapter_next", HandleChapterNext);
+        RegisterKeyword("chapter_end", HandleChapterEnd);
+        RegisterKeyword("chapter_unlock_if", HandleChapterUnlockIf);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -965,6 +978,136 @@ public sealed class DslV2Parser : AdventureDslParser
             _randomEvents.Add(evt);
     }
 
+    private void HandleBranch(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        _currentBranchId = NormalizeId(parts[0]);
+    }
+
+    private void HandleBranchWhen(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string branchId = NormalizeId(parts[0]);
+        var branch = new DslBranch { Id = branchId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].Contains(">=") || parts[i].Contains("<=") || parts[i].Contains(":"))
+                branch.Condition = parts[i];
+        }
+
+        _storySystem.AddBranch(branch);
+    }
+
+    private void HandleBranchThen(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string branchId = NormalizeId(parts[0]);
+        var branch = _storySystem.GetBranch(branchId);
+
+        if (branch != null)
+        {
+            for (int i = 1; i < parts.Count; i++)
+            {
+                if (parts[i].StartsWith("effects="))
+                    branch.Effects = parts[i][8..];
+            }
+        }
+    }
+
+    private void HandleChapter(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string chapterId = NormalizeId(parts[0]);
+        _currentChapterId = chapterId;
+        var chapter = new DslChapter { Id = chapterId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("title="))
+                chapter.Title = parts[i][6..];
+            else if (parts[i].StartsWith("desc="))
+                chapter.Description = parts[i][5..];
+        }
+
+        _storySystem.AddChapter(chapter);
+    }
+
+    private void HandleChapterObjective(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string objId = NormalizeId(parts[0]);
+        var obj = new DslChapterObjective { ChapterId = _currentChapterId, ObjectiveId = objId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("title="))
+                obj.Title = parts[i][6..];
+            else if (parts[i].StartsWith("desc="))
+                obj.Description = parts[i][5..];
+        }
+
+        _storySystem.AddObjective(obj);
+
+        // Add to current chapter
+        var chapter = _storySystem.GetChapter(_currentChapterId);
+        if (chapter != null && !chapter.Objectives.Contains(objId))
+            chapter.Objectives.Add(objId);
+    }
+
+    private void HandleChapterNext(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string nextChapterId = NormalizeId(parts[1]);
+        var chapter = _storySystem.GetChapter(_currentChapterId);
+
+        if (chapter != null && !chapter.NextChapters.Contains(nextChapterId))
+            chapter.NextChapters.Add(nextChapterId);
+    }
+
+    private void HandleChapterEnd(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        var chapter = _storySystem.GetChapter(_currentChapterId);
+        if (chapter != null)
+        {
+            chapter.IsEnding = true;
+
+            var ending = new DslChapterEnding { ChapterId = _currentChapterId };
+
+            for (int i = 0; i < parts.Count; i++)
+            {
+                if (parts[i].StartsWith("title="))
+                    ending.Title = parts[i][6..];
+                else if (parts[i].StartsWith("desc="))
+                    ending.Description = parts[i][5..];
+            }
+
+            _storySystem.AddEnding(ending);
+        }
+    }
+
+    private void HandleChapterUnlockIf(AdventureDslContext context, string value)
+    {
+        var chapter = _storySystem.GetChapter(_currentChapterId);
+        if (chapter != null)
+            chapter.UnlockCondition = value.Trim();
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
@@ -995,6 +1138,7 @@ public sealed class DslV2Parser : AdventureDslParser
     public IReadOnlyList<DslSchedule> GetSchedules() => _schedules;
     public DslRandomSettings GetRandomSettings() => _randomSettings;
     public IReadOnlyList<DslRandomEvent> GetRandomEvents() => _randomEvents;
+    public DslStorySystem GetStorySystem() => _storySystem;
 }
 
 /// <summary>

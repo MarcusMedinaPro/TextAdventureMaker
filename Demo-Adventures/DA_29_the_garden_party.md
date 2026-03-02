@@ -1,0 +1,80 @@
+# Demo Adventure 29: The Garden Party
+
+Converted from `docs/examples/48_The_Garden_Party.md` with expanded scene detail and denser red herring interaction.
+
+## Premise
+You are dropped into the garden party, where each decision pushes the night towards a harsher outcome.
+
+## Expanded Description Pack
+- Opening room: Layer in ambient sound, one tactile detail, and one subtle movement in the corner of view.
+- Transitional space: Describe light quality (flicker, haze, reflected glare) to signal emotional shift.
+- Safe-looking object: Make it richly described, but functionally unimportant, to support red herring play.
+- Threat-adjacent zone: Add a repeated motif (metallic smell, distant tapping, static hum) that grows stronger.
+- Finale space: Keep descriptions short, sharp, and concrete so the ending lands with urgency.
+
+## Expanded Story Beats (10)
+1) Arrive at Mrs Ashworth's garden party. Everything is perfect.
+2) Explore the garden, marquee, and house. Meet the guests.
+3) Notice something wrong: the guests repeat the same phrases.
+4) Find the locked shed. Peer through the window.
+5) Suspicion rises. The guests notice you aren't eating the cake.
+6) Discover the truth: the garden was built over something buried.
+7) Find the garden shears and the rope in the greenhouse.
+8) Choose: combine shears + rope to escape, or confront Mrs Ashworth.
+9) Escape ending: you flee through the hedge. The party continues without you.
+10) Confrontation ending: Mrs Ashworth reveals the truth. You are the guest of honour.
+
+## ASCII Map
+```
+          N
+    W           E
+          S
+
+┌──────────────┐    ┌──────────┐
+│  Greenhouse  ├────┤  Garden  │
+│   S  R       │    │   C  G   │
+└──────────────┘    └────┬─────┘
+                         │
+┌──────────────┐    ┌────┴─────┐
+│   Shed       ├────┤ Marquee  │
+│   (locked)   │    │   T  A   │
+└──────────────┘    └────┬─────┘
+                         │
+                    ┌────┴─────┐
+                    │  House   │
+                    │   H      │
+                    └──────────┘
+
+S = Shears
+R = Rope
+C = Cake (poisoned)
+G = Guests (NPCs)
+T = Table (fixed)
+A = Mrs Ashworth (NPC)
+H = Hallway items
+```
+
+## Atmosphere Notes
+- Descriptions should stress texture, sound, and small motion: humming lights, distant steps, and stale air.
+- Each room should include one sensory anchor (smell, temperature, vibration, or light quality).
+- Use short reactive lines when players repeat actions, so repeated checks still feel intentional.
+- Red herring objects should always answer to `look`, and if possible also `open` or `read`.
+- Keep key progression items visually ordinary so players cannot spot them by rarity cues.
+
+## Red Herrings and Interactables
+- Framed noticeboard with outdated warnings that seem important but are not.
+- Locked drawer containing harmless paperwork and old receipts.
+- Cracked mirror that offers flavour text and mood reactions only.
+- Vending machine or cabinet that can be opened, inspected, and dismissed.
+- Discarded personal item (ticket, keyring, glove) with no quest value.
+- Window, vent, or hatch with detailed responses but no progression impact.
+- Wall clock that can be checked repeatedly for creeping tension.
+- Mundane furniture (chair, trolley, cabinet) with tactile descriptions.
+- Readable leaflet or memo with lore hints and false leads.
+- Ambient sound source that changes text over time without blocking progress.
+
+## Implementation Guidance (Non-AI)
+- Add custom handling for `open`, `read`, `look`, and `examine` on every listed red herring.
+- Keep progression linear unless the source story clearly defines alternate outcomes.
+- Auto-look after successful movement and preserve British English for all output text.
+- Ensure every visible object has at least one response: take, inspect, or explicit refusal.

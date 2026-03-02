@@ -11,6 +11,13 @@ namespace MarcusMedina.TextAdventure.Models;
 // Slice 061: Debug Console
 public sealed class DebugConsole
 {
+    private bool _enabled;
+
+    public bool IsEnabled => _enabled;
+
+    public void Enable() => _enabled = true;
+    public void Disable() => _enabled = false;
+
     public void Log(string message) => Console.WriteLine($"[DEBUG] {message}");
     public void Error(string message) => Console.WriteLine($"[ERROR] {message}");
     public void Warn(string message) => Console.WriteLine($"[WARN] {message}");

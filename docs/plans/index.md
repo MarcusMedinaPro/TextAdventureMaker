@@ -5,6 +5,7 @@
 - AI Planning Summary: `docs/plans/ai-planning-summary.md`
 - AI Slices Index: `docs/plans/AI_SLICES_INDEX.md`
 - AI Feature Backlog: `docs/plans/AI_FEATURE_BACKLOG.md`
+- DSL v2 Master Plan: `docs/plans/dsl-v2-master-plan.md`
 
 | Slice | Title | Goal | File |
 | --- | --- | --- | --- |

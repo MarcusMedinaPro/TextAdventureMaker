@@ -8,17 +8,6 @@ using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
 
-// Slice 060: Puzzle Toolkit
-public sealed class PuzzleSystem
-{
-    private readonly Dictionary<string, Puzzle> _puzzles = [];
-
-    public void RegisterPuzzle(string id, Puzzle puzzle) => _puzzles[id] = puzzle;
-    public Puzzle? GetPuzzle(string id) => _puzzles.TryGetValue(id, out var p) ? p : null;
-}
-
-public sealed record Puzzle(string Id, string Name, string Solution, string Hint);
-
 // Slice 061: Debug Console
 public sealed class DebugConsole
 {

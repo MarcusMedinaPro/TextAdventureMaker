@@ -1,3 +1,35 @@
+# The Laundry Room Warning
+
+_Slice tag: Slice 50 — Linear staircase horror with delayed trigger, door gating, and heavy red-herring interaction density._
+
+## Story beats (max ~10 steps)
+1) You are a daughter in your room, studying homework.
+2) The bedroom door stays effectively closed while dinner is supposedly being prepared.
+3) You can inspect, read, open, and close many irrelevant objects (red herrings).
+4) After enough study time, a voice downstairs calls you to dinner.
+5) You head out to the landing and approach the stairs.
+6) Before you get downstairs, hands drag you into the laundry room.
+7) It is your real mother, shaking and tearful.
+8) She says: “Don’t go down there, honey. I heard it too.”
+
+## Map (rough layout)
+
+```
+┌────────────────────┐
+│      Bedroom       │
+│  Desk, Books, Box  │
+└─────────┬──────────┘
+          │
+┌─────────┴──────────┐
+│      Landing       │
+└──────┬───────┬─────┘
+       │       │
+   Downstairs  Laundry
+      Hall      Room
+```
+
+## Example (the laundry room warning)
+```csharp
 using System;
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
@@ -288,3 +320,4 @@ enum SceneStage
     CalledToDinner,
     Revealed
 }
+```

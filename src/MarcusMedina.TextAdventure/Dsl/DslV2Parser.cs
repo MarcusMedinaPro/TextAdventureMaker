@@ -17,6 +17,9 @@ public sealed class DslV2Parser : AdventureDslParser
     private readonly Dictionary<string, DslEntityDefinition> _definedItems = [];
     private readonly Dictionary<string, DslEntityDefinition> _definedNpcs = [];
     private readonly DslStartStateDefinition _startState = new();
+    private readonly List<DslItemReaction> _itemReactions = [];
+    private readonly List<DslItemConsequence> _itemConsequences = [];
+    private readonly List<DslRecipe> _recipes = [];
 
     public DslV2Parser()
     {
@@ -43,6 +46,11 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("counter", HandleCounter);
         RegisterKeyword("relationship", HandleRelationship);
         RegisterKeyword("timeline", HandleTimeline);
+
+        // Item reactions and consequences (Slice 074)
+        RegisterKeyword("item_reaction", HandleItemReaction);
+        RegisterKeyword("item_consequence", HandleItemConsequence);
+        RegisterKeyword("recipe", HandleRecipe);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -250,9 +258,103 @@ public sealed class DslV2Parser : AdventureDslParser
         return input.Trim().ToLowerInvariant().Replace(" ", "_");
     }
 
+    private void HandleItemReaction(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string itemId = NormalizeId(parts[0]);
+        string? action = null;
+        string? text = null;
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("on="))
+                action = parts[i][3..];
+            else if (parts[i].StartsWith("text="))
+                text = parts[i][5..];
+        }
+
+        if (!string.IsNullOrEmpty(action) && !string.IsNullOrEmpty(text))
+        {
+            _itemReactions.Add(new DslItemReaction { ItemId = itemId, Action = action, Text = text });
+        }
+    }
+
+    private void HandleItemConsequence(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string itemId = NormalizeId(parts[0]);
+        string? action = null;
+        var consequence = new DslItemConsequence { ItemId = itemId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("on="))
+                action = parts[i][3..];
+            else if (parts[i].StartsWith("destroy="))
+                consequence.Destroy = parts[i][8..].Equals("true", StringComparison.OrdinalIgnoreCase);
+            else if (parts[i].StartsWith("create="))
+                consequence.Create = parts[i][7..].Split(',').Select(x => NormalizeId(x.Trim())).ToList();
+            else if (parts[i].StartsWith("transform="))
+                consequence.Transform = NormalizeId(parts[i][10..]);
+            else if (parts[i].StartsWith("set_flag="))
+            {
+                var kv = parts[i][9..].Split(':');
+                if (kv.Length == 2)
+                    consequence.SetFlags[kv[0]] = kv[1].Equals("true", StringComparison.OrdinalIgnoreCase);
+            }
+            else if (parts[i].StartsWith("inc_counter="))
+            {
+                var kv = parts[i][12..].Split(':');
+                if (kv.Length == 2 && int.TryParse(kv[1], out var val))
+                    consequence.IncrementCounters[kv[0]] = val;
+            }
+            else if (parts[i].StartsWith("message="))
+                consequence.Message = parts[i][8..];
+        }
+
+        if (!string.IsNullOrEmpty(action))
+        {
+            consequence.Action = action;
+            _itemConsequences.Add(consequence);
+        }
+    }
+
+    private void HandleRecipe(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string recipeId = NormalizeId(parts[0]);
+        var recipe = new DslRecipe { Id = recipeId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("left="))
+                recipe.LeftItemId = NormalizeId(parts[i][5..]);
+            else if (parts[i].StartsWith("right="))
+                recipe.RightItemId = NormalizeId(parts[i][6..]);
+            else if (parts[i].StartsWith("create="))
+                recipe.CreatedItemId = NormalizeId(parts[i][7..]);
+            else if (parts[i].StartsWith("message="))
+                recipe.Message = parts[i][8..];
+        }
+
+        if (!string.IsNullOrEmpty(recipe.LeftItemId) && !string.IsNullOrEmpty(recipe.RightItemId) && !string.IsNullOrEmpty(recipe.CreatedItemId))
+        {
+            _recipes.Add(recipe);
+        }
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
+    public IReadOnlyList<DslItemReaction> GetItemReactions() => _itemReactions;
+    public IReadOnlyList<DslItemConsequence> GetItemConsequences() => _itemConsequences;
+    public IReadOnlyList<DslRecipe> GetRecipes() => _recipes;
 }
 
 /// <summary>
@@ -289,4 +391,41 @@ public sealed class DslInventoryEntry
 {
     public string ItemId { get; set; } = "";
     public int Amount { get; set; } = 1;
+}
+
+/// <summary>
+/// Item reaction definition for DSL v2.
+/// </summary>
+public sealed class DslItemReaction
+{
+    public string ItemId { get; set; } = "";
+    public string Action { get; set; } = "";
+    public string Text { get; set; } = "";
+}
+
+/// <summary>
+/// Item consequence definition for DSL v2.
+/// </summary>
+public sealed class DslItemConsequence
+{
+    public string ItemId { get; set; } = "";
+    public string Action { get; set; } = "";
+    public bool Destroy { get; set; }
+    public List<string> Create { get; set; } = [];
+    public string Transform { get; set; } = "";
+    public Dictionary<string, bool> SetFlags { get; set; } = [];
+    public Dictionary<string, int> IncrementCounters { get; set; } = [];
+    public string Message { get; set; } = "";
+}
+
+/// <summary>
+/// Recipe definition for DSL v2 (item combinations).
+/// </summary>
+public sealed class DslRecipe
+{
+    public string Id { get; set; } = "";
+    public string LeftItemId { get; set; } = "";
+    public string RightItemId { get; set; } = "";
+    public string CreatedItemId { get; set; } = "";
+    public string Message { get; set; } = "";
 }

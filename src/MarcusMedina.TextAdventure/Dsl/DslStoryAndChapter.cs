@@ -78,6 +78,10 @@ public sealed class DslStorySystem
     public DslChapterEnding? GetChapterEnding(string chapterId) =>
         _endings.Values.FirstOrDefault(e => e.ChapterId == chapterId);
 
+    public IEnumerable<DslBranch> GetAllBranches() => _branches.Values;
+    public IEnumerable<DslChapter> GetAllChapters() => _chapters.Values;
+    public IEnumerable<DslChapterEnding> GetAllEndings() => _endings.Values;
+
     /// <summary>
     /// Validate story structure.
     /// </summary>

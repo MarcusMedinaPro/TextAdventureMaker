@@ -26,6 +26,12 @@ public sealed class DslV2Parser : AdventureDslParser
     private readonly List<DslRoomDescriptionCondition> _roomDescConditions = [];
     private readonly List<DslRoomVariable> _roomVariables = [];
     private readonly List<DslRoomTransform> _roomTransforms = [];
+    private readonly List<DslNpcDef> _npcDefs = [];
+    private readonly List<DslNpcPlacement> _npcPlacements = [];
+    private readonly List<DslNpcDialog> _npcDialogs = [];
+    private readonly List<DslNpcAcceptanceRule> _acceptanceRules = [];
+    private readonly List<DslNpcAcceptanceDefault> _acceptanceDefaults = [];
+    private int _acceptanceRulePriority = 0;
 
     public DslV2Parser()
     {
@@ -65,6 +71,13 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("room_desc_when", HandleRoomDescWhen);
         RegisterKeyword("room_var", HandleRoomVar);
         RegisterKeyword("room_transform", HandleRoomTransform);
+
+        // NPC definitions (Slice 077)
+        RegisterKeyword("npc", HandleNpc);
+        RegisterKeyword("npc_place", HandleNpcPlace);
+        RegisterKeyword("npc_dialog", HandleNpcDialog);
+        RegisterKeyword("npc_acceptance", HandleNpcAcceptance);
+        RegisterKeyword("npc_acceptance_default", HandleNpcAcceptanceDefault);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -500,6 +513,114 @@ public sealed class DslV2Parser : AdventureDslParser
             _roomTransforms.Add(transform);
     }
 
+    private void HandleNpc(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string npcId = NormalizeId(parts[0]);
+        var npc = new DslNpcDef { Id = npcId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("name="))
+                npc.Name = parts[i][5..];
+            else if (parts[i].StartsWith("state="))
+                npc.State = parts[i][6..];
+            else if (parts[i].StartsWith("health="))
+            {
+                if (int.TryParse(parts[i][7..], out var health))
+                    npc.Health = health;
+            }
+            else if (parts[i].StartsWith("archetype="))
+                npc.Archetype = parts[i][10..];
+            else if (parts[i].StartsWith("dies_at="))
+            {
+                if (int.TryParse(parts[i][8..], out var dies))
+                    npc.DiesAt = dies;
+            }
+            else if (parts[i].StartsWith("movement="))
+                npc.Movement = parts[i][9..];
+            else if (parts[i].StartsWith("description="))
+                npc.Description = parts[i][12..];
+        }
+
+        _npcDefs.Add(npc);
+    }
+
+    private void HandleNpcPlace(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string locationId = NormalizeId(parts[0]);
+        string npcId = NormalizeId(parts[1]);
+
+        _npcPlacements.Add(new DslNpcPlacement { LocationId = locationId, NpcId = npcId });
+    }
+
+    private void HandleNpcDialog(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string npcId = NormalizeId(parts[0]);
+        var dialog = new DslNpcDialog { NpcId = npcId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("text="))
+                dialog.Text = parts[i][5..];
+        }
+
+        _npcDialogs.Add(dialog);
+    }
+
+    private void HandleNpcAcceptance(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string npcId = NormalizeId(parts[0]);
+        var rule = new DslNpcAcceptanceRule { NpcId = npcId, Priority = _acceptanceRulePriority++ };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("target="))
+                rule.TargetId = parts[i][7..];
+            else if (parts[i].StartsWith("if="))
+                rule.Condition = parts[i][3..];
+            else if (parts[i].StartsWith("level="))
+                rule.Level = parts[i][6..];
+            else if (parts[i].StartsWith("say="))
+                rule.Say = parts[i][4..];
+        }
+
+        if (!string.IsNullOrEmpty(rule.TargetId) && !string.IsNullOrEmpty(rule.Level))
+            _acceptanceRules.Add(rule);
+    }
+
+    private void HandleNpcAcceptanceDefault(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string npcId = NormalizeId(parts[0]);
+        var def = new DslNpcAcceptanceDefault { NpcId = npcId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("target="))
+                def.TargetId = parts[i][7..];
+            else if (parts[i].StartsWith("level="))
+                def.Level = parts[i][6..];
+            else if (parts[i].StartsWith("say="))
+                def.Say = parts[i][4..];
+        }
+
+        _acceptanceDefaults.Add(def);
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
@@ -512,6 +633,11 @@ public sealed class DslV2Parser : AdventureDslParser
     public IReadOnlyList<DslRoomDescriptionCondition> GetRoomDescConditions() => _roomDescConditions;
     public IReadOnlyList<DslRoomVariable> GetRoomVariables() => _roomVariables;
     public IReadOnlyList<DslRoomTransform> GetRoomTransforms() => _roomTransforms;
+    public IReadOnlyList<DslNpcDef> GetNpcDefs() => _npcDefs;
+    public IReadOnlyList<DslNpcPlacement> GetNpcPlacements() => _npcPlacements;
+    public IReadOnlyList<DslNpcDialog> GetNpcDialogs() => _npcDialogs;
+    public IReadOnlyList<DslNpcAcceptanceRule> GetAcceptanceRules() => _acceptanceRules;
+    public IReadOnlyList<DslNpcAcceptanceDefault> GetAcceptanceDefaults() => _acceptanceDefaults;
 }
 
 /// <summary>

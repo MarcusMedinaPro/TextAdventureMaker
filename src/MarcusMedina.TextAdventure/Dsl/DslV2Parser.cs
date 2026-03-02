@@ -42,6 +42,11 @@ public sealed class DslV2Parser : AdventureDslParser
     private readonly List<DslQuestCondition> _questConditions = [];
     private readonly List<DslQuestOnComplete> _questOnCompletes = [];
     private readonly List<DslQuestOnFail> _questOnFails = [];
+    private readonly List<DslTrigger> _triggers = [];
+    private readonly List<DslSchedule> _schedules = [];
+    private DslRandomSettings _randomSettings = new();
+    private readonly List<DslRandomEvent> _randomEvents = [];
+    private int _scheduleId = 0;
 
     public DslV2Parser()
     {
@@ -101,6 +106,19 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("quest_condition", HandleQuestCondition);
         RegisterKeyword("quest_on_complete", HandleQuestOnComplete);
         RegisterKeyword("quest_on_fail", HandleQuestOnFail);
+
+        // Event and schedule (Slice 080)
+        RegisterKeyword("on_enter", (ctx, val) => HandleTrigger(ctx, val, "on_enter"));
+        RegisterKeyword("on_pickup", (ctx, val) => HandleTrigger(ctx, val, "on_pickup"));
+        RegisterKeyword("on_talk", (ctx, val) => HandleTrigger(ctx, val, "on_talk"));
+        RegisterKeyword("on_action", (ctx, val) => HandleTrigger(ctx, val, "on_action"));
+        RegisterKeyword("on_npc_death", (ctx, val) => HandleTrigger(ctx, val, "on_npc_death"));
+        RegisterKeyword("on_tick", (ctx, val) => HandleTrigger(ctx, val, "on_tick"));
+        RegisterKeyword("schedule_at", HandleScheduleAt);
+        RegisterKeyword("schedule_every", HandleScheduleEvery);
+        RegisterKeyword("schedule_when", HandleScheduleWhen);
+        RegisterKeyword("random_settings", HandleRandomSettings);
+        RegisterKeyword("random_event", HandleRandomEvent);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -823,6 +841,130 @@ public sealed class DslV2Parser : AdventureDslParser
         _questOnFails.Add(new DslQuestOnFail { QuestId = questId, Effects = effects });
     }
 
+    private void HandleTrigger(AdventureDslContext context, string value, string triggerType)
+    {
+        var parts = SplitParts(value);
+        var trigger = new DslTrigger { TriggerType = triggerType };
+
+        // Context can be location_id, item_id, etc. depending on trigger type
+        if (parts.Count > 0 && !parts[0].Contains("="))
+            trigger.Context = NormalizeId(parts[0]);
+
+        for (int i = (trigger.Context != "" ? 1 : 0); i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("if="))
+                trigger.Condition = parts[i][3..];
+            else if (parts[i].StartsWith("effects="))
+                trigger.Effects = parts[i][8..];
+        }
+
+        if (!string.IsNullOrEmpty(trigger.Effects))
+            _triggers.Add(trigger);
+    }
+
+    private void HandleScheduleAt(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        if (int.TryParse(parts[0], out var tick))
+        {
+            var schedule = new DslSchedule { Id = $"schedule_{_scheduleId++}", ScheduleType = "at", TickValue = tick };
+
+            for (int i = 1; i < parts.Count; i++)
+            {
+                if (parts[i].StartsWith("effects="))
+                    schedule.Effects = parts[i][8..];
+            }
+
+            if (!string.IsNullOrEmpty(schedule.Effects))
+                _schedules.Add(schedule);
+        }
+    }
+
+    private void HandleScheduleEvery(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        if (int.TryParse(parts[0], out var ticks))
+        {
+            var schedule = new DslSchedule { Id = $"schedule_{_scheduleId++}", ScheduleType = "every", TickValue = ticks };
+
+            for (int i = 1; i < parts.Count; i++)
+            {
+                if (parts[i].StartsWith("effects="))
+                    schedule.Effects = parts[i][8..];
+            }
+
+            if (!string.IsNullOrEmpty(schedule.Effects))
+                _schedules.Add(schedule);
+        }
+    }
+
+    private void HandleScheduleWhen(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        var schedule = new DslSchedule { Id = $"schedule_{_scheduleId++}", ScheduleType = "when" };
+
+        for (int i = 0; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("if="))
+                schedule.Condition = parts[i][3..];
+            else if (parts[i].StartsWith("effects="))
+                schedule.Effects = parts[i][8..];
+        }
+
+        if (!string.IsNullOrEmpty(schedule.Condition) && !string.IsNullOrEmpty(schedule.Effects))
+            _schedules.Add(schedule);
+    }
+
+    private void HandleRandomSettings(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+
+        for (int i = 0; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("enabled="))
+                _randomSettings.Enabled = parts[i][8..].Equals("true", StringComparison.OrdinalIgnoreCase);
+            else if (parts[i].StartsWith("chance="))
+            {
+                if (float.TryParse(parts[i][7..], out var chance))
+                    _randomSettings.Chance = Math.Clamp(chance, 0f, 1f);
+            }
+        }
+    }
+
+    private void HandleRandomEvent(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string eventId = NormalizeId(parts[0]);
+        var evt = new DslRandomEvent { Id = eventId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("weight="))
+            {
+                if (int.TryParse(parts[i][7..], out var w))
+                    evt.Weight = w;
+            }
+            else if (parts[i].StartsWith("cooldown="))
+            {
+                if (int.TryParse(parts[i][9..], out var cd))
+                    evt.Cooldown = cd;
+            }
+            else if (parts[i].StartsWith("if="))
+                evt.Condition = parts[i][3..];
+            else if (parts[i].StartsWith("effects="))
+                evt.Effects = parts[i][8..];
+        }
+
+        if (!string.IsNullOrEmpty(evt.Effects))
+            _randomEvents.Add(evt);
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
@@ -849,6 +991,10 @@ public sealed class DslV2Parser : AdventureDslParser
     public IReadOnlyList<DslQuestCondition> GetQuestConditions() => _questConditions;
     public IReadOnlyList<DslQuestOnComplete> GetQuestOnCompletes() => _questOnCompletes;
     public IReadOnlyList<DslQuestOnFail> GetQuestOnFails() => _questOnFails;
+    public IReadOnlyList<DslTrigger> GetTriggers() => _triggers;
+    public IReadOnlyList<DslSchedule> GetSchedules() => _schedules;
+    public DslRandomSettings GetRandomSettings() => _randomSettings;
+    public IReadOnlyList<DslRandomEvent> GetRandomEvents() => _randomEvents;
 }
 
 /// <summary>

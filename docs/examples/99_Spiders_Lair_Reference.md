@@ -12,8 +12,8 @@
     "rooms": [
       {
         "id": "village_square",
-        "name": "Bytorget",
-        "description": "Du står på torget i en liten by. En port leder norrut, en källardörr söderut.",
+        "name": "Village Square",
+        "description": "You stand in the village square. A city gate leads north, and a basement door leads south.",
         "exits": {
           "north": "city_gate",
           "south": "basement"
@@ -22,8 +22,8 @@
       },
       {
         "id": "city_gate",
-        "name": "Stadsporten",
-        "description": "En massiv port av järn. Den verkar kunna stängas vid solnedgång.",
+        "name": "City Gate",
+        "description": "A massive iron gate that can be sealed at sundown.",
         "exits": {
           "south": "village_square"
         },
@@ -31,8 +31,8 @@
       },
       {
         "id": "basement",
-        "name": "Källare",
-        "description": "En fuktig, mörk källare. Vattnet sipprar in från väggarna.",
+        "name": "Basement",
+        "description": "A damp, dark basement. Water seeps through the stone walls.",
         "exits": {
           "north": "village_square",
           "east": "cave_entrance"
@@ -41,8 +41,8 @@
       },
       {
         "id": "cave_entrance",
-        "name": "Grottans mynning",
-        "description": "En mörk öppning leder in i berget. Ett svagt rassel hörs inifrån...",
+        "name": "Cave Entrance",
+        "description": "A black opening leads into the mountain. A faint skittering sound echoes within.",
         "exits": {
           "west": "basement"
         },
@@ -52,46 +52,46 @@
     "objects": [
       {
         "id": "torch",
-        "name": "Fackla",
+        "name": "Torch",
         "attributes": ["light_source", "portable"],
         "state": "unlit",
-        "description": "En enkel fackla. Den måste tändas för att lysa upp mörker."
+        "description": "A simple torch. It must be lit to pierce the dark."
       },
       {
         "id": "poster",
-        "name": "Affisch",
+        "name": "Poster",
         "attributes": ["readable"],
-        "description": "En sliten affisch: 'Varning för muterade spindlar!'"
+        "description": "A torn notice: 'Warning: mutant spiders!'"
       },
       {
         "id": "wooden_plank",
-        "name": "Planka",
+        "name": "Wooden Plank",
         "attributes": ["portable", "buildable"],
-        "description": "En stadig träplanka. Kan användas för att bygga en bro eller flotte."
+        "description": "A sturdy plank. It could be used for a makeshift bridge or raft."
       },
       {
         "id": "egg_cluster",
-        "name": "Äggklase",
+        "name": "Egg Cluster",
         "attributes": ["fragile"],
-        "description": "En klase glänsande spindelägg. De rör sig nästan..."
+        "description": "A clutch of glossy spider eggs. They seem to twitch when you stare too long."
       }
     ],
     "npcs": [
       {
         "id": "village_guard",
-        "name": "Byvakt",
+        "name": "Village Guard",
         "location": "city_gate",
         "dialogue": [
-          "Håll dig inne när solen går ner!",
-          "Jag har sett spindlarna röra sig i skogen..."
+          "Stay indoors when the sun goes down!",
+          "I have seen the spiders moving in the woods..."
         ],
         "schedule": ["city_gate", "village_square"]
       },
       {
         "id": "mutant_spider",
-        "name": "Muterad spindel",
+        "name": "Mutant Spider",
         "location": "cave_entrance",
-        "behavior": "hostile",
+        "behaviour": "hostile",
         "dialogue": [],
         "on_tick": "chase_player"
       }
@@ -102,14 +102,14 @@
         "time": "18:00",
         "action": "close_door",
         "target": "city_gate",
-        "message": "Porten stängs med ett brak!"
+        "message": "The gate slams shut!"
       },
       {
         "type": "countdown",
         "duration": 10,
         "action": "flood_room",
         "target": "basement",
-        "message": "Vattnet stiger i källaren – du måste fly!"
+        "message": "Water rises in the basement - you must flee!"
       },
       {
         "type": "after_ticks",
@@ -117,14 +117,14 @@
         "action": "spawn",
         "target": "mutant_spider",
         "location": "cave_entrance",
-        "message": "Äggen spricker – spindlar kryper fram ur klasen!"
+        "message": "The eggs split - spiders spill out!"
       },
       {
         "type": "chase",
         "ticks": 1,
         "npc": "mutant_spider",
         "follow": "player",
-        "message": "Du hör spindelns steg bakom dig..."
+        "message": "You hear the spider creeping behind you..."
       }
     ]
   },
@@ -147,22 +147,16 @@
 ```
                 ┌─────────────┐
                 │   City Gate │
-                │   (NPC: Guard)
-                │   [Port stängs 18:00]
+                │  NPC: Guard │
+                │ [Closes 18:00]
                 └───────▲─────┘
                         │
                         │
 ┌─────────────┐   ┌─────┴─────┐   ┌──────────────┐
-│ Village Sq. │   │  Basement │──▶│ Cave Entrance│
-│ (Start)     │   │ (Översväm-│   │ (Äggklase +  │
-│ Obj: Torch, │   │  mas efter│   │ mutant spider│
-│ Poster      │   │   10 drag)│   │ spawn efter  │
-└───────▲─────┘   └───────────┘   │   20 drag)   │
-        │                         └──────────────┘
-        │
-        │
-        ▼
-   [Spelaren startar här]
+│Village Square│   │  Basement │──▶│ Cave Entrance│
+│   (Start)    │   │ [Flood +10]│   │ [Eggs +20]   │
+│ Torch, Poster│   │    Plank   │   │ Mutant Spider│
+└───────▲──────┘   └───────────┘   └──────────────┘
 ```
 
 ---
@@ -171,50 +165,50 @@
 
 | Feature | Implementation |
 |---------|----------------|
-| **4 rooms** | torget, porten, källaren, grottan |
-| **4 objects** | fackla, affisch, planka, äggklase |
-| **2 NPCs** | vakt med schema, mutantspindel som jagar |
-| **4 events** | port stänger kl. 18, källare översvämmas, ägg kläcks efter 20 drag, spindeljakt varje drag |
+| **4 rooms** | village square, city gate, basement, cave entrance |
+| **4 objects** | torch, poster, wooden plank, egg cluster |
+| **2 NPCs** | scheduled guard, hostile mutant spider |
+| **4 events** | gate closure, basement flood, egg hatch, per-turn chase |
 
 ---
 
 ## Gameplay Flow
 
-### 1. Start – Village Square
+### 1. Start - Village Square
 
-* Spelaren börjar här
-* De ser: **Torch (unlit)** + **Poster**
-* **Poster** ger ledtråd: *"Varning för muterade spindlar!"*
-* **Torch** kan plockas upp → behöver tändas senare
+- The player starts here.
+- They can find **Torch (unlit)** and **Poster**.
+- **Poster** gives the core warning.
+- **Torch** is useful later in dark zones.
 
-### 2. Utforska – City Gate
+### 2. Explore - City Gate
 
-* Porten står öppen på dagen
-* **NPC Guard** finns här. Dialog hintar: *"Stanna inne när solen går ner."*
-* Om spelaren väntar för länge (efter kl. 18) stängs porten → ingen flyktväg
+- The gate is open during daytime.
+- **Village Guard** gives time-pressure hints.
+- If the player waits too long (after 18:00), the gate closes.
 
-### 3. Utforska – Basement
+### 3. Explore - Basement
 
-* En fuktig källare med **Wooden Plank**
-* Event: *Efter 10 drag börjar vattnet stiga*
-* Om spelaren dröjer för länge → källaren översvämmas → game over
+- A damp basement with **Wooden Plank**.
+- Event: after 10 turns, water rises.
+- Delay too long and the basement becomes a fail state.
 
 ### 4. Cave Entrance
 
-* Här finns **Egg Cluster** (spindelägg)
-* Efter 20 drag → äggen spricker → **Mutant Spider** spawnar
-* När spindeln finns → den jagar spelaren (ett steg närmare varje drag)
+- Contains **Egg Cluster**.
+- After 20 turns, eggs hatch and spawn **Mutant Spider**.
+- Once spawned, the spider pursues the player each turn.
 
-### 5. Pussel – Planka
+### 5. Puzzle Potential - Wooden Plank
 
-* **Wooden Plank** kan användas för att skapa en provisorisk bro
-* Fungerar som "quest item" för framtida expansion
+- **Wooden Plank** can support traversal puzzles.
+- Works well as a future quest item or route unlock.
 
-### 6. Kritiska val
+### 6. Critical Choices
 
-* Om facklan inte är tänd → spelaren famlar i mörkret i grottan
-* Om spelaren väntar för länge → porten stängs, källaren översvämmas, spindlarna kläcks
-* Om spelaren agerar snabbt → kan förstöra äggen innan de kläcks
+- If the torch remains unlit, cave navigation becomes risky.
+- If the player stalls, deadlines stack: closed gate, flood, hatch.
+- If they act quickly, they can destroy eggs before hatching.
 
 ---
 
@@ -222,20 +216,20 @@
 
 | Ending | Condition |
 |--------|-----------|
-| **Victory 1** | Förstör äggen innan de kläcks → byn räddad |
-| **Victory 2** | Fly innan porten stängs → du överlever, men spindlarna sprider sig |
-| **Loss 1** | Fast i översvämmad källare |
-| **Loss 2** | Spindlar kläcks → jagar dig och dödar dig |
-| **Loss 3** | Porten stängs, spindlarna tar över |
+| **Victory 1** | Destroy eggs before they hatch, saving the village |
+| **Victory 2** | Escape before gate closure, surviving while danger remains |
+| **Loss 1** | Trapped in the flooded basement |
+| **Loss 2** | Spider hatches, catches, and kills the player |
+| **Loss 3** | Gate closes and the spiders overrun the area |
 
 ---
 
 ## Design Points
 
-* **Tid som fiende** – flera parallella deadlines
-* **Valfrihet** – olika slut, både "heroisk" och "survivalistisk"
-* **Replayability** – spelaren kan experimentera med olika strategier
-* **Stämning** – klassisk C64-känsla: mörker, enkla resurser, hårda val
+- **Time as enemy**: multiple parallel deadlines.
+- **Meaningful choice**: different endings from route and pacing.
+- **Replayability**: strategic experimentation across runs.
+- **Atmosphere**: classic C64-inspired survival pressure.
 
 ---
 
@@ -247,14 +241,14 @@
 {
   "id": "river_bank",
   "name": "River Bank",
-  "description": "En bred flod blockerar vägen till grottans inre. En trasig båt ligger vid stranden.",
+  "description": "A broad river blocks the inner cave route. A damaged boat rests at the shore.",
   "exits": { "west": "cave_entrance", "east": "spider_temple" },
   "objects": ["boat"]
 },
 {
   "id": "jungle_clearing",
   "name": "Jungle Clearing",
-  "description": "En apa hänger i trädet och stirrar på dig med nyfikna ögon.",
+  "description": "A monkey hangs from a branch and studies you with bright, curious eyes.",
   "exits": { "north": "basement" },
   "objects": ["banana"],
   "npcs": ["monkey"]
@@ -262,7 +256,7 @@
 {
   "id": "spider_temple",
   "name": "Spider Temple",
-  "description": "Slutrummet med spindeldrottningen. Dörren är låst med spindelsymboler.",
+  "description": "Final chamber of the Spider Queen. The door is sealed by spider glyphs.",
   "exits": { "west": "river_bank" },
   "locked_until": "egg_offering"
 }
@@ -275,14 +269,14 @@
   "id": "banana",
   "name": "Banana",
   "attributes": ["portable", "edible"],
-  "description": "A ripe, yellow banana. Monkeys love these."
+  "description": "A ripe yellow banana. Monkeys adore these."
 },
 {
   "id": "boat",
   "name": "Boat",
   "attributes": ["vehicle"],
   "state": "broken",
-  "description": "A small boat with a hole in the bottom."
+  "description": "A small boat with a hole in the hull."
 }
 ```
 
@@ -293,7 +287,7 @@
   "id": "monkey",
   "name": "Mischievous Monkey",
   "location": "jungle_clearing",
-  "behavior": "neutral",
+  "behaviour": "neutral",
   "on_tick": {
     "chance": 0.1,
     "action": "steal_item",
@@ -302,12 +296,12 @@
   "on_give": {
     "banana": {
       "action": "plug_boat_hole",
-      "message": "Apan gnager lyckligt på bananen och sätter sig sedan i båten. Den sticker in svansen i hålet — båten är tät!"
+      "message": "The monkey chews happily on the banana, then wedges its tail into the hull gap. The boat is watertight."
     }
   },
   "dialogue": [
     "Ook ook!",
-    "*The monkey stares at your banana with suspicious interest…*"
+    "*The monkey watches your banana with suspicious interest...*"
   ]
 }
 ```
@@ -316,19 +310,19 @@
 
 | Command | Response |
 |---------|----------|
-| `climb monkey` | *"The monkey giggles and climbs you instead. Now you smell like bananas."* |
+| `climb monkey` | *"The monkey giggles and climbs you instead. You now smell of bananas."* |
 | `attack monkey` | *"The monkey counters with a banana peel to the face."* |
-| `use torch on boat` | *"Well, you burned the boat. Hope you like swimming."* |
+| `use torch on boat` | *"Well, you burned the boat. Hope you enjoy swimming."* |
 
 ### Expanded Flow
 
-1. Spelaren får fackla i byn
-2. Går till djungeln → hittar apan, bananen
-3. Ger banan till apan → apan blir din kaotiska sidekick
-4. I River Bank → apan hjälper att laga båten med svansen
-5. Korsar floden → når Spider Temple
-6. Offrar ett ägg på altaret → öppnar dörren
-7. Slutboss: Spindeldrottningen → final showdown eller smart pussellösning
+1. The player collects the torch in the village.
+2. They reach the jungle and find monkey + banana.
+3. They give the banana and gain a chaotic monkey ally.
+4. At River Bank, the monkey helps patch the boat.
+5. They cross the river and reach Spider Temple.
+6. They offer an egg at the altar to unlock the door.
+7. Final boss: Spider Queen showdown or puzzle-based resolution.
 
 ---
 
@@ -336,50 +330,50 @@
 
 ```csharp
 var game = new GameBuilder("Spider's Lair")
-    .WithIntro("Byn hotas av muterade spindlar. Kan du stoppa dem innan det är för sent?")
-    .WithGoal("Förstör spindeläggen eller fly från byn.")
+    .WithIntro("The village is threatened by mutant spiders. Can you stop them before it is too late?")
+    .WithGoal("Destroy the spider eggs or flee the village.")
     .AddLocation("village_square", loc => loc
-        .Name("Bytorget")
-        .Description("Du står på torget i en liten by.")
+        .Name("Village Square")
+        .Description("You stand in a small village square.")
         .AddItem("torch", item => item.IsLightSource().State("unlit"))
-        .AddItem("poster", item => item.IsReadable().OnRead("Varning för muterade spindlar!"))
+        .AddItem("poster", item => item.IsReadable().OnRead("Warning: mutant spiders!"))
         .AddExit(Direction.North, "city_gate")
         .AddExit(Direction.South, "basement"))
     .AddLocation("city_gate", loc => loc
-        .Name("Stadsporten")
-        .Description("En massiv port av järn.")
+        .Name("City Gate")
+        .Description("A massive iron gate.")
         .AddExit(Direction.South, "village_square")
         .AddNpc("guard", npc => npc
-            .AddDialogue("Håll dig inne när solen går ner!")
+            .AddDialogue("Stay indoors when the sun goes down!")
             .WithSchedule("city_gate", "village_square")))
     .AddLocation("basement", loc => loc
-        .Name("Källare")
-        .Description("En fuktig, mörk källare.")
+        .Name("Basement")
+        .Description("A damp, dark basement.")
         .AddItem("wooden_plank", item => item.IsTakeable())
         .AddExit(Direction.North, "village_square")
         .AddExit(Direction.East, "cave_entrance"))
     .AddLocation("cave_entrance", loc => loc
-        .Name("Grottans mynning")
-        .Description("En mörk öppning leder in i berget.")
+        .Name("Cave Entrance")
+        .Description("A dark opening leads into the mountain.")
         .AddItem("egg_cluster", item => item.IsFragile())
         .AddExit(Direction.West, "basement"))
     // Events
     .AddEvent(evt => evt
         .AtTime(18, 0)
         .CloseDoor("city_gate")
-        .WithMessage("Porten stängs med ett brak!"))
+        .WithMessage("The gate slams shut!"))
     .AddEvent(evt => evt
         .AfterTicks(10)
         .FloodRoom("basement")
-        .WithMessage("Vattnet stiger i källaren – du måste fly!"))
+        .WithMessage("Water rises in the basement - you must flee!"))
     .AddEvent(evt => evt
         .AfterTicks(20)
         .SpawnNpc("mutant_spider", "cave_entrance")
-        .WithMessage("Äggen spricker – spindlar kryper fram!"))
+        .WithMessage("The eggs crack open - spiders crawl free!"))
     .AddNpc("mutant_spider", npc => npc
         .IsHostile()
         .ChasesPlayer()
-        .WithChaseMessage("Du hör spindelns steg bakom dig..."))
+        .WithChaseMessage("You hear the spider creeping behind you..."))
     .StartAt("village_square")
     .Build();
 ```
@@ -393,7 +387,7 @@ This adventure demonstrates features from:
 - **Slice 001**: Location & Navigation
 - **Slice 002**: Doors & Keys
 - **Slice 004**: Items & Inventory
-- **Slice 005**: NPCs & Dialog
+- **Slice 005**: NPCs & Dialogue
 - **Slice 006**: Event System
 - **Slice 021**: Time System
 - **Slice 038**: Time-Triggered Objects

@@ -50,7 +50,7 @@ WriteLineC64($"Language file: {Path.GetFileName(Language.GetLanguageFilePath(jso
 WriteLineC64(Language.LanguageHint);
 int hour = 8;
 int minutes = 30;
-string[] destroyPrefixes = ["destroy ", "smash ", "krossa ", "förstör ", "sla ", "slå "];
+string[] destroyPrefixes = ["destroy ", "smash ", "break "];
 
 ShowRoom();
 while (true)
@@ -227,9 +227,9 @@ static KeywordParser BuildParser(JsonLanguageProvider provider)
 {
     KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
         .WithLanguageProvider(provider)
-        .WithIgnoreItemTokens("up", "to", "at", "the", "a", "på", "till", "en", "ett")
-        .WithCombineSeparators("and", "+", "och", "med")
-        .WithPourPrepositions("into", "in", "i")
+        .WithIgnoreItemTokens("up", "to", "at", "the", "a")
+        .WithCombineSeparators("and", "+", "with")
+        .WithPourPrepositions("into", "in")
         .WithDirectionAliases(provider.GetDirectionAliases())
         .AllowDirectionEnumNames(true)
         .Build();
@@ -346,7 +346,7 @@ bool IsDestroyCommand(string input)
 
 static bool IsLanguageCommand(string token)
 {
-    return token.TextCompare("language") || token.TextCompare("lang") || token.TextCompare("språk");
+    return token.TextCompare("language") || token.TextCompare("lang");
 }
 
 static bool ShouldShowRoom(ICommand command, CommandResult result)
@@ -378,27 +378,27 @@ bool HandleNoItemHere()
 ## Language file format (JSON)
 ```json
 {
-  "meta": { "code": "sv", "name": "Svenska" },
+  "meta": { "code": "en-gb", "name": "British English" },
   "labels": {
-    "roomLabel": "Rum:",
-    "descriptionLabel": "Beskrivning:",
-    "itemsHereLabel": "Föremål här:",
-    "exitsLabel": "Utgångar:",
-    "goalLabel": "Mål:"
+    "roomLabel": "Room:",
+    "descriptionLabel": "Description:",
+    "itemsHereLabel": "Items here:",
+    "exitsLabel": "Exits:",
+    "goalLabel": "Goal:"
   },
   "messages": {
-    "goalIntro": "Ladda den språkleverantör du föredrar innan du går till mötet.",
-    "languageHint": "Skriv \"language <code>\" för att byta språk."
+    "goalIntro": "Load your preferred language provider before heading to the meeting.",
+    "languageHint": "Type \"language <code>\" to switch language."
   },
   "names": {
-    "bedroom": "Sovrum",
-    "hallway": "Korridor",
-    "coffee": "Kaffe"
+    "bedroom": "Bedroom",
+    "hallway": "Hallway",
+    "coffee": "Coffee"
   },
   "descriptions": {
-    "bedroom": "Ditt alarm blinkar 08:57. En kappa hänger vid dörren.",
-    "hallway": "En tyst korridor med en spegel.",
-    "coffee": "En het kopp kaffe."
+    "bedroom": "Your alarm blinks 08:57. A coat hangs by the door.",
+    "hallway": "A quiet hallway with a mirror.",
+    "coffee": "A hot cup of coffee."
   }
 }
 ```

@@ -22,6 +22,7 @@ using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
 StoryStage stage = StoryStage.Briefing;
 bool basementSeen;
+bool suppliesReadyAnnounced;
 
 Location wardCorridor = new("ward_corridor", "A sterile night corridor. Fluorescent lights buzz over polished floors.");
 Location liftCar = new("lift_car", "A mirrored hospital lift that smells faintly of antiseptic and metal.");
@@ -41,22 +42,31 @@ wardCorridor.AddItem(new Item("poster", "Safety Poster", "A laminated poster abo
 wardCorridor.AddItem(new Item("sanitiser", "Sanitiser Pump", "A wall-mounted sanitiser pump with a sticky nozzle.").SetTakeable(false));
 wardCorridor.AddItem(new Item("vending", "Vending Machine", "Chocolate bars, isotonic drinks, and crisps no one admits to buying.").SetTakeable(false));
 wardCorridor.AddItem(new Item("chair", "Plastic Chair", "A waiting chair with one short leg.").SetTakeable(false));
+wardCorridor.AddItem(new Item("clock", "Wall Clock", "A ticking wall clock frozen two minutes slow.").SetTakeable(false));
+wardCorridor.AddItem(new Item("umbrella", "Umbrella Stand", "Three damp umbrellas and one bent walking stick.").SetTakeable(false));
+wardCorridor.AddItem(new Item("noticeboard", "Noticeboard", "Shift swaps, cafeteria offers, and half a missing crossword.").SetTakeable(false).SetReadable().SetReadText("Night shift short-staffed. Bring your own tea."));
 
 // Red herrings: lift details
 liftCar.AddItem(new Item("panel", "Button Panel", "Rows of numbered buttons, one cracked and taped over.").SetTakeable(false));
 liftCar.AddItem(new Item("mirror", "Lift Mirror", "Your face looks older under hospital light.").SetTakeable(false));
 liftCar.AddItem(new Item("camera", "Ceiling Camera", "A tiny red LED blinks without comfort.").SetTakeable(false));
+liftCar.AddItem(new Item("mat", "Lift Mat", "A rubber mat marked with muddy heel prints.").SetTakeable(false));
 
 // Red herrings: basement and store
 basementLanding.AddItem(new Item("mop", "Mop", "A wet mop leaning against a caution sign."));
 basementLanding.AddItem(new Item("sign", "Caution Sign", "CAUTION: WET FLOOR. The plastic is cracked at the base.").SetTakeable(false).SetReadable().SetReadText("Someone has scribbled 'still slippery' in pen."));
 basementLanding.AddItem(new Item("vent", "Vent Grille", "A rusted vent grille humming with distant machinery.").SetTakeable(false));
+basementLanding.AddItem(new Item("trolley", "Service Trolley", "An empty steel trolley with one squeaking wheel.").SetTakeable(false));
+basementLanding.AddItem(new Item("intercom", "Wall Intercom", "A beige intercom handset with faded labels.").SetTakeable(false));
 
 supplyStore.AddItem(new Item("gauze", "Gauze Pack", "Sterile gauze packs in sealed blue wrappers."));
 supplyStore.AddItem(new Item("saline", "Saline Bag", "Clear fluid bags hanging from a wire rack."));
 supplyStore.AddItem(new Item("mask_box", "Mask Box", "Disposable masks in a cardboard dispenser."));
 supplyStore.AddItem(new Item("locker", "Storage Locker", "A tall metal locker with chipped paint and a stubborn latch.").SetTakeable(false));
 supplyStore.AddItem(new Item("manifest", "Delivery Manifest", "A clipboard listing deliveries to theatre and ICU.").SetReadable().SetReadText("Sutures, dressings, tubing, syringes. Everything except peace of mind."));
+supplyStore.AddItem(new Item("sharps_box", "Sharps Box", "A yellow sharps box bolted to the wall.").SetTakeable(false));
+supplyStore.AddItem(new Item("blanket", "Thermal Blanket", "A folded silver thermal blanket that crackles like foil."));
+supplyStore.AddItem(new Item("torch", "Pocket Torch", "A cheap pocket torch with a weak battery."));
 
 Npc woman = new("woman", "Patient")
     .Description("A calm woman in a hospital gown, standing with her hands folded.")
@@ -95,6 +105,12 @@ while (stage != StoryStage.Ended)
     CommandResult result = state.Execute(command);
     state.DisplayResult(command, result);
 
+    if (command is TakeCommand && result.Success && !suppliesReadyAnnounced && HasRequiredSupplies())
+    {
+        suppliesReadyAnnounced = true;
+        WriteLineC64("You have enough supplies. Time to get back upstairs.");
+    }
+
     if (result.ShouldQuit)
         break;
 
@@ -106,6 +122,15 @@ return;
 
 bool HandleSpecial(string text)
 {
+    if ((text.TextCompare("go up") || text.TextCompare("up") || text.TextCompare("go upstairs"))
+        && stage == StoryStage.BasementReached
+        && state.IsCurrentRoomId("basement_landing")
+        && !HasRequiredSupplies())
+    {
+        WriteLineC64("You were sent for supplies. You should grab at least gauze and a saline bag first.");
+        return true;
+    }
+
     if (text.TextCompare("open vending machine"))
     {
         WriteLineC64("You rattle the flap. It stays shut and judges you quietly.");
@@ -121,6 +146,36 @@ bool HandleSpecial(string text)
         }
 
         WriteLineC64("You force the locker open. Aprons, mop heads, and an old radio. Nothing useful.");
+        return true;
+    }
+
+    if (text.TextCompare("open vent") || text.TextCompare("open vent grille"))
+    {
+        WriteLineC64("You tug at the grille. Rust flakes down, but it does not budge.");
+        return true;
+    }
+
+    if (text.TextCompare("call porter") || text.TextCompare("use intercom") || text.TextCompare("call security"))
+    {
+        if (!state.IsCurrentRoomId("basement_landing"))
+        {
+            WriteLineC64("You mutter for help to no one in particular.");
+            return true;
+        }
+
+        WriteLineC64("You lift the intercom. Only static answers back.");
+        return true;
+    }
+
+    if (text.TextCompare("check wristband") || text.TextCompare("look wristband"))
+    {
+        if (!state.IsCurrentRoomId("lift_car"))
+        {
+            WriteLineC64("No patient stands close enough here.");
+            return true;
+        }
+
+        WriteLineC64("Her wrist is turned away. You tell yourself you imagined the unease.");
         return true;
     }
 
@@ -145,6 +200,10 @@ bool HandleSpecial(string text)
 
     return false;
 }
+
+bool HasRequiredSupplies() =>
+    state.Inventory.FindItem("gauze") is not null
+    && state.Inventory.FindItem("saline") is not null;
 
 void HandleMoveBeat(Direction direction)
 {

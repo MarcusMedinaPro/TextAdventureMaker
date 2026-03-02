@@ -36,6 +36,12 @@ public sealed class DslV2Parser : AdventureDslParser
     private readonly List<DslNpcRule> _npcRules = [];
     private readonly List<DslNpcTrigger> _npcTriggers = [];
     private int _npcRulePriority = 1000; // Higher = evaluated first
+    private readonly List<DslQuest> _quests = [];
+    private readonly List<DslQuestStage> _questStages = [];
+    private readonly List<DslQuestObjective> _questObjectives = [];
+    private readonly List<DslQuestCondition> _questConditions = [];
+    private readonly List<DslQuestOnComplete> _questOnCompletes = [];
+    private readonly List<DslQuestOnFail> _questOnFails = [];
 
     public DslV2Parser()
     {
@@ -87,6 +93,14 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("npc_dialog_option", HandleNpcDialogOption);
         RegisterKeyword("npc_rule", HandleNpcRule);
         RegisterKeyword("npc_trigger", HandleNpcTrigger);
+
+        // Quest definitions (Slice 079)
+        RegisterKeyword("quest", HandleQuest);
+        RegisterKeyword("quest_stage", HandleQuestStage);
+        RegisterKeyword("quest_objective", HandleQuestObjective);
+        RegisterKeyword("quest_condition", HandleQuestCondition);
+        RegisterKeyword("quest_on_complete", HandleQuestOnComplete);
+        RegisterKeyword("quest_on_fail", HandleQuestOnFail);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -711,6 +725,104 @@ public sealed class DslV2Parser : AdventureDslParser
             _npcTriggers.Add(trigger);
     }
 
+    private void HandleQuest(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string questId = NormalizeId(parts[0]);
+        var quest = new DslQuest { Id = questId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("title="))
+                quest.Title = parts[i][6..];
+            else if (parts[i].StartsWith("desc="))
+                quest.Description = parts[i][5..];
+            else if (parts[i].StartsWith("state="))
+                quest.State = parts[i][6..];
+        }
+
+        _quests.Add(quest);
+    }
+
+    private void HandleQuestStage(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string questId = NormalizeId(parts[0]);
+        var stage = new DslQuestStage { QuestId = questId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("id="))
+                stage.StageId = parts[i][3..];
+            else if (parts[i].StartsWith("required="))
+                stage.Required = parts[i][9..].Split(',').Select(x => NormalizeId(x.Trim())).ToList();
+            else if (parts[i].StartsWith("optional="))
+                stage.Optional = parts[i][9..].Split(',').Select(x => NormalizeId(x.Trim())).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(stage.StageId))
+            _questStages.Add(stage);
+    }
+
+    private void HandleQuestObjective(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string questId = NormalizeId(parts[0]);
+        var objective = new DslQuestObjective { QuestId = questId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("id="))
+                objective.ObjectiveId = parts[i][3..];
+            else if (parts[i].StartsWith("title="))
+                objective.Title = parts[i][6..];
+            else if (parts[i].StartsWith("desc="))
+                objective.Description = parts[i][5..];
+        }
+
+        if (!string.IsNullOrEmpty(objective.ObjectiveId))
+            _questObjectives.Add(objective);
+    }
+
+    private void HandleQuestCondition(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string questId = NormalizeId(parts[0]);
+        string expr = string.Join(" ", parts[1..]);
+
+        _questConditions.Add(new DslQuestCondition { QuestId = questId, Expression = expr });
+    }
+
+    private void HandleQuestOnComplete(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string questId = NormalizeId(parts[0]);
+        string effects = string.Join(" ", parts[1..]);
+
+        _questOnCompletes.Add(new DslQuestOnComplete { QuestId = questId, Effects = effects });
+    }
+
+    private void HandleQuestOnFail(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string questId = NormalizeId(parts[0]);
+        string effects = string.Join(" ", parts[1..]);
+
+        _questOnFails.Add(new DslQuestOnFail { QuestId = questId, Effects = effects });
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
@@ -731,6 +843,12 @@ public sealed class DslV2Parser : AdventureDslParser
     public IReadOnlyList<DslNpcDialogOption> GetDialogOptions() => _dialogOptions;
     public IReadOnlyList<DslNpcRule> GetNpcRules() => _npcRules;
     public IReadOnlyList<DslNpcTrigger> GetNpcTriggers() => _npcTriggers;
+    public IReadOnlyList<DslQuest> GetQuests() => _quests;
+    public IReadOnlyList<DslQuestStage> GetQuestStages() => _questStages;
+    public IReadOnlyList<DslQuestObjective> GetQuestObjectives() => _questObjectives;
+    public IReadOnlyList<DslQuestCondition> GetQuestConditions() => _questConditions;
+    public IReadOnlyList<DslQuestOnComplete> GetQuestOnCompletes() => _questOnCompletes;
+    public IReadOnlyList<DslQuestOnFail> GetQuestOnFails() => _questOnFails;
 }
 
 /// <summary>

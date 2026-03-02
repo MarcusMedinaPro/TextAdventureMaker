@@ -1,0 +1,177 @@
+// Demo Adventure in Pure DSL v2
+// A complete playable adventure demonstrating all DSL v2 features
+
+world: The Forsaken Library
+goal: Escape the library with the ancient manuscript
+
+current_location: entrance
+
+// === ENTITIES ===
+
+// Items
+define item: rusty_key | A rusty iron key | description="A key covered in dust"
+define item: torch | A burning torch | description="Provides light in darkness"
+define item: manuscript | Ancient Manuscript | description="A priceless artifact"
+define item: gold_coin | Gold Coin | description="Currency for the shop"
+define item: health_potion | Health Potion | description="Restores health"
+
+// NPCs
+define npc: librarian | Keeper of the Archive | description="An elderly librarian"
+define npc: merchant | Travelling Merchant | description="Sells provisions"
+define npc: guard | Stone Guardian | description="Protects the manuscript"
+
+// Keys
+define key: silver_key | Silver Key | description="Opens the inner sanctum"
+
+// === LOCATIONS ===
+
+location: entrance | You stand at the entrance of a grand library
+  item: torch
+  item: gold_coin
+  exit: north -> main_hall
+  exit: east -> shop
+
+location: main_hall | A vast reading room with towering shelves
+  exit: south -> entrance
+  exit: west -> restricted_section
+  exit: up -> upper_floor
+
+location: shop | A small trading post
+  item: health_potion
+  item: health_potion
+  exit: west -> main_hall
+  npc: merchant
+
+location: restricted_section | A locked area with ancient tomes
+  door: iron_gate | A heavy iron gate | key=rusty_key
+  exit: east -> main_hall
+  npc: librarian
+
+location: upper_floor | The archive chamber
+  npc: guard
+  exit: down -> main_hall
+
+// === SHOP ECONOMY ===
+
+// Economy configuration for merchant
+flag: merchant_befriended=false
+counter: gold=1
+counter: items_purchased=0
+
+// === NPC ACCEPTANCE (Reputation System) ===
+
+// Librarian acceptance rules - ladder of trust
+npc_acceptance: librarian | reputation=0 | text="The librarian eyes you cautiously."
+npc_acceptance: librarian | reputation=5 | text="The librarian nods acknowledgement."
+npc_acceptance: librarian | reputation=10 | text="The librarian smiles warmly and shares knowledge."
+
+// Merchant acceptance - transaction focused
+npc_acceptance_default: merchant | text="The merchant awaits your interest."
+
+// Guard acceptance - protective
+npc_acceptance: guard | reputation=0 | text="The guard blocks your path sternly."
+npc_acceptance: guard | reputation=15 | text="The guard steps aside, recognising your worth."
+
+// === QUESTS ===
+
+quest: explore | Explore the Library | Examine all major areas
+
+quest_stage: explore | stage_1 | required=main_hall | required=shop | optional=restricted_section
+quest_objective: explore | objective_1 | Visit Main Hall | Navigate to the central chamber
+quest_objective: explore | objective_2 | Find Provisions | Discover the merchant's shop
+
+quest: acquire_manuscript | Obtain the Manuscript | Retrieve the ancient text
+
+quest_stage: acquire_manuscript | stage_1 | required=find_key | required=befriend_guard
+quest_objective: acquire_manuscript | objective_1 | Locate Rusty Key | Find the way to unlock doors
+quest_objective: acquire_manuscript | objective_2 | Gain Guard's Trust | Improve reputation to 15+
+
+quest_on_complete: acquire_manuscript | effects="message:You escape with the manuscript!"
+
+// === RULES & TRIGGERS ===
+
+// Trigger on entering main hall
+on_enter: main_hall | effects="message:You feel the weight of centuries in this place."
+
+// Trigger on picking up torch
+on_pickup: torch | effects="message:The torch illuminates your path forward."
+
+// NPC reaction rules
+npc_rule: librarian | when=counter.reputation>=10 | priority=1 | then="message:The librarian shares ancient secrets with you."
+npc_rule: merchant | when=counter.gold>=5 | priority=1 | then="message:The merchant offers premium wares."
+npc_rule: guard | when=counter.reputation>=15 | priority=1 | then="message:The guard permits you to pass."
+
+// === SCHEDULES & EVENTS ===
+
+// Periodic events
+schedule_every: 10 | effects="message:You hear distant echoes in the library"
+schedule_at: 5 | effects="message:A mysterious sound draws your attention"
+
+// Random ambient events
+random_settings: enabled=true | chance=0.3
+random_event: ambient_sound | weight=1 | cooldown=5 | effects="message:Something stirs in the shadows"
+random_event: page_flutter | weight=1 | cooldown=3 | effects="message:A page flutters from a nearby shelf"
+
+// === START STATE ===
+
+start_inventory: torch
+start_inventory: gold_coin
+start_stats: health=100 | sanity=50 | reputation=0
+flag: explored_entrance=true
+counter: reputation=0
+counter: gold=1
+relationship: librarian=0
+relationship: merchant=0
+relationship: guard=0
+
+// === WORLD VARIATIONS ===
+
+// Room descriptions with conditional text
+room_desc: main_hall | A vast reading room with towering shelves reaching toward a distant ceiling
+
+room_desc_when: main_hall | flag:torch_lit=true | text="The torch casts dancing shadows across countless volumes"
+room_desc_when: main_hall | flag:torch_lit=false | text="Darkness hides the full extent of the library"
+
+// Room transformations
+room_transform: restricted_section | target=inner_sanctum | when=flag:iron_gate_opened=true | irreversible=true
+
+// === PARSER CONFIGURATION ===
+
+// Allow natural command variations
+command_alias: examine=x
+command_alias: inventory=i
+command_alias: look=l
+command_alias: take=get
+command_alias: drop=leave
+
+// Direction shortcuts
+direction_alias: n=north
+direction_alias: s=south
+direction_alias: e=east
+direction_alias: w=west
+direction_alias: u=up
+direction_alias: d=down
+direction_alias: ne=northeast
+direction_alias: nw=northwest
+direction_alias: se=southeast
+direction_alias: sw=southwest
+
+// Parser options
+parser_option: fuzzy=true
+parser_option: max_distance=1
+
+// === STORY STRUCTURE ===
+
+// Story branches for multiple paths
+branch: good_ending | when=counter.reputation>=15 AND has_item:manuscript | then="message:You escape with honour and wisdom"
+branch: neutral_ending | when=has_item:manuscript | then="message:You escape, but questions linger"
+branch: bad_ending | when=counter.reputation<=0 | then="message:You fail to gain the guard's trust"
+
+// Chapters for progression
+chapter: chapter_1 | Part One: The Entrance | objectives=objective_1,objective_2 | next=chapter_2
+chapter: chapter_2 | Part Two: Inner Secrets | objectives=objective_3 | next=chapter_3
+chapter: chapter_3 | Part Three: The Escape | objectives=objective_4 | is_ending=true
+
+chapter_end: chapter_3 | The Escape | You emerge from the library, transformed by knowledge
+
+// End of demo adventure

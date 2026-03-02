@@ -32,6 +32,10 @@ public sealed class DslV2Parser : AdventureDslParser
     private readonly List<DslNpcAcceptanceRule> _acceptanceRules = [];
     private readonly List<DslNpcAcceptanceDefault> _acceptanceDefaults = [];
     private int _acceptanceRulePriority = 0;
+    private readonly List<DslNpcDialogOption> _dialogOptions = [];
+    private readonly List<DslNpcRule> _npcRules = [];
+    private readonly List<DslNpcTrigger> _npcTriggers = [];
+    private int _npcRulePriority = 1000; // Higher = evaluated first
 
     public DslV2Parser()
     {
@@ -78,6 +82,11 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("npc_dialog", HandleNpcDialog);
         RegisterKeyword("npc_acceptance", HandleNpcAcceptance);
         RegisterKeyword("npc_acceptance_default", HandleNpcAcceptanceDefault);
+
+        // NPC rules and triggers (Slice 078)
+        RegisterKeyword("npc_dialog_option", HandleNpcDialogOption);
+        RegisterKeyword("npc_rule", HandleNpcRule);
+        RegisterKeyword("npc_trigger", HandleNpcTrigger);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -621,6 +630,87 @@ public sealed class DslV2Parser : AdventureDslParser
         _acceptanceDefaults.Add(def);
     }
 
+    private void HandleNpcDialogOption(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string npcId = NormalizeId(parts[0]);
+        var option = new DslNpcDialogOption { NpcId = npcId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("from="))
+                option.FromNodeId = parts[i][5..];
+            else if (parts[i].StartsWith("text="))
+                option.OptionText = parts[i][5..];
+            else if (parts[i].StartsWith("to="))
+                option.ToNodeId = parts[i][3..];
+        }
+
+        if (!string.IsNullOrEmpty(option.FromNodeId) && !string.IsNullOrEmpty(option.ToNodeId))
+            _dialogOptions.Add(option);
+    }
+
+    private void HandleNpcRule(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string npcId = NormalizeId(parts[0]);
+        var rule = new DslNpcRule { NpcId = npcId, Priority = _npcRulePriority-- };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("id="))
+                rule.RuleId = parts[i][3..];
+            else if (parts[i].StartsWith("if="))
+                rule.Condition = parts[i][3..];
+            else if (parts[i].StartsWith("priority="))
+            {
+                if (int.TryParse(parts[i][9..], out var p))
+                    rule.Priority = p;
+            }
+            else if (parts[i].StartsWith("say="))
+                rule.Say = parts[i][4..];
+            else if (parts[i].StartsWith("then="))
+                rule.Then = parts[i][5..];
+        }
+
+        _npcRules.Add(rule);
+    }
+
+    private void HandleNpcTrigger(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string npcId = NormalizeId(parts[0]);
+        var trigger = new DslNpcTrigger { NpcId = npcId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("sense="))
+                trigger.Sense = parts[i][6..];
+            else if (parts[i].StartsWith("target="))
+                trigger.Target = parts[i][7..];
+            else if (parts[i].StartsWith("after="))
+            {
+                if (int.TryParse(parts[i][6..], out var ticks))
+                    trigger.After = ticks;
+            }
+            else if (parts[i].StartsWith("say="))
+                trigger.Say = parts[i][4..];
+            else if (parts[i].Equals("say_once=true", StringComparison.OrdinalIgnoreCase))
+                trigger.SayOnce = true;
+            else if (parts[i].Equals("flee=true", StringComparison.OrdinalIgnoreCase))
+                trigger.Flee = true;
+        }
+
+        if (!string.IsNullOrEmpty(trigger.Sense) && !string.IsNullOrEmpty(trigger.Target))
+            _npcTriggers.Add(trigger);
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
@@ -638,6 +728,9 @@ public sealed class DslV2Parser : AdventureDslParser
     public IReadOnlyList<DslNpcDialog> GetNpcDialogs() => _npcDialogs;
     public IReadOnlyList<DslNpcAcceptanceRule> GetAcceptanceRules() => _acceptanceRules;
     public IReadOnlyList<DslNpcAcceptanceDefault> GetAcceptanceDefaults() => _acceptanceDefaults;
+    public IReadOnlyList<DslNpcDialogOption> GetDialogOptions() => _dialogOptions;
+    public IReadOnlyList<DslNpcRule> GetNpcRules() => _npcRules;
+    public IReadOnlyList<DslNpcTrigger> GetNpcTriggers() => _npcTriggers;
 }
 
 /// <summary>

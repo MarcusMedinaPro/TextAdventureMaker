@@ -20,6 +20,12 @@ public sealed class DslV2Parser : AdventureDslParser
     private readonly List<DslItemReaction> _itemReactions = [];
     private readonly List<DslItemConsequence> _itemConsequences = [];
     private readonly List<DslRecipe> _recipes = [];
+    private readonly List<DslDoorConfig> _doorConfigs = [];
+    private readonly List<DslExitConfig> _exitConfigs = [];
+    private readonly List<DslRoomDescription> _roomDescriptions = [];
+    private readonly List<DslRoomDescriptionCondition> _roomDescConditions = [];
+    private readonly List<DslRoomVariable> _roomVariables = [];
+    private readonly List<DslRoomTransform> _roomTransforms = [];
 
     public DslV2Parser()
     {
@@ -51,6 +57,14 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("item_reaction", HandleItemReaction);
         RegisterKeyword("item_consequence", HandleItemConsequence);
         RegisterKeyword("recipe", HandleRecipe);
+
+        // World interaction (Slice 076)
+        RegisterKeyword("door_config", HandleDoorConfig);
+        RegisterKeyword("exit_config", HandleExitConfig);
+        RegisterKeyword("room_desc", HandleRoomDesc);
+        RegisterKeyword("room_desc_when", HandleRoomDescWhen);
+        RegisterKeyword("room_var", HandleRoomVar);
+        RegisterKeyword("room_transform", HandleRoomTransform);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -349,12 +363,155 @@ public sealed class DslV2Parser : AdventureDslParser
         }
     }
 
+    private void HandleDoorConfig(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string doorId = NormalizeId(parts[0]);
+        var config = new DslDoorConfig { Id = doorId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("state="))
+                config.State = parts[i][6..];
+            else if (parts[i].StartsWith("aliases="))
+                config.Aliases = parts[i][8..].Split(',').Select(x => x.Trim()).ToList();
+            else if (parts[i].StartsWith("reaction."))
+            {
+                var kv = parts[i][9..].Split('=');
+                if (kv.Length == 2)
+                    config.Reactions[kv[0]] = kv[1];
+            }
+        }
+
+        _doorConfigs.Add(config);
+    }
+
+    private void HandleExitConfig(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 2) return;
+
+        string fromId = NormalizeId(parts[0]);
+        string toId = NormalizeId(parts[1]);
+        var config = new DslExitConfig { FromLocationId = fromId, ToLocationId = toId };
+
+        for (int i = 2; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("direction="))
+                config.Direction = parts[i][10..];
+            else if (parts[i].Equals("hidden=true", StringComparison.OrdinalIgnoreCase))
+                config.Hidden = true;
+            else if (parts[i].StartsWith("discover_if="))
+                config.DiscoverIf = parts[i][12..];
+            else if (parts[i].StartsWith("perception="))
+            {
+                if (int.TryParse(parts[i][11..], out var p))
+                    config.Perception = Math.Clamp(p, 1, 100);
+            }
+            else if (parts[i].StartsWith("door="))
+                config.DoorId = NormalizeId(parts[i][5..]);
+            else if (parts[i].Equals("oneway=true", StringComparison.OrdinalIgnoreCase))
+                config.OneWay = true;
+        }
+
+        _exitConfigs.Add(config);
+    }
+
+    private void HandleRoomDesc(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string locationId = NormalizeId(parts[0]);
+        var desc = new DslRoomDescription { LocationId = locationId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("default="))
+                desc.DefaultDescription = parts[i][8..];
+            else if (parts[i].StartsWith("first_visit="))
+                desc.FirstVisitDescription = parts[i][12..];
+        }
+
+        _roomDescriptions.Add(desc);
+    }
+
+    private void HandleRoomDescWhen(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string locationId = NormalizeId(parts[0]);
+        var condition = new DslRoomDescriptionCondition { LocationId = locationId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("if="))
+                condition.Condition = parts[i][3..];
+            else if (parts[i].StartsWith("text="))
+                condition.Text = parts[i][5..];
+        }
+
+        if (!string.IsNullOrEmpty(condition.Condition) && !string.IsNullOrEmpty(condition.Text))
+            _roomDescConditions.Add(condition);
+    }
+
+    private void HandleRoomVar(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string locationId = NormalizeId(parts[0]);
+        var roomVar = new DslRoomVariable { LocationId = locationId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("key="))
+                roomVar.Key = parts[i][4..];
+            else if (parts[i].StartsWith("value="))
+                roomVar.Value = parts[i][6..];
+        }
+
+        if (!string.IsNullOrEmpty(roomVar.Key) && !string.IsNullOrEmpty(roomVar.Value))
+            _roomVariables.Add(roomVar);
+    }
+
+    private void HandleRoomTransform(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        string locationId = NormalizeId(parts[0]);
+        var transform = new DslRoomTransform { SourceLocationId = locationId };
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("target="))
+                transform.TargetLocationId = NormalizeId(parts[i][7..]);
+            else if (parts[i].StartsWith("if="))
+                transform.Condition = parts[i][3..];
+            else if (parts[i].Equals("irreversible=true", StringComparison.OrdinalIgnoreCase))
+                transform.Irreversible = true;
+        }
+
+        if (!string.IsNullOrEmpty(transform.TargetLocationId))
+            _roomTransforms.Add(transform);
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
     public IReadOnlyList<DslItemReaction> GetItemReactions() => _itemReactions;
     public IReadOnlyList<DslItemConsequence> GetItemConsequences() => _itemConsequences;
     public IReadOnlyList<DslRecipe> GetRecipes() => _recipes;
+    public IReadOnlyList<DslDoorConfig> GetDoorConfigs() => _doorConfigs;
+    public IReadOnlyList<DslExitConfig> GetExitConfigs() => _exitConfigs;
+    public IReadOnlyList<DslRoomDescription> GetRoomDescriptions() => _roomDescriptions;
+    public IReadOnlyList<DslRoomDescriptionCondition> GetRoomDescConditions() => _roomDescConditions;
+    public IReadOnlyList<DslRoomVariable> GetRoomVariables() => _roomVariables;
+    public IReadOnlyList<DslRoomTransform> GetRoomTransforms() => _roomTransforms;
 }
 
 /// <summary>

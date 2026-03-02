@@ -15,6 +15,7 @@
 ✅ **Slice 055**: Cinematic Presentation (ITextPresenter, TypewriterPresenter, ScenePresenter)
 ✅ **Slice 056**: Procedural Content Generation Framework (IContentGenerator, GenerationContext, EventTemplates)
 ✅ **Slice 060**: Puzzle Toolkit (IPuzzle, CombinationLockPuzzle, SequencePuzzle, RiddlePuzzle, MultiStepPuzzle, EnvironmentalPuzzle, PuzzleSystem, SolveCommand)
+✅ **Slice 073**: DSL v2 Entity and Start-State Definitions (DslV2Parser with entity definitions, placements, and start-state keywords)
 
 ## Work In Progress (Phase 2: DSL v2 Major Upgrade)
 🔧 **Slices 061-072**: Stub implementations in GameSystemStubs.cs (DebugConsole, DeadlineSystem, ChaseSystem, StatusEffectSystem, etc.)

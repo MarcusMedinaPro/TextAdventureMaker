@@ -50,6 +50,7 @@ public sealed class DslV2Parser : AdventureDslParser
     private readonly DslStorySystem _storySystem = new();
     private string _currentBranchId = "";
     private string _currentChapterId = "";
+    private readonly DslParserConfiguration _parserConfig = new();
 
     public DslV2Parser()
     {
@@ -132,6 +133,11 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("chapter_next", HandleChapterNext);
         RegisterKeyword("chapter_end", HandleChapterEnd);
         RegisterKeyword("chapter_unlock_if", HandleChapterUnlockIf);
+
+        // Parser configuration (Slice 084)
+        RegisterKeyword("parser_option", HandleParserOption);
+        RegisterKeyword("command_alias", HandleCommandAlias);
+        RegisterKeyword("direction_alias", HandleDirectionAlias);
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -1108,6 +1114,45 @@ public sealed class DslV2Parser : AdventureDslParser
             chapter.UnlockCondition = value.Trim();
     }
 
+    private void HandleParserOption(AdventureDslContext context, string value)
+    {
+        var parts = value.Split('=');
+        if (parts.Length != 2) return;
+
+        var option = new DslParserOption
+        {
+            Key = parts[0].Trim(),
+            Value = parts[1].Trim()
+        };
+        _parserConfig.Options.Add(option);
+    }
+
+    private void HandleCommandAlias(AdventureDslContext context, string value)
+    {
+        var parts = value.Split('=');
+        if (parts.Length != 2) return;
+
+        var alias = new DslCommandAlias
+        {
+            Alias = parts[0].Trim(),
+            TargetCommand = parts[1].Trim()
+        };
+        _parserConfig.CommandAliases.Add(alias);
+    }
+
+    private void HandleDirectionAlias(AdventureDslContext context, string value)
+    {
+        var parts = value.Split('=');
+        if (parts.Length != 2) return;
+
+        var alias = new DslDirectionAlias
+        {
+            Alias = parts[0].Trim(),
+            TargetDirection = parts[1].Trim()
+        };
+        _parserConfig.DirectionAliases.Add(alias);
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
@@ -1139,6 +1184,7 @@ public sealed class DslV2Parser : AdventureDslParser
     public DslRandomSettings GetRandomSettings() => _randomSettings;
     public IReadOnlyList<DslRandomEvent> GetRandomEvents() => _randomEvents;
     public DslStorySystem GetStorySystem() => _storySystem;
+    public DslParserConfiguration GetParserConfiguration() => _parserConfig;
 }
 
 /// <summary>

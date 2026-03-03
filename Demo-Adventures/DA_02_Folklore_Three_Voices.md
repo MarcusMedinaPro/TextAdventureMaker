@@ -59,7 +59,7 @@ item: cardigan | Cardigan | A soft cardigan carrying old warmth and unfinished c
 exit: west -> b_hallway
 """;
 
-AdventureDslParser dslParser = new();
+DslV2Parser dslParser = new();
 DslAdventure adventure = dslParser.ParseString(dsl);
 GameState state = adventure.State;
 

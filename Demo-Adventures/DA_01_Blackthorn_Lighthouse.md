@@ -76,7 +76,7 @@ door: cellar_hatch | cellar hatch | A bolted hatch with a stiff locking plate. |
 timed_spawn: flare | appears_at=night | disappears_at=day | message=A red distress flare has washed against the quay wall.
 """;
 
-AdventureDslParser dslParser = new();
+DslV2Parser dslParser = new();
 DslAdventure adventure = dslParser.ParseString(dsl);
 GameState state = adventure.State;
 

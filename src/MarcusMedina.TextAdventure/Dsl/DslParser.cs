@@ -309,7 +309,8 @@ public sealed class DslParser : AdventureDslParser
             }
 
             Func<IGameState, bool>? condition = ParseNpcReactionCondition(reaction.Condition);
-            npc.AddReaction(reaction.Trigger, reaction.Text, condition);
+            Action<IGameState>? effect = BuildNpcReactionEffect(reaction);
+            npc.AddReaction(reaction.Trigger, reaction.Text, condition, reaction.EndGame, effect);
         }
 
         if (_dialogOptions.Count > 0)
@@ -326,15 +327,48 @@ public sealed class DslParser : AdventureDslParser
         if (string.IsNullOrWhiteSpace(condition))
             return null;
 
-        if (condition.StartsWith("flag:", StringComparison.OrdinalIgnoreCase))
+        // Multiple conditions joined by commas — all must pass
+        string[] clauses = condition.Split(',').Select(c => c.Trim()).Where(c => c.Length > 0).ToArray();
+        var funcs = clauses.Select(ParseSingleCondition).Where(f => f is not null).ToList();
+
+        return funcs.Count switch
         {
-            string[] kv = condition[5..].Split('=');
+            0 => null,
+            1 => funcs[0],
+            _ => state => funcs.All(f => f!(state))
+        };
+    }
+
+    private static Func<IGameState, bool>? ParseSingleCondition(string clause)
+    {
+        // flag:key=value
+        if (clause.StartsWith("flag:", StringComparison.OrdinalIgnoreCase))
+        {
+            string[] kv = clause[5..].Split('=');
             if (kv.Length == 2)
             {
                 string key = kv[0].Trim();
                 bool expected = kv[1].Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
                 return state => state.WorldState.GetFlag(key) == expected;
             }
+            return null;
+        }
+
+        // has_item=item_id
+        if (clause.StartsWith("has_item=", StringComparison.OrdinalIgnoreCase))
+        {
+            string id = clause[9..].Trim();
+            return state => state.Inventory.FindById(id) is not null;
+        }
+
+        // door_unlocked=door_id
+        if (clause.StartsWith("door_unlocked=", StringComparison.OrdinalIgnoreCase))
+        {
+            string doorId = clause[14..].Trim();
+            return state => state.Locations
+                .SelectMany(loc => loc.Exits.Values)
+                .Any(exit => exit.Door?.Id.Equals(doorId, StringComparison.OrdinalIgnoreCase) == true
+                          && exit.Door.State != DoorState.Locked);
         }
 
         return null;
@@ -1441,15 +1475,60 @@ public sealed class DslParser : AdventureDslParser
         for (int i = 1; i < parts.Count; i++)
         {
             if (parts[i].StartsWith("on=", StringComparison.OrdinalIgnoreCase))
-                reaction.Trigger = parts[i][3..].Trim().ToLowerInvariant();
+            {
+                // Support "on=talk,has_item=brass_key,door_unlocked=hatch" — first token is trigger, rest are inline conditions
+                string[] onTokens = parts[i][3..].Trim().ToLowerInvariant().Split(',');
+                reaction.Trigger = onTokens[0].Trim();
+                for (int t = 1; t < onTokens.Length; t++)
+                {
+                    string inlineCond = onTokens[t].Trim();
+                    if (!string.IsNullOrWhiteSpace(inlineCond))
+                        reaction.Condition = string.IsNullOrWhiteSpace(reaction.Condition)
+                            ? inlineCond
+                            : reaction.Condition + "," + inlineCond;
+                }
+            }
             else if (parts[i].StartsWith("text=", StringComparison.OrdinalIgnoreCase))
                 reaction.Text = parts[i][5..].Trim();
             else if (parts[i].StartsWith("if=", StringComparison.OrdinalIgnoreCase))
-                reaction.Condition = parts[i][3..].Trim();
+                reaction.Condition = string.IsNullOrWhiteSpace(reaction.Condition)
+                    ? parts[i][3..].Trim()
+                    : reaction.Condition + "," + parts[i][3..].Trim();
+            else if (parts[i].Equals("end_game=true", StringComparison.OrdinalIgnoreCase))
+                reaction.EndGame = true;
+            else if (parts[i].StartsWith("set_flag=", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] kv = parts[i][9..].Split(':');
+                if (kv.Length == 2)
+                    reaction.SetFlags[kv[0].Trim()] = kv[1].Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+            }
+            else if (parts[i].StartsWith("inc_counter=", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] kv = parts[i][12..].Split(':');
+                if (kv.Length == 2 && int.TryParse(kv[1].Trim(), out int val))
+                    reaction.IncrementCounters[kv[0].Trim()] = val;
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(reaction.NpcId) && !string.IsNullOrWhiteSpace(reaction.Trigger) && !string.IsNullOrWhiteSpace(reaction.Text))
             _parserConfig.NpcReactions.Add(reaction);
+    }
+
+    private static Action<IGameState>? BuildNpcReactionEffect(DslNpcReaction reaction)
+    {
+        if (reaction.SetFlags.Count == 0 && reaction.IncrementCounters.Count == 0)
+            return null;
+
+        var flags = new Dictionary<string, bool>(reaction.SetFlags);
+        var counters = new Dictionary<string, int>(reaction.IncrementCounters);
+
+        return state =>
+        {
+            foreach (var (key, val) in flags)
+                state.WorldState.SetFlag(key, val);
+            foreach (var (key, amount) in counters)
+                state.WorldState.Increment(key, amount);
+        };
     }
 
     public DslStartStateDefinition GetStartState() => _startState;

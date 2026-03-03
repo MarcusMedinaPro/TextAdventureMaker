@@ -43,6 +43,6 @@ public interface INpc : IGameEntity
     INpc SetArchetype(CharacterArchetype archetype);
     INpc DiesAt(JourneyStage stage);
     string? GetRuleBasedDialog(IGameState state);
-    INpc AddReaction(string trigger, string text, Func<IGameState, bool>? condition = null);
-    string? GetReaction(string trigger, IGameState state);
+    INpc AddReaction(string trigger, string text, Func<IGameState, bool>? condition = null, bool endGame = false, Action<IGameState>? effect = null);
+    NpcReaction? GetReaction(string trigger, IGameState state);
 }

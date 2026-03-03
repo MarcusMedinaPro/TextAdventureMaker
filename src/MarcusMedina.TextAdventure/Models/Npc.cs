@@ -127,22 +127,19 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
         return this;
     }
 
-    public INpc AddReaction(string trigger, string text, Func<IGameState, bool>? condition = null)
+    public INpc AddReaction(string trigger, string text, Func<IGameState, bool>? condition = null, bool endGame = false, Action<IGameState>? effect = null)
     {
-        _reactions.Add(new NpcReaction(trigger.ToLowerInvariant(), text, condition));
+        _reactions.Add(new NpcReaction(trigger.ToLowerInvariant(), text, condition, endGame, effect));
         return this;
     }
 
-    public string? GetReaction(string trigger, IGameState state)
+    public NpcReaction? GetReaction(string trigger, IGameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
         string lower = trigger.ToLowerInvariant();
-
-        // Specific triggers (e.g. "blow:trumpet") take precedence over general (e.g. "blow")
         return _reactions.FirstOrDefault(r =>
-                r.Trigger == lower &&
-                (r.Condition is null || r.Condition(state)))
-            ?.Text;
+            r.Trigger == lower &&
+            (r.Condition is null || r.Condition(state)));
     }
 
     public string? GetRuleBasedDialog(IGameState state)

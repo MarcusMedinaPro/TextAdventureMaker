@@ -179,8 +179,8 @@ public class CustomActionCommandTests
         INpc? guard = room!.FindNpc("guard");
         Assert.NotNull(guard);
 
-        string? reaction = guard!.GetReaction("blow", adventure.State);
+        NpcReaction? reaction = guard!.GetReaction("blow", adventure.State);
         Assert.NotNull(reaction);
-        Assert.Contains("disapproving stare", reaction);
+        Assert.Contains("disapproving stare", reaction.Text);
     }
 }

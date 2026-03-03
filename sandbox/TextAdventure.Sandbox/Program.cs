@@ -45,7 +45,7 @@ npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal,door_unlocked=cellar_hatch | text=The keeper's eyes widen at the sight of the unlocked hatch. "With the key, the reserve lens, that storm tonic, some dry lamp coal, and the hatch open, you might just be able to get the lamp working again. The stairs are rickety and the gate is stuck fast during the day."
 npc_reaction: keeper | on=blow | text=The keeper looks at you "WTF are you trying to do?"
 npc_reaction: keeper | on=threaten | text=The keeper looks at you "Hey, I'm just trying to do my job here. Do you have a death wish?"
-npc_reaction: keeper | on=attack | text=Important message: This is Marcus, the game maker speaking. I don't want you to attack the keeper. Please don't attack the keeper. The keeper is a nice guy just trying to do his job, and attacking him will not help you relight the beacon. Please be nice to the keeper.
+npc_reaction: keeper | on=attack | text=As you try to attack the keeper, he discards your blow easily. As you turn to strike again, his hand moves in a blur. You feel a sharp sting at your neck. Everything goes dark. | end_game=true
 
 exit: down -> cellar | door=cellar_hatch
 exit: west -> quay | door=keeper_door

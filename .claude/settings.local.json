@@ -12,7 +12,8 @@
       "Bash(python3:*)",
       "Bash(pkill:*)",
       "Bash(lsof:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(git push:*)"
     ]
   }
 }

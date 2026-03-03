@@ -5,18 +5,17 @@
 
 using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Engine;
 
 /// <summary>
-/// After any command executes, checks NPCs in the current room for matching reactions
-/// and appends their text to the command result.
+/// After any command executes, checks NPCs in the current room for matching reactions,
+/// appends their text to the result, applies any side-effects, and sets ShouldQuit when
+/// a reaction has <c>EndGame = true</c>.
 /// </summary>
 public static class NpcReactionResolver
 {
-    /// <summary>
-    /// Resolves NPC reactions for the executed command and returns an updated result.
-    /// </summary>
     public static CommandResult Resolve(ICommand command, CommandResult result, GameState state)
     {
         if (result.ShouldQuit)
@@ -26,25 +25,33 @@ public static class NpcReactionResolver
         if (triggers.Length == 0)
             return result;
 
-        var npcReactions = new List<string>();
+        var firedReactions = new List<NpcReaction>();
         foreach (INpc npc in state.CurrentLocation.Npcs)
         {
-            string? text = null;
             foreach (string trigger in triggers)
             {
-                text = npc.GetReaction(trigger, state);
-                if (text is not null)
-                    break;
+                NpcReaction? reaction = npc.GetReaction(trigger, state);
+                if (reaction is not null)
+                {
+                    firedReactions.Add(reaction);
+                    break; // one reaction per NPC per command
+                }
             }
-            if (text is not null)
-                npcReactions.Add(text);
         }
 
-        if (npcReactions.Count == 0)
+        if (firedReactions.Count == 0)
             return result;
 
-        var combined = result.ReactionsList.Concat(npcReactions).ToArray();
-        return new CommandResult(result.Success, result.Message, result.Error, result.ShouldQuit, combined);
+        // Apply side-effects
+        foreach (NpcReaction reaction in firedReactions)
+            reaction.Effect?.Invoke(state);
+
+        bool endGame = firedReactions.Any(r => r.EndGame);
+        var combined = result.ReactionsList
+            .Concat(firedReactions.Select(r => r.Text))
+            .ToArray();
+
+        return new CommandResult(result.Success, result.Message, result.Error, endGame || result.ShouldQuit, combined);
     }
 
     private static string[] BuildTriggers(ICommand command, CommandResult result) => command switch

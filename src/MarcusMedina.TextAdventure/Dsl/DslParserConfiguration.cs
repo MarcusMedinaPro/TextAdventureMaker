@@ -56,6 +56,9 @@ public sealed class DslNpcReaction
     public string Trigger { get; set; } = "";
     public string Text { get; set; } = "";
     public string? Condition { get; set; }
+    public bool EndGame { get; set; }
+    public Dictionary<string, bool> SetFlags { get; set; } = [];
+    public Dictionary<string, int> IncrementCounters { get; set; } = [];
 }
 
 public sealed class DslParserConfiguration

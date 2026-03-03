@@ -42,3 +42,9 @@ Planera:
 
 **Definition of Done**
 - DSL v2 kan släppas med tydlig support- och migrationsstrategi.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `92_DSL_v2_Release_Readiness.md`.
+- [x] Marked complete in project slice status.

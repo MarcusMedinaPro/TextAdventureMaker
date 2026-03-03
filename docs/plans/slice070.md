@@ -509,3 +509,9 @@ public void Survival_DecaysOverTime()
 ```
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `70_Cold_Night_Survival.md`.
+- [x] Marked complete in project slice status.

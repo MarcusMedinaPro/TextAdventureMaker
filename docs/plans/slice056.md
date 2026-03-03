@@ -297,3 +297,9 @@ public void Personality_AffectsResponse()
 Demo med NPCs som har olika personligheter, minns tidigare samtal och vars relationer utvecklas.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `56_Questions_in_the_Kitchen.md`.
+- [x] Marked complete in project slice status.

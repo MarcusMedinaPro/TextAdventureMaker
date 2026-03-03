@@ -2,6 +2,10 @@
 
 _Slice tag: Slice 12 — DSL Parser. This file defines the minimal `.adventure` format supported by the core parser._
 
+For DSL v2 overview and rollout:
+- `docs/dsl/adventure-dsl-v2.md`
+- `docs/dsl/adventure-dsl-v2-core-report.md`
+
 ## Rules
 - One statement per line: `keyword: value`
 - `#` and `//` start comments

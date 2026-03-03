@@ -52,3 +52,9 @@ Minimikrav:
 
 **Definition of Done**
 - Story branches och chapter flow kan byggas utan C# wiring.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `83_DSL_v2_Story_Chapters.md`.
+- [x] Marked complete in project slice status.

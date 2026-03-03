@@ -379,3 +379,9 @@ public void SequencePuzzle_RequiresCorrectOrder()
 Demo med kombinationslås, gåtor och miljöpussel som måste lösas för att nå skatten.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `60_The_Puzzle_Basement.md`.
+- [x] Marked complete in project slice status.

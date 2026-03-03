@@ -320,3 +320,9 @@ public async Task TypewriterPresenter_CanBeSkipped()
 Demo med dramatisk presentation, ASCII-art och stämningsmusik-hooks.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `58_The_Candle_Cutscene.md`.
+- [x] Marked complete in project slice status.

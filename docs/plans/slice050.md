@@ -118,3 +118,9 @@ public void LookNorth_WithClosedDoor_ShowsDoorBlocking()
 Skapa demo där spelaren kan kika genom öppningar innan de går in.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `50_The_Laundry_Room_Warning.md`.
+- [x] Marked complete in project slice status.

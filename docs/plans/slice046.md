@@ -172,7 +172,7 @@ public static Item WithPoison(this Item item, int damagePerTurn, int turns) =>
 - [x] Tests (minimum 10)
 
 ## Example Checklist (docs/examples)
-- [ ] Sandbox demo: `46_Consumables.md`
+- [x] Sandbox demo: `46_The_Flat_On_Rye_Lane.md`
 
 ## Dependencies
 - None (builds on existing IItem, IStats, GameState)

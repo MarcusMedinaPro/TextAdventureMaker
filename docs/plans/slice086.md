@@ -42,3 +42,9 @@ Minimikrav:
 
 **Definition of Done**
 - V2 rules engine är stabil och produktionssäker för större spel.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `86_DSL_v2_Rule_Engine_Hardening.md`.
+- [x] Marked complete in project slice status.

@@ -56,8 +56,33 @@
 | 045 | Generic Fixes | Ersätt hårdkodade input-checkar (t.ex. `IsSitInput`) med en generisk, fluent alias‑lösning. | `slice045.md` |
 | 046 | Consumable Items — Eat, Drink & Healing | EatCommand, DrinkCommand, healing on consume, poison-over-time. | `slice046.md` |
 | 047 | Stackable Items & Inventory Grouping | Stack merging, partial take/drop, grouped inventory display. | `slice047.md` |
+| 048 | Social Horror Party System | Social horror scenario with faction pressure, suspicion, and branching outcomes. | `slice048.md` |
+| 049 | Linear Domestic Horror Progression | State-gated linear horror sequence with object toggles and side interactions. | `slice049.md` |
+| 050 | Directional Looking | Look/peek into adjacent rooms through open exits and doors. | `slice050.md` |
+| 051 | Directional Actions | Context-aware directional interactions beyond movement. | `slice051.md` |
+| 052 | Spatial Awareness System | Track nearby entities/rooms and expose directional spatial context. | `slice052.md` |
+| 053 | Advanced Map Generator | Richer map rendering and generation controls. | `slice053.md` |
+| 054 | Player History System | Persist and query notable player history events. | `slice054.md` |
+| 055 | Economic & Store System | Store economy, prices, and transactional game loops. | `slice055.md` |
+| 056 | Advanced NPC Communication | Deeper NPC topic handling, memory, and response logic. | `slice056.md` |
+| 057 | Advanced Semantic Parser | Intent extraction and semantic command interpretation. | `slice057.md` |
+| 058 | Cinematic Presentation | Staged narrative presentation and cinematic pacing tools. | `slice058.md` |
+| 059 | Procedural Storytelling | Procedural quest/event generation for replayable narratives. | `slice059.md` |
+| 060 | Puzzle Toolkit | Reusable puzzle abstractions and puzzle orchestration. | `slice060.md` |
+| 061 | Debug Console & Dev Tools | Developer inspection commands and runtime debug helpers. | `slice061.md` |
+| 062 | Countdown & Deadline Events | Tick-driven deadlines and fail/succeed timing paths. | `slice062.md` |
+| 063 | Chase & Pursuit System | Pursuit loops, pressure mechanics, and chase state transitions. | `slice063.md` |
+| 064 | Status Effects System | Reusable status effects with ticking and expiry behaviour. | `slice064.md` |
+| 065 | Test Helpers & Infrastructure | Test utilities and fixtures to speed scenario coverage. | `slice065.md` |
+| 066 | Weather & Environment System | Dynamic weather and environment-driven state changes. | `slice066.md` |
+| 067 | Vehicles & Teleporters | Travel mechanics through vehicles and teleport links. | `slice067.md` |
+| 068 | Stealth & Detection System | Visibility/detection mechanics with stealth gameplay rules. | `slice068.md` |
+| 069 | Light & Darkness System | Illumination-aware visibility and interaction constraints. | `slice069.md` |
+| 070 | Food, Hunger & Survival | Survival loop with hunger/thirst/energy systems. | `slice070.md` |
+| 071 | Crafting System | Ingredient recipes, crafting checks, and crafted outputs. | `slice071.md` |
+| 072 | Machines & Electronics | Interactable machine states with power/fuel style behaviours. | `slice072.md` |
 
-## DSL v2 Upgrade Track (72+)
+## DSL v2 Upgrade Track (73+)
 
 | Slice | Title | Goal | File |
 | --- | --- | --- | --- |
@@ -82,3 +107,4 @@
 | 091 | Demo Adventure in Pure DSL v2 | End-to-end reference game authored in DSL v2. | `slice091.md` |
 | 092 | DSL v2 Release, Versioning & Deprecation | Release readiness, support matrix, and deprecation policy. | `slice092.md` |
 | 093 | Post-GA Governance & v2.x Backlog | Ongoing schema governance and roadmap after GA. | `slice093.md` |
+| 900 | Long-Horizon Backlog | Large future backlog and exploratory ideas. | `slice900.md` |

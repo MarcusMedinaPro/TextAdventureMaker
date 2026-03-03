@@ -56,3 +56,9 @@ Minimikrav:
 
 **Definition of Done**
 - Quests med condition-graf och stage/objective-flöde fungerar via DSL.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `79_DSL_v2_Quest_Graph.md`.
+- [x] Marked complete in project slice status.

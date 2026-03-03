@@ -197,3 +197,9 @@ public void SpatialContext_WithClosedGlassDoor_HasPartialVisibility()
 Demo med spatial awareness där spelaren hör fotsteg från andra rum och ser skuggor genom springor.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `52_The_Station_Echo_Map.md`.
+- [x] Marked complete in project slice status.

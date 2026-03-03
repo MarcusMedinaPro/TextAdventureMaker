@@ -41,3 +41,9 @@ Behåll möjlighet att exportera v1-minimal format för legacy användning.
 
 **Definition of Done**
 - V2 exporter producerar läsbara och stabila filer som går att round-trippa.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `85_DSL_v2_Roundtrip_Export.md`.
+- [x] Marked complete in project slice status.

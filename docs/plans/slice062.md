@@ -353,3 +353,9 @@ public void DeadlineEvent_CanBePrevented()
 Demo med bomb som måste desarmeras innan tiden går ut.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `62_The_Midnight_Deadline.md`.
+- [x] Marked complete in project slice status.

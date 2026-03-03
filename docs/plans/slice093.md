@@ -43,3 +43,9 @@ Definiera återkommande schemafönster:
 
 **Definition of Done**
 - DSL v2 har en hållbar förvaltningsmodell och tydlig v2.x roadmap.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `93_DSL_v2_Governance_Roadmap.md`.
+- [x] Marked complete in project slice status.

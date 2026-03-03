@@ -517,3 +517,9 @@ public void LitTorch_IlluminatesDarkRoom()
 ```
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `69_Blackout_Protocol.md`.
+- [x] Marked complete in project slice status.

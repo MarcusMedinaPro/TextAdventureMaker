@@ -66,3 +66,9 @@ Minimikrav:
 **Definition of Done**
 - Text kan innehålla dynamiska DSL-variabler.
 - Runtime expressions är säkra och validerade.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `75_DSL_v2_Variables_and_Expressions.md`.
+- [x] Marked complete in project slice status.

@@ -233,7 +233,7 @@ public float TotalWeight => _items.Sum(i =>
 - [x] Tests (minimum 12)
 
 ## Example Checklist (docs/examples)
-- [ ] Sandbox demo: `47_Stackable_Items.md`
+- [x] Sandbox demo: `47_The_Night_Shift_At_Harrow_Hill.md`
 
 ## Dependencies
 - None (builds on existing IItem, Inventory)

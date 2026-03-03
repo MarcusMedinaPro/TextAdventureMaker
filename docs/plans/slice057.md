@@ -340,3 +340,9 @@ public void Parser_ResolvesPronouns()
 Demo där spelaren kan använda fritt formulerade kommandon istället för strikta format.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `57_What_Did_You_Mean.md`.
+- [x] Marked complete in project slice status.

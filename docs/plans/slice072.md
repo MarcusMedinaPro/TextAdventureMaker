@@ -606,3 +606,9 @@ public void VendingMachine_SellsProducts()
 ```
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `72_Machine_Room_Startup.md`.
+- [x] Marked complete in project slice status.

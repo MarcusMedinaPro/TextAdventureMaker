@@ -496,3 +496,9 @@ public void RecipeDiscovery_TriggersEvent()
 ```
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `71_Workbench_Recipes.md`.
+- [x] Marked complete in project slice status.

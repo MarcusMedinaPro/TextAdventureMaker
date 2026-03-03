@@ -288,3 +288,9 @@ public void SideQuestGenerator_GeneratesSameQuestWithSameSeed()
 Demo med procedurellt genererade quests och events som aldrig tar slut.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `59_The_Neverending_Noticeboard.md`.
+- [x] Marked complete in project slice status.

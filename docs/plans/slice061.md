@@ -387,3 +387,9 @@ public void UndoRedo_RestoresPreviousState()
 Demo med aktiverad debug console för att testa alla kommandon.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `61_Debug_Console_Deep_Dive.md`.
+- [x] Marked complete in project slice status.

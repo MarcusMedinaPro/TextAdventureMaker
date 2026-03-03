@@ -279,3 +279,9 @@ public void Store_BuyItem_FailsWithoutEnoughGold()
 Demo med flera butiker, olika valutor och dynamisk prissättning baserat på reputation.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `55_The_Empty_Till.md`.
+- [x] Marked complete in project slice status.

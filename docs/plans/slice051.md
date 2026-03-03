@@ -185,3 +185,9 @@ public void ThrowWalletNorth_MovesItemToTargetRoom()
 Demo där spelaren kan kasta plånbok för att distrahera rånare, eller ropa på hjälp.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `51_The_Corridor_Levers.md`.
+- [x] Marked complete in project slice status.

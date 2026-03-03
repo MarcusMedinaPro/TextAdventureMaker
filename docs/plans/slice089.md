@@ -41,3 +41,9 @@ Minimikrav:
 
 **Definition of Done**
 - V1-innehåll kan flyttas till v2 med låg manuell insats och tydlig riskrapport.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `89_DSL_v1_to_v2_Migration.md`.
+- [x] Marked complete in project slice status.

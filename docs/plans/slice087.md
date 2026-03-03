@@ -47,3 +47,9 @@ Minimikrav:
 
 **Definition of Done**
 - Save DSL är tillräckligt komplett för verklig fortsättning av spel.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `87_DSL_v2_Save_Integrity.md`.
+- [x] Marked complete in project slice status.

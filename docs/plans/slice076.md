@@ -53,3 +53,9 @@ Minimikrav:
 
 **Definition of Done**
 - Dörrar/exits och dynamiska rumsregler kan beskrivas deklarativt i DSL.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `76_DSL_v2_Dynamic_World_Rules.md`.
+- [x] Marked complete in project slice status.

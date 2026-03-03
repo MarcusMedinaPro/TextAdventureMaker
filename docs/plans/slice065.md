@@ -533,3 +533,9 @@ public void PerformanceAssert_FailsWhenTooSlow()
 ```
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `65_Test_Helpers_Walkthrough.md`.
+- [x] Marked complete in project slice status.

@@ -65,3 +65,9 @@ Minimikrav:
 
 **Definition of Done**
 - Teamet kan bygga, ändra och validera äventyr via DSL+tooling med minimal C#-wiring.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `82_DSL_v2_Validation_and_CRUD.md`.
+- [x] Marked complete in project slice status.

@@ -253,3 +253,9 @@ public void ProceduralGenerator_CreatesConnectedWorld()
 Demo med slumpmässigt genererad labyrint och ASCII-karta.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `53_The_City_Map_Restore.md`.
+- [x] Marked complete in project slice status.

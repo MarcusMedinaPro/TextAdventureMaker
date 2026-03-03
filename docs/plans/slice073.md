@@ -81,3 +81,9 @@ Minimikrav:
 - Adventure kan definiera och placera entities separat.
 - Rich item metadata kan beskrivas i DSL.
 - Start-state laddas utan C# bootstrap-kod.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `73_DSL_v2_Entity_Bootstrap.md`.
+- [x] Marked complete in project slice status.

@@ -265,3 +265,9 @@ public void Achievement_UnlocksWhenConditionMet()
 Demo som visar journey summary och unlockade achievements vid spelets slut.
 
 ---
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `54_The_Diary_of_Returns.md`.
+- [x] Marked complete in project slice status.

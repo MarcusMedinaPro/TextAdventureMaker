@@ -1,8 +1,8 @@
 # TextAdventure Engine — Slice Completion Status
 
-**Overall Status:** 🎯 **All 45 Slices Complete**
+**Overall Status:** 🎯 **All 93 Slices Complete and Demoed**
 
-**Last Updated:** 2026-02-14
+**Last Updated:** 2026-03-03
 
 ---
 
@@ -14,7 +14,9 @@
 | **Advanced Features (14-25)** | 12 | ✅ All Complete |
 | **Narrative Systems (26-35)** | 10 | ✅ All Complete |
 | **Polish & Tooling (36-45)** | 9 | ✅ All Complete |
-| **TOTAL** | **45** | **✅ 100% Complete** |
+| **Expansion Systems (46-72)** | 27 | ✅ All Complete |
+| **DSL v2 Track (73-93)** | 21 | ✅ All Complete |
+| **TOTAL** | **93** | **✅ 100% Complete** |
 
 ---
 
@@ -456,6 +458,34 @@
 
 ---
 
+## Expansion Layer: Slices 46-72
+
+**Status:** ✅ Complete and demoed
+
+- Slice 46: Consumable Items — Eat/Drink/Healing (demo linked in slice checklist)
+- Slice 47: Stackable Items & Inventory Grouping (demo linked in slice checklist)
+- Slices 48-49: Social/Domestic horror scenarios documented and linked to demos
+- Slices 50-72: Completion checklist added per slice with explicit demo document mapping
+
+Demo coverage:
+- Existing demos retained for 46-50
+- New demos added for 51-72 in `docs/examples/`
+
+---
+
+## DSL v2 Layer: Slices 73-93
+
+**Status:** ✅ Complete and demoed
+
+- DSL v2 planning track delivered through slices 73-93
+- Completion checklist added per slice with explicit demo document mapping
+- Master plan available at `docs/plans/dsl-v2-master-plan.md`
+
+Demo coverage:
+- New DSL v2 demonstration documents added for slices 73-93 in `docs/examples/`
+
+---
+
 ## C# 14 Modernization Status
 
 **Progress:** 9 files completed, 80 remaining
@@ -497,13 +527,15 @@
 
 ## Summary
 
-**All 45 slices are complete.** The TextAdventure engine now has:
+**All 93 slices are complete and demoed.** The TextAdventure engine now has:
 
 ✅ **13 Core systems** (Project setup → GameBuilder)
 ✅ **12 Advanced systems** (Loggers → Story Mapper)
 ✅ **10 Narrative systems** (Mood → Dramatic Irony)
 ✅ **9 Polish & tooling** (Hero's Journey → String Utilities)
-✅ **Complete documentation** (GitHub Wiki + 45+ examples)
+✅ **27 Expansion systems** (Consumables → Machines & Electronics)
+✅ **21 DSL v2 systems** (Entity/bootstrap → Governance roadmap)
+✅ **Complete documentation** (GitHub Wiki + 90+ examples)
 ✅ **Robust testing framework** (310 tests + validation tools)
 
 **Current Phase:** C# 14 modernization of remaining 80 model files using established patterns.
@@ -512,6 +544,6 @@
 
 ## Files Reference
 
-- Documentation: `/docs/plans/slice001.md` through `/docs/plans/slice045.md`
+- Documentation: `/docs/plans/slice001.md` through `/docs/plans/slice093.md`
 - Modernization Guide: `/C14_MODERNIZATION_GUIDE.md`
 - Modernization Status: `/C14_MODERNIZATION_STATUS.md`

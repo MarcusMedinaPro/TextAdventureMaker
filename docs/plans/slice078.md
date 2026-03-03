@@ -51,3 +51,9 @@ Minimikrav:
 
 **Definition of Done**
 - NPC rules och triggers kan definieras i DSL och exekveras av Core-systemen.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `78_DSL_v2_NPC_Triggers.md`.
+- [x] Marked complete in project slice status.

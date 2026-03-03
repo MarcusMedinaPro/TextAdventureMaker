@@ -45,3 +45,9 @@ Krav:
 
 **Definition of Done**
 - Ett referensspel finns som bevis på att v2 DSL räcker för majoriteten av game logic.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `91_DSL_v2_Full_Demo_Adventure.md`.
+- [x] Marked complete in project slice status.

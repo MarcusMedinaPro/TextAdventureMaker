@@ -55,3 +55,9 @@ Minimikrav:
 
 **Definition of Done**
 - Event/schedule/random automation kan definieras i DSL och exekveras av Core-systemen.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `80_DSL_v2_Event_Automation.md`.
+- [x] Marked complete in project slice status.

@@ -59,3 +59,9 @@ Minimikrav:
 **Definition of Done**
 - Item reactions och consequences kan beskrivas helt i DSL.
 - Recipes/merge fungerar utan extra C#-registration.
+
+## Completion Checklist
+- [x] Core implementation for this slice is present in the engine.
+- [x] Behaviour is covered by tests and/or deterministic validation paths.
+- [x] Demo document: `74_DSL_v2_Item_Behaviours.md`.
+- [x] Marked complete in project slice status.

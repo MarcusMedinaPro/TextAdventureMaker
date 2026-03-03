@@ -103,7 +103,53 @@ Specific triggers (`blow:trumpet`) are checked before general ones (`blow`).
 
 ---
 
-### Task 094.3: DSL parser keywords
+### Task 094.3: C# API
+
+DSL and C# must be fully equivalent. Every DSL keyword has a fluent C# counterpart.
+
+#### Custom verbs — `KeywordParserConfigBuilder`
+
+```csharp
+// Single verb
+KeywordParserConfigBuilder.BritishDefaults()
+    .AddCustomVerb("blow")
+    .Build();
+
+// Multiple verbs
+KeywordParserConfigBuilder.BritishDefaults()
+    .AddCustomVerbs("blow", "threaten", "juggle")
+    .Build();
+```
+
+#### NPC reactions — `INpc`
+
+```csharp
+// Simple reaction
+guard.AddReaction("blow", "The guard gives you a very long, very disapproving stare.");
+
+// Specific target takes precedence over general
+guard.AddReaction("blow:trumpet", "The guard covers his ears. \"Must you do that here?!\"");
+guard.AddReaction("blow", "The guard gives you a very long, very disapproving stare.");
+
+// With condition
+guard.AddReaction(
+    "blow:trumpet",
+    "He covers his ears.",
+    state => state.WorldState.GetFlag("guard_on_duty"));
+
+// Chained (INpc returns this)
+var guard = new Npc("guard", "Guard")
+    .Description("A palace guard in full ceremonial dress.")
+    .AddReaction("blow:trumpet", "The guard covers his ears. \"Must you?!\"")
+    .AddReaction("blow",         "The guard gives you a very long, very disapproving stare.")
+    .AddReaction("threaten",     "The guard raises an eyebrow slowly.")
+    .AddReaction("attack",       "The guard's hand moves to his sword hilt.")
+    .AddReaction("take",         "The guard watches your hands carefully.");
+```
+
+---
+
+### Task 094.4: DSL parser keywords
 
 Register `command:` and `npc_reaction:` in `AdventureDslParser`:
 
@@ -198,9 +244,11 @@ npc_reaction: guard | on=take        | text=The guard watches your hands careful
 ## Completion Checklist
 - [ ] `CustomActionCommand` implemented
 - [ ] `NpcReaction` record and `INpc` members
+- [ ] `KeywordParserConfigBuilder.AddCustomVerb(s)` implemented
+- [ ] `INpc.AddReaction(trigger, text, condition?)` implemented (fluent, chainable)
 - [ ] DSL parser: `command:` keyword
 - [ ] DSL parser: `npc_reaction:` keyword
 - [ ] Command execution hook
-- [ ] Tests written and passing
-- [ ] `api-command-reference.md` updated
+- [ ] Tests written and passing (C# API + DSL round-trip)
+- [ ] `api-command-reference.md` updated (DSL + C# sections)
 - [ ] Sandbox demo created

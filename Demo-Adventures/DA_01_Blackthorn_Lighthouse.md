@@ -256,6 +256,9 @@ while (true)
         if (state.Quests.CheckAll(state))
             WriteLineC64("Quest updated.");
 
+        if (TryShowEnding(state))
+            break;
+
         continue;
     }
 
@@ -336,6 +339,9 @@ while (true)
         if (state.Quests.CheckAll(state))
             WriteLineC64("Quest updated.");
 
+        if (TryShowEnding(state))
+            break;
+
         continue;
     }
 
@@ -372,13 +378,8 @@ while (true)
     if (result.ShouldQuit)
         break;
 
-    if (state.WorldState.GetFlag("beacon_lit") && state.WorldState.GetCounter("bell_rings") >= 2)
-    {
-        WriteLineC64();
-        WriteLineC64("A distant cutter answers with two short horn blasts. The channel is safe for tonight.");
-        WriteLineC64("=== END: THE BEACON HOLDS ===");
+    if (TryShowEnding(state))
         break;
-    }
 }
 
 static bool TryHandleDialogChoice(string input, GameState state, ref INpc? activeConversationNpc, ref IDialogNode? activeDialogNode)
@@ -445,6 +446,17 @@ static void WriteDialogNode(IDialogNode node)
     WriteLineC64(Language.DialogOptionsLabel);
     for (var i = 0; i < node.Options.Count; i++)
         WriteLineC64(Language.DialogOption(i + 1, node.Options[i].Text));
+}
+
+static bool TryShowEnding(GameState state)
+{
+    if (!state.WorldState.GetFlag("beacon_lit") || state.WorldState.GetCounter("bell_rings") < 2)
+        return false;
+
+    WriteLineC64();
+    WriteLineC64("A distant cutter answers with two short horn blasts. The channel is safe for tonight.");
+    WriteLineC64("=== END: THE BEACON HOLDS ===");
+    return true;
 }
 
 static void AdvanceWorldForCustomTurn(GameState state, DslAdventure adventure)

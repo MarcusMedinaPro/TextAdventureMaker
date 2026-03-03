@@ -1,6 +1,12 @@
-using System.Threading;
+// <copyright file="AiConsoleSpinner.cs" company="Marcus Ackre Medina">
+// Copyright (c) Marcus Ackre Medina. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
 
-internal sealed class AiConsoleSpinner : IDisposable
+namespace MarcusMedina.TextAdventure.AI.Router;
+
+/// <summary>Console spinner shown while an AI provider call is in flight.</summary>
+public sealed class AiConsoleSpinner : IAiSpinner, IDisposable
 {
     private static readonly char[] Frames = ['|', '/', '-', '\\'];
 
@@ -107,10 +113,7 @@ internal sealed class AiConsoleSpinner : IDisposable
         private readonly AiConsoleSpinner? _spinner;
         private bool _disposed;
 
-        public SpinnerScope(AiConsoleSpinner? spinner)
-        {
-            _spinner = spinner;
-        }
+        public SpinnerScope(AiConsoleSpinner? spinner) => _spinner = spinner;
 
         public void Dispose()
         {

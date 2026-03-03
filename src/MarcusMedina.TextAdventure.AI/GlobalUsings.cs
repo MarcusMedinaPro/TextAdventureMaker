@@ -1,4 +1,5 @@
 global using MarcusMedina.TextAdventure.AI.Contracts;
+global using MarcusMedina.TextAdventure.AI.Diagnostics;
 global using MarcusMedina.TextAdventure.AI.Features;
 global using MarcusMedina.TextAdventure.AI.Models;
 global using MarcusMedina.TextAdventure.AI.Parsing;

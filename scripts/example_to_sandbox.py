@@ -11,7 +11,7 @@ SANDBOX_PROGRAM = ROOT / "sandbox" / "TextAdventure.Sandbox" / "Program.cs"
 def find_example(arg: str) -> Path:
     candidate = Path(arg)
     if candidate.suffix == ".md" and candidate.exists():
-        return candidate
+        return candidate.resolve()
 
     if (EXAMPLES_DIR / f"{arg}.md").exists():
         return EXAMPLES_DIR / f"{arg}.md"
@@ -52,7 +52,12 @@ def main() -> int:
     code = extract_csharp_block(content)
 
     SANDBOX_PROGRAM.write_text(code, encoding="utf-8")
-    print(f"Wrote sandbox program from {example.relative_to(ROOT)}")
+    try:
+        display = example.relative_to(ROOT)
+    except ValueError:
+        display = example
+
+    print(f"Wrote sandbox program from {display}")
     return 0
 
 

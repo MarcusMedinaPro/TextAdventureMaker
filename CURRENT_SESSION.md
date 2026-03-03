@@ -156,6 +156,23 @@
   - `?? src/MarcusMedina.TextAdventure/Models/NpcReaction.cs`
   - `?? tests/MarcusMedina.TextAdventure.Tests/CustomActionCommandTests.cs`
 
+## 2026-03-03 17:00 UTC (end of day)
+
+- Branch: `main`
+- Commit: f6c140b
+- Push: success
+- Done:
+  - Slice 094 fully implemented: `command:` + `npc_reaction:` DSL keywords
+  - `CustomActionCommand`, `NpcReaction`, `NpcReactionResolver` (new files)
+  - `INpc.AddReaction`/`GetReaction` updated to return `NpcReaction?` (not `string?`)
+  - Comma-condition syntax: `on=talk,has_item=brass_key,door_unlocked=id`
+  - `end_game=true`, `set_flag=key:val`, `inc_counter=key:n` on reactions
+  - 10 passing tests in `CustomActionCommandTests.cs`
+  - Sandbox: watchman + keeper with full reaction sets including fatal attack
+  - Skills created: `/wrap-up` and `/new-day`
+- Next: Decide on NPC patrol UX — should keeper suppress reactions when it walked in silently? Then continue next backlog slice.
+- Blockers: None.
+
 ## 2026-03-03 15:28 UTC
 - Branch: `main`
 - Commit: no new commit

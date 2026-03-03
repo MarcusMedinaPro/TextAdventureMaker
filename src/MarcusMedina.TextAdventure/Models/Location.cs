@@ -185,8 +185,27 @@ public class Location(string id) : ILocation
 
     public bool RemoveNpc(INpc npc) => _npcs.Remove(npc);
 
-    public INpc? FindNpc(string name) =>
-        string.IsNullOrWhiteSpace(name) ? null : _npcs.FirstOrDefault(n => n.Name.TextCompare(name));
+    public INpc? FindNpc(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        string target = name.Trim();
+        return _npcs.FirstOrDefault(npc => NpcMatches(npc, target));
+    }
+
+    private static bool NpcMatches(INpc npc, string target)
+    {
+        if (npc.Name.TextCompare(target) || npc.Id.TextCompare(target))
+            return true;
+
+        string[] nameParts = npc.Name.Split([' ', '-', '_'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (nameParts.Any(part => part.TextCompare(target)))
+            return true;
+
+        string[] idParts = npc.Id.Split([' ', '-', '_'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return idParts.Any(part => part.TextCompare(target));
+    }
 
     public static implicit operator Location(string id) => new(id);
 

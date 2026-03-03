@@ -75,4 +75,22 @@ public class TalkCommandTests
         Assert.Equal(GameError.MissingArgument, result.Error);
         Assert.Equal(Language.NoOneToTalkTo, result.Message);
     }
+
+    [Fact]
+    public void TalkCommand_MatchesNpcByNamePart()
+    {
+        Location location = new("camp");
+        var npc = new Npc("keeper", "Keeper Sable")
+            .SetDialog(new DialogNode("Keep your voice down."));
+        location.AddNpc(npc);
+        GameState state = new(location);
+
+        var talkByFirstName = new TalkCommand("keeper").Execute(new CommandContext(state));
+        var talkByLastName = new TalkCommand("sable").Execute(new CommandContext(state));
+
+        Assert.True(talkByFirstName.Success);
+        Assert.Contains("Keep your voice down.", talkByFirstName.Message);
+        Assert.True(talkByLastName.Success);
+        Assert.Contains("Keep your voice down.", talkByLastName.Message);
+    }
 }

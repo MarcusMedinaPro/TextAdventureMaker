@@ -40,7 +40,12 @@ public static class NpcReactionResolver
         }
 
         if (firedReactions.Count == 0)
+        {
+            // If a custom action found no reactions, return an error
+            if (command is CustomActionCommand cac)
+                return CommandResult.Fail($"You try to {cac.Verb}{(string.IsNullOrWhiteSpace(cac.Target) ? "" : $" {cac.Target}")}, but nothing happens.", Enums.GameError.UnknownCommand);
             return result;
+        }
 
         // Apply side-effects
         foreach (NpcReaction reaction in firedReactions)

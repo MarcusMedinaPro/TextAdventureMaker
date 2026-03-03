@@ -13,7 +13,10 @@
       "Bash(pkill:*)",
       "Bash(lsof:*)",
       "Bash(dotnet test:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(./dev.sh test:*)",
+      "Bash(.gitattributes:*)",
+      "Bash(./test.sh:*)"
     ]
   }
 }

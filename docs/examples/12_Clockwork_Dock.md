@@ -61,7 +61,7 @@ var dsl = sb.ToString();
 
 File.WriteAllText("clockwork.adventure", dsl);
 
-var parser = new DslV2Parser();
+var parser = new DslParser();
 var adventure = parser.ParseFile("clockwork.adventure");
 
 var state = adventure.State;

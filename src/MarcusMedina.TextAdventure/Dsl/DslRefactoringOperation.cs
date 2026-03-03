@@ -152,7 +152,7 @@ public sealed class DslRefactoringEngine
     /// <summary>
     /// Execute a rename operation with reference tracking.
     /// </summary>
-    public DslRefactoringResult Rename(DslRenameOperation op, DslV2Parser parser)
+    public DslRefactoringResult Rename(DslRenameOperation op, DslParser parser)
     {
         ArgumentNullException.ThrowIfNull(op);
         ArgumentNullException.ThrowIfNull(parser);
@@ -208,7 +208,7 @@ public sealed class DslRefactoringEngine
     /// <summary>
     /// Execute a copy operation.
     /// </summary>
-    public DslRefactoringResult Copy(DslCopyOperation op, DslV2Parser parser)
+    public DslRefactoringResult Copy(DslCopyOperation op, DslParser parser)
     {
         ArgumentNullException.ThrowIfNull(op);
         ArgumentNullException.ThrowIfNull(parser);
@@ -262,7 +262,7 @@ public sealed class DslRefactoringEngine
     /// <summary>
     /// Execute a batch operation.
     /// </summary>
-    public List<DslRefactoringResult> ExecuteBatch(DslBatchOperation op, DslV2Parser parser)
+    public List<DslRefactoringResult> ExecuteBatch(DslBatchOperation op, DslParser parser)
     {
         ArgumentNullException.ThrowIfNull(op);
         ArgumentNullException.ThrowIfNull(parser);
@@ -295,7 +295,7 @@ public sealed class DslRefactoringEngine
     /// <summary>
     /// Execute a query/inspection operation.
     /// </summary>
-    public DslQueryResult Query(DslQueryOperation op, DslV2Parser parser)
+    public DslQueryResult Query(DslQueryOperation op, DslParser parser)
     {
         ArgumentNullException.ThrowIfNull(op);
         ArgumentNullException.ThrowIfNull(parser);
@@ -322,7 +322,7 @@ public sealed class DslRefactoringEngine
         return result;
     }
 
-    private DslRefactoringResult ExecuteBatchCommand(DslBatchCommand cmd, DslV2Parser parser, bool dryRun)
+    private DslRefactoringResult ExecuteBatchCommand(DslBatchCommand cmd, DslParser parser, bool dryRun)
     {
         return new DslRefactoringResult
         {
@@ -332,7 +332,7 @@ public sealed class DslRefactoringEngine
         };
     }
 
-    private object? FindEntity(DslV2Parser parser, string entityType, string id)
+    private object? FindEntity(DslParser parser, string entityType, string id)
     {
         return entityType.ToLowerInvariant() switch
         {
@@ -342,7 +342,7 @@ public sealed class DslRefactoringEngine
         };
     }
 
-    private List<string> FindReferences(DslV2Parser parser, string entityType, string id)
+    private List<string> FindReferences(DslParser parser, string entityType, string id)
     {
         // Find all references to the entity
         var references = new List<string>();
@@ -350,7 +350,7 @@ public sealed class DslRefactoringEngine
         return references;
     }
 
-    private List<DslReferenceIssue> DetectReferenceIssues(DslV2Parser parser)
+    private List<DslReferenceIssue> DetectReferenceIssues(DslParser parser)
     {
         var issues = new List<DslReferenceIssue>();
         // Detect circular dependencies, broken references, etc.
@@ -362,14 +362,14 @@ public sealed class DslRefactoringEngine
         return $"Rename '{oldId}' to '{newId}' ({references.Count} references)";
     }
 
-    private List<DslQueryItem> FindBrokenReferencesAsItems(DslV2Parser parser)
+    private List<DslQueryItem> FindBrokenReferencesAsItems(DslParser parser)
     {
         var items = new List<DslQueryItem>();
         // Find and report broken references
         return items;
     }
 
-    private List<DslQueryItem> ListRulesAsItems(DslV2Parser parser)
+    private List<DslQueryItem> ListRulesAsItems(DslParser parser)
     {
         var items = new List<DslQueryItem>();
         foreach (var rule in parser.GetNpcRules().OrderBy(r => r.NpcId))
@@ -390,7 +390,7 @@ public sealed class DslRefactoringEngine
         return items;
     }
 
-    private List<DslQueryItem> ListQuestsAsItems(DslV2Parser parser)
+    private List<DslQueryItem> ListQuestsAsItems(DslParser parser)
     {
         var items = new List<DslQueryItem>();
         foreach (var quest in parser.GetQuests().OrderBy(q => q.Id))

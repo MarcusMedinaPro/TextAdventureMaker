@@ -20,6 +20,7 @@ public static class CommandExtensions
         CommandResult result = command.Execute(new CommandContext(state));
         if (!result.ShouldQuit)
         {
+            result = NpcReactionResolver.Resolve(command, result, state);
             state.TimeSystem.Tick(state);
             state.RandomEvents.Tick(state);
             state.TickNpcTriggers();

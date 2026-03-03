@@ -22,6 +22,7 @@ public interface INpc : IGameEntity
     NpcPersonality Personality { get; }
     IReadOnlyList<DialogRule> DialogRules { get; }
     IReadOnlyList<NpcTrigger> Triggers { get; }
+    IReadOnlyList<NpcReaction> Reactions { get; }
     IReadOnlyDictionary<string, ICharacterArc> Arcs { get; }
     IReadOnlyDictionary<string, IBond> Bonds { get; }
     CharacterArchetype? Archetype { get; }
@@ -42,4 +43,6 @@ public interface INpc : IGameEntity
     INpc SetArchetype(CharacterArchetype archetype);
     INpc DiesAt(JourneyStage stage);
     string? GetRuleBasedDialog(IGameState state);
+    INpc AddReaction(string trigger, string text, Func<IGameState, bool>? condition = null);
+    string? GetReaction(string trigger, IGameState state);
 }

@@ -14,6 +14,7 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<DialogRule> _dialogRules = [];
     private readonly List<NpcTrigger> _triggers = [];
+    private readonly List<NpcReaction> _reactions = [];
     private readonly Dictionary<string, ICharacterArc> _arcs = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, IBond> _bonds = new(StringComparer.OrdinalIgnoreCase);
 
@@ -28,6 +29,7 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     public NpcPersonality Personality { get; set; } = new();
     public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
     public IReadOnlyList<NpcTrigger> Triggers => _triggers;
+    public IReadOnlyList<NpcReaction> Reactions => _reactions;
     public IReadOnlyDictionary<string, ICharacterArc> Arcs => _arcs;
     public IReadOnlyDictionary<string, IBond> Bonds => _bonds;
     public CharacterArchetype? Archetype { get; private set; }
@@ -123,6 +125,24 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     {
         FateStage = stage;
         return this;
+    }
+
+    public INpc AddReaction(string trigger, string text, Func<IGameState, bool>? condition = null)
+    {
+        _reactions.Add(new NpcReaction(trigger.ToLowerInvariant(), text, condition));
+        return this;
+    }
+
+    public string? GetReaction(string trigger, IGameState state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        string lower = trigger.ToLowerInvariant();
+
+        // Specific triggers (e.g. "blow:trumpet") take precedence over general (e.g. "blow")
+        return _reactions.FirstOrDefault(r =>
+                r.Trigger == lower &&
+                (r.Condition is null || r.Condition(state)))
+            ?.Text;
     }
 
     public string? GetRuleBasedDialog(IGameState state)

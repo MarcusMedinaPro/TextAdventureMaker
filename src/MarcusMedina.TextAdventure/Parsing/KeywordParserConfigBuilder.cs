@@ -334,6 +334,26 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
+    /// <summary>Register a custom action verb that fires <see cref="Commands.CustomActionCommand"/>.</summary>
+    public KeywordParserConfigBuilder AddCustomVerb(string verb)
+    {
+        if (string.IsNullOrWhiteSpace(verb))
+            return this;
+
+        string v = verb.Trim().ToLowerInvariant();
+        _customCommands[v] = tokens =>
+            new Commands.CustomActionCommand(v, tokens.Length > 1 ? string.Join(" ", tokens[1..]) : null);
+        return this;
+    }
+
+    /// <summary>Register multiple custom action verbs that each fire <see cref="Commands.CustomActionCommand"/>.</summary>
+    public KeywordParserConfigBuilder AddCustomVerbs(params string[] verbs)
+    {
+        foreach (string verb in verbs)
+            AddCustomVerb(verb);
+        return this;
+    }
+
     /// <summary>Register a custom command handler for a full phrase.</summary>
     public KeywordParserConfigBuilder WithCustomCommand(string phrase, Func<string[], ICommand> handler)
     {

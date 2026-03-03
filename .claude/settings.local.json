@@ -5,7 +5,13 @@
       "Bash(sort:*)",
       "Bash(ls:*)",
       "Bash(cat:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(grep:*)",
+      "Bash(git check-ignore -v src/MarcusMedina.TextAdventure.AI/Debug/)",
+      "Bash(do echo:*)",
+      "Bash(python3:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)"
     ]
   }
 }

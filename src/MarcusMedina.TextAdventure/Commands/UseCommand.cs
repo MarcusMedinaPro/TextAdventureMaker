@@ -7,6 +7,7 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using System.Linq;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -21,8 +22,11 @@ public class UseCommand : ICommand
 
     public CommandResult Execute(CommandContext context)
     {
+        ILocation location = context.State.CurrentLocation;
         IItem? item = context.State.Inventory.FindItem(ItemName);
+        bool useFixedRoomItem = false;
         string? suggestion = null;
+
         if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
         {
             IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
@@ -33,13 +37,38 @@ public class UseCommand : ICommand
             }
         }
 
+        if (item is null)
+        {
+            IItem? roomItem = location.FindItem(ItemName);
+            if (roomItem is not null && !roomItem.Takeable)
+            {
+                item = roomItem;
+                useFixedRoomItem = true;
+            }
+        }
+
+        if (item is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
+        {
+            IItem? bestRoomFixture = FuzzyMatcher.FindBestItem(
+                location.Items.Where(current => !current.Takeable),
+                ItemName,
+                context.State.FuzzyMaxDistance);
+
+            if (bestRoomFixture is not null)
+            {
+                item = bestRoomFixture;
+                useFixedRoomItem = true;
+                suggestion = bestRoomFixture.Name;
+            }
+        }
+
         if (item  is null)
         {
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotFound);
         }
 
         item.Use();
-        if (item.Amount.HasValue && item.Amount.Value == 0)
+        if (!useFixedRoomItem && item.Amount.HasValue && item.Amount.Value == 0)
         {
             _ = context.State.Inventory.Remove(item);
         }

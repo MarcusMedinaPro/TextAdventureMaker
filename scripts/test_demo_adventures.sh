@@ -47,13 +47,13 @@ for file in $GLOB_PATTERN; do
     if rg -q "MSB3021|Access to the path .* is denied" /tmp/da_build.log; then
       dotnet clean sandbox/TextAdventure.Sandbox/ --nologo >/tmp/da_clean.log 2>&1 || true
       if ! dotnet build sandbox/TextAdventure.Sandbox/ --nologo >/tmp/da_build.log 2>&1; then
-        note="$(rg -n \"error [A-Z0-9]+:\" /tmp/da_build.log | head -n 2 | tr '\n' ' ' | tr '\t' ' ')"
+        note="$(rg -n 'error [A-Z0-9]+:' /tmp/da_build.log | head -n 2 | tr '\n' ' ' | tr '\t' ' ' || true)"
         [[ -n "$note" ]] || note="$(tail -n 4 /tmp/da_build.log | tr '\n' ' ' | tr '\t' ' ')"
         printf "%s\tok\tfail\t-\tyes\t%s\n" "$file" "$note" >> "$SUMMARY_FILE"
         continue
       fi
     else
-      note="$(rg -n \"error [A-Z0-9]+:\" /tmp/da_build.log | head -n 2 | tr '\n' ' ' | tr '\t' ' ')"
+      note="$(rg -n 'error [A-Z0-9]+:' /tmp/da_build.log | head -n 2 | tr '\n' ' ' | tr '\t' ' ' || true)"
       [[ -n "$note" ]] || note="$(tail -n 4 /tmp/da_build.log | tr '\n' ' ' | tr '\t' ' ')"
       printf "%s\tok\tfail\t-\tyes\t%s\n" "$file" "$note" >> "$SUMMARY_FILE"
       continue

@@ -14,9 +14,9 @@ namespace MarcusMedina.TextAdventure.Dsl;
 public sealed class DslV2Exporter
 {
     /// <summary>
-    /// Export a DslV2Parser instance back to DSL v2 format.
+    /// Export a DslParser instance back to DSL v2 format.
     /// </summary>
-    public string Export(DslV2Parser parser)
+    public string Export(DslParser parser)
     {
         ArgumentNullException.ThrowIfNull(parser);
 
@@ -66,7 +66,7 @@ public sealed class DslV2Exporter
     /// <summary>
     /// Export to file.
     /// </summary>
-    public void ExportToFile(DslV2Parser parser, string path)
+    public void ExportToFile(DslParser parser, string path)
     {
         ArgumentNullException.ThrowIfNull(parser);
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
@@ -75,7 +75,7 @@ public sealed class DslV2Exporter
         File.WriteAllText(path, content);
     }
 
-    private static void ExportDefinedItems(StringBuilder sb, DslV2Parser parser)
+    private static void ExportDefinedItems(StringBuilder sb, DslParser parser)
     {
         var items = parser.GetDefinedItems();
         if (items.Count == 0) return;
@@ -89,7 +89,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportDefinedNpcs(StringBuilder sb, DslV2Parser parser)
+    private static void ExportDefinedNpcs(StringBuilder sb, DslParser parser)
     {
         var npcs = parser.GetDefinedNpcs();
         if (npcs.Count == 0) return;
@@ -120,7 +120,7 @@ public sealed class DslV2Exporter
         sb.AppendLine($"{keyword}: {line}");
     }
 
-    private static void ExportStartState(StringBuilder sb, DslV2Parser parser)
+    private static void ExportStartState(StringBuilder sb, DslParser parser)
     {
         var state = parser.GetStartState();
         if (string.IsNullOrEmpty(state.CurrentLocationId) && state.StartInventory.Count == 0) return;
@@ -144,7 +144,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportItemReactions(StringBuilder sb, DslV2Parser parser)
+    private static void ExportItemReactions(StringBuilder sb, DslParser parser)
     {
         var reactions = parser.GetItemReactions();
         if (reactions.Count == 0) return;
@@ -155,7 +155,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportItemConsequences(StringBuilder sb, DslV2Parser parser)
+    private static void ExportItemConsequences(StringBuilder sb, DslParser parser)
     {
         var consequences = parser.GetItemConsequences();
         if (consequences.Count == 0) return;
@@ -174,7 +174,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportRecipes(StringBuilder sb, DslV2Parser parser)
+    private static void ExportRecipes(StringBuilder sb, DslParser parser)
     {
         var recipes = parser.GetRecipes();
         if (recipes.Count == 0) return;
@@ -185,7 +185,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportDoorConfigs(StringBuilder sb, DslV2Parser parser)
+    private static void ExportDoorConfigs(StringBuilder sb, DslParser parser)
     {
         var doors = parser.GetDoorConfigs();
         if (doors.Count == 0) return;
@@ -201,7 +201,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportExitConfigs(StringBuilder sb, DslV2Parser parser)
+    private static void ExportExitConfigs(StringBuilder sb, DslParser parser)
     {
         var exits = parser.GetExitConfigs();
         if (exits.Count == 0) return;
@@ -221,7 +221,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportRoomDescriptions(StringBuilder sb, DslV2Parser parser)
+    private static void ExportRoomDescriptions(StringBuilder sb, DslParser parser)
     {
         var descs = parser.GetRoomDescriptions();
         if (descs.Count == 0) return;
@@ -235,7 +235,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportRoomVariables(StringBuilder sb, DslV2Parser parser)
+    private static void ExportRoomVariables(StringBuilder sb, DslParser parser)
     {
         var vars = parser.GetRoomVariables();
         if (vars.Count == 0) return;
@@ -246,7 +246,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportRoomTransforms(StringBuilder sb, DslV2Parser parser)
+    private static void ExportRoomTransforms(StringBuilder sb, DslParser parser)
     {
         var transforms = parser.GetRoomTransforms();
         if (transforms.Count == 0) return;
@@ -263,7 +263,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportNpcDefinitions(StringBuilder sb, DslV2Parser parser)
+    private static void ExportNpcDefinitions(StringBuilder sb, DslParser parser)
     {
         var npcs = parser.GetNpcDefs();
         if (npcs.Count == 0) return;
@@ -281,7 +281,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportNpcRulesAndTriggers(StringBuilder sb, DslV2Parser parser)
+    private static void ExportNpcRulesAndTriggers(StringBuilder sb, DslParser parser)
     {
         var rules = parser.GetNpcRules();
         var triggers = parser.GetNpcTriggers();
@@ -315,7 +315,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportQuests(StringBuilder sb, DslV2Parser parser)
+    private static void ExportQuests(StringBuilder sb, DslParser parser)
     {
         var quests = parser.GetQuests();
         if (quests.Count == 0) return;
@@ -337,7 +337,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportTriggers(StringBuilder sb, DslV2Parser parser)
+    private static void ExportTriggers(StringBuilder sb, DslParser parser)
     {
         var triggers = parser.GetTriggers();
         if (triggers.Count == 0) return;
@@ -355,7 +355,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportSchedules(StringBuilder sb, DslV2Parser parser)
+    private static void ExportSchedules(StringBuilder sb, DslParser parser)
     {
         var schedules = parser.GetSchedules();
         if (schedules.Count == 0) return;
@@ -373,7 +373,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportRandomEvents(StringBuilder sb, DslV2Parser parser)
+    private static void ExportRandomEvents(StringBuilder sb, DslParser parser)
     {
         var settings = parser.GetRandomSettings();
         var events = parser.GetRandomEvents();
@@ -396,7 +396,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportStoryBranches(StringBuilder sb, DslV2Parser parser)
+    private static void ExportStoryBranches(StringBuilder sb, DslParser parser)
     {
         var system = parser.GetStorySystem();
         var branches = system.GetAllBranches().ToList();
@@ -415,7 +415,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportChapters(StringBuilder sb, DslV2Parser parser)
+    private static void ExportChapters(StringBuilder sb, DslParser parser)
     {
         var system = parser.GetStorySystem();
         var chapters = system.GetAllChapters().ToList();
@@ -445,7 +445,7 @@ public sealed class DslV2Exporter
         sb.AppendLine();
     }
 
-    private static void ExportParserConfiguration(StringBuilder sb, DslV2Parser parser)
+    private static void ExportParserConfiguration(StringBuilder sb, DslParser parser)
     {
         var config = parser.GetParserConfiguration();
         if (config.Options.Count == 0 && config.CommandAliases.Count == 0 && config.DirectionAliases.Count == 0)

@@ -1,9 +1,11 @@
-// <copyright file="DslV2Parser.cs" company="Marcus Ackre Medina">
+// <copyright file="DslParser.cs" company="Marcus Ackre Medina">
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
 using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Dsl;
@@ -12,7 +14,7 @@ namespace MarcusMedina.TextAdventure.Dsl;
 /// DSL v2 parser - extended keywords for entities, items, and start-state definitions.
 /// Extends AdventureDslParser with new v2 features without breaking v1 compatibility.
 /// </summary>
-public sealed class DslV2Parser : AdventureDslParser
+public sealed class DslParser : AdventureDslParser
 {
     private readonly Dictionary<string, DslEntityDefinition> _definedItems = [];
     private readonly Dictionary<string, DslEntityDefinition> _definedNpcs = [];
@@ -52,9 +54,16 @@ public sealed class DslV2Parser : AdventureDslParser
     private string _currentChapterId = "";
     private readonly DslParserConfiguration _parserConfig = new();
 
-    public DslV2Parser()
+    public DslParser()
     {
         RegisterV2Keywords();
+    }
+
+    protected override void OnAfterParse(AdventureDslContext context)
+    {
+        base.OnAfterParse(context);
+        ApplyItemRuntimeData(context);
+        ApplyNpcRuntimeData(context);
     }
 
     private void RegisterV2Keywords()
@@ -138,6 +147,266 @@ public sealed class DslV2Parser : AdventureDslParser
         RegisterKeyword("parser_option", HandleParserOption);
         RegisterKeyword("command_alias", HandleCommandAlias);
         RegisterKeyword("direction_alias", HandleDirectionAlias);
+
+        // Custom verbs and NPC reactions (Slice 094)
+        RegisterKeyword("command", HandleCustomCommand);
+        RegisterKeyword("npc_reaction", HandleNpcReaction);
+    }
+
+    private void ApplyItemRuntimeData(AdventureDslContext context)
+    {
+        if (_itemReactions.Count == 0)
+            return;
+
+        foreach (DslItemReaction reaction in _itemReactions)
+        {
+            string itemId = NormalizeId(reaction.ItemId);
+            if (string.IsNullOrWhiteSpace(itemId))
+                continue;
+
+            if (!TryResolveItem(context, itemId, out Item item))
+            {
+                context.AddWarning(new DslParseError(
+                    0,
+                    $"item_reaction: {reaction.ItemId}",
+                    $"Item '{itemId}' referenced by item_reaction is not defined"));
+                continue;
+            }
+
+            if (!TryParseItemAction(reaction.Action, out ItemAction action))
+            {
+                context.AddWarning(new DslParseError(
+                    0,
+                    $"item_reaction: {reaction.ItemId} | on={reaction.Action}",
+                    $"Unsupported item action '{reaction.Action}' in item_reaction"));
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(reaction.Text))
+                _ = item.SetReaction(action, reaction.Text);
+        }
+    }
+
+    private static bool TryResolveItem(AdventureDslContext context, string itemId, out Item item)
+    {
+        if (context.Items.TryGetValue(itemId, out Item? foundItem))
+        {
+            item = foundItem;
+            return true;
+        }
+
+        if (context.Keys.TryGetValue(itemId, out Key? foundKey))
+        {
+            item = foundKey;
+            return true;
+        }
+
+        item = null!;
+        return false;
+    }
+
+    private static bool TryParseItemAction(string actionText, out ItemAction action)
+    {
+        if (string.IsNullOrWhiteSpace(actionText))
+        {
+            action = default;
+            return false;
+        }
+
+        string normalized = actionText
+            .Trim()
+            .Replace("_", "", StringComparison.Ordinal)
+            .Replace("-", "", StringComparison.Ordinal)
+            .Replace(" ", "", StringComparison.Ordinal);
+
+        return Enum.TryParse(normalized, true, out action);
+    }
+
+    private void ApplyNpcRuntimeData(AdventureDslContext context)
+    {
+        if (_npcDefs.Count == 0)
+            return;
+
+        Dictionary<string, Npc> npcs = new(StringComparer.OrdinalIgnoreCase);
+
+        foreach (DslNpcDef definition in _npcDefs)
+        {
+            string id = NormalizeId(definition.Id);
+            if (string.IsNullOrWhiteSpace(id))
+                continue;
+
+            string name = string.IsNullOrWhiteSpace(definition.Name)
+                ? id.Replace('_', ' ')
+                : definition.Name.Trim();
+
+            var npc = new Npc(id, name, ParseNpcState(definition.State), new Stats(Math.Max(1, definition.Health)));
+
+            if (!string.IsNullOrWhiteSpace(definition.Description))
+                npc.Description(definition.Description);
+
+            if (TryParseArchetype(definition.Archetype, out CharacterArchetype archetype))
+                npc.SetArchetype(archetype);
+
+            if (TryParseJourneyStage(definition.DiesAt, out JourneyStage stage))
+                npc.DiesAt(stage);
+
+            npc.SetMovement(ParseNpcMovement(definition.Movement, context));
+            npcs[id] = npc;
+        }
+
+        foreach (DslNpcDialog dialog in _npcDialogs)
+        {
+            string npcId = NormalizeId(dialog.NpcId);
+            if (!npcs.TryGetValue(npcId, out Npc? npc))
+            {
+                context.AddWarning(new DslParseError(
+                    0,
+                    $"npc_dialog: {dialog.NpcId}",
+                    $"NPC '{npcId}' referenced by npc_dialog is not defined"));
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dialog.Text))
+                npc.Dialog(dialog.Text);
+        }
+
+        foreach (DslNpcPlacement placement in _npcPlacements)
+        {
+            string locationId = NormalizeId(placement.LocationId);
+            string npcId = NormalizeId(placement.NpcId);
+
+            if (!npcs.TryGetValue(npcId, out Npc? npc))
+            {
+                context.AddWarning(new DslParseError(
+                    0,
+                    $"npc_place: {placement.LocationId} | {placement.NpcId}",
+                    $"NPC '{npcId}' referenced by npc_place is not defined"));
+                continue;
+            }
+
+            if (!context.Locations.TryGetValue(locationId, out Location? location))
+            {
+                context.AddWarning(new DslParseError(
+                    0,
+                    $"npc_place: {placement.LocationId} | {placement.NpcId}",
+                    $"Location '{locationId}' referenced by npc_place is not defined"));
+                continue;
+            }
+
+            if (location.FindNpc(npc.Id) is null)
+                location.AddNpc(npc);
+        }
+
+        foreach (DslNpcReaction reaction in _parserConfig.NpcReactions)
+        {
+            if (!npcs.TryGetValue(reaction.NpcId, out Npc? npc))
+            {
+                context.AddWarning(new DslParseError(
+                    0,
+                    $"npc_reaction: {reaction.NpcId}",
+                    $"NPC '{reaction.NpcId}' referenced by npc_reaction is not defined"));
+                continue;
+            }
+
+            Func<IGameState, bool>? condition = ParseNpcReactionCondition(reaction.Condition);
+            npc.AddReaction(reaction.Trigger, reaction.Text, condition);
+        }
+
+        if (_dialogOptions.Count > 0)
+        {
+            context.AddWarning(new DslParseError(
+                0,
+                "npc_dialog_option",
+                "npc_dialog_option is parsed but not yet bound into runtime dialog trees"));
+        }
+    }
+
+    private static Func<IGameState, bool>? ParseNpcReactionCondition(string? condition)
+    {
+        if (string.IsNullOrWhiteSpace(condition))
+            return null;
+
+        if (condition.StartsWith("flag:", StringComparison.OrdinalIgnoreCase))
+        {
+            string[] kv = condition[5..].Split('=');
+            if (kv.Length == 2)
+            {
+                string key = kv[0].Trim();
+                bool expected = kv[1].Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+                return state => state.WorldState.GetFlag(key) == expected;
+            }
+        }
+
+        return null;
+    }
+
+    private static NpcState ParseNpcState(string state)
+    {
+        if (string.IsNullOrWhiteSpace(state))
+            return NpcState.Friendly;
+
+        string normalized = state.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            "friendly" or "alive" => NpcState.Friendly,
+            "hostile" => NpcState.Hostile,
+            "neutral" or "dormant" or "passive" => NpcState.Neutral,
+            "dead" or "defeated" => NpcState.Dead,
+            _ => NpcState.Friendly
+        };
+    }
+
+    private static bool TryParseArchetype(string archetype, out CharacterArchetype value)
+    {
+        if (string.IsNullOrWhiteSpace(archetype))
+        {
+            value = default;
+            return false;
+        }
+
+        return Enum.TryParse(archetype.Trim(), true, out value);
+    }
+
+    private static bool TryParseJourneyStage(int index, out JourneyStage stage)
+    {
+        if (!Enum.IsDefined(typeof(JourneyStage), index))
+        {
+            stage = default;
+            return false;
+        }
+
+        stage = (JourneyStage)index;
+        return true;
+    }
+
+    private static INpcMovement ParseNpcMovement(string movement, AdventureDslContext context)
+    {
+        if (string.IsNullOrWhiteSpace(movement))
+            return new NoNpcMovement();
+
+        string raw = movement.Trim();
+        if (raw.Equals("none", StringComparison.OrdinalIgnoreCase))
+            return new NoNpcMovement();
+
+        if (raw.Equals("random", StringComparison.OrdinalIgnoreCase))
+            return new RandomNpcMovement();
+
+        if (raw.StartsWith("patrol:", StringComparison.OrdinalIgnoreCase))
+        {
+            string routeText = raw["patrol:".Length..];
+            List<ILocation> route = [];
+            foreach (string token in routeText.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                string locationId = NormalizeId(token);
+                if (context.Locations.TryGetValue(locationId, out Location? location))
+                    route.Add(location);
+            }
+
+            if (route.Count > 0)
+                return new PatrolNpcMovement(route);
+        }
+
+        return new NoNpcMovement();
     }
 
     private void HandleDefineItem(AdventureDslContext context, string value)
@@ -1151,6 +1420,36 @@ public sealed class DslV2Parser : AdventureDslParser
             TargetDirection = parts[1].Trim()
         };
         _parserConfig.DirectionAliases.Add(alias);
+    }
+
+    private void HandleCustomCommand(AdventureDslContext context, string value)
+    {
+        foreach (string verb in value.Split(','))
+        {
+            string v = verb.Trim().ToLowerInvariant();
+            if (!string.IsNullOrWhiteSpace(v))
+                _parserConfig.CustomVerbs.Add(new DslCustomVerb { Verb = v });
+        }
+    }
+
+    private void HandleNpcReaction(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 1) return;
+
+        var reaction = new DslNpcReaction { NpcId = NormalizeId(parts[0]) };
+        for (int i = 1; i < parts.Count; i++)
+        {
+            if (parts[i].StartsWith("on=", StringComparison.OrdinalIgnoreCase))
+                reaction.Trigger = parts[i][3..].Trim().ToLowerInvariant();
+            else if (parts[i].StartsWith("text=", StringComparison.OrdinalIgnoreCase))
+                reaction.Text = parts[i][5..].Trim();
+            else if (parts[i].StartsWith("if=", StringComparison.OrdinalIgnoreCase))
+                reaction.Condition = parts[i][3..].Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(reaction.NpcId) && !string.IsNullOrWhiteSpace(reaction.Trigger) && !string.IsNullOrWhiteSpace(reaction.Text))
+            _parserConfig.NpcReactions.Add(reaction);
     }
 
     public DslStartStateDefinition GetStartState() => _startState;

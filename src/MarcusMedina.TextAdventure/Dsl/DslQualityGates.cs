@@ -199,7 +199,7 @@ public sealed class DslQualityGate
         try
         {
             // Parse fixture
-            var parser = new DslV2Parser();
+            var parser = new DslParser();
             sw.Stop();
             parseTimeMs = sw.ElapsedMilliseconds;
 

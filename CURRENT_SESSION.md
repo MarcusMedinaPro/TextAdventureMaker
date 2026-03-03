@@ -15,7 +15,7 @@
 ✅ **Slice 055**: Cinematic Presentation (ITextPresenter, TypewriterPresenter, ScenePresenter)
 ✅ **Slice 056**: Procedural Content Generation Framework (IContentGenerator, GenerationContext, EventTemplates)
 ✅ **Slice 060**: Puzzle Toolkit (IPuzzle, CombinationLockPuzzle, SequencePuzzle, RiddlePuzzle, MultiStepPuzzle, EnvironmentalPuzzle, PuzzleSystem, SolveCommand)
-✅ **Slice 073**: DSL v2 Entity and Start-State Definitions (DslV2Parser with entity definitions, placements, and start-state keywords)
+✅ **Slice 073**: DSL v2 Entity and Start-State Definitions (DslParser with entity definitions, placements, and start-state keywords)
 ✅ **Slice 074**: Item Reactions, Consequences & Recipes (item_reaction, item_consequence, recipe keywords)
 ✅ **Slice 075**: Variable Interpolation & Safe Expressions (DslInterpolationEngine, path resolution, formatters, safe expression evaluator)
 ✅ **Slice 076**: Door/Exit Expansion & Dynamic Rooms (DslWorldInteraction with door configs, exits, room descriptions, transforms)

@@ -39,11 +39,32 @@ public sealed class DslDirectionAlias
 /// <summary>
 /// Parser configuration container for DSL v2.
 /// </summary>
+/// <summary>
+/// Custom verb declared via <c>command:</c> DSL keyword.
+/// </summary>
+public sealed class DslCustomVerb
+{
+    public string Verb { get; set; } = "";
+}
+
+/// <summary>
+/// NPC reaction definition from DSL <c>npc_reaction:</c> keyword.
+/// </summary>
+public sealed class DslNpcReaction
+{
+    public string NpcId { get; set; } = "";
+    public string Trigger { get; set; } = "";
+    public string Text { get; set; } = "";
+    public string? Condition { get; set; }
+}
+
 public sealed class DslParserConfiguration
 {
     public List<DslParserOption> Options { get; set; } = [];
     public List<DslCommandAlias> CommandAliases { get; set; } = [];
     public List<DslDirectionAlias> DirectionAliases { get; set; } = [];
+    public List<DslCustomVerb> CustomVerbs { get; set; } = [];
+    public List<DslNpcReaction> NpcReactions { get; set; } = [];
 
     /// <summary>
     /// Validate parser configuration.

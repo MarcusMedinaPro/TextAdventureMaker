@@ -16,7 +16,7 @@ public sealed class DslSaveStateCollector
     /// <summary>
     /// Create a complete save state snapshot from current game state.
     /// </summary>
-    public DslCompleteGameState CollectSaveState(GameState gameState, DslV2Parser? parser = null)
+    public DslCompleteGameState CollectSaveState(GameState gameState, DslParser? parser = null)
     {
         ArgumentNullException.ThrowIfNull(gameState);
 

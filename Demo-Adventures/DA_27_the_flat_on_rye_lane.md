@@ -65,25 +65,25 @@ define npc: the_flat_on_rye_lane_watcher | Watcher | A tense observer who reacts
 
 // --- World layout ---
 location: start | Arrive at the flat. Something feels wrong.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_flat_on_rye_lane_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_flat_on_rye_lane_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | Explore the hallway. Notice the wallpaper is... breathing.
   npc: the_flat_on_rye_lane_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | Enter the kitchen. The clock runs backwards.
-  item: the_flat_on_rye_lane_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_flat_on_rye_lane_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | Find a note in the bedroom. The handwriting is yours.
-  item: the_flat_on_rye_lane_token | proof token | A concrete token that confirms what is really happening.
+  item: the_flat_on_rye_lane_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---
@@ -146,25 +146,25 @@ define npc: the_flat_on_rye_lane_watcher | Watcher | A tense observer who reacts
 
 // --- World layout ---
 location: start | Arrive at the flat. Something feels wrong.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_flat_on_rye_lane_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_flat_on_rye_lane_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | Explore the hallway. Notice the wallpaper is... breathing.
   npc: the_flat_on_rye_lane_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | Enter the kitchen. The clock runs backwards.
-  item: the_flat_on_rye_lane_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_flat_on_rye_lane_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | Find a note in the bedroom. The handwriting is yours.
-  item: the_flat_on_rye_lane_token | proof token | A concrete token that confirms what is really happening.
+  item: the_flat_on_rye_lane_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---

@@ -57,25 +57,25 @@ define npc: the_bedtime_check_watcher | Watcher | A tense observer who reacts to
 
 // --- World layout ---
 location: start | Father and son sit together in the living room before bedtime.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_bedtime_check_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_bedtime_check_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | The player can watch telly or speak with the son.
   npc: the_bedtime_check_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | At 21:30, the evening turns toward bedtime.
-  item: the_bedtime_check_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_bedtime_check_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | The father tells the son it is time for bed.
-  item: the_bedtime_check_token | proof token | A concrete token that confirms what is really happening.
+  item: the_bedtime_check_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---
@@ -138,25 +138,25 @@ define npc: the_bedtime_check_watcher | Watcher | A tense observer who reacts to
 
 // --- World layout ---
 location: start | Father and son sit together in the living room before bedtime.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_bedtime_check_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_bedtime_check_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | The player can watch telly or speak with the son.
   npc: the_bedtime_check_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | At 21:30, the evening turns toward bedtime.
-  item: the_bedtime_check_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_bedtime_check_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | The father tells the son it is time for bed.
-  item: the_bedtime_check_token | proof token | A concrete token that confirms what is really happening.
+  item: the_bedtime_check_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---

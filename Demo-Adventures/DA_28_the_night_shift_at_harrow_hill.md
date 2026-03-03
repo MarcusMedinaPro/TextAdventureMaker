@@ -66,25 +66,25 @@ define npc: the_night_shift_at_harrow_hill_watcher | Watcher | A tense observer 
 
 // --- World layout ---
 location: start | Arrive at the hospital for the night shift.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_night_shift_at_harrow_hill_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_night_shift_at_harrow_hill_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | Begin patrol: reception, ward, morgue, office.
   npc: the_night_shift_at_harrow_hill_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | Notice the logbook entry is wrong - tonight's date is last week.
-  item: the_night_shift_at_harrow_hill_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_night_shift_at_harrow_hill_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | A figure appears in the ward. She says she's a nurse. She follows you.
-  item: the_night_shift_at_harrow_hill_token | proof token | A concrete token that confirms what is really happening.
+  item: the_night_shift_at_harrow_hill_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---
@@ -147,25 +147,25 @@ define npc: the_night_shift_at_harrow_hill_watcher | Watcher | A tense observer 
 
 // --- World layout ---
 location: start | Arrive at the hospital for the night shift.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_night_shift_at_harrow_hill_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_night_shift_at_harrow_hill_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | Begin patrol: reception, ward, morgue, office.
   npc: the_night_shift_at_harrow_hill_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | Notice the logbook entry is wrong - tonight's date is last week.
-  item: the_night_shift_at_harrow_hill_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_night_shift_at_harrow_hill_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | A figure appears in the ward. She says she's a nurse. She follows you.
-  item: the_night_shift_at_harrow_hill_token | proof token | A concrete token that confirms what is really happening.
+  item: the_night_shift_at_harrow_hill_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---

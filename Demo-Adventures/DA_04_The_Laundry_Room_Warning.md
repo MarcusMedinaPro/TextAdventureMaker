@@ -52,25 +52,25 @@ define npc: the_laundry_room_warning_watcher | Watcher | A tense observer who re
 
 // --- World layout ---
 location: start | You are a daughter in your room, studying homework.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_laundry_room_warning_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_laundry_room_warning_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | The bedroom door stays effectively closed while dinner is supposedly being prepared.
   npc: the_laundry_room_warning_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | You can inspect, read, open, and close many irrelevant objects (red herrings).
-  item: the_laundry_room_warning_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_laundry_room_warning_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | After enough study time, a voice downstairs calls you to dinner.
-  item: the_laundry_room_warning_token | proof token | A concrete token that confirms what is really happening.
+  item: the_laundry_room_warning_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---
@@ -133,25 +133,25 @@ define npc: the_laundry_room_warning_watcher | Watcher | A tense observer who re
 
 // --- World layout ---
 location: start | You are a daughter in your room, studying homework.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: the_laundry_room_warning_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: the_laundry_room_warning_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | The bedroom door stays effectively closed while dinner is supposedly being prepared.
   npc: the_laundry_room_warning_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | You can inspect, read, open, and close many irrelevant objects (red herrings).
-  item: the_laundry_room_warning_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: the_laundry_room_warning_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | After enough study time, a voice downstairs calls you to dinner.
-  item: the_laundry_room_warning_token | proof token | A concrete token that confirms what is really happening.
+  item: the_laundry_room_warning_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---

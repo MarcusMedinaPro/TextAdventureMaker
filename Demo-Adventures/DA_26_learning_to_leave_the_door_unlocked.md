@@ -64,25 +64,25 @@ define npc: learning_to_leave_the_door_unlocked_watcher | Watcher | A tense obse
 
 // --- World layout ---
 location: start | The disturbance arrives and feels personal.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: learning_to_leave_the_door_unlocked_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: learning_to_leave_the_door_unlocked_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | A rule is broken or a boundary is crossed.
   npc: learning_to_leave_the_door_unlocked_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | A clue reveals the scale of the problem.
-  item: learning_to_leave_the_door_unlocked_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: learning_to_leave_the_door_unlocked_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | A choice narrows the world.
-  item: learning_to_leave_the_door_unlocked_token | proof token | A concrete token that confirms what is really happening.
+  item: learning_to_leave_the_door_unlocked_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---
@@ -145,25 +145,25 @@ define npc: learning_to_leave_the_door_unlocked_watcher | Watcher | A tense obse
 
 // --- World layout ---
 location: start | The disturbance arrives and feels personal.
-  item: lantern | hand lantern | A hand lantern with a faint, wavering glow. | takeable=false
-  item: clock | wall clock | A wall clock ticking half a beat too slowly. | takeable=false
-  item: learning_to_leave_the_door_unlocked_note | case note | A folded note containing partial context and names.
+  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
+  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
+  item: learning_to_leave_the_door_unlocked_note | case note| A folded note containing partial context and names. | aliases=case,note
   exit: north -> crossroads
   exit: east -> sidetrack
 
 location: crossroads | A rule is broken or a boundary is crossed.
   npc: learning_to_leave_the_door_unlocked_watcher
-  item: railing | iron railing | Cold iron slick with condensation. | takeable=false
+  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
   exit: south -> start
   exit: north -> finale
 
 location: sidetrack | A clue reveals the scale of the problem.
-  item: learning_to_leave_the_door_unlocked_decoy | red herring | A convincing but ultimately irrelevant object.
-  item: cabinet | utility cabinet | A paint-chipped cabinet full of mundane supplies. | takeable=false
+  item: learning_to_leave_the_door_unlocked_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
+  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
   exit: west -> start
 
 location: finale | A choice narrows the world.
-  item: learning_to_leave_the_door_unlocked_token | proof token | A concrete token that confirms what is really happening.
+  item: learning_to_leave_the_door_unlocked_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
   exit: south -> crossroads
 
 // --- Start state ---

@@ -172,6 +172,10 @@ Public types, methods, and helpers for `MarcusMedina.TextAdventure` and `MarcusM
 | `npc.OnSee(target)` | `npc.OnSee("player").OnComplete(handler)` | Trigger when NPC sees a target. |
 | `state.WorldState.GetRelationship(id)` | `state.WorldState.GetRelationship("keeper")` | Get relationship value with an NPC. |
 | `state.WorldState.SetRelationship(id, val)` | `state.WorldState.SetRelationship("keeper", 50)` | Set relationship value. |
+| `npc.AddReaction(trigger, text)` | `guard.AddReaction("blow", "The guard raises an eyebrow slowly.")` | Add an NPC reaction for a verb trigger. Fluent/chainable. |
+| `npc.AddReaction(trigger, text, condition)` | `guard.AddReaction("blow", "He covers his ears.", s => s.WorldState.GetFlag("on_duty"))` | Conditional NPC reaction. |
+| `npc.GetReaction(trigger, state)` | `guard.GetReaction("blow:trumpet", state)` | Returns first matching reaction text, or `null`. Specific triggers (`blow:trumpet`) take precedence over general (`blow`). |
+| `npc.Reactions` | `guard.Reactions` | All registered reactions (`IReadOnlyList<NpcReaction>`). |
 
 ---
 
@@ -197,6 +201,8 @@ Public types, methods, and helpers for `MarcusMedina.TextAdventure` and `MarcusM
 | `.WithMove(…)` | `.WithMove("move", "push", "shift")` | Configure move/push synonyms. |
 | `.WithQuest(…)` | `.WithQuest("quest", "journal")` | Configure quest command keyword. |
 | `.AddSynonyms(keyword, …)` | `.AddSynonyms("take", "grab", "snatch")` | Add synonyms for any command keyword. |
+| `.AddCustomVerb(verb)` | `.AddCustomVerb("blow")` | Register a custom verb; parser fires `CustomActionCommand(verb, target?)`. |
+| `.AddCustomVerbs(…)` | `.AddCustomVerbs("blow", "threaten", "juggle")` | Register multiple custom verbs at once. |
 | **Command Types** | | All constructed by the parser from input. |
 | `GoCommand` | `go north` | Move in a direction. |
 | `LookCommand` | `look` / `look door` | Examine the room or a target. |
@@ -231,6 +237,7 @@ Public types, methods, and helpers for `MarcusMedina.TextAdventure` and `MarcusM
 | `QuitCommand` | `quit` / `exit` | End the game. |
 | `MapCommand` | `map` | Show ASCII map. |
 | `QuestCommand` | `quests` | Show quest log. |
+| `CustomActionCommand(verb, target?)` | `blow trumpet` (requires `command: blow`) | Fires for custom verbs. No built-in logic — NPC reactions and hooks respond. |
 
 ---
 
@@ -408,6 +415,10 @@ Public types, methods, and helpers for `MarcusMedina.TextAdventure` and `MarcusM
 | `flag: key=true/false` | `flag: beacon_lit=false` | Set a world flag. |
 | `room_desc: id \| text` | `room_desc: cave \| first_visit=Eerie silence greets you.` | Conditional room description. |
 | `room_desc_when: id \| if=expr \| text=…` | `room_desc_when: cave \| if=flag:lit=true \| text=Now bright.` | State-dependent room description. |
+| `command: verb, …` | `command: blow, threaten, juggle` | Declare custom player verbs. Parser accepts `<verb>` and `<verb> <target>`; fires `CustomActionCommand`. Default verbs (go, look, take…) need not be declared. |
+| `npc_reaction: npc_id \| on=trigger \| text=…` | `npc_reaction: guard \| on=blow \| text=The guard raises an eyebrow.` | Attach a text reaction to an NPC for any verb trigger. Fires when the NPC is in the current room. |
+| `npc_reaction: npc_id \| on=verb:target \| text=…` | `npc_reaction: guard \| on=blow:trumpet \| text=He covers his ears.` | Specific-target trigger; takes precedence over the general form. |
+| `npc_reaction: … \| if=flag:key=true` | `npc_reaction: guard \| on=blow \| text=… \| if=flag:guard_on_duty=true` | Conditional reaction — only fires when the world flag condition passes. |
 
 ---
 

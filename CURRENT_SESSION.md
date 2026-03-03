@@ -123,3 +123,35 @@
 - Modern C# 14 syntax (sealed classes, records, primary constructors, =>)
 - All 391 existing tests should remain passing
 - User can continue on another computer from this point
+
+## 2026-03-03 15:10 UTC
+- Branch: `main`
+- Commit: 7ad4e95
+- Push: failed
+- Done: Made Blackthorn Lighthouse more DSL-first (horn blow via DSL, parser/runtime wiring for item_reaction, fixed-room item use in UseCommand) and created the enough-for-the-day skill.
+- Next: Resolve sandbox file-lock/copy issue in TextAdventure.Sandbox and run an interactive blow horn smoke test.
+- Blockers: Sandbox build currently fails with file access denied while copying MarcusMedina.TextAdventure.dll.
+- Git status before wrap-up:
+  - ` M .claude/settings.local.json`
+  - ` M CURRENT_SESSION.md`
+  - ` M Demo-Adventures/DA_01_Blackthorn_Lighthouse.md`
+  - ` M Demo-Adventures/DA_02_Folklore_Three_Voices.md`
+  - ` M docs/examples/12_Clockwork_Dock.md`
+  - ` M sandbox/TextAdventure.Sandbox/Program.cs`
+  - ` M scripts/test_demo_adventures.sh`
+  - ` M src/MarcusMedina.TextAdventure/Commands/UseCommand.cs`
+  - ` M src/MarcusMedina.TextAdventure/Dsl/DslParserConfiguration.cs`
+  - ` M src/MarcusMedina.TextAdventure/Dsl/DslQualityGates.cs`
+  - ` M src/MarcusMedina.TextAdventure/Dsl/DslRefactoringOperation.cs`
+  - ` M src/MarcusMedina.TextAdventure/Dsl/DslSaveStateCollector.cs`
+  - ` M src/MarcusMedina.TextAdventure/Dsl/DslV2Exporter.cs`
+  - ` D src/MarcusMedina.TextAdventure/Dsl/DslV2Parser.cs`
+  - ` M src/MarcusMedina.TextAdventure/Extensions/CommandExtensions.cs`
+  - ` M src/MarcusMedina.TextAdventure/Interfaces/INpc.cs`
+  - ` M src/MarcusMedina.TextAdventure/Models/Npc.cs`
+  - ` M src/MarcusMedina.TextAdventure/Parsing/KeywordParserConfigBuilder.cs`
+  - `?? src/MarcusMedina.TextAdventure/Commands/CustomActionCommand.cs`
+  - `?? src/MarcusMedina.TextAdventure/Dsl/DslParser.cs`
+  - `?? src/MarcusMedina.TextAdventure/Engine/NpcReactionResolver.cs`
+  - `?? src/MarcusMedina.TextAdventure/Models/NpcReaction.cs`
+  - `?? tests/MarcusMedina.TextAdventure.Tests/CustomActionCommandTests.cs`

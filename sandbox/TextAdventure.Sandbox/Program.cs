@@ -9,7 +9,7 @@ string dsl = """
 world: Blackthorn Lighthouse
 goal: Relight the beacon before the cutters run aground.
 start: quay
-command_alias: blow=use
+command: blow, threaten, attack
 
 location: quay | A wet stone quay with a fog horn, an iron chain, and a weather board nailed to a piling.
 item: chain | iron chain | A salt-stiff iron chain bolted into the quay stones. | aliases=chain,iron chain | takeable=false
@@ -18,6 +18,14 @@ item_reaction: horn | on=use | text=Tuuuuuut
 item: board | weather board | A chalk board listing tide times and keeper notes. | aliases=board,weather board | takeable=false
 item: chart | sea chart | A chart of local shoals and hidden reefs. | aliases=chart,map
 key: brass_key | brass key | A tarnished brass key with a lighthouse crest. | aliases=key
+item: trumpet | brass trumpet | A dented brass trumpet found wedged under the chain locker. | aliases=trumpet
+npc: watchman | name=Watchman | state=friendly | description=A harbour watchman in a worn oilskin coat.
+npc_place: quay | watchman
+npc_reaction: watchman | on=blow:trumpet | text=The watchman gives you a very long, very disapproving stare.
+npc_reaction: watchman | on=blow        | text=The watchman raises an eyebrow slowly.
+npc_reaction: watchman | on=threaten    | text=The watchman's hand moves to his lamp hook.
+npc_reaction: watchman | on=attack      | text=The watchman steps back sharply. "I'm just the night watch!"
+npc_reaction: watchman | on=take        | text=The watchman watches your hands carefully.
 exit: east -> keeper_house | door=keeper_door
 exit: north -> signal_stairs
 exit: west -> cliff_path
@@ -35,7 +43,9 @@ npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens | text=T
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic | text=The keeper's eyes widen at the sight of the tonic. "With the key, the reserve lens, and that storm tonic, you might just be able to get the lamp working again. The hatch is stiff, but it might still open. The stairs are rickety and the gate is stuck fast during the day."
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal | text=The keeper's face breaks into a grin. "With the key, the reserve lens, that storm tonic, and some dry lamp coal, you might just be able to get the lamp working again. The hatch is stiff, but it might still open. The stairs are rickety and the gate is stuck fast during the day."
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal,door_unlocked=cellar_hatch | text=The keeper's eyes widen at the sight of the unlocked hatch. "With the key, the reserve lens, that storm tonic, some dry lamp coal, and the hatch open, you might just be able to get the lamp working again. The stairs are rickety and the gate is stuck fast during the day."
-npc_reaction: keeper | on=use | text=The keeper looks at you "WTF are you trying to do?"
+npc_reaction: keeper | on=blow | text=The keeper looks at you "WTF are you trying to do?"
+npc_reaction: keeper | on=threaten | text=The keeper looks at you "Hey, I'm just trying to do my job here. Do you have a death wish?"
+npc_reaction: keeper | on=attack | text=Important message: This is Marcus, the game maker speaking. I don't want you to attack the keeper. Please don't attack the keeper. The keeper is a nice guy just trying to do his job, and attacking him will not help you relight the beacon. Please be nice to the keeper.
 
 exit: down -> cellar | door=cellar_hatch
 exit: west -> quay | door=keeper_door

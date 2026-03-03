@@ -147,7 +147,7 @@ public class CustomActionCommandTests
     {
         const string dsl = """
             world: Guard Test | A quick test.
-            room: gatehouse | The Gatehouse | A stone gatehouse.
+            location: gatehouse | The Gatehouse | A stone gatehouse.
             command: blow, threaten
             """;
 
@@ -164,7 +164,7 @@ public class CustomActionCommandTests
     {
         const string dsl = """
             world: Guard Test | A quick test.
-            room: gatehouse | The Gatehouse | A stone gatehouse.
+            location: gatehouse | The Gatehouse | A stone gatehouse.
             npc: guard | name=Guard | state=friendly | description=A palace guard.
             npc_place: gatehouse | guard
             npc_reaction: guard | on=blow | text=The guard gives you a very long, very disapproving stare.

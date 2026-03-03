@@ -9,6 +9,7 @@ using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using MarcusMedina.TextAdventure.Tools;
@@ -27,6 +28,7 @@ item: chart | sea chart | A chart of local shoals and hidden reefs. | aliases=ch
 key: brass_key | brass key | A tarnished brass key with a lighthouse crest. | aliases=key
 exit: east -> keeper_house | door=keeper_door
 exit: north -> signal_stairs
+exit: west -> cliff_path
 
 location: keeper_house | The keeper's house with a ledger desk, a paraffin kettle, and a framed rescue map.
 item: ledger | signal ledger | A thick ledger recording lamp failures and ship sightings. | aliases=ledger,book | takeable=false
@@ -61,7 +63,7 @@ location: cliff_path | A cliff path with marker posts, a mile bell, and a bent s
 item: posts | marker posts | Marker posts painted white to catch moonlight. | aliases=posts,markers | takeable=false
 item: mile_bell | mile bell | A bell used to report visibility by sound. | aliases=bell,mile bell | takeable=false
 item: flag | signal flag | A torn signal flag snapping in the wind. | aliases=flag
-exit: south -> quay
+exit: east -> quay
 
 # Doors
 
@@ -160,6 +162,9 @@ WriteLineC64("Try: read ledger, take reserve lens, mount lens, light beacon, rin
 WriteLineC64();
 state.ShowRoom();
 
+INpc? activeConversationNpc = null;
+IDialogNode? activeDialogNode = null;
+
 while (true)
 {
     foreach ((string sourceName, int damage) in state.TickPoisons())
@@ -174,6 +179,15 @@ while (true)
     string trimmed = input.Trim();
     if (string.IsNullOrWhiteSpace(trimmed))
         continue;
+
+    if (TryHandleDialogChoice(trimmed, state, ref activeConversationNpc, ref activeDialogNode))
+    {
+        AdvanceWorldForCustomTurn(state, adventure);
+        continue;
+    }
+
+    activeConversationNpc = null;
+    activeDialogNode = null;
 
     if (trimmed.TextCompare("map"))
     {
@@ -328,6 +342,16 @@ while (true)
     ICommand command = parser.Parse(trimmed);
     CommandResult result = state.Execute(command);
 
+    if (command is TalkCommand talk && result.Success && !string.IsNullOrWhiteSpace(talk.Target))
+    {
+        INpc? npc = state.CurrentLocation.FindNpc(talk.Target);
+        if (npc?.DialogRoot is IDialogNode { Options.Count: > 0 } dialog)
+        {
+            activeConversationNpc = npc;
+            activeDialogNode = dialog;
+        }
+    }
+
     if (command is ReadCommand && result.Success && state.IsCurrentRoomId("keeper_house"))
         state.WorldState.SetFlag("read_ledger", true);
 
@@ -355,6 +379,72 @@ while (true)
         WriteLineC64("=== END: THE BEACON HOLDS ===");
         break;
     }
+}
+
+static bool TryHandleDialogChoice(string input, GameState state, ref INpc? activeConversationNpc, ref IDialogNode? activeDialogNode)
+{
+    if (activeConversationNpc is null || activeDialogNode is null || activeDialogNode.Options.Count == 0)
+        return false;
+
+    if (state.CurrentLocation.FindNpc(activeConversationNpc.Id) is null)
+    {
+        activeConversationNpc = null;
+        activeDialogNode = null;
+        return false;
+    }
+
+    string trimmed = input.Trim();
+    DialogOption? selectedOption = null;
+
+    if (int.TryParse(trimmed.TrimEnd('.'), out int index))
+    {
+        if (index < 1 || index > activeDialogNode.Options.Count)
+        {
+            WriteLineC64("Choose a listed option number.");
+            return true;
+        }
+
+        selectedOption = activeDialogNode.Options[index - 1];
+    }
+    else
+    {
+        selectedOption = activeDialogNode.Options.FirstOrDefault(option => option.Text.TextCompare(trimmed));
+        if (selectedOption is null)
+            return false;
+    }
+
+    if (selectedOption.Next is not IDialogNode nextNode)
+    {
+        WriteLineC64($"{activeConversationNpc.Name} has nothing more to add.");
+        activeConversationNpc = null;
+        activeDialogNode = null;
+        return true;
+    }
+
+    WriteDialogNode(nextNode);
+
+    if (nextNode.Options.Count == 0)
+    {
+        activeConversationNpc = null;
+        activeDialogNode = null;
+    }
+    else
+    {
+        activeDialogNode = nextNode;
+    }
+
+    return true;
+}
+
+static void WriteDialogNode(IDialogNode node)
+{
+    WriteLineC64(node.Text);
+    if (node.Options.Count == 0)
+        return;
+
+    WriteLineC64(Language.DialogOptionsLabel);
+    for (var i = 0; i < node.Options.Count; i++)
+        WriteLineC64(Language.DialogOption(i + 1, node.Options[i].Text));
 }
 
 static void AdvanceWorldForCustomTurn(GameState state, DslAdventure adventure)

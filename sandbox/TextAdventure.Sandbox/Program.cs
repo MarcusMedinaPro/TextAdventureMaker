@@ -20,6 +20,7 @@ item: board | weather board | A chalk board listing tide times and keeper notes.
 item: chart | sea chart | A chart of local shoals and hidden reefs. | aliases=chart,map
 key: brass_key | brass key | A tarnished brass key with a lighthouse crest. | aliases=key
 item: trumpet | brass trumpet | A dented brass trumpet found wedged under the chain locker. | aliases=trumpet
+item_reaction: trumpet | on=blow | text=The trumpet lets out a clear, mournful wail into the fog.
 npc: watchman | name=Watchman | state=friendly | description=A harbour watchman in a worn oilskin coat.
 npc_place: quay | watchman
 npc_reaction: watchman | on=blow:trumpet | text=The watchman gives you a very long, very disapproving stare.
@@ -46,7 +47,6 @@ npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal,door_unlocked=cellar_hatch | text=The keeper's eyes widen at the sight of the unlocked hatch. "With the key, the reserve lens, that storm tonic, some dry lamp coal, and the hatch open, you might just be able to get the lamp working again. The stairs are rickety and the gate is stuck fast during the day."
 npc_reaction: keeper | on=threaten | text=The keeper looks at you "Hey, I'm just trying to do my job here. Do you have a death wish?"
 npc_reaction: keeper | on=attack | text=As you try to attack the keeper, he discards your blow easily. As you turn to strike again, his hand moves in a blur. You feel a sharp sting at your neck. Everything goes dark. | end_game=true
-npc_reaction: keeper | on=kiss        | text=The keeper looks at you like you've lost your mind. "Look, I'm not sure what you're trying to accomplish here, but maybe you should just leave me alone, alright?"
 exit: down -> cellar | door=cellar_hatch
 exit: west -> quay | door=keeper_door
 

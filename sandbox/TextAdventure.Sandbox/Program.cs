@@ -9,7 +9,7 @@ string dsl = """
 world: Blackthorn Lighthouse
 goal: Relight the beacon before the cutters run aground.
 start: quay
-command: blow, threaten, attack
+command: blow, threaten, attack, kiss
 
 location: quay | A wet stone quay with a fog horn, an iron chain, and a weather board nailed to a piling.
 item: chain | iron chain | A salt-stiff iron chain bolted into the quay stones. | aliases=chain,iron chain | takeable=false
@@ -26,6 +26,7 @@ npc_reaction: watchman | on=blow        | text=The watchman raises an eyebrow sl
 npc_reaction: watchman | on=threaten    | text=The watchman's hand moves to his lamp hook.
 npc_reaction: watchman | on=attack      | text=The watchman steps back sharply. "I'm just the night watch!"
 npc_reaction: watchman | on=take        | text=The watchman watches your hands carefully.
+npc_reaction: watchman | on=kiss        | text=The watchman looks at you like you've lost your mind.
 exit: east -> keeper_house | door=keeper_door
 exit: north -> signal_stairs
 exit: west -> cliff_path
@@ -46,7 +47,7 @@ npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item
 npc_reaction: keeper | on=blow | text=The keeper looks at you "WTF are you trying to do?"
 npc_reaction: keeper | on=threaten | text=The keeper looks at you "Hey, I'm just trying to do my job here. Do you have a death wish?"
 npc_reaction: keeper | on=attack | text=As you try to attack the keeper, he discards your blow easily. As you turn to strike again, his hand moves in a blur. You feel a sharp sting at your neck. Everything goes dark. | end_game=true
-
+npc_reaction: keeper | on=kiss        | text=The keeper looks at you like you've lost your mind. "Look, I'm not sure what you're trying to accomplish here, but maybe you should just leave me alone, alright?"
 exit: down -> cellar | door=cellar_hatch
 exit: west -> quay | door=keeper_door
 

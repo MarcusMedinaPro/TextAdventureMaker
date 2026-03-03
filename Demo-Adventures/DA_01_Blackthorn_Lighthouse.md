@@ -32,15 +32,14 @@ location: keeper_house | The keeper's house with a ledger desk, a paraffin kettl
 item: ledger | signal ledger | A thick ledger recording lamp failures and ship sightings. | aliases=ledger,book | takeable=false
 item: kettle | paraffin kettle | A dented kettle warming over a spirit flame. | aliases=kettle | takeable=false
 item: rescue_map | rescue map | A map with lifeboat routes inked in red. | aliases=map,rescue map | takeable=false
-exit: west -> quay | door=keeper_door
 exit: down -> cellar | door=cellar_hatch
+exit: west -> quay | door=keeper_door
 
 location: cellar | A cramped coal cellar with a split crate, a medicine tin, and a wall valve.
 item: crate | split crate | A split crate still full of coal dust. | aliases=crate | takeable=false
 item: valve | wall valve | A rusted wall valve controlling fuel feed. | aliases=valve,wheel | takeable=false
 item: coal | lamp coal | A sack of lamp coal, dry enough to burn cleanly. | aliases=coal
 item: tonic | storm tonic | A bitter tonic used to steady shaking hands. | aliases=tonic
-key: cellar_key | cellar key | A narrow iron key hanging from a nail. | aliases=key
 exit: up -> keeper_house | door=cellar_hatch
 
 location: signal_stairs | Narrow stairs with a handrail, a warning bell, and a cracked inspection mirror.
@@ -68,7 +67,7 @@ exit: south -> quay
 
 door: keeper_door | keeper door | A thick oak door swollen by sea damp. | key=brass_key
 
-door: cellar_hatch | cellar hatch | A bolted hatch with a stiff locking plate. | key=cellar_key
+door: cellar_hatch | cellar hatch | A bolted hatch with a stiff locking plate. | key=brass_key
 
 # Timed world objects
 
@@ -79,7 +78,7 @@ AdventureDslParser dslParser = new();
 DslAdventure adventure = dslParser.ParseString(dsl);
 GameState state = adventure.State;
 
-TimeSystem time = new TimeSystem()
+var time = new TimeSystem()
     .Enable()
     .SetTicksPerDay(8)
     .SetStartTime(TimeOfDay.Dusk);
@@ -120,7 +119,12 @@ lanternGallery.SetDynamicDescription(new DynamicDescription()
         "The gallery pulses with warm light. The lens throws a steady beam across black water.")
     .Default("The lantern gallery with a lens cradle, oil feed, and beacon controls."));
 
-Npc keeper = new Npc("keeper", "Keeper Sable")
+cliffPath.SetDynamicDescription(new DynamicDescription()
+    .When(_ => cliffPath.FindItem("signal flag") is null,
+        "A cliff path with marker posts and a mile bell above the surf.")
+    .Default("A cliff path with marker posts, a mile bell, and a bent signal flag."));
+
+INpc keeper = new Npc("keeper", "Keeper Sable")
     .Description("A weather-beaten keeper with oil-stained cuffs and a voice like gravel.")
     .SetMovement(new PatrolNpcMovement([keeperHouse, quay, keeperHouse]))
     .SetDialog(new DialogNode("If the lens is in place and the feed is primed, we might still save them.")
@@ -131,13 +135,13 @@ keeperHouse.AddNpc(keeper);
 state.DramaticIrony.PlayerLearn("keeper_broke_primary_lens");
 state.DramaticIrony.RegisterAction("keeper_broke_primary_lens", "ask_keeper");
 
-Quest lightQuest = new("light_beacon", "Relight The Beacon", "Mount the reserve lens and ignite the beacon.")
+IQuest lightQuest = new Quest("light_beacon", "Relight The Beacon", "Mount the reserve lens and ignite the beacon.")
     .AddCondition(new WorldFlagCondition("lens_mounted"))
     .AddCondition(new WorldFlagCondition("beacon_lit"));
 _ = lightQuest.Start();
 _ = state.Quests.Add(lightQuest);
 
-Quest warningQuest = new("sound_warning", "Sound The Warning Bell", "Ring the warning bell twice if the weather turns.")
+IQuest warningQuest = new Quest("sound_warning", "Sound The Warning Bell", "Ring the warning bell twice if the weather turns.")
     .AddCondition(new WorldCounterCondition("bell_rings", 2));
 _ = warningQuest.Start();
 _ = state.Quests.Add(warningQuest);
@@ -173,7 +177,50 @@ while (true)
 
     if (trimmed.TextCompare("map"))
     {
-        WriteLineC64(MapGenerator.Render(state));
+        WriteLineC64(MarcusMedina.TextAdventure.Tools.MapGenerator.Render(state));
+        continue;
+    }
+
+    if (trimmed.TextCompare("unlock cellar hatch") || trimmed.TextCompare("unlock hatch"))
+    {
+        if (!state.IsCurrentRoomId("keeper_house"))
+        {
+            WriteLineC64("You are not near the cellar hatch.");
+            continue;
+        }
+
+        Exit? cellarExit = state.CurrentLocation.GetExit(Direction.Down);
+        if (cellarExit?.Door is not Door cellarHatch)
+        {
+            WriteLineC64("There is no cellar hatch here.");
+            continue;
+        }
+
+        IKey? brassKey = null;
+        foreach (IItem item in state.Inventory.Items)
+        {
+            if (item is IKey key && key.Id.TextCompare("brass_key"))
+            {
+                brassKey = key;
+                break;
+            }
+        }
+
+        if (brassKey is null)
+        {
+            WriteLineC64("You need the brass key.");
+            continue;
+        }
+
+        if (!cellarHatch.Unlock(brassKey))
+        {
+            WriteLineC64("That key doesn't fit.");
+            continue;
+        }
+
+        _ = cellarHatch.Open();
+        WriteLineC64("You unlock and open the cellar hatch.");
+        AdvanceWorldForCustomTurn(state, adventure);
         continue;
     }
 
@@ -229,13 +276,14 @@ while (true)
             continue;
         }
 
-        if (!state.Inventory.HasItem("reserve_lens"))
+        IItem? carriedLens = state.Inventory.FindById("reserve_lens");
+        if (carriedLens is null)
         {
             WriteLineC64("You are not carrying the reserve lens.");
             continue;
         }
 
-        _ = state.Inventory.Remove("reserve_lens");
+        _ = state.Inventory.Remove(carriedLens);
         state.WorldState.SetFlag("lens_mounted", true);
         WriteLineC64("You lock the reserve lens into the brass cradle.");
 
@@ -260,7 +308,7 @@ while (true)
             continue;
         }
 
-        if (!state.Inventory.HasItem("coal"))
+        if (state.Inventory.FindById("coal") is null)
         {
             WriteLineC64("You need lamp coal before the beacon can hold a steady flame.");
             continue;
@@ -340,7 +388,11 @@ static void ProcessTimedWorld(DslAdventure adventure, GameState state)
 
             bool shouldDisappear = spawn.DisappearPhases.Contains(phase);
             if (shouldDisappear)
-                _ = location.RemoveItem(spawn.ItemId);
+            {
+                IItem? spawnedItem = location.Items.FirstOrDefault(item => item.Id.TextCompare(spawn.ItemId));
+                if (spawnedItem is not null)
+                    _ = location.RemoveItem(spawnedItem);
+            }
         }
 
         foreach (Exit exit in location.Exits.Values)

@@ -1,41 +1,75 @@
 #!/usr/bin/env python3
 """
-Build and test automation script.
-Usage: python build_and_test.py
+Build, test and run helper — no shell substitution, no permission prompts.
+
+Usage:
+  python build_and_test.py              # build + test (whole solution)
+  python build_and_test.py --run        # build + run sandbox
+  python build_and_test.py --build      # build only
+  python build_and_test.py --test       # test only
+  python build_and_test.py --sandbox    # run sandbox only (no build)
 """
 
 import subprocess
 import sys
 
-def run_command(cmd, description):
-    """Run a shell command and report results."""
-    print(f"\n{'='*60}")
-    print(f"{description}")
-    print(f"{'='*60}")
+SOLUTION   = "/mnt/c/git/TextAdventureMaker"
+SANDBOX    = f"{SOLUTION}/sandbox/TextAdventure.Sandbox"
+CORE       = f"{SOLUTION}/src/MarcusMedina.TextAdventure"
+AI         = f"{SOLUTION}/src/MarcusMedina.TextAdventure.AI"
+TESTS      = f"{SOLUTION}/tests/MarcusMedina.TextAdventure.Tests"
 
-    result = subprocess.run(cmd, shell=True, text=True)
+def run(args, cwd=None):
+    print(f"\n> {' '.join(args)}")
+    result = subprocess.run(args, cwd=cwd)
     return result.returncode == 0
 
+def build():
+    return run(["dotnet", "build", SOLUTION, "-q"])
+
+def test():
+    return run(["dotnet", "test", TESTS, "--verbosity=minimal"])
+
+def sandbox():
+    return run(["dotnet", "run", "--project", SANDBOX])
+
 def main():
-    # Build
-    if not run_command(
-        "dotnet build src/MarcusMedina.TextAdventure/",
-        "Building project..."
-    ):
-        print("❌ Build failed")
+    args = sys.argv[1:]
+
+    if "--sandbox" in args:
+        if not sandbox():
+            sys.exit(1)
+        return
+
+    if "--build" in args:
+        if not build():
+            print("Build failed.")
+            sys.exit(1)
+        print("Build OK.")
+        return
+
+    if "--test" in args:
+        if not test():
+            print("Tests failed.")
+            sys.exit(1)
+        print("Tests OK.")
+        return
+
+    if "--run" in args:
+        if not build():
+            print("Build failed.")
+            sys.exit(1)
+        sandbox()
+        return
+
+    # Default: build + test
+    if not build():
+        print("Build failed.")
         sys.exit(1)
-
-    print("✓ Build successful")
-
-    # Test
-    if not run_command(
-        "dotnet test tests/MarcusMedina.TextAdventure.Tests/ --verbosity=minimal",
-        "Running tests..."
-    ):
-        print("❌ Tests failed")
+    if not test():
+        print("Tests failed.")
         sys.exit(1)
-
-    print("✓ All tests passed")
+    print("\nAll good.")
 
 if __name__ == "__main__":
     main()

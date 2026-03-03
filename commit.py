@@ -1,53 +1,63 @@
 #!/usr/bin/env python3
 """
-Git commit automation script.
-Usage: python commit.py "commit message"
+Git commit helper — no shell substitution, no permission prompts.
+
+Usage:
+  python commit.py "message"               # stage all, commit
+  python commit.py "message" --push        # stage all, commit, push
+  python commit.py "message" file1 file2   # stage specific files, commit
+  python commit.py "message" --push file1  # stage specific, commit, push
 """
 
 import subprocess
 import sys
 import os
 
-def run_command(cmd):
-    """Run a shell command without prompting."""
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    return result.returncode, result.stdout, result.stderr
+CO_AUTHOR = "Co-Authored-By: Claude <noreply@anthropic.com>"
 
-def commit(message):
-    """Commit changes with the given message."""
-    if not message:
-        print("Error: No commit message provided")
+def run(args, **kwargs):
+    return subprocess.run(args, capture_output=True, text=True, **kwargs)
+
+def die(msg):
+    print(f"Error: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+def main():
+    args = sys.argv[1:]
+    if not args:
+        print(__doc__)
         sys.exit(1)
 
-    # Stage all changes
-    print("Staging changes...")
-    returncode, stdout, stderr = run_command("git add -A")
-    if returncode != 0:
-        print(f"Error staging changes: {stderr}")
-        sys.exit(1)
+    message = args[0]
+    push = "--push" in args
+    files = [a for a in args[1:] if a != "--push"]
 
-    # Check if there are changes to commit
-    returncode, stdout, stderr = run_command("git status --porcelain")
-    if not stdout.strip():
-        print("No changes to commit")
+    # Stage
+    if files:
+        r = run(["git", "add", "--"] + files)
+    else:
+        r = run(["git", "add", "-A"])
+    if r.returncode != 0:
+        die(r.stderr.strip())
+
+    # Check for changes
+    r = run(["git", "status", "--porcelain"])
+    if not r.stdout.strip():
+        print("Nothing to commit.")
         return
 
-    # Commit with the provided message
-    print(f"Committing: {message}")
-    commit_cmd = f'git commit -m "{message}\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"'
-    returncode, stdout, stderr = run_command(commit_cmd)
+    # Commit — message passed as a list arg, no shell involved
+    full_message = f"{message}\n\n{CO_AUTHOR}"
+    r = run(["git", "commit", "-m", full_message])
+    if r.returncode != 0:
+        die(r.stderr.strip())
+    print(r.stdout.strip())
 
-    if returncode != 0:
-        print(f"Error committing: {stderr}")
-        sys.exit(1)
-
-    print(stdout)
-    print("✓ Commit successful")
+    if push:
+        r = run(["git", "push"])
+        if r.returncode != 0:
+            die(r.stderr.strip())
+        print("Pushed.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python commit.py \"commit message\"")
-        sys.exit(1)
-
-    message = sys.argv[1]
-    commit(message)
+    main()

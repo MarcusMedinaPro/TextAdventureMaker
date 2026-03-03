@@ -15,6 +15,7 @@ location: quay | A wet stone quay with a fog horn, an iron chain, and a weather 
 item: chain | iron chain | A salt-stiff iron chain bolted into the quay stones. | aliases=chain,iron chain | takeable=false
 item: horn | fog horn | A brass fog horn on a cracked wooden stand. | aliases=horn,fog horn | takeable=false
 item_reaction: horn | on=use | text=Tuuuuuut
+item_reaction: horn | on=blow | text=The fog horn blares across the harbour, low and mournful.
 item: board | weather board | A chalk board listing tide times and keeper notes. | aliases=board,weather board | takeable=false
 item: chart | sea chart | A chart of local shoals and hidden reefs. | aliases=chart,map
 key: brass_key | brass key | A tarnished brass key with a lighthouse crest. | aliases=key
@@ -22,7 +23,6 @@ item: trumpet | brass trumpet | A dented brass trumpet found wedged under the ch
 npc: watchman | name=Watchman | state=friendly | description=A harbour watchman in a worn oilskin coat.
 npc_place: quay | watchman
 npc_reaction: watchman | on=blow:trumpet | text=The watchman gives you a very long, very disapproving stare.
-npc_reaction: watchman | on=blow        | text=The watchman raises an eyebrow slowly.
 npc_reaction: watchman | on=threaten    | text=The watchman's hand moves to his lamp hook.
 npc_reaction: watchman | on=attack      | text=The watchman steps back sharply. "I'm just the night watch!"
 npc_reaction: watchman | on=take        | text=The watchman watches your hands carefully.
@@ -44,7 +44,6 @@ npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens | text=T
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic | text=The keeper's eyes widen at the sight of the tonic. "With the key, the reserve lens, and that storm tonic, you might just be able to get the lamp working again. The hatch is stiff, but it might still open. The stairs are rickety and the gate is stuck fast during the day."
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal | text=The keeper's face breaks into a grin. "With the key, the reserve lens, that storm tonic, and some dry lamp coal, you might just be able to get the lamp working again. The hatch is stiff, but it might still open. The stairs are rickety and the gate is stuck fast during the day."
 npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal,door_unlocked=cellar_hatch | text=The keeper's eyes widen at the sight of the unlocked hatch. "With the key, the reserve lens, that storm tonic, some dry lamp coal, and the hatch open, you might just be able to get the lamp working again. The stairs are rickety and the gate is stuck fast during the day."
-npc_reaction: keeper | on=blow | text=The keeper looks at you "WTF are you trying to do?"
 npc_reaction: keeper | on=threaten | text=The keeper looks at you "Hey, I'm just trying to do my job here. Do you have a death wish?"
 npc_reaction: keeper | on=attack | text=As you try to attack the keeper, he discards your blow easily. As you turn to strike again, his hand moves in a blur. You feel a sharp sting at your neck. Everything goes dark. | end_game=true
 npc_reaction: keeper | on=kiss        | text=The keeper looks at you like you've lost your mind. "Look, I'm not sure what you're trying to accomplish here, but maybe you should just leave me alone, alright?"

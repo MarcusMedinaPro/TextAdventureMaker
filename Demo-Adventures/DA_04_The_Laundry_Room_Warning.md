@@ -1,11 +1,8 @@
-# Demo Adventure 04: The Laundry Room Warning
+# The Laundry Room Warning
 
-Modernised to DSL v2-first format. DSL carries world/story structure; C# is only a thin runner.
+_Slice tag: Slice 50 — Linear staircase horror with delayed trigger, door gating, and heavy red-herring interaction density._
 
-## Premise
-_Slice tag: Slice 50 - Linear staircase horror with delayed trigger, door gating, and heavy red-herring interaction density._
-
-## Story Beats
+## Story beats (max ~10 steps)
 1) You are a daughter in your room, studying homework.
 2) The bedroom door stays effectively closed while dinner is supposedly being prepared.
 3) You can inspect, read, open, and close many irrelevant objects (red herrings).
@@ -13,9 +10,10 @@ _Slice tag: Slice 50 - Linear staircase horror with delayed trigger, door gating
 5) You head out to the landing and approach the stairs.
 6) Before you get downstairs, hands drag you into the laundry room.
 7) It is your real mother, shaking and tearful.
-8) She says: "Don't go down there, honey. I heard it too."
+8) She says: “Don’t go down there, honey. I heard it too.”
 
-## ASCII Map
+## Map (rough layout)
+
 ```
 ┌────────────────────┐
 │      Bedroom       │
@@ -30,196 +28,296 @@ _Slice tag: Slice 50 - Linear staircase horror with delayed trigger, door gating
       Hall      Room
 ```
 
-## Red Herrings and Interactables
-- Framed noticeboard with outdated notices and dead-end hints.
-- Cracked mirror that only returns atmospheric flavour text.
-- Locked drawer containing harmless paperwork and receipts.
-- Vending cabinet that opens but offers no progression items.
-- Wall clock that can be checked for creeping time pressure.
-- Window or vent with rich description and no route unlock.
-
-## DSL v2 Adventure (Primary)
-```adventure
-world: The Laundry Room Warning
-goal: Reach the final turn with enough context to act decisively.
-current_location: start
-
-// --- DSL v2 entity definitions ---
-define item: the_laundry_room_warning_note | Case Note | A folded note containing partial context and names.
-define item: the_laundry_room_warning_decoy | Red Herring | A convincing but ultimately irrelevant object.
-define item: the_laundry_room_warning_token | Proof Token | A concrete token that confirms what is really happening.
-define npc: the_laundry_room_warning_watcher | Watcher | A tense observer who reacts to your choices.
-
-// --- World layout ---
-location: start | You are a daughter in your room, studying homework.
-  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
-  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
-  item: the_laundry_room_warning_note | case note| A folded note containing partial context and names. | aliases=case,note
-  exit: north -> crossroads
-  exit: east -> sidetrack
-
-location: crossroads | The bedroom door stays effectively closed while dinner is supposedly being prepared.
-  npc: the_laundry_room_warning_watcher
-  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
-  exit: south -> start
-  exit: north -> finale
-
-location: sidetrack | You can inspect, read, open, and close many irrelevant objects (red herrings).
-  item: the_laundry_room_warning_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
-  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
-  exit: west -> start
-
-location: finale | After enough study time, a voice downstairs calls you to dinner.
-  item: the_laundry_room_warning_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
-  exit: south -> crossroads
-
-// --- Start state ---
-start_inventory: the_laundry_room_warning_note
-start_stats: health=100 | resolve=50 | trust=0
-flag: alarm_heard=false
-counter: tension=0
-relationship: the_laundry_room_warning_watcher=0
-
-// --- DSL v2 quests/rules/triggers ---
-quest: truth_path | Follow the Truth Path | Gather context and reach the final location.
-quest_stage: truth_path | stage_1 | required=start | required=crossroads | required=finale
-quest_objective: truth_path | obj_1 | Track the signs | Read room cues and avoid false certainty
-quest_on_complete: truth_path | effects="message:You force clarity out of fear and confusion."
-
-on_enter: crossroads | effects="message:The air tightens as if the corridor itself is listening."
-on_enter: sidetrack | effects="message:A convincing detail appears useful, but leads nowhere."
-on_pickup: the_laundry_room_warning_token | effects="message:This detail is real. Build your choice around it."
-
-npc_acceptance_default: the_laundry_room_warning_watcher | text="The watcher says little, but notes every move."
-npc_rule: the_laundry_room_warning_watcher | when=counter.tension>=2 | priority=1 | then="message:The watcher glances away, as if expecting impact."
-
-room_desc: crossroads | A transition space where every sound seems delayed by a heartbeat.
-room_desc_when: crossroads | flag:alarm_heard=true | text="A distant alarm threads through the dark like wire."
-
-branch: sharp_end | when=has_item:the_laundry_room_warning_token | then="message:You reach the ending with evidence, not guesswork."
-chapter: chapter_1 | Rising Pressure | objectives=obj_1 | next=chapter_2
-chapter: chapter_2 | Final Choice | objectives=obj_1 | is_ending=true
-
-// --- Parser preferences ---
-command_alias: examine=x
-command_alias: inventory=i
-command_alias: look=l
-direction_alias: n=north
-direction_alias: s=south
-direction_alias: e=east
-direction_alias: w=west
-parser_option: fuzzy=true
-parser_option: max_distance=1
-```
-
-## Minimal C# Runner
+## Example (the laundry room warning)
 ```csharp
-using MarcusMedina.TextAdventure.Dsl;
+using System;
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-const string dsl = """
-world: The Laundry Room Warning
-goal: Reach the final turn with enough context to act decisively.
-current_location: start
+// === THE LAUNDRY ROOM WARNING ===
+// A linear home-horror scenario with deliberate false leads.
 
-// --- DSL v2 entity definitions ---
-define item: the_laundry_room_warning_note | Case Note | A folded note containing partial context and names.
-define item: the_laundry_room_warning_decoy | Red Herring | A convincing but ultimately irrelevant object.
-define item: the_laundry_room_warning_token | Proof Token | A concrete token that confirms what is really happening.
-define npc: the_laundry_room_warning_watcher | Watcher | A tense observer who reacts to your choices.
+// TEST: Player gets a short study phase before the call event can happen.
+var stage = SceneStage.Studying;
+var studyTurns = 0;
 
-// --- World layout ---
-location: start | You are a daughter in your room, studying homework.
-  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
-  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
-  item: the_laundry_room_warning_note | case note| A folded note containing partial context and names. | aliases=case,note
-  exit: north -> crossroads
-  exit: east -> sidetrack
+// --- Locations ---
+Location bedroom = (id: "bedroom", description: "Your bedroom smells of paper and fabric softener drifting up from below.");
+Location landing = (id: "landing", description: "A narrow landing above the staircase, lined with old family frames.");
+Location downstairsHall = (id: "downstairs_hall", description: "The downstairs hall is dim, with warm light leaking from the kitchen doorway.");
+Location laundryRoom = (id: "laundry_room", description: "A cramped laundry room with baskets, detergent, and a rattling machine.");
 
-location: crossroads | The bedroom door stays effectively closed while dinner is supposedly being prepared.
-  npc: the_laundry_room_warning_watcher
-  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
-  exit: south -> start
-  exit: north -> finale
+var bedroomDoor = new Door("bedroom_door", "Bedroom Door", DoorState.Closed)
+    .Description("A painted wooden door with a brass handle.")
+    .SetReaction(DoorAction.Open, "The hinges complain softly.")
+    .SetReaction(DoorAction.Close, "The latch clicks shut.");
 
-location: sidetrack | You can inspect, read, open, and close many irrelevant objects (red herrings).
-  item: the_laundry_room_warning_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
-  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
-  exit: west -> start
+bedroom.AddExit(Direction.West, landing, bedroomDoor);
+landing.AddExit(Direction.Down, downstairsHall);
+landing.AddExit(Direction.South, laundryRoom);
+downstairsHall.AddExit(Direction.Up, landing);
+laundryRoom.AddExit(Direction.North, landing);
 
-location: finale | After enough study time, a voice downstairs calls you to dinner.
-  item: the_laundry_room_warning_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
-  exit: south -> crossroads
+// --- Red-herring items ---
+var homework = new Item("homework", "Homework", "Maths exercises half-finished in neat pencil lines.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("Quadratic equations, margin notes, and one doodle of a cat wearing a crown.");
 
-// --- Start state ---
-start_inventory: the_laundry_room_warning_note
-start_stats: health=100 | resolve=50 | trust=0
-flag: alarm_heard=false
-counter: tension=0
-relationship: the_laundry_room_warning_watcher=0
+var textbook = new Item("textbook", "Textbook", "A battered history textbook, open to Tudor trade routes.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("Henry VIII taxed wool exports heavily. None of this helps your algebra.");
 
-// --- DSL v2 quests/rules/triggers ---
-quest: truth_path | Follow the Truth Path | Gather context and reach the final location.
-quest_stage: truth_path | stage_1 | required=start | required=crossroads | required=finale
-quest_objective: truth_path | obj_1 | Track the signs | Read room cues and avoid false certainty
-quest_on_complete: truth_path | effects="message:You force clarity out of fear and confusion."
+var diary = new Item("diary", "Old Diary", "A floral notebook with a tiny rusted lock that no longer works.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("'Remember to buy detergent. Also, do not forget Tuesday's parent evening.' Nothing sinister. Just chores.");
 
-on_enter: crossroads | effects="message:The air tightens as if the corridor itself is listening."
-on_enter: sidetrack | effects="message:A convincing detail appears useful, but leads nowhere."
-on_pickup: the_laundry_room_warning_token | effects="message:This detail is real. Build your choice around it."
+var drawer = new Item("drawer", "Desk Drawer", "A wooden drawer that sticks unless pulled firmly.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.Move, "Pens, a ruler, and stale peppermint wrappers. No secrets.");
 
-npc_acceptance_default: the_laundry_room_warning_watcher | text="The watcher says little, but notes every move."
-npc_rule: the_laundry_room_warning_watcher | when=counter.tension>=2 | priority=1 | then="message:The watcher glances away, as if expecting impact."
+var jewelleryBox = new Item("jewellery_box", "Jewellery Box", "A little tin jewellery box painted with faded stars.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("A friendship bracelet, two loose buttons, and a ring from a toy machine.");
 
-room_desc: crossroads | A transition space where every sound seems delayed by a heartbeat.
-room_desc_when: crossroads | flag:alarm_heard=true | text="A distant alarm threads through the dark like wire."
+var photoFrame = new Item("photo_frame", "Photo Frame", "A family photograph from a seaside holiday.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("You are missing both front teeth. Mum is laughing with windblown hair. Dad burned the sausages that day.");
 
-branch: sharp_end | when=has_item:the_laundry_room_warning_token | then="message:You reach the ending with evidence, not guesswork."
-chapter: chapter_1 | Rising Pressure | objectives=obj_1 | next=chapter_2
-chapter: chapter_2 | Final Choice | objectives=obj_1 | is_ending=true
+var laundryBasket = new Item("basket", "Laundry Basket", "A basket full of folded towels and one missing sock.")
+    .SetTakeable(false);
 
-// --- Parser preferences ---
-command_alias: examine=x
-command_alias: inventory=i
-command_alias: look=l
-direction_alias: n=north
-direction_alias: s=south
-direction_alias: e=east
-direction_alias: w=west
-parser_option: fuzzy=true
-parser_option: max_distance=1
-""";
+var detergent = new Item("detergent", "Detergent", "Lavender detergent with a cap that never closes properly.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("Ultra clean. Spring fresh. Not a clue in sight.");
 
-DslV2Parser dslParser = new();
-DslAdventure adventure = dslParser.ParseString(dsl);
-GameState state = adventure.State;
-KeywordParser parser = new(KeywordParserConfigBuilder.BritishDefaults().Build());
+bedroom.AddItem(homework);
+bedroom.AddItem(textbook);
+bedroom.AddItem(diary);
+bedroom.AddItem(drawer);
+bedroom.AddItem(jewelleryBox);
+landing.AddItem(photoFrame);
+laundryRoom.AddItem(laundryBasket);
+laundryRoom.AddItem(detergent);
+
+// --- NPC ---
+var mother = new Npc("mother", "Mum")
+    .Description("Your mother is pale, teary-eyed, and breathing too fast.")
+    .SetDialog(new DialogNode("Don't go down there, honey. I heard it too."));
+
+var state = new GameState(bedroom, worldLocations: [bedroom, landing, downstairsHall, laundryRoom]);
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
 
 SetupC64("The Laundry Room Warning");
-WriteLineC64($"=== {adventure.WorldName} ===");
-WriteLineC64($"Goal: {adventure.Goal}");
+WriteLineC64("=== THE LAUNDRY ROOM WARNING ===");
+WriteLineC64();
+WriteLineC64("You are upstairs, finishing homework before dinner.");
+WriteLineC64("Everything in the house sounds normal. Probably.");
+WriteLineC64();
+WriteLineC64("Goal: Keep studying until called, then head downstairs.");
+WriteLineC64();
+WriteLineC64("Try: study, read homework, look, examine items, open/close things.");
+WriteLineC64();
+
 state.ShowRoom();
 
 while (true)
 {
     WriteLineC64();
     WritePromptC64("> ");
-    string? input = Console.ReadLine();
+    var input = Console.ReadLine();
     if (input is null)
         break;
 
-    string trimmed = input.Trim();
+    var trimmed = input.Trim();
     if (string.IsNullOrWhiteSpace(trimmed))
         continue;
 
+    if (HandleCustomCommand(trimmed, out var shouldQuit))
+    {
+        if (shouldQuit)
+            break;
+
+        continue;
+    }
+
     var command = parser.Parse(trimmed);
+
+    // TEST: Bedroom door stays effectively closed before the call event.
+    if (stage == SceneStage.Studying && state.IsCurrentRoomId("bedroom"))
+    {
+        if (command is OpenCommand)
+        {
+            WriteLineC64("Nah... mum's making dinner, don't want to disturb her.");
+            continue;
+        }
+
+        if (command is GoCommand go && go.Direction == Direction.West)
+        {
+            WriteLineC64("Nah... mum's making dinner, don't want to disturb her.");
+            continue;
+        }
+    }
+
+    // TEST: Going downstairs after the call triggers the reveal sequence.
+    if (stage == SceneStage.CalledToDinner
+        && state.IsCurrentRoomId("landing")
+        && command is GoCommand goDown
+        && goDown.Direction == Direction.Down)
+    {
+        TriggerLaundryReveal();
+        break;
+    }
+
     var result = state.Execute(command);
     state.DisplayResult(command, result);
 
+    if (stage == SceneStage.Studying
+        && command is ReadCommand read
+        && result.Success
+        && IsStudyMaterial(read.Target))
+    {
+        RegisterStudyTurn();
+    }
+
     if (result.ShouldQuit)
         break;
+}
+
+bool HandleCustomCommand(string inputText, out bool shouldQuit)
+{
+    shouldQuit = false;
+
+    if (IsStudyCommand(inputText))
+    {
+        if (!state.IsCurrentRoomId("bedroom"))
+        {
+            WriteLineC64("You cannot focus on homework from here.");
+            return true;
+        }
+
+        if (stage != SceneStage.Studying)
+        {
+            WriteLineC64("Studying feels impossible now.");
+            return true;
+        }
+
+        RegisterStudyTurn();
+        return true;
+    }
+
+    // Red-herring open/close interactions that lead nowhere.
+    if (IsOpenDrawer(inputText))
+    {
+        WriteLineC64("You tug the drawer open. Stationery, old receipts, and nothing useful.");
+        return true;
+    }
+
+    if (IsCloseDrawer(inputText))
+    {
+        WriteLineC64("You close the drawer. It sticks at the end, then clicks.");
+        return true;
+    }
+
+    if (IsOpenBox(inputText))
+    {
+        WriteLineC64("You open the jewellery box. Trinkets and childhood clutter. No answers.");
+        return true;
+    }
+
+    if (IsCloseBox(inputText))
+    {
+        WriteLineC64("You close the little tin box and push it back into place.");
+        return true;
+    }
+
+    return false;
+}
+
+void RegisterStudyTurn()
+{
+    studyTurns++;
+
+    var line = studyTurns switch
+    {
+        1 => "You solve another page of algebra and rewrite a messy equation.",
+        2 => "You underline key formulas and check your working twice.",
+        _ => "You keep studying, trying to ignore every creak in the house."
+    };
+
+    WriteLineC64(line);
+
+    if (studyTurns < 2 || stage != SceneStage.Studying)
+        return;
+
+    stage = SceneStage.CalledToDinner;
+
+    WriteLineC64();
+    WriteLineC64("From downstairs, your mother's voice calls up through the stairwell:");
+    WriteLineC64("\"Dinner is ready, sweetheart!\"");
+    WriteLineC64("The house goes quiet immediately after.");
+}
+
+void TriggerLaundryReveal()
+{
+    _ = state.Move(Direction.South);
+    stage = SceneStage.Revealed;
+    laundryRoom.AddNpc(mother);
+
+    WriteLineC64("You step toward the stairs.");
+    WriteLineC64("Suddenly, hands seize your arms and yank you sideways into the laundry room.");
+    WriteLineC64();
+    state.ShowRoom();
+    WriteLineC64();
+    WriteLineC64("Your mother is trembling, eyes red and wet.");
+    WriteLineC64("\"Don't go down there, honey. I heard it too.\"");
+    WriteLineC64();
+    WriteLineC64("=== GAME OVER ===");
+}
+
+static bool IsStudyMaterial(string itemName) =>
+    itemName.TextCompare("homework")
+    || itemName.TextCompare("textbook")
+    || itemName.TextCompare("diary");
+
+static bool IsStudyCommand(string inputText) =>
+    MatchesAny(inputText, "study", "do homework", "continue homework", "revise", "do maths", "do math");
+
+static bool IsOpenDrawer(string inputText) =>
+    MatchesAny(inputText, "open drawer", "open desk drawer", "pull drawer");
+
+static bool IsCloseDrawer(string inputText) =>
+    MatchesAny(inputText, "close drawer", "shut drawer");
+
+static bool IsOpenBox(string inputText) =>
+    MatchesAny(inputText, "open box", "open jewellery box", "open jewelry box");
+
+static bool IsCloseBox(string inputText) =>
+    MatchesAny(inputText, "close box", "close jewellery box", "close jewelry box", "shut box");
+
+static bool MatchesAny(string inputText, params string[] values)
+{
+    foreach (var value in values)
+        if (inputText.TextCompare(value))
+            return true;
+
+    return false;
+}
+
+enum SceneStage
+{
+    Studying,
+    CalledToDinner,
+    Revealed
 }
 ```

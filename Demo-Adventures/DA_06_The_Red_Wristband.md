@@ -1,210 +1,92 @@
 # Demo Adventure 06: The Red Wristband
 
-Modernised to DSL v2-first format. DSL carries world/story structure; C# is only a thin runner.
+Hospital horror demo with many red herrings and a fixed scream ending.
 
-## Premise
+## Story Goal
+
 You are the on-call doctor, sent to fetch supplies from the basement.
+A patient rides the lift with you.
+Something limps towards the lift in the basement.
+You survive one decision, then discover you were never safe.
 
-## Story Beats
-1) You arrive and assess the immediate danger.
-2) You inspect clues and identify a fragile route forward.
-3) A false lead wastes time but reveals useful context.
-4) You commit to a risky path with limited certainty.
-5) The world responds and raises stakes sharply.
-6) You face a final confrontation and force a resolution.
-7) A background detail shifts, implying the threat has moved closer.
-8) An optional interaction foreshadows the final reveal.
+## Drop-In Sandbox Program (C#)
 
-## ASCII Map
-```
-          N
-    W           E
-          S
-
-┌────────────┐     ┌────────────┐
-│   Start    │────>│  Crossroad │
-└─────┬──────┘     └─────┬──────┘
-      │                  │
-      v                  v
-┌────────────┐     ┌────────────┐
-│  Sidetrack │     │   Finale   │
-└────────────┘     └────────────┘
-```
-
-## Red Herrings and Interactables
-- Framed noticeboard with outdated notices and dead-end hints.
-- Cracked mirror that only returns atmospheric flavour text.
-- Locked drawer containing harmless paperwork and receipts.
-- Vending cabinet that opens but offers no progression items.
-- Wall clock that can be checked for creeping time pressure.
-- Window or vent with rich description and no route unlock.
-
-## DSL v2 Adventure (Primary)
-```adventure
-world: The Red Wristband
-goal: Reach the final turn with enough context to act decisively.
-current_location: start
-
-// --- DSL v2 entity definitions ---
-define item: the_red_wristband_note | Case Note | A folded note containing partial context and names.
-define item: the_red_wristband_decoy | Red Herring | A convincing but ultimately irrelevant object.
-define item: the_red_wristband_token | Proof Token | A concrete token that confirms what is really happening.
-define npc: the_red_wristband_watcher | Watcher | A tense observer who reacts to your choices.
-
-// --- World layout ---
-location: start | You arrive and assess the immediate danger.
-  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
-  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
-  item: the_red_wristband_note | case note| A folded note containing partial context and names. | aliases=case,note
-  exit: north -> crossroads
-  exit: east -> sidetrack
-
-location: crossroads | You inspect clues and identify a fragile route forward.
-  npc: the_red_wristband_watcher
-  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
-  exit: south -> start
-  exit: north -> finale
-
-location: sidetrack | A false lead wastes time but reveals useful context.
-  item: the_red_wristband_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
-  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
-  exit: west -> start
-
-location: finale | You commit to a risky path with limited certainty.
-  item: the_red_wristband_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
-  exit: south -> crossroads
-
-// --- Start state ---
-start_inventory: the_red_wristband_note
-start_stats: health=100 | resolve=50 | trust=0
-flag: alarm_heard=false
-counter: tension=0
-relationship: the_red_wristband_watcher=0
-
-// --- DSL v2 quests/rules/triggers ---
-quest: truth_path | Follow the Truth Path | Gather context and reach the final location.
-quest_stage: truth_path | stage_1 | required=start | required=crossroads | required=finale
-quest_objective: truth_path | obj_1 | Track the signs | Read room cues and avoid false certainty
-quest_on_complete: truth_path | effects="message:You force clarity out of fear and confusion."
-
-on_enter: crossroads | effects="message:The air tightens as if the corridor itself is listening."
-on_enter: sidetrack | effects="message:A convincing detail appears useful, but leads nowhere."
-on_pickup: the_red_wristband_token | effects="message:This detail is real. Build your choice around it."
-
-npc_acceptance_default: the_red_wristband_watcher | text="The watcher says little, but notes every move."
-npc_rule: the_red_wristband_watcher | when=counter.tension>=2 | priority=1 | then="message:The watcher glances away, as if expecting impact."
-
-room_desc: crossroads | A transition space where every sound seems delayed by a heartbeat.
-room_desc_when: crossroads | flag:alarm_heard=true | text="A distant alarm threads through the dark like wire."
-
-branch: sharp_end | when=has_item:the_red_wristband_token | then="message:You reach the ending with evidence, not guesswork."
-chapter: chapter_1 | Rising Pressure | objectives=obj_1 | next=chapter_2
-chapter: chapter_2 | Final Choice | objectives=obj_1 | is_ending=true
-
-// --- Parser preferences ---
-command_alias: examine=x
-command_alias: inventory=i
-command_alias: look=l
-direction_alias: n=north
-direction_alias: s=south
-direction_alias: e=east
-direction_alias: w=west
-parser_option: fuzzy=true
-parser_option: max_distance=1
-```
-
-## Minimal C# Runner
 ```csharp
-using MarcusMedina.TextAdventure.Dsl;
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-const string dsl = """
-world: The Red Wristband
-goal: Reach the final turn with enough context to act decisively.
-current_location: start
+StoryStage stage = StoryStage.Briefing;
+bool basementSeen;
+bool suppliesReadyAnnounced;
 
-// --- DSL v2 entity definitions ---
-define item: the_red_wristband_note | Case Note | A folded note containing partial context and names.
-define item: the_red_wristband_decoy | Red Herring | A convincing but ultimately irrelevant object.
-define item: the_red_wristband_token | Proof Token | A concrete token that confirms what is really happening.
-define npc: the_red_wristband_watcher | Watcher | A tense observer who reacts to your choices.
+Location wardCorridor = new("ward_corridor", "A sterile night corridor. Fluorescent lights buzz over polished floors.");
+Location liftCar = new("lift_car", "A mirrored hospital lift that smells faintly of antiseptic and metal.");
+Location basementLanding = new("basement_landing", "A dim basement landing with flickering strips of light and long concrete shadows.");
+Location supplyStore = new("supply_store", "Tall metal shelves are stacked with wrapped packs and labelled boxes.");
 
-// --- World layout ---
-location: start | You arrive and assess the immediate danger.
-  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
-  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
-  item: the_red_wristband_note | case note| A folded note containing partial context and names. | aliases=case,note
-  exit: north -> crossroads
-  exit: east -> sidetrack
+wardCorridor.AddExit(Direction.Down, liftCar);
+liftCar.AddExit(Direction.Up, wardCorridor);
+liftCar.AddExit(Direction.Down, basementLanding);
+basementLanding.AddExit(Direction.Up, liftCar);
+basementLanding.AddExit(Direction.North, supplyStore);
+supplyStore.AddExit(Direction.South, basementLanding);
 
-location: crossroads | You inspect clues and identify a fragile route forward.
-  npc: the_red_wristband_watcher
-  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
-  exit: south -> start
-  exit: north -> finale
+// Red herrings: corridor clutter
+wardCorridor.AddItem(new Item("clipboard", "Clipboard", "A plastic clipboard full of unsigned forms.").SetReadable().SetReadText("Consent forms, bed transfers, and handwriting no one can decipher."));
+wardCorridor.AddItem(new Item("poster", "Safety Poster", "A laminated poster about hand hygiene and proper glove disposal.").SetTakeable(false).SetReadable().SetReadText("WASH. DRY. SANITISE. REPEAT."));
+wardCorridor.AddItem(new Item("sanitiser", "Sanitiser Pump", "A wall-mounted sanitiser pump with a sticky nozzle.").SetTakeable(false));
+wardCorridor.AddItem(new Item("vending", "Vending Machine", "Chocolate bars, isotonic drinks, and crisps no one admits to buying.").SetTakeable(false));
+wardCorridor.AddItem(new Item("chair", "Plastic Chair", "A waiting chair with one short leg.").SetTakeable(false));
+wardCorridor.AddItem(new Item("clock", "Wall Clock", "A ticking wall clock frozen two minutes slow.").SetTakeable(false));
+wardCorridor.AddItem(new Item("umbrella", "Umbrella Stand", "Three damp umbrellas and one bent walking stick.").SetTakeable(false));
+wardCorridor.AddItem(new Item("noticeboard", "Noticeboard", "Shift swaps, cafeteria offers, and half a missing crossword.").SetTakeable(false).SetReadable().SetReadText("Night shift short-staffed. Bring your own tea."));
 
-location: sidetrack | A false lead wastes time but reveals useful context.
-  item: the_red_wristband_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
-  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
-  exit: west -> start
+// Red herrings: lift details
+liftCar.AddItem(new Item("panel", "Button Panel", "Rows of numbered buttons, one cracked and taped over.").SetTakeable(false));
+liftCar.AddItem(new Item("mirror", "Lift Mirror", "Your face looks older under hospital light.").SetTakeable(false));
+liftCar.AddItem(new Item("camera", "Ceiling Camera", "A tiny red LED blinks without comfort.").SetTakeable(false));
+liftCar.AddItem(new Item("mat", "Lift Mat", "A rubber mat marked with muddy heel prints.").SetTakeable(false));
 
-location: finale | You commit to a risky path with limited certainty.
-  item: the_red_wristband_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
-  exit: south -> crossroads
+// Red herrings: basement and store
+basementLanding.AddItem(new Item("mop", "Mop", "A wet mop leaning against a caution sign."));
+basementLanding.AddItem(new Item("sign", "Caution Sign", "CAUTION: WET FLOOR. The plastic is cracked at the base.").SetTakeable(false).SetReadable().SetReadText("Someone has scribbled 'still slippery' in pen."));
+basementLanding.AddItem(new Item("vent", "Vent Grille", "A rusted vent grille humming with distant machinery.").SetTakeable(false));
+basementLanding.AddItem(new Item("trolley", "Service Trolley", "An empty steel trolley with one squeaking wheel.").SetTakeable(false));
+basementLanding.AddItem(new Item("intercom", "Wall Intercom", "A beige intercom handset with faded labels.").SetTakeable(false));
 
-// --- Start state ---
-start_inventory: the_red_wristband_note
-start_stats: health=100 | resolve=50 | trust=0
-flag: alarm_heard=false
-counter: tension=0
-relationship: the_red_wristband_watcher=0
+supplyStore.AddItem(new Item("gauze", "Gauze Pack", "Sterile gauze packs in sealed blue wrappers."));
+supplyStore.AddItem(new Item("saline", "Saline Bag", "Clear fluid bags hanging from a wire rack."));
+supplyStore.AddItem(new Item("mask_box", "Mask Box", "Disposable masks in a cardboard dispenser."));
+supplyStore.AddItem(new Item("locker", "Storage Locker", "A tall metal locker with chipped paint and a stubborn latch.").SetTakeable(false));
+supplyStore.AddItem(new Item("manifest", "Delivery Manifest", "A clipboard listing deliveries to theatre and ICU.").SetReadable().SetReadText("Sutures, dressings, tubing, syringes. Everything except peace of mind."));
+supplyStore.AddItem(new Item("sharps_box", "Sharps Box", "A yellow sharps box bolted to the wall.").SetTakeable(false));
+supplyStore.AddItem(new Item("blanket", "Thermal Blanket", "A folded silver thermal blanket that crackles like foil."));
+supplyStore.AddItem(new Item("torch", "Pocket Torch", "A cheap pocket torch with a weak battery."));
 
-// --- DSL v2 quests/rules/triggers ---
-quest: truth_path | Follow the Truth Path | Gather context and reach the final location.
-quest_stage: truth_path | stage_1 | required=start | required=crossroads | required=finale
-quest_objective: truth_path | obj_1 | Track the signs | Read room cues and avoid false certainty
-quest_on_complete: truth_path | effects="message:You force clarity out of fear and confusion."
+Npc woman = new("woman", "Patient")
+    .Description("A calm woman in a hospital gown, standing with her hands folded.")
+    .Dialog("Quiet night, doctor?");
 
-on_enter: crossroads | effects="message:The air tightens as if the corridor itself is listening."
-on_enter: sidetrack | effects="message:A convincing detail appears useful, but leads nowhere."
-on_pickup: the_red_wristband_token | effects="message:This detail is real. Build your choice around it."
-
-npc_acceptance_default: the_red_wristband_watcher | text="The watcher says little, but notes every move."
-npc_rule: the_red_wristband_watcher | when=counter.tension>=2 | priority=1 | then="message:The watcher glances away, as if expecting impact."
-
-room_desc: crossroads | A transition space where every sound seems delayed by a heartbeat.
-room_desc_when: crossroads | flag:alarm_heard=true | text="A distant alarm threads through the dark like wire."
-
-branch: sharp_end | when=has_item:the_red_wristband_token | then="message:You reach the ending with evidence, not guesswork."
-chapter: chapter_1 | Rising Pressure | objectives=obj_1 | next=chapter_2
-chapter: chapter_2 | Final Choice | objectives=obj_1 | is_ending=true
-
-// --- Parser preferences ---
-command_alias: examine=x
-command_alias: inventory=i
-command_alias: look=l
-direction_alias: n=north
-direction_alias: s=south
-direction_alias: e=east
-direction_alias: w=west
-parser_option: fuzzy=true
-parser_option: max_distance=1
-""";
-
-DslV2Parser dslParser = new();
-DslAdventure adventure = dslParser.ParseString(dsl);
-GameState state = adventure.State;
+GameState state = new(wardCorridor, worldLocations: [wardCorridor, liftCar, basementLanding, supplyStore]);
 KeywordParser parser = new(KeywordParserConfigBuilder.BritishDefaults().Build());
 
 SetupC64("The Red Wristband");
-WriteLineC64($"=== {adventure.WorldName} ===");
-WriteLineC64($"Goal: {adventure.Goal}");
+WriteLineC64("=== THE RED WRISTBAND ===");
+WriteLineC64();
+WriteLineC64("You are the on-call doctor. A nurse asks you to fetch supplies from the basement.");
+WriteLineC64("Patients wear coloured wristbands here: green for alive, red for deceased.");
+WriteLineC64();
+WriteLineC64("Goal: take the lift down, collect supplies, and return upstairs.");
+WriteLineC64("Try: look, go, take, read, open locker, examine objects.");
+
 state.ShowRoom();
 
-while (true)
+while (stage != StoryStage.Ended)
 {
     WriteLineC64();
     WritePromptC64("> ");
@@ -212,15 +94,177 @@ while (true)
     if (input is null)
         break;
 
-    string trimmed = input.Trim();
-    if (string.IsNullOrWhiteSpace(trimmed))
+    string text = input.Trim();
+    if (string.IsNullOrWhiteSpace(text))
         continue;
 
-    var command = parser.Parse(trimmed);
-    var result = state.Execute(command);
+    if (HandleSpecial(text))
+        continue;
+
+    ICommand command = parser.Parse(text);
+    CommandResult result = state.Execute(command);
     state.DisplayResult(command, result);
+
+    if (command is TakeCommand && result.Success && !suppliesReadyAnnounced && HasRequiredSupplies())
+    {
+        suppliesReadyAnnounced = true;
+        WriteLineC64("You have enough supplies. Time to get back upstairs.");
+    }
 
     if (result.ShouldQuit)
         break;
+
+    if (command is GoCommand go && result.Success)
+        HandleMoveBeat(go.Direction);
+}
+
+return;
+
+bool HandleSpecial(string text)
+{
+    if ((text.TextCompare("go up") || text.TextCompare("up") || text.TextCompare("go upstairs"))
+        && stage == StoryStage.BasementReached
+        && state.IsCurrentRoomId("basement_landing")
+        && !HasRequiredSupplies())
+    {
+        WriteLineC64("You were sent for supplies. You should grab at least gauze and a saline bag first.");
+        return true;
+    }
+
+    if (text.TextCompare("open vending machine"))
+    {
+        WriteLineC64("You rattle the flap. It stays shut and judges you quietly.");
+        return true;
+    }
+
+    if (text.TextCompare("open locker"))
+    {
+        if (!state.IsCurrentRoomId("supply_store"))
+        {
+            WriteLineC64("There is no locker to open here.");
+            return true;
+        }
+
+        WriteLineC64("You force the locker open. Aprons, mop heads, and an old radio. Nothing useful.");
+        return true;
+    }
+
+    if (text.TextCompare("open vent") || text.TextCompare("open vent grille"))
+    {
+        WriteLineC64("You tug at the grille. Rust flakes down, but it does not budge.");
+        return true;
+    }
+
+    if (text.TextCompare("call porter") || text.TextCompare("use intercom") || text.TextCompare("call security"))
+    {
+        if (!state.IsCurrentRoomId("basement_landing"))
+        {
+            WriteLineC64("You mutter for help to no one in particular.");
+            return true;
+        }
+
+        WriteLineC64("You lift the intercom. Only static answers back.");
+        return true;
+    }
+
+    if (text.TextCompare("check wristband") || text.TextCompare("look wristband"))
+    {
+        if (!state.IsCurrentRoomId("lift_car"))
+        {
+            WriteLineC64("No patient stands close enough here.");
+            return true;
+        }
+
+        WriteLineC64("Her wrist is turned away. You tell yourself you imagined the unease.");
+        return true;
+    }
+
+    if (text.TextCompare("press basement") || text.TextCompare("press b") || text.TextCompare("press down"))
+    {
+        if (!state.IsCurrentRoomId("lift_car"))
+        {
+            WriteLineC64("You press nothing in the air. The lift panel is not here.");
+            return true;
+        }
+
+        WriteLineC64("You press for the basement.");
+        bool moved = state.Move(Direction.Down);
+        if (moved)
+        {
+            state.ShowRoom();
+            HandleMoveBeat(Direction.Down);
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool HasRequiredSupplies() =>
+    state.Inventory.FindItem("gauze") is not null
+    && state.Inventory.FindItem("saline") is not null;
+
+void HandleMoveBeat(Direction direction)
+{
+    if (stage == StoryStage.Briefing && state.IsCurrentRoomId("lift_car"))
+    {
+        stage = StoryStage.InLift;
+        liftCar.AddNpc(woman);
+
+        WriteLineC64("The lift doors open. A patient is already inside, calm and silent.");
+        WriteLineC64("You smile politely and step in.");
+        return;
+    }
+
+    if (stage == StoryStage.InLift && state.IsCurrentRoomId("basement_landing"))
+    {
+        stage = StoryStage.BasementReached;
+        basementSeen = true;
+
+        WriteLineC64("The doors part to the basement.");
+        WriteLineC64("In the distance, a man limps towards the lift, dragging one foot.");
+        WriteLineC64("His shape is wrong in a way you feel before you understand.");
+        WriteLineC64("Maybe collect supplies, then return upstairs quickly.");
+        return;
+    }
+
+    if (stage == StoryStage.BasementReached
+        && basementSeen
+        && state.IsCurrentRoomId("lift_car")
+        && direction == Direction.Up)
+    {
+        TriggerFinalReveal();
+    }
+}
+
+void TriggerFinalReveal()
+{
+    stage = StoryStage.Reveal;
+
+    WriteLineC64("You hammer the close button and ride back up, pulse pounding.");
+    WriteLineC64("The patient turns to you, annoyed.");
+    WriteLineC64("'Why did you do that? He was trying to use the lift.'");
+    WriteLineC64();
+    WriteLineC64("'Did you see his wrist?' you ask. 'It was red. He died last night. I performed his surgery.'");
+    WriteLineC64();
+    WriteLineC64("She lifts her wrist slowly.");
+    WriteLineC64("A red band catches the fluorescent light.");
+    WriteLineC64("She smiles. 'Like this one?' ");
+    WriteLineC64();
+    WriteLineC64("A scream tears out of your throat before the doors open.");
+    WriteLineC64();
+    WriteLineC64("=== GAME OVER ===");
+
+    stage = StoryStage.Ended;
+}
+
+enum StoryStage
+{
+    Briefing,
+    InLift,
+    BasementReached,
+    Reveal,
+    Ended
 }
 ```

@@ -1,11 +1,8 @@
-# Demo Adventure 03: The Bedtime Check
+# The Bedtime Check
 
-Modernised to DSL v2-first format. DSL carries world/story structure; C# is only a thin runner.
+_Slice tag: Slice 49 — Linear domestic horror with state-gated progression, object state toggles, and false-path side interactions._
 
-## Premise
-_Slice tag: Slice 49 - Linear domestic horror with state-gated progression, object state toggles, and false-path side interactions._
-
-## Story Beats
+## Story beats (max ~10 steps)
 1) Father and son sit together in the living room before bedtime.
 2) The player can watch telly or speak with the son.
 3) At 21:30, the evening turns toward bedtime.
@@ -17,7 +14,8 @@ _Slice tag: Slice 49 - Linear domestic horror with state-gated progression, obje
 9) The bed skirt hangs too low to see underneath.
 10) Pull up the quilt and reveal the twist.
 
-## ASCII Map
+## Map (rough layout)
+
 ```
             UP
 ┌────────────────────┐
@@ -35,196 +33,464 @@ _Slice tag: Slice 49 - Linear domestic horror with state-gated progression, obje
 └────────────────────┘
 ```
 
-## Red Herrings and Interactables
-- Framed noticeboard with outdated notices and dead-end hints.
-- Cracked mirror that only returns atmospheric flavour text.
-- Locked drawer containing harmless paperwork and receipts.
-- Vending cabinet that opens but offers no progression items.
-- Wall clock that can be checked for creeping time pressure.
-- Window or vent with rich description and no route unlock.
-
-## DSL v2 Adventure (Primary)
-```adventure
-world: The Bedtime Check
-goal: Reach the final turn with enough context to act decisively.
-current_location: start
-
-// --- DSL v2 entity definitions ---
-define item: the_bedtime_check_note | Case Note | A folded note containing partial context and names.
-define item: the_bedtime_check_decoy | Red Herring | A convincing but ultimately irrelevant object.
-define item: the_bedtime_check_token | Proof Token | A concrete token that confirms what is really happening.
-define npc: the_bedtime_check_watcher | Watcher | A tense observer who reacts to your choices.
-
-// --- World layout ---
-location: start | Father and son sit together in the living room before bedtime.
-  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
-  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
-  item: the_bedtime_check_note | case note| A folded note containing partial context and names. | aliases=case,note
-  exit: north -> crossroads
-  exit: east -> sidetrack
-
-location: crossroads | The player can watch telly or speak with the son.
-  npc: the_bedtime_check_watcher
-  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
-  exit: south -> start
-  exit: north -> finale
-
-location: sidetrack | At 21:30, the evening turns toward bedtime.
-  item: the_bedtime_check_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
-  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
-  exit: west -> start
-
-location: finale | The father tells the son it is time for bed.
-  item: the_bedtime_check_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
-  exit: south -> crossroads
-
-// --- Start state ---
-start_inventory: the_bedtime_check_note
-start_stats: health=100 | resolve=50 | trust=0
-flag: alarm_heard=false
-counter: tension=0
-relationship: the_bedtime_check_watcher=0
-
-// --- DSL v2 quests/rules/triggers ---
-quest: truth_path | Follow the Truth Path | Gather context and reach the final location.
-quest_stage: truth_path | stage_1 | required=start | required=crossroads | required=finale
-quest_objective: truth_path | obj_1 | Track the signs | Read room cues and avoid false certainty
-quest_on_complete: truth_path | effects="message:You force clarity out of fear and confusion."
-
-on_enter: crossroads | effects="message:The air tightens as if the corridor itself is listening."
-on_enter: sidetrack | effects="message:A convincing detail appears useful, but leads nowhere."
-on_pickup: the_bedtime_check_token | effects="message:This detail is real. Build your choice around it."
-
-npc_acceptance_default: the_bedtime_check_watcher | text="The watcher says little, but notes every move."
-npc_rule: the_bedtime_check_watcher | when=counter.tension>=2 | priority=1 | then="message:The watcher glances away, as if expecting impact."
-
-room_desc: crossroads | A transition space where every sound seems delayed by a heartbeat.
-room_desc_when: crossroads | flag:alarm_heard=true | text="A distant alarm threads through the dark like wire."
-
-branch: sharp_end | when=has_item:the_bedtime_check_token | then="message:You reach the ending with evidence, not guesswork."
-chapter: chapter_1 | Rising Pressure | objectives=obj_1 | next=chapter_2
-chapter: chapter_2 | Final Choice | objectives=obj_1 | is_ending=true
-
-// --- Parser preferences ---
-command_alias: examine=x
-command_alias: inventory=i
-command_alias: look=l
-direction_alias: n=north
-direction_alias: s=south
-direction_alias: e=east
-direction_alias: w=west
-parser_option: fuzzy=true
-parser_option: max_distance=1
-```
-
-## Minimal C# Runner
+## Example (the bedtime check)
 ```csharp
-using MarcusMedina.TextAdventure.Dsl;
+using System;
+using MarcusMedina.TextAdventure.Commands;
 using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-const string dsl = """
-world: The Bedtime Check
-goal: Reach the final turn with enough context to act decisively.
-current_location: start
+// === THE BEDTIME CHECK ===
+// A linear home-horror story.
+// Core focus: gated progression, custom stateful interactions, and a single inevitable ending.
 
-// --- DSL v2 entity definitions ---
-define item: the_bedtime_check_note | Case Note | A folded note containing partial context and names.
-define item: the_bedtime_check_decoy | Red Herring | A convincing but ultimately irrelevant object.
-define item: the_bedtime_check_token | Proof Token | A concrete token that confirms what is really happening.
-define npc: the_bedtime_check_watcher | Watcher | A tense observer who reacts to your choices.
+// --- Story stage ---
+// TEST: 21:30 should trigger only after the player chooses to watch telly or talk to the son.
+var bedtimeStage = BedtimeStage.OnSofa;
+var openingChoiceMade = false;
+var clockStruck2130 = false;
+var lampOn = true;
+var tvOn = true;
+var sonUpsetByTv = false;
+var footstepsHeard = false;
+var pauseBedtimeProgressThisTurn = false;
 
-// --- World layout ---
-location: start | Father and son sit together in the living room before bedtime.
-  item: lantern | hand lantern| A hand lantern with a faint, wavering glow. | takeable=false | aliases=hand,lantern
-  item: clock | wall clock| A wall clock ticking half a beat too slowly. | takeable=false | aliases=wall,clock
-  item: the_bedtime_check_note | case note| A folded note containing partial context and names. | aliases=case,note
-  exit: north -> crossroads
-  exit: east -> sidetrack
+// --- Locations ---
+Location livingRoom = (id: "living_room", description: "A modest living room with a worn sofa and a low coffee table. Evening settles against the windows.");
+Location landing = (id: "landing", description: "A narrow upstairs landing with thin carpet and family photos along the wall.");
+Location childBedroom = (id: "child_bedroom", description: "A small bedroom lit by warm light. The quiet here feels too careful.");
 
-location: crossroads | The player can watch telly or speak with the son.
-  npc: the_bedtime_check_watcher
-  item: railing | iron railing| Cold iron slick with condensation. | takeable=false | aliases=iron,railing
-  exit: south -> start
-  exit: north -> finale
+livingRoom.AddExit(Direction.Up, landing);
+landing.AddExit(Direction.East, childBedroom);
 
-location: sidetrack | At 21:30, the evening turns toward bedtime.
-  item: the_bedtime_check_decoy | red herring| A convincing but ultimately irrelevant object. | aliases=red,herring
-  item: cabinet | utility cabinet| A paint-chipped cabinet full of mundane supplies. | takeable=false | aliases=utility,cabinet
-  exit: west -> start
+// --- Items ---
+var lamp = new Item("lamp", "Lamp", "A brass floor lamp. It is currently on.")
+    .SetTakeable(false)
+    .AddAliases("light");
 
-location: finale | The father tells the son it is time for bed.
-  item: the_bedtime_check_token | proof token| A concrete token that confirms what is really happening. | aliases=proof,token
-  exit: south -> crossroads
+var television = new Item("tv", "Television", "An old telly playing a late film at low volume.")
+    .SetTakeable(false)
+    .AddAliases("television", "telly");
 
-// --- Start state ---
-start_inventory: the_bedtime_check_note
-start_stats: health=100 | resolve=50 | trust=0
-flag: alarm_heard=false
-counter: tension=0
-relationship: the_bedtime_check_watcher=0
+var table = new Item("table", "Coffee Table", "A scratched coffee table with biscuit crumbs and a glass of juice.")
+    .SetTakeable(false);
 
-// --- DSL v2 quests/rules/triggers ---
-quest: truth_path | Follow the Truth Path | Gather context and reach the final location.
-quest_stage: truth_path | stage_1 | required=start | required=crossroads | required=finale
-quest_objective: truth_path | obj_1 | Track the signs | Read room cues and avoid false certainty
-quest_on_complete: truth_path | effects="message:You force clarity out of fear and confusion."
+var biscuit = new Item("biscuit", "Biscuit", "A round chocolate biscuit on a small plate.")
+    .SetTakeable(true)
+    .AsFood(1)
+    .SetReaction(ItemAction.Use, "Buttery, chocolatey, and slightly stale.");
 
-on_enter: crossroads | effects="message:The air tightens as if the corridor itself is listening."
-on_enter: sidetrack | effects="message:A convincing detail appears useful, but leads nowhere."
-on_pickup: the_bedtime_check_token | effects="message:This detail is real. Build your choice around it."
+var juice = new Item("juice", "Apple Juice", "A glass of cloudy apple juice.")
+    .SetTakeable(true)
+    .AddAliases("glass", "squash")
+    .AsDrink(1);
 
-npc_acceptance_default: the_bedtime_check_watcher | text="The watcher says little, but notes every move."
-npc_rule: the_bedtime_check_watcher | when=counter.tension>=2 | priority=1 | then="message:The watcher glances away, as if expecting impact."
+var bed = new Item("bed", "Children's Bed", "A comfy children's bed with a long quilt hanging down to the floor. You cannot see under the bed.")
+    .SetTakeable(false)
+    .AddAliases("childrens bed", "child's bed");
 
-room_desc: crossroads | A transition space where every sound seems delayed by a heartbeat.
-room_desc_when: crossroads | flag:alarm_heard=true | text="A distant alarm threads through the dark like wire."
+var quilt = new Item("quilt", "Quilt", "A thick quilt with rockets and stars stitched into the fabric.")
+    .SetTakeable(false)
+    .AddAliases("blanket", "duvet", "cover");
 
-branch: sharp_end | when=has_item:the_bedtime_check_token | then="message:You reach the ending with evidence, not guesswork."
-chapter: chapter_1 | Rising Pressure | objectives=obj_1 | next=chapter_2
-chapter: chapter_2 | Final Choice | objectives=obj_1 | is_ending=true
+livingRoom.AddItem(lamp);
+livingRoom.AddItem(television);
+livingRoom.AddItem(table);
+livingRoom.AddItem(biscuit);
+livingRoom.AddItem(juice);
+childBedroom.AddItem(bed);
+childBedroom.AddItem(quilt);
 
-// --- Parser preferences ---
-command_alias: examine=x
-command_alias: inventory=i
-command_alias: look=l
-direction_alias: n=north
-direction_alias: s=south
-direction_alias: e=east
-direction_alias: w=west
-parser_option: fuzzy=true
-parser_option: max_distance=1
-""";
+// --- NPC ---
+var son = new Npc("son", "Son")
+    .Description("Your son sits curled up on the sofa in dinosaur pyjamas, eyes fixed on the telly.");
 
-DslV2Parser dslParser = new();
-DslAdventure adventure = dslParser.ParseString(dsl);
-GameState state = adventure.State;
-KeywordParser parser = new(KeywordParserConfigBuilder.BritishDefaults().Build());
+livingRoom.AddNpc(son);
+
+// --- Game setup ---
+var state = new GameState(livingRoom, worldLocations: [livingRoom, landing, childBedroom]);
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
 
 SetupC64("The Bedtime Check");
-WriteLineC64($"=== {adventure.WorldName} ===");
-WriteLineC64($"Goal: {adventure.Goal}");
+WriteLineC64("=== THE BEDTIME CHECK ===");
+WriteLineC64();
+WriteLineC64("You are winding down for the night with your son.");
+WriteLineC64("He always asks for the same bedtime ritual, and tonight is no different.");
+WriteLineC64();
+WriteLineC64("Goal: Put your son to bed and check under the bed when the moment comes.");
+WriteLineC64();
+WriteLineC64("For now, choose your next moment: watch the telly, or talk to your son.");
+WriteLineC64();
+
 state.ShowRoom();
 
 while (true)
 {
     WriteLineC64();
     WritePromptC64("> ");
-    string? input = Console.ReadLine();
+
+    var input = Console.ReadLine();
     if (input is null)
         break;
 
-    string trimmed = input.Trim();
+    var trimmed = input.Trim();
     if (string.IsNullOrWhiteSpace(trimmed))
         continue;
 
+    if (HandleCustomCommand(trimmed, out var shouldQuit))
+    {
+        if (shouldQuit)
+            break;
+
+        AdvanceStoryTurn();
+        continue;
+    }
+
     var command = parser.Parse(trimmed);
+
+    // TEST: Stairs are blocked before the child is in bed.
+    if (command is GoCommand go
+        && go.Direction == Direction.Up
+        && state.IsCurrentRoomId("living_room")
+        && bedtimeStage != BedtimeStage.InBed)
+    {
+        WriteLineC64("No need to go upstairs.");
+        AdvanceStoryTurn();
+        continue;
+    }
+
+    // TEST: Son dialogue is stateful and only works when he is present in the current room.
+    if (command is TalkCommand talk
+        && talk.Target is not null
+        && talk.Target.TextCompare("son")
+        && state.CurrentLocation.FindNpc("son") is not null)
+    {
+        HandleTalkToSon();
+        AdvanceStoryTurn();
+        continue;
+    }
+
     var result = state.Execute(command);
     state.DisplayResult(command, result);
 
+    // TEST: Optional side flavour interactions.
+    if (command is DrinkCommand drink && IsAppleJuiceName(drink.ItemName) && result.Success)
+    {
+        WriteLineC64("It tastes like Grandma's apple juice.");
+    }
+
+    if (command is EatCommand eat && IsBiscuitName(eat.ItemName) && result.Success)
+    {
+        WriteLineC64("You dust crumbs from your fingers and glance back at the sofa.");
+    }
+
+    AdvanceStoryTurn();
+
     if (result.ShouldQuit)
         break;
+}
+
+bool HandleCustomCommand(string inputText, out bool shouldQuit)
+{
+    shouldQuit = false;
+
+    if (IsWatchTv(inputText))
+    {
+        if (!state.IsCurrentRoomId("living_room"))
+        {
+            WriteLineC64("You can only watch the telly from the living room.");
+            return true;
+        }
+
+        if (!tvOn)
+        {
+            WriteLineC64("The telly is off.");
+            return true;
+        }
+
+        openingChoiceMade = true;
+        WriteLineC64("You sit with him and watch in comfortable silence for a moment.");
+        return true;
+    }
+
+    if (IsTurnOffLamp(inputText))
+    {
+        if (!state.IsCurrentRoomId("living_room"))
+        {
+            WriteLineC64("The lamp is downstairs in the living room.");
+            return true;
+        }
+
+        if (!lampOn)
+        {
+            WriteLineC64("The lamp is already off.");
+            return true;
+        }
+
+        lampOn = false;
+        lamp.SetDescription("A brass floor lamp. It is currently off.");
+        WriteLineC64("You switch off the lamp. Shadows gather in the corners.");
+        return true;
+    }
+
+    if (IsTurnOnLamp(inputText))
+    {
+        if (!state.IsCurrentRoomId("living_room"))
+        {
+            WriteLineC64("The lamp is downstairs in the living room.");
+            return true;
+        }
+
+        if (lampOn)
+        {
+            WriteLineC64("The lamp is already on.");
+            return true;
+        }
+
+        lampOn = true;
+        lamp.SetDescription("A brass floor lamp. It is currently on.");
+        WriteLineC64("You switch the lamp back on. Warm light fills the room again.");
+        return true;
+    }
+
+    // TEST: Turning off TV before 21:30 makes the son upset until TV is back on or the clock strikes 21:30.
+    if (IsTurnOffTv(inputText))
+    {
+        if (!state.IsCurrentRoomId("living_room"))
+        {
+            WriteLineC64("The telly is downstairs in the living room.");
+            return true;
+        }
+
+        if (!tvOn)
+        {
+            WriteLineC64("The telly is already off.");
+            return true;
+        }
+
+        tvOn = false;
+        television.SetDescription("An old telly with a dark, reflective screen.");
+        WriteLineC64("You switch the telly off.");
+
+        if (!clockStruck2130)
+        {
+            sonUpsetByTv = true;
+            WriteLineC64("Your son frowns. \"Hey... I was watching that.\"");
+        }
+
+        return true;
+    }
+
+    if (IsTurnOnTv(inputText))
+    {
+        if (!state.IsCurrentRoomId("living_room"))
+        {
+            WriteLineC64("The telly is downstairs in the living room.");
+            return true;
+        }
+
+        if (tvOn)
+        {
+            WriteLineC64("The telly is already on.");
+            return true;
+        }
+
+        tvOn = true;
+        sonUpsetByTv = false;
+        television.SetDescription("An old telly playing a late film at low volume.");
+        WriteLineC64("You switch the telly back on.");
+        WriteLineC64("He relaxes into the cushions again.");
+        return true;
+    }
+
+    if (IsLookUnderBed(inputText))
+    {
+        if (!state.IsCurrentRoomId("child_bedroom"))
+        {
+            WriteLineC64("There is no bed here.");
+            return true;
+        }
+
+        WriteLineC64("The quilt hangs too low. You cannot see under the bed.");
+        return true;
+    }
+
+    // TEST: Final horror trigger can only occur in the correct late-story state.
+    if (IsPullUpQuilt(inputText))
+    {
+        if (!state.IsCurrentRoomId("child_bedroom"))
+        {
+            WriteLineC64("There is nothing here to pull up.");
+            return true;
+        }
+
+        if (bedtimeStage != BedtimeStage.InBed)
+        {
+            WriteLineC64("Not yet.");
+            return true;
+        }
+
+        if (!footstepsHeard)
+        {
+            WriteLineC64("You hesitate. Something still feels unfinished.");
+            return true;
+        }
+
+        WriteLineC64("You grab the quilt and pull it up in one quick motion.");
+        WriteLineC64();
+        WriteLineC64("Under the bed, your real son is curled tight, pale and shaking.");
+        WriteLineC64("\"Daddy, there's someone on my bed.\"");
+        WriteLineC64();
+        WriteLineC64("AAAAAAAAAGGGGGGGGGGHHHHHHHHHHHHHH");
+        WriteLineC64();
+        WriteLineC64("=== GAME OVER ===");
+        shouldQuit = true;
+        return true;
+    }
+
+    return false;
+}
+
+void HandleTalkToSon()
+{
+    openingChoiceMade = true;
+
+    if (bedtimeStage == BedtimeStage.InBed && state.IsCurrentRoomId("child_bedroom"))
+    {
+        WriteLineC64("\"Daddy, I am in bed.\"");
+
+        if (footstepsHeard)
+            return;
+
+        footstepsHeard = true;
+        WriteLineC64("You hear soft footsteps moving around the room.");
+        WriteLineC64("\"I hear you walking around!\" you call out.");
+        return;
+    }
+
+    if (!clockStruck2130)
+    {
+        if (sonUpsetByTv)
+            WriteLineC64("\"Dad... please put the telly back on.\"");
+        else
+            WriteLineC64("\"Shh, I'm watching the film.\"");
+
+        return;
+    }
+
+    if (bedtimeStage != BedtimeStage.OnSofa)
+    {
+        WriteLineC64("You hear him upstairs.");
+        return;
+    }
+
+    if (!lampOn)
+    {
+        WriteLineC64("\"It's too dark, Dad. I'm not going upstairs like this.\"");
+        return;
+    }
+
+    WriteLineC64("You nod toward the hallway. \"Time for bed.\"");
+    WriteLineC64("He groans and slides off the sofa.");
+    WriteLineC64("\"Fine...\" he mutters, then shuffles towards the bathroom.");
+
+    livingRoom.RemoveNpc(son);
+    bedtimeStage = BedtimeStage.GoingToBathroom;
+    pauseBedtimeProgressThisTurn = true;
+}
+
+void AdvanceStoryTurn()
+{
+    if (!clockStruck2130 && openingChoiceMade)
+    {
+        clockStruck2130 = true;
+        sonUpsetByTv = false;
+
+        WriteLineC64();
+        WriteLineC64("The mantel clock strikes 21:30.");
+        WriteLineC64("The film suddenly feels much too loud for the hour.");
+        return;
+    }
+
+    if (!clockStruck2130)
+    {
+        WriteLineC64("The evening hangs in a pause. You can watch the telly or talk to your son.");
+        return;
+    }
+
+    if (pauseBedtimeProgressThisTurn)
+    {
+        pauseBedtimeProgressThisTurn = false;
+        return;
+    }
+
+    if (bedtimeStage == BedtimeStage.GoingToBathroom)
+    {
+        bedtimeStage = BedtimeStage.BrushingTeeth;
+        WriteLineC64("From upstairs, you hear tap water and patient tooth-brushing.");
+        return;
+    }
+
+    if (bedtimeStage != BedtimeStage.BrushingTeeth)
+        return;
+
+    bedtimeStage = BedtimeStage.InBed;
+    livingRoom.RemoveNpc(son);
+    childBedroom.AddNpc(son);
+
+    WriteLineC64("Floorboards creak above you.");
+    WriteLineC64("\"Daddy, I am in bed.\"");
+}
+
+static bool IsWatchTv(string inputText) =>
+    MatchesAny(inputText, "watch tv", "watch telly", "watch television", "watch movie", "watch film");
+
+static bool IsTurnOffLamp(string inputText) =>
+    MatchesAny(inputText, "turn off lamp", "switch off lamp", "turn lamp off", "switch lamp off", "turn off light", "switch off light");
+
+static bool IsTurnOnLamp(string inputText) =>
+    MatchesAny(inputText, "turn on lamp", "switch on lamp", "turn lamp on", "switch lamp on", "turn on light", "switch on light");
+
+static bool IsTurnOffTv(string inputText) =>
+    MatchesAny(inputText, "turn off tv", "switch off tv", "turn tv off", "switch tv off", "turn off television", "switch off television", "turn off telly", "switch off telly");
+
+static bool IsTurnOnTv(string inputText) =>
+    MatchesAny(inputText, "turn on tv", "switch on tv", "turn tv on", "switch tv on", "turn on television", "switch on television", "turn on telly", "switch on telly");
+
+static bool IsLookUnderBed(string inputText) =>
+    MatchesAny(inputText, "look under bed", "check under bed", "look beneath bed", "peek under bed");
+
+static bool IsPullUpQuilt(string inputText) =>
+    MatchesAny(inputText, "pull up quilt", "pull up blanket", "pull quilt", "pull blanket", "lift quilt", "lift blanket", "lift duvet");
+
+static bool MatchesAny(string inputText, params string[] values)
+{
+    foreach (var value in values)
+        if (inputText.TextCompare(value))
+            return true;
+
+    return false;
+}
+
+static bool IsAppleJuiceName(string itemName) =>
+    itemName.TextCompare("juice")
+    || itemName.TextCompare("apple juice")
+    || itemName.TextCompare("squash")
+    || itemName.TextCompare("glass");
+
+static bool IsBiscuitName(string itemName) =>
+    itemName.TextCompare("biscuit")
+    || itemName.TextCompare("cookie");
+
+enum BedtimeStage
+{
+    OnSofa,
+    GoingToBathroom,
+    BrushingTeeth,
+    InBed
 }
 ```

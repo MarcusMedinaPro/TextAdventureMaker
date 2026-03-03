@@ -4,9 +4,11 @@
 // </copyright>
 
 using MarcusMedina.TextAdventure.Commands;
+using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
+using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 
 namespace MarcusMedina.TextAdventure.Tests;
@@ -402,6 +404,83 @@ public class KeywordParserTests
         KeywordParser parser = new(CreateEnglishConfig());
 
         ICommand command = parser.Parse("dance");
+
+        _ = Assert.IsType<UnknownCommand>(command);
+    }
+
+    [Theory]
+    [InlineData("help")]
+    [InlineData("halp")]
+    [InlineData("?")]
+    public void Parse_Help_ReturnsHelpCommand(string input)
+    {
+        KeywordParser parser = new(CreateEnglishConfig());
+
+        ICommand command = parser.Parse(input);
+
+        _ = Assert.IsType<HelpCommand>(command);
+    }
+
+    [Fact]
+    public void Parse_Help_ListsAvailableCommandsAndAliases()
+    {
+        KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+            .WithCustomCommand("brew tea", _ => new UnknownCommand())
+            .WithPhraseAlias("peek at", "look")
+            .AddSynonyms("take", "grab")
+            .Build();
+
+        KeywordParser parser = new(config);
+        HelpCommand command = Assert.IsType<HelpCommand>(parser.Parse("help"));
+
+        CommandResult result = command.Execute(new CommandContext(new GameState(new Location("start"))));
+
+        Assert.Contains("Available commands:", result.Message);
+        Assert.Contains("help:", result.Message);
+        Assert.Contains("look:", result.Message);
+        Assert.Contains("take:", result.Message);
+
+        Assert.Contains("Custom commands:", result.Message);
+        Assert.Contains("brew tea", result.Message);
+
+        Assert.Contains("Phrase aliases:", result.Message);
+        Assert.Contains("peek at -> look", result.Message);
+
+        Assert.Contains("Word synonyms:", result.Message);
+        Assert.Contains("grab -> take", result.Message);
+
+        Assert.Contains("Direction aliases:", result.Message);
+        Assert.Contains("n -> north", result.Message);
+    }
+
+    [Fact]
+    public void Parse_Help_UsesConfiguredOverrideText()
+    {
+        const string customHelp = "Type LOOK to survey the room.\nType GO <direction> to move on.";
+
+        KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+            .WithHelpText(customHelp)
+            .Build();
+
+        KeywordParser parser = new(config);
+        HelpCommand command = Assert.IsType<HelpCommand>(parser.Parse("help"));
+
+        CommandResult result = command.Execute(new CommandContext(new GameState(new Location("start"))));
+
+        Assert.Equal(customHelp, result.Message);
+    }
+
+    [Fact]
+    public void Parse_Help_AllowsCustomCommandOverride()
+    {
+        KeywordParserConfig config = KeywordParserConfigBuilder.BritishDefaults()
+            .WithCustomCommand("help", _ => new UnknownCommand())
+            .WithHelpText("This text should not be used.")
+            .Build();
+
+        KeywordParser parser = new(config);
+
+        ICommand command = parser.Parse("help");
 
         _ = Assert.IsType<UnknownCommand>(command);
     }

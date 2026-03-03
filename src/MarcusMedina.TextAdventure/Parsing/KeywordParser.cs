@@ -14,6 +14,7 @@ namespace MarcusMedina.TextAdventure.Parsing;
 
 public class KeywordParser(KeywordParserConfig config) : ICommandParser
 {
+    private static readonly string[] HelpKeywords = ["help", "halp", "?"];
     private readonly KeywordParserConfig _config = config ?? throw new ArgumentNullException(nameof(config));
     private string? _lastInput;
     private string? _lastTarget;
@@ -48,6 +49,11 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         if (custom  is not null)
         {
             return GuardPronoun(custom);
+        }
+
+        if (trimmed.IsHelpRequest())
+        {
+            return new HelpCommand(GetHelpText());
         }
 
         string[] tokens = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -287,6 +293,11 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
     private ICommand? BuildCommandForKeyword(string keyword, string[] tokens)
     {
         keyword = NormalizeKeyword(keyword);
+        if (keyword.IsHelpRequest())
+        {
+            return new HelpCommand(GetHelpText());
+        }
+
         if (_config.Quit.Contains(keyword))
         {
             return new QuitCommand();
@@ -492,7 +503,109 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .Concat(_config.Eat)
             .Concat(_config.Drink)
             .Concat(_config.Hint)
+            .Concat(HelpKeywords)
             .Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private string BuildHelpText()
+    {
+        List<string> lines = ["Available commands:"];
+
+        AppendCommandLine(lines, "help", HelpKeywords);
+        AppendCommandLine(lines, "look", _config.Look);
+        AppendCommandLine(lines, "examine", _config.Examine);
+        AppendCommandLine(lines, "inventory", _config.Inventory);
+        AppendCommandLine(lines, "stats", _config.Stats);
+        AppendCommandLine(lines, "go", _config.Go);
+        AppendCommandLine(lines, "move", _config.Move);
+        AppendCommandLine(lines, "take", _config.Take);
+        AppendCommandLine(lines, "drop", _config.Drop);
+        AppendCommandLine(lines, "use", _config.Use);
+        AppendCommandLine(lines, "combine", _config.Combine);
+        AppendCommandLine(lines, "pour", _config.Pour);
+        AppendCommandLine(lines, "read", _config.Read);
+        AppendCommandLine(lines, "talk", _config.Talk);
+        AppendCommandLine(lines, "attack", _config.Attack);
+        AppendCommandLine(lines, "flee", _config.Flee);
+        AppendCommandLine(lines, "open", _config.Open);
+        AppendCommandLine(lines, "unlock", _config.Unlock);
+        AppendCommandLine(lines, "close", _config.Close);
+        AppendCommandLine(lines, "lock", _config.LockDoor);
+        AppendCommandLine(lines, "destroy", _config.Destroy);
+        AppendCommandLine(lines, "eat", _config.Eat);
+        AppendCommandLine(lines, "drink", _config.Drink);
+        AppendCommandLine(lines, "save", _config.Save);
+        AppendCommandLine(lines, "load", _config.Load);
+        AppendCommandLine(lines, "quest", _config.Quest);
+        AppendCommandLine(lines, "hint", _config.Hint);
+        AppendCommandLine(lines, "quit", _config.Quit);
+        AppendCommandLine(lines, "again", _config.Again);
+
+        AppendOptionalSection(
+            lines,
+            "Custom commands:",
+            _config.CustomCommands.Keys);
+
+        AppendOptionalSection(
+            lines,
+            "Phrase aliases:",
+            _config.PhraseAliases.Select(pair => $"{pair.Key} -> {pair.Value}"));
+
+        AppendOptionalSection(
+            lines,
+            "Word synonyms:",
+            _config.Synonyms
+                .Where(pair => !pair.Key.Equals(pair.Value, StringComparison.OrdinalIgnoreCase))
+                .Select(pair => $"{pair.Key} -> {pair.Value}"));
+
+        AppendOptionalSection(
+            lines,
+            "Direction aliases:",
+            _config.DirectionAliases.Select(pair => $"{pair.Key} -> {pair.Value.ToString().ToLowerInvariant()}"));
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private string GetHelpText() => _config.HelpTextOverride ?? BuildHelpText();
+
+    private static void AppendCommandLine(ICollection<string> lines, string label, IEnumerable<string> commands)
+    {
+        string text = commands
+            .Where(command => !string.IsNullOrWhiteSpace(command))
+            .Select(command => command.Trim().ToLowerInvariant())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(command => command, StringComparer.OrdinalIgnoreCase)
+            .CommaJoin();
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
+        lines.Add($"  {label}: {text}");
+    }
+
+    private static void AppendOptionalSection(ICollection<string> lines, string heading, IEnumerable<string> entries)
+    {
+        string[] values = entries
+            .Where(entry => !string.IsNullOrWhiteSpace(entry))
+            .Select(entry => entry.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(entry => entry, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (values.Length == 0)
+        {
+            return;
+        }
+
+        lines.Add(string.Empty);
+        lines.Add(heading);
+
+        foreach (string value in values)
+        {
+            lines.Add($"  {value}");
+        }
     }
 
     private string? ParseItemName(string[] tokens, int startIndex)

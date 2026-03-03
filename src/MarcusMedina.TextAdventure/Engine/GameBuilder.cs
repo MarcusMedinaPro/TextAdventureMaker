@@ -31,15 +31,22 @@ public sealed class GameBuilder
     private IWeatherSystem? _weatherSystem;
     private IAccessibilitySystem? _accessibilitySystem;
     private IMoodSystem? _moodSystem;
+    private readonly List<IGamePlugin> _plugins = [];
     private readonly List<IStoryBranch> _storyBranches = [];
     private readonly List<Action<Game>> _turnStartHandlers = [];
     private readonly List<Action<Game, ICommand, CommandResult>> _turnEndHandlers = [];
     private IStoryLogger? _storyLogger;
     private IDevLogger? _devLogger;
 
-    public static GameBuilder Create()
+    public ICommandParser? CurrentParser => _parser;
+
+    public static GameBuilder Create() => new();
+
+    public GameBuilder UsePlugin(IGamePlugin plugin)
     {
-        return new();
+        ArgumentNullException.ThrowIfNull(plugin);
+        _plugins.Add(plugin);
+        return this;
     }
 
     public GameBuilder UseState(GameState state)
@@ -229,6 +236,9 @@ public sealed class GameBuilder
 
     public Game Build()
     {
+        foreach (IGamePlugin plugin in _plugins)
+            plugin.Configure(this);
+
         ICommandParser parser = _parser ?? throw new InvalidOperationException("Parser must be provided.");
         GameState state = _state ?? BuildStateFromLocations();
 
@@ -333,6 +343,9 @@ public sealed class GameBuilder
         {
             game.AddTurnEndHandler((g, command, result) => _devLogger.LogTurn(g.State, command, result));
         }
+
+        foreach (IGamePlugin plugin in _plugins)
+            plugin.OnGameBuilt(game);
 
         return game;
     }

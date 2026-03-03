@@ -50,6 +50,7 @@ public sealed class KeywordParserConfigBuilder
     private readonly Dictionary<string, string> _synonyms;
     private readonly Dictionary<string, string> _phraseAliases;
     private readonly Dictionary<string, Func<string[], ICommand>> _customCommands;
+    private string? _helpTextOverride;
     private bool _allowDirectionEnumNames;
     private bool _enableFuzzyMatching;
     private int _fuzzyMaxDistance;
@@ -107,6 +108,7 @@ public sealed class KeywordParserConfigBuilder
         _synonyms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         _phraseAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         _customCommands = new Dictionary<string, Func<string[], ICommand>>(StringComparer.OrdinalIgnoreCase);
+        _helpTextOverride = null;
         _allowDirectionEnumNames = true;
         _enableFuzzyMatching = false;
         _fuzzyMaxDistance = 1;
@@ -343,6 +345,13 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
+    /// <summary>Override help output text shown for the help command.</summary>
+    public KeywordParserConfigBuilder WithHelpText(string? helpText)
+    {
+        _helpTextOverride = string.IsNullOrWhiteSpace(helpText) ? null : helpText.Trim();
+        return this;
+    }
+
     /// <summary>Add a custom word that maps to the same keyword.</summary>
     public KeywordParserConfigBuilder WithWord(string word)
     {
@@ -532,6 +541,7 @@ public sealed class KeywordParserConfigBuilder
             synonyms: _synonyms,
             phraseAliases: _phraseAliases,
             customCommands: _customCommands,
+            helpTextOverride: _helpTextOverride,
             allowDirectionEnumNames: _allowDirectionEnumNames,
             enableFuzzyMatching: _enableFuzzyMatching,
             fuzzyMaxDistance: _fuzzyMaxDistance);

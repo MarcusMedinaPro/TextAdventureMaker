@@ -166,7 +166,7 @@ while (true)
         WriteLineC64($"{sourceName} burns in your throat. You take {damage} damage.");
 
     WriteLineC64();
-    WritePromptC64("> ");
+    WritePromptC64(activeDialogNode is { Options.Count: > 0 } ? "choice> " : "> ");
     string? input = Console.ReadLine();
     if (input is null)
         break;
@@ -341,11 +341,17 @@ while (true)
     }
 
     ICommand command = parser.Parse(trimmed);
+    INpc? talkNpc = command is TalkCommand pendingTalk && !string.IsNullOrWhiteSpace(pendingTalk.Target)
+        ? state.CurrentLocation.FindNpc(pendingTalk.Target)
+        : null;
     CommandResult result = state.Execute(command);
 
-    if (command is TalkCommand talk && result.Success && !string.IsNullOrWhiteSpace(talk.Target))
+    if (command is TalkCommand && result.Success)
     {
-        INpc? npc = state.CurrentLocation.FindNpc(talk.Target);
+        INpc? npc = talkNpc;
+        if (npc is null && result.Message.Contains(Language.DialogOptionsLabel, StringComparison.OrdinalIgnoreCase))
+            npc = state.CurrentLocation.Npcs.FirstOrDefault(candidate => candidate.DialogRoot is { Options.Count: > 0 });
+
         if (npc?.DialogRoot is IDialogNode { Options.Count: > 0 } dialog)
         {
             activeConversationNpc = npc;
@@ -381,13 +387,6 @@ static bool TryHandleDialogChoice(string input, GameState state, ref INpc? activ
 {
     if (activeConversationNpc is null || activeDialogNode is null || activeDialogNode.Options.Count == 0)
         return false;
-
-    if (state.CurrentLocation.FindNpc(activeConversationNpc.Id) is null)
-    {
-        activeConversationNpc = null;
-        activeDialogNode = null;
-        return false;
-    }
 
     string trimmed = input.Trim();
     DialogOption? selectedOption = null;

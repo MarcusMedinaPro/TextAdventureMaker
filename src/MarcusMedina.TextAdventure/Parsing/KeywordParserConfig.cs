@@ -64,6 +64,7 @@ public sealed class KeywordParserConfig
         synonyms: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         phraseAliases: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         customCommands: new Dictionary<string, Func<string[], ICommand>>(StringComparer.OrdinalIgnoreCase),
+        helpTextOverride: null,
         allowDirectionEnumNames: true);
     /// <summary>Keywords used to quit the game.</summary>
     public ISet<string> Quit { get; }
@@ -129,6 +130,8 @@ public sealed class KeywordParserConfig
     public IReadOnlyDictionary<string, string> PhraseAliases { get; }
     /// <summary>Custom command handlers keyed by full phrase.</summary>
     public IReadOnlyDictionary<string, Func<string[], ICommand>> CustomCommands { get; }
+    /// <summary>Optional full override text used when the player types help.</summary>
+    public string? HelpTextOverride { get; }
 
     /// <summary>Keywords that indicate "all" in take/drop commands.</summary>
     public ISet<string> All { get; }
@@ -186,6 +189,7 @@ public sealed class KeywordParserConfig
         IReadOnlyDictionary<string, string>? synonyms = null,
         IReadOnlyDictionary<string, string>? phraseAliases = null,
         IReadOnlyDictionary<string, Func<string[], ICommand>>? customCommands = null,
+        string? helpTextOverride = null,
         bool allowDirectionEnumNames = false,
         bool enableFuzzyMatching = false,
         int fuzzyMaxDistance = 1)
@@ -222,6 +226,7 @@ public sealed class KeywordParserConfig
         Synonyms = synonyms ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         PhraseAliases = phraseAliases ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         CustomCommands = customCommands ?? new Dictionary<string, Func<string[], ICommand>>(StringComparer.OrdinalIgnoreCase);
+        HelpTextOverride = string.IsNullOrWhiteSpace(helpTextOverride) ? null : helpTextOverride.Trim();
         All = all ?? throw new ArgumentNullException(nameof(all));
         IgnoreItemTokens = ignoreItemTokens ?? throw new ArgumentNullException(nameof(ignoreItemTokens));
         CombineSeparators = combineSeparators ?? throw new ArgumentNullException(nameof(combineSeparators));
@@ -300,6 +305,7 @@ public sealed class KeywordParserConfig
             pourPrepositions,
             directionAliases,
             synonyms,
+            null,
             null,
             null,
             allowDirectionEnumNames,

@@ -29,28 +29,10 @@ public class CombineCommand : ICommand
         IItem? rightItem = inventory.FindItem(Right);
         string? suggestion = null;
 
-        if (context.State.EnableFuzzyMatching)
-        {
-            if (leftItem  is null && !FuzzyMatcher.IsLikelyCommandToken(Left))
-            {
-                IItem? bestLeft = FuzzyMatcher.FindBestItem(inventory.Items, Left, context.State.FuzzyMaxDistance);
-                if (bestLeft  is not null)
-                {
-                    leftItem = bestLeft;
-                    suggestion ??= bestLeft.Name;
-                }
-            }
-
-            if (rightItem  is null && !FuzzyMatcher.IsLikelyCommandToken(Right))
-            {
-                IItem? bestRight = FuzzyMatcher.FindBestItem(inventory.Items, Right, context.State.FuzzyMaxDistance);
-                if (bestRight  is not null)
-                {
-                    rightItem = bestRight;
-                    suggestion ??= bestRight.Name;
-                }
-            }
-        }
+        (leftItem, string? leftSuggestion) = FuzzyItemResolver.Resolve(context.State, inventory.Items, leftItem, Left);
+        suggestion ??= leftSuggestion;
+        (rightItem, string? rightSuggestion) = FuzzyItemResolver.Resolve(context.State, inventory.Items, rightItem, Right);
+        suggestion ??= rightSuggestion;
 
         if (leftItem  is null || rightItem  is null)
         {
@@ -71,7 +53,6 @@ public class CombineCommand : ICommand
             _ = inventory.Add(created);
         }
 
-        CommandResult ok = CommandResult.Ok(Language.CombineResult(Language.EntityName(leftItem), Language.EntityName(rightItem)));
-        return suggestion  is not null ? ok.WithSuggestion(suggestion) : ok;
+        return CommandResult.Ok(Language.CombineResult(Language.EntityName(leftItem), Language.EntityName(rightItem))).WithOptionalSuggestion(suggestion);
     }
 }

@@ -27,15 +27,7 @@ public class TakeCommand : ICommand
         ILocation location = context.State.CurrentLocation;
         IItem? item = location.FindItem(ItemName);
         string? suggestion = null;
-        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
-        {
-            IItem? best = FuzzyMatcher.FindBestItem(location.Items, ItemName, context.State.FuzzyMaxDistance);
-            if (best  is not null)
-            {
-                item = best;
-                suggestion = best.Name;
-            }
-        }
+        (item, suggestion) = FuzzyItemResolver.Resolve(context.State, location.Items, item, ItemName);
 
         if (item  is null)
             return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
@@ -69,11 +61,7 @@ public class TakeCommand : ICommand
 
             string splitDisplay = $"{Amount.Value} {item.Name}";
             string? onTake = item.GetReaction(ItemAction.Take);
-            CommandResult splitResult = onTake  is not null
-                ? CommandResult.Ok(Language.TakeItem(splitDisplay), onTake)
-                : CommandResult.Ok(Language.TakeItem(splitDisplay));
-
-            return suggestion  is not null ? splitResult.WithSuggestion(suggestion) : splitResult;
+            return CommandResultExtensions.OkWithReaction(Language.TakeItem(splitDisplay), onTake).WithOptionalSuggestion(suggestion);
         }
 
         // Full take (normal or full stack)
@@ -88,10 +76,6 @@ public class TakeCommand : ICommand
 
         string displayName = Language.EntityName(item);
         string? fullOnTake = item.GetReaction(ItemAction.Take);
-        CommandResult result = fullOnTake  is not null
-            ? CommandResult.Ok(Language.TakeItem(displayName), fullOnTake)
-            : CommandResult.Ok(Language.TakeItem(displayName));
-
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return CommandResultExtensions.OkWithReaction(Language.TakeItem(displayName), fullOnTake).WithOptionalSuggestion(suggestion);
     }
 }

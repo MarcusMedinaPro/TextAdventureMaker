@@ -20,18 +20,17 @@ public class DrinkCommand(string itemName) : ICommand
     {
         IItem? item = context.State.Inventory.FindItem(ItemName);
         string? suggestion = null;
-        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
-        {
-            IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
-            if (best  is not null)
-            {
-                item = best;
-                suggestion = best.Name;
-            }
-        }
+        (item, suggestion) = FuzzyItemResolver.Resolve(context.State, context.State.Inventory.Items, item, ItemName);
 
-        if (item  is null)
+        if (item is null)
+        {
+            IItem? roomItem = context.State.CurrentLocation.FindItem(ItemName);
+            if (roomItem is null)
+                (roomItem, _) = FuzzyItemResolver.Resolve(context.State, context.State.CurrentLocation.Items, null, ItemName);
+            if (roomItem is not null)
+                return CommandResult.Fail(Language.MustPickUpToDrink, GameError.ItemNotFound);
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotFound);
+        }
 
         if (!item.IsDrinkable)
             return CommandResult.Fail(Language.CannotDrinkThat, GameError.ItemNotUsable);
@@ -64,6 +63,6 @@ public class DrinkCommand(string itemName) : ICommand
             ? CommandResult.Ok(Language.DrinkItem(displayName), [.. reactions])
             : CommandResult.Ok(Language.DrinkItem(displayName));
 
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return result.WithOptionalSuggestion(suggestion);
     }
 }

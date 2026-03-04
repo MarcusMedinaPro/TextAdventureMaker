@@ -38,6 +38,7 @@ public enum GameError
 
     NotEnoughHealth = 401,
     AlreadyDead = 402,
+    WrongObjectType = 403,
 
     // Commands 500-599
     UnknownCommand = 500,

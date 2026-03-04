@@ -82,6 +82,8 @@ public static class Language
     public static string NothingToMove => Provider.Get("NothingToMove");
     public static string CannotMoveItem => Provider.Get("CannotMoveItem");
     public static string NoOneToTalkTo => Provider.Get("NoOneToTalkTo");
+    public static string CannotTalkToThat => Provider.Get("CannotTalkToThat");
+    public static string CannotAttackThat => Provider.Get("CannotAttackThat");
     public static string NoSuchNpcHere => Provider.Get("NoSuchNpcHere");
     public static string NpcHasNothingToSay => Provider.Get("NpcHasNothingToSay");
     public static string DialogOptionsLabel => Provider.Get("DialogOptionsLabel");
@@ -336,6 +338,8 @@ public static class Language
     public static string RoomDescriptionLabel => Provider.Get("RoomDescriptionLabel");
     public static string CannotEatThat => Provider.Get("CannotEatThat");
     public static string CannotDrinkThat => Provider.Get("CannotDrinkThat");
+    public static string MustPickUpToEat => Provider.Get("MustPickUpToEat");
+    public static string MustPickUpToDrink => Provider.Get("MustPickUpToDrink");
 
     public static string EatItem(string itemName) =>
         Provider.Format("EatItemTemplate", itemName);
@@ -397,6 +401,8 @@ public static class Language
             ["MoveItemTemplate"] = "You move the {0}.",
             ["CanTakeInsteadTemplate"] = "You can just take the {0}.",
             ["NoOneToTalkTo"] = "There's no one here to talk to.",
+            ["CannotTalkToThat"] = "You can't talk to that.",
+            ["CannotAttackThat"] = "You can't attack that.",
             ["NoSuchNpcHere"] = "You don't see anyone like that.",
             ["NpcHasNothingToSay"] = "They have nothing to say.",
             ["DialogOptionsLabel"] = "Options:",
@@ -461,6 +467,8 @@ public static class Language
             ["RoomDescriptionLabel"] = "Description:",
             ["CannotEatThat"] = "You can't eat that.",
             ["CannotDrinkThat"] = "You can't drink that.",
+            ["MustPickUpToEat"] = "You need to pick it up first before eating it.",
+            ["MustPickUpToDrink"] = "You need to pick it up first before drinking it.",
             ["EatItemTemplate"] = "You eat the {0}.",
             ["DrinkItemTemplate"] = "You drink the {0}.",
             ["HealedAmountTemplate"] = "You feel better. (+{0} health)",

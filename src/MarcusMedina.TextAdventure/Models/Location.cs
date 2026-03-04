@@ -29,6 +29,8 @@ public class Location(string id) : ILocation
     public IReadOnlyDictionary<Direction, Exit> Exits => _exits;
     public IReadOnlyList<IItem> Items => _items;
     public IReadOnlyList<INpc> Npcs => _npcs;
+    public IStore? Store { get; set; }
+    public PuzzleSystem? PuzzleSystem { get; set; }
     public IReadOnlyList<FlashbackTrigger> FlashbackTriggers => _flashbackTriggers;
     public IReadOnlyList<TimedSpawn> TimedSpawns => _timedSpawns;
     public LocationTransform? Transform => _transform;

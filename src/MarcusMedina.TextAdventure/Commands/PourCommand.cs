@@ -26,12 +26,14 @@ public class PourCommand : ICommand
         IInventory inventory = context.State.Inventory;
         IFluid? fluidItem = inventory.FindItem(FluidName) as IFluid;
         string? suggestion = null;
-        if (fluidItem  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(FluidName))
+
+        if (fluidItem is null)
         {
-            if (FuzzyMatcher.FindBestItem(inventory.Items, FluidName, context.State.FuzzyMaxDistance) is IFluid best)
+            (IItem? bestFluidItem, string? fluidSuggestion) = FuzzyItemResolver.Resolve(context.State, inventory.Items, null, FluidName);
+            if (bestFluidItem is IFluid bestFluid)
             {
-                fluidItem = best;
-                suggestion = best.Name;
+                fluidItem = bestFluid;
+                suggestion = fluidSuggestion;
             }
         }
 
@@ -41,15 +43,8 @@ public class PourCommand : ICommand
         }
 
         IItem? containerItem = inventory.FindItem(ContainerName);
-        if (containerItem  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ContainerName))
-        {
-            IItem? best = FuzzyMatcher.FindBestItem(inventory.Items, ContainerName, context.State.FuzzyMaxDistance);
-            if (best  is not null)
-            {
-                containerItem = best;
-                suggestion ??= best.Name;
-            }
-        }
+        (containerItem, string? containerSuggestion) = FuzzyItemResolver.Resolve(context.State, inventory.Items, containerItem, ContainerName);
+        suggestion ??= containerSuggestion;
 
         if (containerItem is not IContainer<IFluid> container)
         {
@@ -64,7 +59,6 @@ public class PourCommand : ICommand
         _ = inventory.Remove((IItem)fluidItem);
         string fluidName = Language.EntityName(fluidItem.Id, fluidItem.Name);
         string containerName = Language.EntityName(containerItem);
-        CommandResult ok = CommandResult.Ok(Language.PourResult(fluidName, containerName));
-        return suggestion  is not null ? ok.WithSuggestion(suggestion) : ok;
+        return CommandResult.Ok(Language.PourResult(fluidName, containerName)).WithOptionalSuggestion(suggestion);
     }
 }

@@ -26,15 +26,7 @@ public class DropCommand : ICommand
     {
         IItem? item = context.State.Inventory.FindItem(ItemName);
         string? suggestion = null;
-        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
-        {
-            IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
-            if (best  is not null)
-            {
-                item = best;
-                suggestion = best.Name;
-            }
-        }
+        (item, suggestion) = FuzzyItemResolver.Resolve(context.State, context.State.Inventory.Items, item, ItemName);
 
         if (item  is null)
             return CommandResult.Fail(Language.NoSuchItemInventory, GameError.ItemNotInInventory);
@@ -54,11 +46,7 @@ public class DropCommand : ICommand
 
             string splitDisplay = $"{Amount.Value} {item.Name}";
             string? onDrop = item.GetReaction(ItemAction.Drop);
-            CommandResult splitResult = onDrop  is not null
-                ? CommandResult.Ok(Language.DropItem(splitDisplay), onDrop)
-                : CommandResult.Ok(Language.DropItem(splitDisplay));
-
-            return suggestion  is not null ? splitResult.WithSuggestion(suggestion) : splitResult;
+            return CommandResultExtensions.OkWithReaction(Language.DropItem(splitDisplay), onDrop).WithOptionalSuggestion(suggestion);
         }
 
         // Full drop
@@ -69,10 +57,6 @@ public class DropCommand : ICommand
 
         string displayName = Language.EntityName(item);
         string? fullOnDrop = item.GetReaction(ItemAction.Drop);
-        CommandResult result = fullOnDrop  is not null
-            ? CommandResult.Ok(Language.DropItem(displayName), fullOnDrop)
-            : CommandResult.Ok(Language.DropItem(displayName));
-
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return CommandResultExtensions.OkWithReaction(Language.DropItem(displayName), fullOnDrop).WithOptionalSuggestion(suggestion);
     }
 }

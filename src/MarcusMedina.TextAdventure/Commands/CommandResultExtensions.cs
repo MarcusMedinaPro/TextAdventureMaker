@@ -10,6 +10,14 @@ namespace MarcusMedina.TextAdventure.Commands;
 
 public static class CommandResultExtensions
 {
+    /// <summary>Create an Ok result that includes a reaction if one is provided.</summary>
+    public static CommandResult OkWithReaction(string message, string? reaction) =>
+        reaction is not null ? CommandResult.Ok(message, reaction) : CommandResult.Ok(message);
+
+    /// <summary>Append a "did you mean" suggestion to the result if one is provided.</summary>
+    public static CommandResult WithOptionalSuggestion(this CommandResult result, string? suggestion) =>
+        suggestion is not null ? result.WithSuggestion(suggestion) : result;
+
     /// <summary>Prefix a "did you mean" hint to the result message.</summary>
     public static CommandResult WithSuggestion(this CommandResult result, string suggestion)
     {

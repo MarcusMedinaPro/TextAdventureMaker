@@ -85,24 +85,32 @@ public class LookCommand(string? target = null) : ICommand
 
         IItem? item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
         string? suggestion = null;
-        if (item is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
-        {
-            IEnumerable<IItem> candidates = location.Items.Concat(context.State.Inventory.Items);
-            IItem? best = FuzzyMatcher.FindBestItem(candidates, target, context.State.FuzzyMaxDistance);
-            if (best is not null)
-            {
-                item = best;
-                suggestion = Language.EntityName(best);
-            }
-        }
+        IEnumerable<IItem> itemCandidates = location.Items.Concat(context.State.Inventory.Items);
+        (item, string? rawItemSuggestion) = FuzzyItemResolver.Resolve(context.State, itemCandidates, item, target);
+        if (rawItemSuggestion is not null)
+            suggestion = rawItemSuggestion;
 
         if (item is not null)
         {
             string description = item.GetDescription();
-            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
+            string baseDescription = string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(item))
-                : description);
-            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
+                : description;
+
+            if (item is IContainer<IItem> container)
+            {
+                string contentsMsg = container.Contents.Count == 0
+                    ? Language.ContainerIsEmpty
+                    : string.Join(", ", container.Contents
+                        .Where(i => !i.HiddenFromItemList)
+                        .Select(i => i.Name));
+                string full = container.Contents.Count == 0
+                    ? $"{baseDescription}\n{Language.ContainerIsEmpty}"
+                    : $"{baseDescription}\n{Language.ContainerContents(item.Name, contentsMsg)}";
+                return CommandResult.Ok(full).WithOptionalSuggestion(suggestion);
+            }
+
+            return CommandResult.Ok(baseDescription).WithOptionalSuggestion(suggestion);
         }
 
         INpc? npc = location.FindNpc(target);
@@ -122,7 +130,7 @@ public class LookCommand(string? target = null) : ICommand
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(npc))
                 : description);
-            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
+            return result.WithOptionalSuggestion(suggestion);
         }
 
         IDoor? door = location.Exits.Values
@@ -145,7 +153,7 @@ public class LookCommand(string? target = null) : ICommand
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(door))
                 : description);
-            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
+            return result.WithOptionalSuggestion(suggestion);
         }
 
         IKey? key = location.Exits.Values
@@ -171,7 +179,7 @@ public class LookCommand(string? target = null) : ICommand
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
                 ? Language.ItemDescription(Language.EntityName(key))
                 : description);
-            return suggestion is not null ? result.WithSuggestion(suggestion) : result;
+            return result.WithOptionalSuggestion(suggestion);
         }
 
         if (target.TextCompare(location.Id) || target.TextCompare("here") || target.TextCompare("room"))

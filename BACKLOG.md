@@ -31,21 +31,21 @@ One slice at a time. Mark `[>]` in progress, `[x]` done.
 
 ## 🟠 P2 — Quick Wins (small effort, high value)
 
-### [ ] S003 — `CommandContext.State` → `IGameState`
+### [ ] S003 — `CommandContext.State` → `IGameState` (deferred — large, unblocks test mocking)
 **Why:** All 55 commands depend on the concrete `GameState`, making unit testing without a full engine setup impossible. DIP violation.
 **File:** `Commands/CommandContext.cs` + all command unit tests
 **Scope:** Change `public GameState State { get; }` to `public IGameState State { get; }`. Verify all commands compile (some may need casts removed). Tests: construct a mock `IGameState` in a command test.
 
 ---
 
-### [ ] S004 — Add `Name` to `ILocation`
+### [x] S004 — Add `Name` to `ILocation`
 **Why:** Debug commands and others cast to concrete `Location` to read `.Name`, leaking the abstraction.
 **Files:** `Interfaces/ILocation.cs`, `Models/Location.cs`, debug commands
 **Scope:** Add `string Name { get; }` to `ILocation`. Remove 2+ concrete casts in debug command files. Tests: `ILocation.Name` accessible without cast.
 
 ---
 
-### [ ] S005 — Extract `FuzzyItemResolver` utility
+### [x] S005 — Extract `FuzzyItemResolver` utility
 **Why:** The fuzzy-match block is copy-pasted across 14 command files (21 call sites). Any change to fuzzy logic requires touching 14 files.
 **Files:** New `Helpers/FuzzyItemResolver.cs`, all 14 command files
 **Scope:**
@@ -63,7 +63,7 @@ Tests: fuzzy resolution works identically before/after in TakeCommand, EatComman
 
 ---
 
-### [ ] S006 — Add `WithOptionalSuggestion` + `OkWithReaction` extensions
+### [x] S006 — Add `WithOptionalSuggestion` + `OkWithReaction` extensions
 **Why:** Every item-interaction command ends with the same ternary chain (18 occurrences):
 ```csharp
 var result = reaction is not null ? CommandResult.Ok(msg, reaction) : CommandResult.Ok(msg);
@@ -79,21 +79,21 @@ Replace all 18 occurrences across commands. Tests: null reaction → no extra pa
 
 ---
 
-### [ ] S007 — `ConsumableExtensions`/`StackExtensions` → target `IItem`
+### [x] S007 — `ConsumableExtensions`/`StackExtensions` → target `IItem`
 **Why:** `AsFood(this Item)`, `AsDrink(this Item)`, `AsStack(this Item)` take a concrete type, breaking fluent chains that hold `IItem`. `ConsumableExtensions` also casts return to `(Item)` — unsafe for subclasses.
 **Files:** `Extensions/ConsumableExtensions.cs`, `Extensions/StackExtensions.cs`
 **Scope:** Change `this Item` to `this IItem` on all three methods. Remove unsafe `(Item)` casts. Tests: call on a subclass type (e.g., `Key`) without exception.
 
 ---
 
-### [ ] S008 — Remove static dictionaries from `StoreExtensions`/`PuzzleExtensions`
+### [x] S008 — Remove static dictionaries from `StoreExtensions`/`PuzzleExtensions`
 **Why:** Both use `private static Dictionary<ILocation, T>` as process-global side-channel state. Multiple game instances in one process share stores/puzzles; tests cannot isolate.
 **Files:** `Extensions/StoreExtensions.cs`, `Extensions/PuzzleExtensions.cs`, `Interfaces/ILocation.cs` or `Interfaces/IGameState.cs`
 **Scope:** Move store and puzzle associations onto `ILocation` as optional properties (or onto `IGameState`). Remove static fields. Tests: two separate `GameState` instances do not share store data.
 
 ---
 
-### [ ] S009 — Dead properties on `RepairCommand`
+### [x] S009 — Dead properties on `RepairCommand`
 **Why:** `Name`, `Aliases`, `Description` on `RepairCommand` are not part of `ICommand` and are never read anywhere. Pure noise.
 **File:** `Commands/RepairCommand.cs`
 **Scope:** Delete the three dead properties. Verify build.
@@ -102,21 +102,21 @@ Replace all 18 occurrences across commands. Tests: null reaction → no extra pa
 
 ## 🟡 P3 — Command Harmony
 
-### [ ] S010 — `eat`/`drink`: room item fallback + pickup hint
+### [x] S010 — `eat`/`drink`: room item fallback + pickup hint
 **Why:** `eat bread` when bread is on the table gives "No such item in inventory" — as if the bread doesn't exist. `ReadCommand` correctly handles this with `Language.MustTakeToRead`.
 **Files:** `Commands/EatCommand.cs`, `Commands/DrinkCommand.cs`, `Localization/Language.cs`
 **Scope:** Search room items as fallback. If found but not in inventory, return `Language.MustPickUpToEat` / `Language.MustPickUpToDrink`. Tests: food on floor gives hint; food in inventory still works.
 
 ---
 
-### [ ] S011 — `look` shows container contents
+### [x] S011 — `look` shows container contents
 **Why:** `look chest` shows the chest description but never lists its contents. The player cannot discover what is inside without game-specific DSL hints.
 **File:** `Commands/LookCommand.cs` — `ExecuteTarget` method
 **Scope:** After resolving an `IItem` target, check `item is IContainer<IItem> container`. If yes, append contents list (respecting `HiddenFromItemList`). Tests: `look chest` with 2 items inside shows items; empty chest says "It is empty."
 
 ---
 
-### [ ] S012 — Fix misleading error codes: `talk`/`attack` on wrong type
+### [x] S012 — Fix misleading error codes: `talk`/`attack` on wrong type
 **Why:** `talk door` returns `Language.NoSuchNpcHere` with `GameError.TargetNotFound`. The door exists — it just can't be talked to. `GameError.TargetNotFound` misleads adventure authors debugging reactions.
 **Files:** `Commands/TalkCommand.cs`, `Commands/AttackCommand.cs`, `Enums/GameError.cs`
 **Scope:** Add `GameError.WrongObjectType`. When target is found but wrong type (not NPC), return a distinct message + error code. Tests: `talk <item>` → `WrongObjectType`; `talk <nonexistent>` → `TargetNotFound`.

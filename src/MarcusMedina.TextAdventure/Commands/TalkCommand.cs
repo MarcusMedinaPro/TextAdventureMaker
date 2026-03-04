@@ -5,6 +5,7 @@
 
 namespace MarcusMedina.TextAdventure.Commands;
 
+using System.Linq;
 using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
@@ -36,8 +37,23 @@ public class TalkCommand(string? target) : ICommand
             }
         }
 
-        if (npc  is null)
+        if (npc is null)
         {
+            // Check if a non-NPC entity with this name exists (item or door) → wrong type
+            IItem? matchedItem = location.FindItem(Target);
+            if (matchedItem is null)
+            {
+                IDoor? matchedDoor = location.Exits.Values
+                    .Select(e => e.Door)
+                    .FirstOrDefault(d => d is not null && d.Matches(Target));
+                if (matchedDoor is not null)
+                    return CommandResult.Fail(Language.CannotTalkToThat, GameError.WrongObjectType);
+            }
+            else
+            {
+                return CommandResult.Fail(Language.CannotTalkToThat, GameError.WrongObjectType);
+            }
+
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
         }
 
@@ -46,8 +62,7 @@ public class TalkCommand(string? target) : ICommand
         var ruleBased = npc.GetRuleBasedDialog(context.State);
         if (!string.IsNullOrWhiteSpace(ruleBased))
         {
-            var ruleResult = CommandResult.Ok(ruleBased);
-            return suggestion  is not null ? ruleResult.WithSuggestion(suggestion) : ruleResult;
+            return CommandResult.Ok(ruleBased).WithOptionalSuggestion(suggestion);
         }
 
         var dialog = npc.DialogRoot;
@@ -76,7 +91,6 @@ public class TalkCommand(string? target) : ICommand
         }
 
         npc.Memory.MarkMet();
-        var result = CommandResult.Ok(builder.ToString());
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return CommandResult.Ok(builder.ToString()).WithOptionalSuggestion(suggestion);
     }
 }

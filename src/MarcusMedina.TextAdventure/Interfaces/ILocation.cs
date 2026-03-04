@@ -14,6 +14,8 @@ public interface ILocation : IPropertyBag
     string Id { get; }
     string Name { get; }
     IReadOnlyList<IItem> Items { get; }
+    IStore? Store { get; set; }
+    PuzzleSystem? PuzzleSystem { get; set; }
 
     IReadOnlyList<INpc> Npcs { get; }
 

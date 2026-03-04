@@ -27,15 +27,7 @@ public class UseCommand : ICommand
         bool useFixedRoomItem = false;
         string? suggestion = null;
 
-        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
-        {
-            IItem? best = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, ItemName, context.State.FuzzyMaxDistance);
-            if (best  is not null)
-            {
-                item = best;
-                suggestion = best.Name;
-            }
-        }
+        (item, suggestion) = FuzzyItemResolver.Resolve(context.State, context.State.Inventory.Items, item, ItemName);
 
         if (item is null)
         {
@@ -47,18 +39,15 @@ public class UseCommand : ICommand
             }
         }
 
-        if (item is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(ItemName))
+        if (item is null)
         {
-            IItem? bestRoomFixture = FuzzyMatcher.FindBestItem(
-                location.Items.Where(current => !current.Takeable),
-                ItemName,
-                context.State.FuzzyMaxDistance);
-
-            if (bestRoomFixture is not null)
+            IEnumerable<IItem> fixtures = location.Items.Where(current => !current.Takeable);
+            (IItem? bestFixture, string? fixtureSuggestion) = FuzzyItemResolver.Resolve(context.State, fixtures, null, ItemName);
+            if (bestFixture is not null)
             {
-                item = bestRoomFixture;
+                item = bestFixture;
                 useFixedRoomItem = true;
-                suggestion = bestRoomFixture.Name;
+                suggestion = fixtureSuggestion;
             }
         }
 
@@ -74,10 +63,6 @@ public class UseCommand : ICommand
         }
         string displayName = Language.EntityName(item);
         string? onUse = item.GetReaction(ItemAction.Use);
-        CommandResult result = onUse  is not null
-            ? CommandResult.Ok(Language.UseItem(displayName), onUse)
-            : CommandResult.Ok(Language.UseItem(displayName));
-
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return CommandResultExtensions.OkWithReaction(Language.UseItem(displayName), onUse).WithOptionalSuggestion(suggestion);
     }
 }

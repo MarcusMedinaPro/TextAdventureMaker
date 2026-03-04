@@ -4,7 +4,6 @@
 // </copyright>
 
 using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Extensions;
 
@@ -13,17 +12,15 @@ namespace MarcusMedina.TextAdventure.Extensions;
 /// </summary>
 public static class StoreExtensions
 {
-    private static readonly Dictionary<ILocation, IStore> LocationStores = [];
-
     /// <summary>
     /// Sets a store for a location.
     /// </summary>
     public static void SetStore(this ILocation location, IStore store) =>
-        LocationStores[location] = store;
+        location.Store = store;
 
     /// <summary>
     /// Gets the store for a location, if one exists.
     /// </summary>
     public static IStore? GetStore(this ILocation location) =>
-        LocationStores.TryGetValue(location, out var store) ? store : null;
+        location.Store;
 }

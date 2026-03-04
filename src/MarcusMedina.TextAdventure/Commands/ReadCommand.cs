@@ -9,6 +9,7 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
+using System.Linq;
 
 public class ReadCommand(string target) : ICommand
 {
@@ -25,24 +26,17 @@ public class ReadCommand(string target) : ICommand
         var itemInRoom = location.FindItem(Target);
         var itemInInventory = context.State.Inventory.FindItem(Target);
         string? suggestion = null;
-        if (itemInRoom  is null && itemInInventory  is null &&
-            context.State.EnableFuzzyMatching &&
-            !FuzzyMatcher.IsLikelyCommandToken(Target))
+        if (itemInRoom is null && itemInInventory is null)
         {
-            var bestRoom = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
-            var bestInventory = FuzzyMatcher.FindBestItem(context.State.Inventory.Items, Target, context.State.FuzzyMaxDistance);
-            var best = bestInventory ?? bestRoom;
-            if (best  is not null)
+            IEnumerable<IItem> allItems = location.Items.Concat(context.State.Inventory.Items);
+            (IItem? bestAny, string? bestSuggestion) = FuzzyItemResolver.Resolve(context.State, allItems, null, Target);
+            if (bestAny is not null)
             {
-                suggestion = best.Name;
-                if (bestInventory  is not null)
-                {
-                    itemInInventory = bestInventory;
-                }
+                suggestion = bestSuggestion;
+                if (context.State.Inventory.Items.Contains(bestAny))
+                    itemInInventory = bestAny;
                 else
-                {
-                    itemInRoom = bestRoom;
-                }
+                    itemInRoom = bestAny;
             }
         }
 
@@ -77,10 +71,6 @@ public class ReadCommand(string target) : ICommand
             : text;
 
         var onRead = item.GetReaction(ItemAction.Read);
-        var result = onRead  is not null
-            ? CommandResult.Ok(message, onRead)
-            : CommandResult.Ok(message);
-
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return CommandResultExtensions.OkWithReaction(message, onRead).WithOptionalSuggestion(suggestion);
     }
 }

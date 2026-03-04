@@ -30,16 +30,7 @@ public class MoveCommand : ICommand
         ILocation location = context.State.CurrentLocation;
         IItem? item = location.FindItem(Target);
         string? suggestion = null;
-
-        if (item  is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(Target))
-        {
-            IItem? best = FuzzyMatcher.FindBestItem(location.Items, Target, context.State.FuzzyMaxDistance);
-            if (best  is not null)
-            {
-                item = best;
-                suggestion = best.Name;
-            }
-        }
+        (item, suggestion) = FuzzyItemResolver.Resolve(context.State, location.Items, item, Target);
 
         if (item  is null)
         {
@@ -48,25 +39,15 @@ public class MoveCommand : ICommand
 
         string? moveFailed = item.GetReaction(ItemAction.MoveFailed);
         if (!string.IsNullOrWhiteSpace(moveFailed))
-        {
-            CommandResult failed = CommandResult.Fail(Language.CannotMoveItem, GameError.ItemNotUsable, moveFailed);
-            return suggestion  is not null ? failed.WithSuggestion(suggestion) : failed;
-        }
+            return CommandResult.Fail(Language.CannotMoveItem, GameError.ItemNotUsable, moveFailed).WithOptionalSuggestion(suggestion);
 
         string displayName = Language.EntityName(item);
         if (item.Takeable && item.GetReaction(ItemAction.Move)  is null)
-        {
-            CommandResult failed = CommandResult.Fail(Language.CanTakeInstead(displayName), GameError.ItemNotUsable);
-            return suggestion  is not null ? failed.WithSuggestion(suggestion) : failed;
-        }
+            return CommandResult.Fail(Language.CanTakeInstead(displayName), GameError.ItemNotUsable).WithOptionalSuggestion(suggestion);
 
         item.Move();
         context.State.Events.Publish(new GameEvent(GameEventType.MoveItem, context.State, location, item));
         string? onMove = item.GetReaction(ItemAction.Move);
-        CommandResult ok = onMove  is not null
-            ? CommandResult.Ok(Language.MoveItem(displayName), onMove)
-            : CommandResult.Ok(Language.MoveItem(displayName));
-
-        return suggestion  is not null ? ok.WithSuggestion(suggestion) : ok;
+        return CommandResultExtensions.OkWithReaction(Language.MoveItem(displayName), onMove).WithOptionalSuggestion(suggestion);
     }
 }

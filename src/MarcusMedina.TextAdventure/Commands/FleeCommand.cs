@@ -40,7 +40,6 @@ public class FleeCommand(string? target = null) : ICommand
             return CommandResult.Fail(Language.NoOneToFlee, GameError.TargetNotFound);
         }
 
-        var result = context.State.CombatSystem.Flee(context.State, npc);
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return context.State.CombatSystem.Flee(context.State, npc).WithOptionalSuggestion(suggestion);
     }
 }

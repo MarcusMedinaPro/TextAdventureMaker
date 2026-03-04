@@ -43,10 +43,7 @@ public class GoToCommand(string target) : ICommand
 
         var direction = matches[0].Key;
         if (context.State.Move(direction))
-        {
-            var result = CommandResult.Ok(Language.GoDirection(direction.ToString().Lower()));
-            return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
-        }
+            return CommandResult.Ok(Language.GoDirection(direction.ToString().Lower())).WithOptionalSuggestion(suggestion);
 
         var error = context.State.LastMoveErrorCode != GameError.None
             ? context.State.LastMoveErrorCode

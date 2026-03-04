@@ -5,6 +5,7 @@
 
 namespace MarcusMedina.TextAdventure.Commands;
 
+using System.Linq;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
@@ -35,8 +36,23 @@ public class AttackCommand(string? target) : ICommand
             }
         }
 
-        if (npc  is null)
+        if (npc is null)
         {
+            // Check if a non-NPC entity with this name exists → wrong type
+            IItem? matchedItem = location.FindItem(Target);
+            if (matchedItem is null)
+            {
+                IDoor? matchedDoor = location.Exits.Values
+                    .Select(e => e.Door)
+                    .FirstOrDefault(d => d is not null && d.Matches(Target));
+                if (matchedDoor is not null)
+                    return CommandResult.Fail(Language.CannotAttackThat, GameError.WrongObjectType);
+            }
+            else
+            {
+                return CommandResult.Fail(Language.CannotAttackThat, GameError.WrongObjectType);
+            }
+
             return CommandResult.Fail(Language.NoSuchNpcHere, GameError.TargetNotFound);
         }
 
@@ -51,7 +67,6 @@ public class AttackCommand(string? target) : ICommand
         }
 
         context.State.Events.Publish(new GameEvent(GameEventType.CombatStart, context.State, location, npc: npc));
-        var result = context.State.CombatSystem.Attack(context.State, npc);
-        return suggestion  is not null ? result.WithSuggestion(suggestion) : result;
+        return context.State.CombatSystem.Attack(context.State, npc).WithOptionalSuggestion(suggestion);
     }
 }

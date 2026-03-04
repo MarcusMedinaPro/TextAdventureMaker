@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Models;
 
@@ -14,6 +15,10 @@ public interface IGameState
     bool Move(Direction direction);
     bool IsCurrentRoomId(string id);
     GameError LastMoveErrorCode { get; }
+    string? LastMoveError { get; }
+    MementoCaretaker History { get; }
+    GameMemento CreateMemento();
+    void ApplyMemento(GameMemento memento);
     RecipeBook RecipeBook { get; }
     IInventory Inventory { get; }
     IStats Stats { get; }

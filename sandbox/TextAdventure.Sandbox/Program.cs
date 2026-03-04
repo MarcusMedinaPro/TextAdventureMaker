@@ -6,7 +6,7 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
-using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+using static MarcusMedina.TextAdventure.Engine.ConsoleRenderer;
 
 // === THE LAUNDRY ROOM WARNING ===
 // A linear home-horror scenario with deliberate false leads.

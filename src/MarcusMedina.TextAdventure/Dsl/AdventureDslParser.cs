@@ -6,7 +6,9 @@
 using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Models;
+using MarcusMedina.TextAdventure.Parsing;
 using System.Globalization;
 
 namespace MarcusMedina.TextAdventure.Dsl;
@@ -398,7 +400,7 @@ public class AdventureDslParser : IDslParser
         return new DslDoorParts(id, name, description, options);
     }
 
-    private static void ApplyItemOptions(Item item, IReadOnlyDictionary<string, string> options)
+    private static void ApplyItemOptions(IItem item, IReadOnlyDictionary<string, string> options)
     {
         foreach (KeyValuePair<string, string> option in options)
         {
@@ -415,27 +417,6 @@ public class AdventureDslParser : IDslParser
             else if (option.Key.TextCompare("takeable") && bool.TryParse(option.Value, out bool takeable))
             {
                 _ = item.SetTakeable(takeable);
-            }
-        }
-    }
-
-    private static void ApplyItemOptions(Key key, IReadOnlyDictionary<string, string> options)
-    {
-        foreach (KeyValuePair<string, string> option in options)
-        {
-            if (option.Key.TextCompare("weight") &&
-                float.TryParse(option.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out float weight))
-            {
-                _ = key.SetWeight(weight);
-            }
-            else if (option.Key.TextCompare("aliases"))
-            {
-                string[] aliases = option.Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                _ = key.AddAliases(aliases);
-            }
-            else if (option.Key.TextCompare("takeable") && bool.TryParse(option.Value, out bool takeable))
-            {
-                _ = key.SetTakeable(takeable);
             }
         }
     }
@@ -493,26 +474,14 @@ public class AdventureDslParser : IDslParser
 
     private static bool TryParseDirection(string value, out Direction direction)
     {
-        return Enum.TryParse(value, true, out direction) || value.ToLowerInvariant() switch
-        {
-            "n" => AssignDirection(Direction.North, out direction),
-            "s" => AssignDirection(Direction.South, out direction),
-            "e" => AssignDirection(Direction.East, out direction),
-            "w" => AssignDirection(Direction.West, out direction),
-            "ne" => AssignDirection(Direction.NorthEast, out direction),
-            "nw" => AssignDirection(Direction.NorthWest, out direction),
-            "se" => AssignDirection(Direction.SouthEast, out direction),
-            "sw" => AssignDirection(Direction.SouthWest, out direction),
-            "u" => AssignDirection(Direction.Up, out direction),
-            "d" => AssignDirection(Direction.Down, out direction),
-            _ => AssignDirection(Direction.North, out direction, false)
-        };
-    }
+        if (Enum.TryParse(value, true, out direction))
+            return true;
 
-    private static bool AssignDirection(Direction direction, out Direction output, bool success = true)
-    {
-        output = direction;
-        return success;
+        if (KeywordParserConfig.DefaultDirectionAliases.TryGetValue(value, out direction))
+            return true;
+
+        direction = Direction.North;
+        return false;
     }
 
     private static DslAdventure BuildAdventure(AdventureDslContext context)

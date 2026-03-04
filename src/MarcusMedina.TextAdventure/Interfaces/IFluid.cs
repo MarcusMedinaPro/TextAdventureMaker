@@ -4,10 +4,8 @@
 // </copyright>
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface IFluid
+public interface IFluid : IGameEntity
 {
-    string Id { get; }
-    string Name { get; }
     string? Description { get; }
     string GetDescription();
     IFluid SetDescription(string description);

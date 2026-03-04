@@ -57,6 +57,11 @@ public sealed class Game(
     public CommandResult Execute(string input)
     {
         ICommand command = Parser.Parse(input);
+        return Execute(command);
+    }
+
+    public CommandResult Execute(ICommand command)
+    {
         CommandResult result = State.Execute(command);
         if (!result.ShouldQuit)
         {
@@ -101,56 +106,37 @@ public sealed class Game(
         while (true)
         {
             foreach (Action<Game> handler in _turnStartHandlers)
-            {
                 handler(this);
-            }
 
             Output.Write(Prompt);
             string? input = Input.ReadLine();
-            if (input  is null)
-            {
+            if (input is null)
                 break;
-            }
 
             input = input.Trim();
             if (string.IsNullOrWhiteSpace(input))
-            {
                 continue;
-            }
 
             ICommand command = Parser.Parse(input);
-            CommandResult result = State.Execute(command);
+            CommandResult result = Execute(command);
 
             if (!string.IsNullOrWhiteSpace(result.Message))
-            {
                 Output.WriteLine(result.Message);
-            }
 
             foreach (string reaction in result.ReactionsList)
             {
                 if (!string.IsNullOrWhiteSpace(reaction))
-                {
                     Output.WriteLine($"> {reaction}");
-                }
             }
 
             if (result.ShouldQuit)
-            {
                 break;
-            }
-
-            TickNpcs();
-            EvaluateStoryBranches();
 
             foreach (Action<Game, ICommand, CommandResult> handler in _turnEndHandlers)
-            {
                 handler(this, command, result);
-            }
 
             if (_stopRequested)
-            {
                 break;
-            }
         }
     }
 }

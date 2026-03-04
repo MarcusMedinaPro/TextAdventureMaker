@@ -16,11 +16,11 @@ public class RedoCommand : ICommand
     public string[]? Aliases => ["r"];
     public string Description => "Redo the last undone action";
 
-    private readonly GameState? _state;
+    private readonly IGameState? _state;
 
     public RedoCommand() { }
 
-    public RedoCommand(GameState state)
+    public RedoCommand(IGameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
         _state = state;
@@ -28,7 +28,7 @@ public class RedoCommand : ICommand
 
     public CommandResult Execute(CommandContext context)
     {
-        GameState state = _state ?? context.State;
+        IGameState state = _state ?? context.State;
         GameMemento? memento = state.History.Redo();
 
         if (memento  is null)

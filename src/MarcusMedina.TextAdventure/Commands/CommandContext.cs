@@ -5,15 +5,15 @@
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Interfaces;
 
 public class CommandContext
 {
-    public CommandContext(GameState state)
+    public CommandContext(IGameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
         State = state;
     }
 
-    public GameState State { get; }
+    public IGameState State { get; }
 }

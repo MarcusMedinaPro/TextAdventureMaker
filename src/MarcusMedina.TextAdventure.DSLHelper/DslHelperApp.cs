@@ -1,5 +1,6 @@
+using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Extensions;
-using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
+using static MarcusMedina.TextAdventure.Engine.ConsoleRenderer;
 
 namespace MarcusMedina.TextAdventure.DSLHelper;
 

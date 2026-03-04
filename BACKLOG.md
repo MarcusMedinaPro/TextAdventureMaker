@@ -31,7 +31,7 @@ One slice at a time. Mark `[>]` in progress, `[x]` done.
 
 ## 🟠 P2 — Quick Wins (small effort, high value)
 
-### [ ] S003 — `CommandContext.State` → `IGameState` (deferred — large, unblocks test mocking)
+### [x] S003 — `CommandContext.State` → `IGameState`
 **Why:** All 55 commands depend on the concrete `GameState`, making unit testing without a full engine setup impossible. DIP violation.
 **File:** `Commands/CommandContext.cs` + all command unit tests
 **Scope:** Change `public GameState State { get; }` to `public IGameState State { get; }`. Verify all commands compile (some may need casts removed). Tests: construct a mock `IGameState` in a command test.
@@ -186,42 +186,42 @@ public interface IOpenable
 
 ## 🔵 P5 — Architecture (larger, do last)
 
-### [ ] S019 — `AdventureDslParser.ApplyItemOptions` dedup
+### [x] S019 — `AdventureDslParser.ApplyItemOptions` dedup
 **Why:** Two overloads for `Item` and `Key` with identical bodies.
 **File:** `Dsl/AdventureDslParser.cs`
 **Scope:** Merge into one method taking `IItem`. Tests: key options still applied correctly.
 
 ---
 
-### [ ] S020 — `Game.Run()` pipeline dedup
+### [x] S020 — `Game.Run()` pipeline dedup
 **Why:** `Run()` reimplements the parse→execute→display pipeline independently of `Execute(string)`.
 **File:** `Engine/Game.cs`
 **Scope:** `Run()` calls `Execute(string)` internally. Tests: Run loop produces same results as explicit Execute calls.
 
 ---
 
-### [ ] S021 — `IFluid` → extend `IGameEntity`
+### [x] S021 — `IFluid` → extend `IGameEntity`
 **Why:** `IFluid` defines `Id`, `Name`, `GetDescription()` manually — all of which are already on `IGameEntity`. Fluids are outside the entity hierarchy, preventing entity extensions from working on them.
 **Files:** `Interfaces/IFluid.cs`, `Models/FluidItem.cs`
 **Scope:** `IFluid : IGameEntity`. Remove duplicated members. Tests: `GameEntityExtensions` work on a fluid item.
 
 ---
 
-### [ ] S022 — `GrammarExtensions`: extract `EnglishGrammar` to own file
+### [x] S022 — `GrammarExtensions`: extract `EnglishGrammar` to own file
 **Why:** `EnglishGrammar : IGrammarProvider` is a model/service embedded in an extensions file. SRP violation.
 **Files:** `Extensions/GrammarExtensions.cs` → split into `Extensions/GrammarExtensions.cs` + `Localization/EnglishGrammar.cs`
 **Scope:** Move class, update namespace. Tests: unchanged.
 
 ---
 
-### [ ] S023 — `ConsoleExtensions` → `ConsoleRenderer`
+### [x] S023 — `ConsoleExtensions` → `ConsoleRenderer`
 **Why:** `SetupC64`, `WriteLineC64`, `WritePromptC64` are static utility methods with no `this` parameter. They are not extension methods and don't belong in `Extensions/`.
 **Files:** Rename/move to `Engine/ConsoleRenderer.cs` or `Output/ConsoleRenderer.cs`
 **Scope:** Move methods, update all callers. Tests: C64 output still works.
 
 ---
 
-### [ ] S024 — Unify direction alias table (DSL vs KeywordParser)
+### [x] S024 — Unify direction alias table (DSL vs KeywordParser)
 **Why:** `AdventureDslParser` has its own `TryParseDirection` with its own alias table; `KeywordParser` delegates to `KeywordParserConfig.DirectionAliases`. The two can diverge (e.g., DSL recognises "nw" but config doesn't).
 **Files:** `Dsl/AdventureDslParser.cs`, `Parsing/KeywordParserConfig.cs`
 **Scope:** Both share a single static `DirectionAliases` source. Tests: DSL `exit: hall north` and `go nw` both work from the same alias set.

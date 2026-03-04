@@ -16,11 +16,11 @@ public class UndoCommand : ICommand
     public string[]? Aliases => ["u"];
     public string Description => "Undo the last action";
 
-    private readonly GameState? _state;
+    private readonly IGameState? _state;
 
     public UndoCommand() { }
 
-    public UndoCommand(GameState state)
+    public UndoCommand(IGameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
         _state = state;
@@ -28,7 +28,7 @@ public class UndoCommand : ICommand
 
     public CommandResult Execute(CommandContext context)
     {
-        GameState state = _state ?? context.State;
+        IGameState state = _state ?? context.State;
         GameMemento? memento = state.History.Undo();
 
         if (memento  is null)

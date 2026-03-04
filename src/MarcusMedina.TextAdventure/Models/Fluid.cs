@@ -10,10 +10,12 @@ namespace MarcusMedina.TextAdventure.Models;
 public class Fluid : IFluid
 {
     private string _description = "";
+    private readonly Dictionary<string, string> _properties = new(StringComparer.OrdinalIgnoreCase);
 
     public string Id { get; }
     public string Name { get; }
     public string? Description => _description;
+    public IDictionary<string, string> Properties => _properties;
 
     public Fluid(string id, string name)
     {
@@ -29,6 +31,11 @@ public class Fluid : IFluid
     }
 
     public string GetDescription() => _description;
+
+    public bool Matches(string input) =>
+        !string.IsNullOrWhiteSpace(input) &&
+        (Name.Equals(input.Trim(), StringComparison.OrdinalIgnoreCase) ||
+         Id.Equals(input.Trim(), StringComparison.OrdinalIgnoreCase));
 
     public IFluid SetDescription(string description)
     {

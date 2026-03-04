@@ -11,6 +11,24 @@ namespace MarcusMedina.TextAdventure.Parsing;
 /// <summary>Configuration for the keyword-based command parser.</summary>
 public sealed class KeywordParserConfig
 {
+    /// <summary>Canonical direction alias table shared across parsers.</summary>
+    public static IReadOnlyDictionary<string, Direction> DefaultDirectionAliases { get; } =
+        new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["n"] = Direction.North,
+            ["s"] = Direction.South,
+            ["e"] = Direction.East,
+            ["w"] = Direction.West,
+            ["ne"] = Direction.NorthEast,
+            ["nw"] = Direction.NorthWest,
+            ["se"] = Direction.SouthEast,
+            ["sw"] = Direction.SouthWest,
+            ["u"] = Direction.Up,
+            ["d"] = Direction.Down,
+            ["in"] = Direction.In,
+            ["out"] = Direction.Out
+        };
+
     /// <summary>Default configuration with common command keywords and direction aliases.</summary>
     public static KeywordParserConfig Default { get; } = new(
         quit: CommandHelper.NewCommands("quit", "exit", "q"),
@@ -46,21 +64,7 @@ public sealed class KeywordParserConfig
         ignoreItemTokens: CommandHelper.NewCommands("up", "to", "at", "the", "a"),
         combineSeparators: CommandHelper.NewCommands("and", "+"),
         pourPrepositions: CommandHelper.NewCommands("into", "in"),
-        directionAliases: new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["n"] = Direction.North,
-            ["s"] = Direction.South,
-            ["e"] = Direction.East,
-            ["w"] = Direction.West,
-            ["ne"] = Direction.NorthEast,
-            ["nw"] = Direction.NorthWest,
-            ["se"] = Direction.SouthEast,
-            ["sw"] = Direction.SouthWest,
-            ["u"] = Direction.Up,
-            ["d"] = Direction.Down,
-            ["in"] = Direction.In,
-            ["out"] = Direction.Out
-        },
+        directionAliases: DefaultDirectionAliases,
         synonyms: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         phraseAliases: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         customCommands: new Dictionary<string, Func<string[], ICommand>>(StringComparer.OrdinalIgnoreCase),

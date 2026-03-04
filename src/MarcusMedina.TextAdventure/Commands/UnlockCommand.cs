@@ -10,44 +10,40 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
-public class UnlockCommand : ICommand
+public class UnlockCommand(string? target) : ICommand
 {
+    public string? Target { get; } = target;
+
     public CommandResult Execute(CommandContext context)
     {
-        var exitWithDoor = context.State.CurrentLocation.Exits.Values
-            .FirstOrDefault(e => e.Door  is not null);
+        IDoor? door = OpenCommand.ResolveDoor(context.State.CurrentLocation, Target);
 
-        if (exitWithDoor?.Door  is null)
-        {
+        if (door is null)
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
-        }
 
-        string doorName = Language.EntityName(exitWithDoor.Door);
-        if (exitWithDoor.Door.RequiredKey  is null)
-        {
+        string doorName = Language.EntityName(door);
+
+        if (door.RequiredKey is null)
             return CommandResult.Fail(Language.NoKeyRequired, GameError.NoKeyRequired);
-        }
 
-        var keys = context.State.Inventory.Items.OfType<IKey>().ToList();
+        List<IKey> keys = context.State.Inventory.Items.OfType<IKey>().ToList();
         if (keys.Count == 0)
-        {
             return CommandResult.Fail(Language.YouNeedAKeyToOpenDoor, GameError.WrongKey);
-        }
 
-        foreach (var key in keys)
+        foreach (IKey key in keys)
         {
-            if (exitWithDoor.Door.Unlock(key))
+            if (door.Unlock(key))
             {
-                context.State.Events.Publish(new GameEvent(GameEventType.UnlockDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
-                var reaction = exitWithDoor.Door.GetReaction(DoorAction.Unlock);
-                return reaction  is not null
+                context.State.Events.Publish(new GameEvent(GameEventType.UnlockDoor, context.State, context.State.CurrentLocation, door: door));
+                string? reaction = door.GetReaction(DoorAction.Unlock);
+                return reaction is not null
                     ? CommandResult.Ok(Language.DoorUnlocked(doorName), reaction)
                     : CommandResult.Ok(Language.DoorUnlocked(doorName));
             }
         }
 
-        var failReaction = exitWithDoor.Door.GetReaction(DoorAction.UnlockFailed);
-        return failReaction  is not null
+        string? failReaction = door.GetReaction(DoorAction.UnlockFailed);
+        return failReaction is not null
             ? CommandResult.Fail(Language.ThatKeyDoesNotFit, GameError.WrongKey, failReaction)
             : CommandResult.Fail(Language.ThatKeyDoesNotFit, GameError.WrongKey);
     }

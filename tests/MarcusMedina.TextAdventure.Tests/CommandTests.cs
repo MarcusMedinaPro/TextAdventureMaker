@@ -143,10 +143,10 @@ public class CommandTests
         _ = start.AddExit(Direction.East, next);
         GameState state = new(start);
 
-        CommandResult result = state.Execute(new OpenCommand());
+        CommandResult result = state.Execute(new OpenCommand(null));
 
         Assert.False(result.Success);
-        Assert.Equal(Language.NoDoorHere, result.Message);
+        Assert.Equal(Language.NothingToOpen, result.Message);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class CommandTests
         _ = start.AddExit(Direction.East, next, door);
         GameState state = new(start);
 
-        CommandResult result = state.Execute(new OpenCommand());
+        CommandResult result = state.Execute(new OpenCommand(null));
 
         Assert.False(result.Success);
         Assert.Equal(Language.DoorLocked("iron door"), result.Message);
@@ -173,7 +173,7 @@ public class CommandTests
         _ = start.AddExit(Direction.East, next, door);
         GameState state = new(start);
 
-        CommandResult result = state.Execute(new UnlockCommand());
+        CommandResult result = state.Execute(new UnlockCommand(null));
 
         Assert.False(result.Success);
         Assert.Equal(Language.YouNeedAKeyToOpenDoor, result.Message);
@@ -190,7 +190,7 @@ public class CommandTests
         GameState state = new(start);
 
         _ = state.Inventory.Add(key);
-        CommandResult result = state.Execute(new UnlockCommand());
+        CommandResult result = state.Execute(new UnlockCommand(null));
 
         Assert.True(result.Success);
         Assert.Equal(Language.DoorUnlocked("iron door"), result.Message);

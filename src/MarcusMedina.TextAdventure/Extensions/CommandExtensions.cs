@@ -21,6 +21,7 @@ public static class CommandExtensions
         if (!result.ShouldQuit)
         {
             result = NpcReactionResolver.Resolve(command, result, state);
+            result = NpcIdleResolver.Resolve(command, result, state);
             state.TimeSystem.Tick(state);
             state.RandomEvents.Tick(state);
             state.TickNpcTriggers();

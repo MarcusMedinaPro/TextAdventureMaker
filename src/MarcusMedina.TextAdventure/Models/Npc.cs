@@ -15,6 +15,7 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     private readonly List<DialogRule> _dialogRules = [];
     private readonly List<NpcTrigger> _triggers = [];
     private readonly List<NpcReaction> _reactions = [];
+    private readonly List<NpcIdleBehavior> _idleBehaviors = [];
     private readonly Dictionary<string, ICharacterArc> _arcs = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, IBond> _bonds = new(StringComparer.OrdinalIgnoreCase);
 
@@ -30,6 +31,7 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     public IReadOnlyList<DialogRule> DialogRules => _dialogRules;
     public IReadOnlyList<NpcTrigger> Triggers => _triggers;
     public IReadOnlyList<NpcReaction> Reactions => _reactions;
+    public IReadOnlyList<NpcIdleBehavior> IdleBehaviors => _idleBehaviors;
     public IReadOnlyDictionary<string, ICharacterArc> Arcs => _arcs;
     public IReadOnlyDictionary<string, IBond> Bonds => _bonds;
     public CharacterArchetype? Archetype { get; private set; }
@@ -124,6 +126,12 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     public INpc DiesAt(JourneyStage stage)
     {
         FateStage = stage;
+        return this;
+    }
+
+    public INpc AddIdleBehavior(int interval, params string[] messages)
+    {
+        _idleBehaviors.Add(new NpcIdleBehavior(interval, messages));
         return this;
     }
 

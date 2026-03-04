@@ -23,6 +23,7 @@ public interface INpc : IGameEntity
     IReadOnlyList<DialogRule> DialogRules { get; }
     IReadOnlyList<NpcTrigger> Triggers { get; }
     IReadOnlyList<NpcReaction> Reactions { get; }
+    IReadOnlyList<NpcIdleBehavior> IdleBehaviors { get; }
     IReadOnlyDictionary<string, ICharacterArc> Arcs { get; }
     IReadOnlyDictionary<string, IBond> Bonds { get; }
     CharacterArchetype? Archetype { get; }
@@ -45,4 +46,5 @@ public interface INpc : IGameEntity
     string? GetRuleBasedDialog(IGameState state);
     INpc AddReaction(string trigger, string text, Func<IGameState, bool>? condition = null, bool endGame = false, Action<IGameState>? effect = null);
     NpcReaction? GetReaction(string trigger, IGameState state);
+    INpc AddIdleBehavior(int interval, params string[] messages);
 }

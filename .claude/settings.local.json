@@ -16,7 +16,9 @@
       "Bash(git push:*)",
       "Bash(./dev.sh test:*)",
       "Bash(.gitattributes:*)",
-      "Bash(./test.sh:*)"
+      "Bash(./test.sh:*)",
+      "Bash(git pull:*)",
+      "Bash(git:*)"
     ]
   }
 }

@@ -59,7 +59,7 @@ public static class NpcReactionResolver
         return new CommandResult(result.Success, result.Message, result.Error, endGame || result.ShouldQuit, combined);
     }
 
-    private static string[] BuildTriggers(ICommand command, CommandResult result) => command switch
+    internal static string[] BuildTriggers(ICommand command, CommandResult result) => command switch
     {
         CustomActionCommand ca when !string.IsNullOrWhiteSpace(ca.Target) =>
             [$"{ca.Verb.ToLowerInvariant()}:{ca.Target.ToLowerInvariant()}", ca.Verb.ToLowerInvariant()],

@@ -65,3 +65,13 @@ public sealed class DslNpcAcceptanceDefault
     public string Level { get; set; } = "";
     public string Say { get; set; } = "";
 }
+
+/// <summary>
+/// NPC idle behaviour definition from DSL <c>npc_idle:</c> keyword.
+/// </summary>
+public sealed class DslNpcIdleBehavior
+{
+    public string NpcId { get; set; } = "";
+    public int Interval { get; set; } = 3;
+    public List<string> Messages { get; set; } = [];
+}

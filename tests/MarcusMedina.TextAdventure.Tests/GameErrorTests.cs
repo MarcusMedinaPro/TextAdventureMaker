@@ -72,7 +72,7 @@ public class GameErrorTests
         _ = start.AddExit(Direction.East, next, door);
         GameState state = new(start);
 
-        var result = state.Execute(new OpenCommand());
+        var result = state.Execute(new OpenCommand(null));
 
         Assert.False(result.Success);
         Assert.Equal(GameError.DoorAlreadyOpen, result.Error);
@@ -87,7 +87,7 @@ public class GameErrorTests
         _ = start.AddExit(Direction.East, next, door);
         GameState state = new(start);
 
-        var result = state.Execute(new OpenCommand());
+        var result = state.Execute(new OpenCommand(null));
 
         Assert.False(result.Success);
         Assert.Equal(GameError.DoorIsLocked, result.Error);
@@ -101,7 +101,7 @@ public class GameErrorTests
         _ = start.AddExit(Direction.East, next);
         GameState state = new(start);
 
-        var result = state.Execute(new OpenCommand());
+        var result = state.Execute(new OpenCommand(null));
 
         Assert.False(result.Success);
         Assert.Equal(GameError.NoDoorHere, result.Error);
@@ -169,7 +169,7 @@ public class GameErrorTests
         _ = start.AddExit(Direction.East, next, door);
         GameState state = new(start);
 
-        var result = state.Execute(new UnlockCommand());
+        var result = state.Execute(new UnlockCommand(null));
 
         Assert.False(result.Success);
         Assert.Equal(GameError.NoKeyRequired, result.Error);
@@ -187,7 +187,7 @@ public class GameErrorTests
         GameState state = new(start);
         _ = state.Inventory.Add(wrong);
 
-        var result = state.Execute(new UnlockCommand());
+        var result = state.Execute(new UnlockCommand(null));
 
         Assert.False(result.Success);
         Assert.Equal(GameError.WrongKey, result.Error);

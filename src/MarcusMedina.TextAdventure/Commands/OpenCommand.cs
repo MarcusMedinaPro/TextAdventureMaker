@@ -10,43 +10,92 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class OpenCommand : ICommand
+public class OpenCommand(string? target) : ICommand
 {
+    public string? Target { get; } = target;
+
     public CommandResult Execute(CommandContext context)
     {
-        Exit? exitWithDoor = context.State.CurrentLocation.Exits.Values
-            .FirstOrDefault(e => e.Door  is not null);
+        ILocation location = context.State.CurrentLocation;
 
-        if (exitWithDoor?.Door  is null)
+        IDoor? door = ResolveDoor(location, Target);
+        if (door is not null)
+            return OpenDoor(context, door);
+
+        if (!string.IsNullOrWhiteSpace(Target))
         {
-            return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
+            IItem? item = location.FindItem(Target) ?? context.State.Inventory.FindItem(Target);
+            if (item is IContainer<IItem> container)
+                return OpenContainer(item, container);
+            if (item is not null)
+                return CommandResult.Fail(Language.NothingToOpen, GameError.ItemNotUsable);
+            return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
         }
 
-        string doorName = Language.EntityName(exitWithDoor.Door);
-        if (exitWithDoor.Door.State == DoorState.Open)
+        foreach (IItem roomItem in location.Items)
         {
+            if (roomItem is IContainer<IItem> container)
+                return OpenContainer(roomItem, container);
+        }
+
+        return CommandResult.Fail(Language.NothingToOpen, GameError.NoDoorHere);
+    }
+
+    internal static IDoor? ResolveDoor(ILocation location, string? target)
+    {
+        if (string.IsNullOrWhiteSpace(target))
+            return location.Exits.Values.FirstOrDefault(e => e.Door is not null)?.Door;
+
+        string tok = target.Trim();
+        return location.Exits.Values
+            .Select(e => e.Door)
+            .FirstOrDefault(d => d is not null && d.Matches(tok));
+    }
+
+    private static CommandResult OpenDoor(CommandContext context, IDoor door)
+    {
+        string doorName = Language.EntityName(door);
+
+        if (door.State == DoorState.Open)
             return CommandResult.Fail(Language.DoorAlreadyOpenMessage(doorName), GameError.DoorAlreadyOpen);
-        }
 
-        if (exitWithDoor.Door.Open())
+        if (door.Open())
         {
-            context.State.Events.Publish(new GameEvent(GameEventType.OpenDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
-            string? reaction = exitWithDoor.Door.GetReaction(DoorAction.Open);
-            return reaction  is not null
+            context.State.Events.Publish(new GameEvent(GameEventType.OpenDoor, context.State, context.State.CurrentLocation, door: door));
+            string? reaction = door.GetReaction(DoorAction.Open);
+            return reaction is not null
                 ? CommandResult.Ok(Language.DoorOpened(doorName), reaction)
                 : CommandResult.Ok(Language.DoorOpened(doorName));
         }
 
-        string message = exitWithDoor.Door.State == DoorState.Locked
+        string message = door.State == DoorState.Locked
             ? Language.DoorLocked(doorName)
             : Language.DoorWontBudge(doorName);
-
-        GameError error = exitWithDoor.Door.State == DoorState.Locked
+        GameError error = door.State == DoorState.Locked
             ? GameError.DoorIsLocked
             : GameError.DoorIsClosed;
-        string? failReaction = exitWithDoor.Door.GetReaction(DoorAction.OpenFailed);
-        return failReaction  is not null
+        string? failReaction = door.GetReaction(DoorAction.OpenFailed);
+        return failReaction is not null
             ? CommandResult.Fail(message, error, failReaction)
             : CommandResult.Fail(message, error);
+    }
+
+    private static CommandResult OpenContainer(IItem item, IContainer<IItem> container)
+    {
+        string? reaction = item.GetReaction(ItemAction.Open);
+
+        if (container.Contents.Count == 0)
+        {
+            string msg = Language.ContainerContents(item.Name, Language.ContainerIsEmpty);
+            return reaction is not null
+                ? CommandResult.Ok(msg, reaction)
+                : CommandResult.Ok(msg);
+        }
+
+        string contentsList = string.Join(", ", container.Contents.Select(i => i.Name));
+        string openMsg = Language.ContainerContents(item.Name, contentsList);
+        return reaction is not null
+            ? CommandResult.Ok(openMsg, reaction)
+            : CommandResult.Ok(openMsg);
     }
 }

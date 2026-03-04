@@ -52,6 +52,7 @@ public sealed class DslParser : AdventureDslParser
     private readonly DslStorySystem _storySystem = new();
     private string _currentBranchId = "";
     private string _currentChapterId = "";
+    private readonly List<DslNpcIdleBehavior> _npcIdleBehaviors = [];
     private readonly DslParserConfiguration _parserConfig = new();
 
     public DslParser()
@@ -151,6 +152,9 @@ public sealed class DslParser : AdventureDslParser
         // Custom verbs and NPC reactions (Slice 094)
         RegisterKeyword("command", HandleCustomCommand);
         RegisterKeyword("npc_reaction", HandleNpcReaction);
+
+        // NPC idle behaviour
+        RegisterKeyword("npc_idle", HandleNpcIdle);
     }
 
     private void ApplyItemRuntimeData(AdventureDslContext context)
@@ -311,6 +315,20 @@ public sealed class DslParser : AdventureDslParser
             Func<IGameState, bool>? condition = ParseNpcReactionCondition(reaction.Condition);
             Action<IGameState>? effect = BuildNpcReactionEffect(reaction);
             npc.AddReaction(reaction.Trigger, reaction.Text, condition, reaction.EndGame, effect);
+        }
+
+        foreach (DslNpcIdleBehavior idle in _npcIdleBehaviors)
+        {
+            if (!npcs.TryGetValue(idle.NpcId, out Npc? npc))
+            {
+                context.AddWarning(new DslParseError(
+                    0,
+                    $"npc_idle: {idle.NpcId}",
+                    $"NPC '{idle.NpcId}' referenced by npc_idle is not defined"));
+                continue;
+            }
+
+            npc.AddIdleBehavior(idle.Interval, [.. idle.Messages]);
         }
 
         if (_dialogOptions.Count > 0)
@@ -1531,6 +1549,24 @@ public sealed class DslParser : AdventureDslParser
         };
     }
 
+    private void HandleNpcIdle(AdventureDslContext context, string value)
+    {
+        var parts = SplitParts(value);
+        if (parts.Count < 3) return; // npc_id | interval | message1 [| message2 ...]
+
+        if (!int.TryParse(parts[1].Trim(), out int interval) || interval < 1) return;
+
+        var idle = new DslNpcIdleBehavior
+        {
+            NpcId = NormalizeId(parts[0]),
+            Interval = interval,
+            Messages = parts.Skip(2).Select(m => m.Trim()).Where(m => m.Length > 0).ToList()
+        };
+
+        if (idle.Messages.Count > 0)
+            _npcIdleBehaviors.Add(idle);
+    }
+
     public DslStartStateDefinition GetStartState() => _startState;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedItems() => _definedItems;
     public IReadOnlyDictionary<string, DslEntityDefinition> GetDefinedNpcs() => _definedNpcs;
@@ -1546,6 +1582,7 @@ public sealed class DslParser : AdventureDslParser
     public IReadOnlyList<DslNpcDef> GetNpcDefs() => _npcDefs;
     public IReadOnlyList<DslNpcPlacement> GetNpcPlacements() => _npcPlacements;
     public IReadOnlyList<DslNpcDialog> GetNpcDialogs() => _npcDialogs;
+    public IReadOnlyList<DslNpcIdleBehavior> GetNpcIdleBehaviors() => _npcIdleBehaviors;
     public IReadOnlyList<DslNpcAcceptanceRule> GetAcceptanceRules() => _acceptanceRules;
     public IReadOnlyList<DslNpcAcceptanceDefault> GetAcceptanceDefaults() => _acceptanceDefaults;
     public IReadOnlyList<DslNpcDialogOption> GetDialogOptions() => _dialogOptions;

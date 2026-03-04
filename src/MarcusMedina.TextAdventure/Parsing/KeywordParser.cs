@@ -93,22 +93,22 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Open.Contains(keyword))
         {
-            return new OpenCommand();
+            return GuardPronoun(new OpenCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Unlock.Contains(keyword))
         {
-            return new UnlockCommand();
+            return GuardPronoun(new UnlockCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Close.Contains(keyword))
         {
-            return new CloseCommand();
+            return GuardPronoun(new CloseCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.LockDoor.Contains(keyword))
         {
-            return new LockCommand();
+            return GuardPronoun(new LockCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Destroy.Contains(keyword))
@@ -325,22 +325,22 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
 
         if (_config.Open.Contains(keyword))
         {
-            return new OpenCommand();
+            return GuardPronoun(new OpenCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Unlock.Contains(keyword))
         {
-            return new UnlockCommand();
+            return GuardPronoun(new UnlockCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Close.Contains(keyword))
         {
-            return new CloseCommand();
+            return GuardPronoun(new CloseCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.LockDoor.Contains(keyword))
         {
-            return new LockCommand();
+            return GuardPronoun(new LockCommand(ParseItemName(tokens, 1)));
         }
 
         if (_config.Destroy.Contains(keyword))

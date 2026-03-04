@@ -49,6 +49,13 @@ public static class Language
     public static string InventoryLabel => Provider.Get("InventoryLabel");
     public static string InventoryEmpty => Provider.Get("InventoryEmpty");
     public static string NoDoorHere => Provider.Get("NoDoorHere");
+    public static string NothingToOpen => Provider.Get("NothingToOpen");
+    public static string NothingToClose => Provider.Get("NothingToClose");
+    public static string ContainerAlreadyOpen => Provider.Get("ContainerAlreadyOpen");
+    public static string ContainerAlreadyClosed => Provider.Get("ContainerAlreadyClosed");
+    public static string ContainerIsEmpty => Provider.Get("ContainerIsEmpty");
+    public static string ContainerContents(string name, string contents) => Provider.Format("ContainerContentsTemplate", name, contents);
+    public static string ContainerClosed(string name) => Provider.Format("ContainerClosedTemplate", name);
     public static string YouNeedAKeyToOpenDoor => Provider.Get("YouNeedAKeyToOpenDoor");
     public static string ThatKeyDoesNotFit => Provider.Get("ThatKeyDoesNotFit");
     public static string NoKeyRequired => Provider.Get("NoKeyRequired");
@@ -358,6 +365,13 @@ public static class Language
             ["InventoryEmpty"] = "Inventory is empty.",
             ["HealthStatusTemplate"] = "Health: {0}/{1}",
             ["NoDoorHere"] = "There's no door here.",
+            ["NothingToOpen"] = "There's nothing here to open.",
+            ["NothingToClose"] = "There's nothing here to close.",
+            ["ContainerAlreadyOpen"] = "It's already open.",
+            ["ContainerAlreadyClosed"] = "It's already closed.",
+            ["ContainerIsEmpty"] = "It's empty.",
+            ["ContainerContentsTemplate"] = "You open the {0}. Inside: {1}.",
+            ["ContainerClosedTemplate"] = "You close the {0}.",
             ["YouNeedAKeyToOpenDoor"] = "You need a key to open the door.",
             ["ThatKeyDoesNotFit"] = "That key doesn't fit.",
             ["NoKeyRequired"] = "That door doesn't need a key.",

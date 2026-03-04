@@ -1,144 +1,290 @@
+using System;
+using System.Linq;
 using MarcusMedina.TextAdventure.Commands;
-using MarcusMedina.TextAdventure.Dsl;
 using MarcusMedina.TextAdventure.Engine;
+using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Extensions;
+using MarcusMedina.TextAdventure.Models;
 using MarcusMedina.TextAdventure.Parsing;
 using static MarcusMedina.TextAdventure.Extensions.ConsoleExtensions;
 
-string dsl = """
-world: Blackthorn Lighthouse
-goal: Relight the beacon before the cutters run aground.
-start: quay
-command: blow, threaten, attack, kiss
+// === THE LAUNDRY ROOM WARNING ===
+// A linear home-horror scenario with deliberate false leads.
 
-location: quay | A wet stone quay with a fog horn, an iron chain, and a weather board nailed to a piling.
-item: chain | iron chain | A salt-stiff iron chain bolted into the quay stones. | aliases=chain,iron chain | takeable=false
-item: horn | fog horn | A brass fog horn on a cracked wooden stand. | aliases=horn,fog horn | takeable=false
-item_reaction: horn | on=use | text=Tuuuuuut
-item_reaction: horn | on=blow | text=The fog horn blares across the harbour, low and mournful.
-item: board | weather board | A chalk board listing tide times and keeper notes. | aliases=board,weather board | takeable=false
-item: chart | sea chart | A chart of local shoals and hidden reefs. | aliases=chart,map
-key: brass_key | brass key | A tarnished brass key with a lighthouse crest. | aliases=key
-item: trumpet | brass trumpet | A dented brass trumpet found wedged under the chain locker. | aliases=trumpet
-item_reaction: trumpet | on=blow | text=The trumpet lets out a clear, mournful wail into the fog.
-npc: watchman | name=Watchman | state=friendly | description=A harbour watchman in a worn oilskin coat.
-npc_place: quay | watchman
-npc_reaction: watchman | on=blow:trumpet | text=The watchman gives you a very long, very disapproving stare.
-npc_reaction: watchman | on=threaten    | text=The watchman's hand moves to his lamp hook.
-npc_reaction: watchman | on=attack      | text=The watchman steps back sharply. "I'm just the night watch!"
-npc_reaction: watchman | on=take        | text=The watchman watches your hands carefully.
-npc_reaction: watchman | on=kiss        | text=The watchman looks at you like you've lost your mind.
-exit: east -> keeper_house | door=keeper_door
-exit: north -> signal_stairs
-exit: west -> cliff_path
+// TEST 1: Player starts in a constrained study phase and cannot leave via the bedroom door.
+var stage = SceneStage.Studying;
+var studyTurns = 0;
+const string BedroomBlockText = "Nah... mum's making dinner, don't want to disturb her.";
 
-location: keeper_house | The keeper's house with a ledger desk, a paraffin kettle, and a framed rescue map.
-item: ledger | signal ledger | A thick ledger recording lamp failures and ship sightings. | aliases=ledger,book | takeable=false
-item: kettle | paraffin kettle | A dented kettle warming over a spirit flame. | aliases=kettle | takeable=false
-item: rescue_map | rescue map | A map with lifeboat routes inked in red. | aliases=map,rescue map | takeable=false
-npc: keeper | name=Keeper Sable | state=friendly | movement=patrol:keeper_house,quay,keeper_house | description=A weather-beaten keeper with oil-stained cuffs and a voice like gravel.
-npc_place: keeper_house | keeper
-npc_dialog: keeper | text=If the lens is in place and the feed is primed, we might still save them.
-npc_reaction: keeper | on=talk | text=The keeper strokes his chin thoughtfully. "The hatch to the cellar is stiff, but it might still open. The lamp's reserve lens is in the gallery, but the stairs are rickety and the gate is stuck fast during the day."
-npc_reaction: keeper | on=talk,has_item=brass_key | text=The keeper's eyes widen at the sight of the key. "Where did you find that? It looks like it might fit the cellar hatch. If you can get down there, you might be able to get the lamp working again."
-npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens | text=The keeper's face breaks into a grin. "With the key and the reserve lens, you might just be able to get the lamp working again. The hatch is stiff, but it might still open. The stairs are rickety and the gate is stuck fast during the day."
-npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic | text=The keeper's eyes widen at the sight of the tonic. "With the key, the reserve lens, and that storm tonic, you might just be able to get the lamp working again. The hatch is stiff, but it might still open. The stairs are rickety and the gate is stuck fast during the day."
-npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal | text=The keeper's face breaks into a grin. "With the key, the reserve lens, that storm tonic, and some dry lamp coal, you might just be able to get the lamp working again. The hatch is stiff, but it might still open. The stairs are rickety and the gate is stuck fast during the day."
-npc_reaction: keeper | on=talk,has_item=brass_key,has_item=reserve_lens,has_item=tonic,has_item=coal,door_unlocked=cellar_hatch | text=The keeper's eyes widen at the sight of the unlocked hatch. "With the key, the reserve lens, that storm tonic, some dry lamp coal, and the hatch open, you might just be able to get the lamp working again. The stairs are rickety and the gate is stuck fast during the day."
-npc_reaction: keeper | on=threaten | text=The keeper looks at you "Hey, I'm just trying to do my job here. Do you have a death wish?"
-npc_reaction: keeper | on=attack | text=As you try to attack the keeper, he discards your blow easily. As you turn to strike again, his hand moves in a blur. You feel a sharp sting at your neck. Everything goes dark. | end_game=true
-exit: down -> cellar | door=cellar_hatch
-exit: west -> quay | door=keeper_door
+// --- Locations ---
+Location bedroom = (id: "bedroom", description: "Your bedroom smells of paper and fabric softener drifting up from below.");
+Location landing = (id: "landing", description: "A narrow landing above the staircase, lined with old family frames.");
+Location downstairsHall = (id: "downstairs_hall", description: "The downstairs hall is dim, with warm light leaking from the kitchen doorway.");
+Location laundryRoom = (id: "laundry_room", description: "A cramped laundry room with baskets, detergent, and a rattling machine.");
 
-location: cellar | A cramped coal cellar with a split crate, a medicine tin, and a wall valve.
-item: crate | split crate | A split crate still full of coal dust. | aliases=crate | takeable=false
-item: valve | wall valve | A rusted wall valve controlling fuel feed. | aliases=valve,wheel | takeable=false
-item: coal | lamp coal | A sack of lamp coal, dry enough to burn cleanly. | aliases=coal
-item: tonic | storm tonic | A bitter tonic used to steady shaking hands. | aliases=tonic
-exit: up -> keeper_house | door=cellar_hatch
+var bedroomDoor = new Door("bedroom_door", "Bedroom Door", DoorState.Closed)
+    .Description("A painted wooden door with a brass handle.")
+    .SetReaction(DoorAction.Open, "The hinges complain softly.")
+    .SetReaction(DoorAction.Close, "The latch clicks shut.");
 
-location: signal_stairs | Narrow stairs with a handrail, a warning bell, and a cracked inspection mirror.
-item: handrail | iron handrail | A cold handrail polished by decades of anxious hands. | aliases=rail,handrail | takeable=false
-item: bell | warning bell | A warning bell with a frayed pull rope. | aliases=bell
-item: mirror | inspection mirror | A mirror used to check lamp smoke from below. | aliases=mirror | takeable=false
-exit: south -> quay
-exit: up -> lantern_gallery
-timed_door: up | opens_at=dusk | closes_at=day | message=The gallery gate clicks open for the evening watch. | closed_message=The gallery gate is bolted for daylight repairs.
+bedroom.AddExit(Direction.West, landing, bedroomDoor);
+landing.AddExit(Direction.Down, downstairsHall);
+landing.AddExit(Direction.South, laundryRoom);
+downstairsHall.AddExit(Direction.Up, landing);
+laundryRoom.AddExit(Direction.North, landing);
 
-location: lantern_gallery | The lantern gallery with a lens cradle, oil feed, and beacon controls.
-item: lens_cradle | lens cradle | A brass cradle where the primary lens should sit. | aliases=cradle,lens cradle | takeable=false
-item: oil_feed | oil feed | A copper oil feed with a pressure gauge. | aliases=feed,oil feed | takeable=false
-item: controls | beacon controls | A set of old controls marked PRIME, IGNITE, and SHUT. | aliases=controls,panel | takeable=false
-item: reserve_lens | reserve lens | A heavy reserve lens wrapped in canvas.
-exit: down -> signal_stairs
+// --- Red-herring items ---
+// TEST 2: Reading and inspecting these objects should feel interactive but never advance the objective.
+var homework = new Item("homework", "Homework", "Maths exercises half-finished in neat pencil lines.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("Quadratic equations, margin notes, and one doodle of a cat wearing a crown.");
 
-location: cliff_path | A cliff path with marker posts, a mile bell, and a bent signal flag.
-item: posts | marker posts | Marker posts painted white to catch moonlight. | aliases=posts,markers | takeable=false
-item: mile_bell | mile bell | A bell used to report visibility by sound. | aliases=bell,mile bell | takeable=false
-item: flag | signal flag | A torn signal flag snapping in the wind. | aliases=flag
-exit: east -> quay
+var textbook = new Item("textbook", "Textbook", "A battered history textbook, open to Tudor trade routes.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("Henry VIII taxed wool exports heavily. None of this helps your algebra.");
 
-# Doors
+var diary = new Item("diary", "Old Diary", "A floral notebook with a tiny rusted lock that no longer works.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("'Remember to buy detergent. Also, do not forget Tuesday's parent evening.' Nothing sinister. Just chores.");
 
-door: keeper_door | keeper door | A thick oak door swollen by sea damp. | key=brass_key
+var drawer = new Item("drawer", "Desk Drawer", "A wooden drawer that sticks unless pulled firmly.")
+    .SetTakeable(false)
+    .SetReaction(ItemAction.Move, "Pens, a ruler, and stale peppermint wrappers. No secrets.");
 
-door: cellar_hatch | cellar hatch | A bolted hatch with a stiff locking plate. | key=brass_key
+var jewelleryBox = new Item("jewellery_box", "Jewellery Box", "A little tin jewellery box painted with faded stars.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("A friendship bracelet, two loose buttons, and a ring from a toy machine.");
 
-# Timed world objects
+var photoFrame = new Item("photo_frame", "Photo Frame", "A family photograph from a seaside holiday.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("You are missing both front teeth. Mum is laughing with windblown hair. Dad burned the sausages that day.");
 
-timed_spawn: flare | appears_at=night | disappears_at=day | message=A red distress flare has washed against the quay wall.
-""";
+var laundryBasket = new Item("basket", "Laundry Basket", "A basket full of folded towels and one missing sock.")
+    .SetTakeable(false);
 
-DslParser dslParser = new();
-DslAdventure adventure = dslParser.ParseString(dsl);
+var detergent = new Item("detergent", "Detergent", "Lavender detergent with a cap that never closes properly.")
+    .SetTakeable(false)
+    .SetReadable()
+    .SetReadText("Ultra clean. Spring fresh. Not a clue in sight.");
 
-if (adventure.HasWarnings)
-{
-    foreach (DslParseError warning in adventure.Warnings)
-        Console.WriteLine($"DSL warning (line {warning.Line}): {warning.Message}");
-}
+bedroom.AddItem(homework);
+bedroom.AddItem(textbook);
+bedroom.AddItem(diary);
+bedroom.AddItem(drawer);
+bedroom.AddItem(jewelleryBox);
+landing.AddItem(photoFrame);
+laundryRoom.AddItem(laundryBasket);
+laundryRoom.AddItem(detergent);
 
-KeywordParserConfigBuilder parserBuilder = KeywordParserConfigBuilder.BritishDefaults()
-    .WithFuzzyMatching(true, 1)
-    .WithPhraseAlias("look at", "look");
+// --- NPC ---
+var mother = new Npc("mother", "Mum")
+    .Description("Your mother is pale, teary-eyed, and breathing too fast.")
+    .SetDialog(new DialogNode("Don't go down there, honey. I heard it too."));
 
-foreach (DslCommandAlias alias in dslParser.GetParserConfiguration().CommandAliases)
-{
-    if (!string.IsNullOrWhiteSpace(alias.Alias) && !string.IsNullOrWhiteSpace(alias.TargetCommand))
-        parserBuilder.AddSynonyms(alias.TargetCommand, alias.Alias);
-}
+var state = new GameState(bedroom, worldLocations: [bedroom, landing, downstairsHall, laundryRoom]);
+var parser = new KeywordParser(KeywordParserConfigBuilder.BritishDefaults().Build());
 
-foreach (DslCustomVerb verb in dslParser.GetParserConfiguration().CustomVerbs)
-    parserBuilder.AddCustomVerb(verb.Verb);
-
-KeywordParser parser = new(parserBuilder.Build());
-
-SetupC64("Blackthorn Lighthouse");
-WriteLineC64("=== BLACKTHORN LIGHTHOUSE ===");
-WriteLineC64(adventure.WorldName ?? "Blackthorn Lighthouse");
-WriteLineC64($"Goal: {adventure.Goal}");
-WriteLineC64("Commands: look, go <direction>, open, unlock, take, use, read, talk, inventory, quests, quit.");
+SetupC64("The Laundry Room Warning");
+WriteLineC64("=== THE LAUNDRY ROOM WARNING ===");
+WriteLineC64();
+WriteLineC64("You are upstairs, finishing homework before dinner.");
+WriteLineC64("Everything in the house sounds normal. Probably.");
+WriteLineC64();
+WriteLineC64("Goal: Keep studying until called, then head downstairs.");
+WriteLineC64();
+WriteLineC64("Try: study, read homework, look, examine items, open/close things.");
 WriteLineC64();
 
-bool firstTurn = true;
+state.ShowRoom();
 
-Game game = GameBuilder.Create()
-    .UseState(adventure.State)
-    .UseParser(parser)
-    .UsePrompt("> ")
-    .AddTurnStart(g =>
+while (true)
+{
+    WriteLineC64();
+    WritePromptC64("> ");
+    var input = Console.ReadLine();
+    if (input is null)
+        break;
+
+    var trimmed = input.Trim();
+    if (string.IsNullOrWhiteSpace(trimmed))
+        continue;
+
+    if (HandleCustomCommand(trimmed, out var shouldQuit))
     {
-        if (!firstTurn)
-            return;
+        if (shouldQuit)
+            break;
 
-        g.State.ShowRoom();
-        firstTurn = false;
-    })
-    .AddTurnEnd((g, command, result) =>
+        continue;
+    }
+
+    var command = parser.Parse(trimmed);
+
+    // TEST 1 assertion: while studying in bedroom, open/go-west is blocked with flavour text.
+    if (stage == SceneStage.Studying && state.IsCurrentRoomId("bedroom"))
     {
-        if (result.ShouldAutoLook(command))
-            g.State.ShowRoom();
-    })
-    .Build();
+        if (command is OpenCommand)
+        {
+            WriteLineC64(BedroomBlockText);
+            continue;
+        }
 
-game.Run();
+        if (command is GoCommand go && go.Direction == Direction.West)
+        {
+            WriteLineC64(BedroomBlockText);
+            continue;
+        }
+    }
+
+    // TEST 3 assertion: once called to dinner, going downstairs triggers the reveal and ends the loop.
+    if (stage == SceneStage.CalledToDinner
+        && state.IsCurrentRoomId("landing")
+        && command is GoCommand goDown
+        && goDown.Direction == Direction.Down)
+    {
+        TriggerLaundryReveal();
+        break;
+    }
+
+    var result = state.Execute(command);
+    state.DisplayResult(command, result);
+
+    if (stage == SceneStage.Studying
+        && command is ReadCommand read
+        && result.Success
+        && IsStudyMaterial(read.Target))
+    {
+        // TEST 2 assertion: valid study-material reads progress turn count toward the dinner call.
+        RegisterStudyTurn();
+    }
+
+    if (result.ShouldQuit)
+        break;
+}
+
+bool HandleCustomCommand(string inputText, out bool shouldQuit)
+{
+    shouldQuit = false;
+
+    if (IsStudyCommand(inputText))
+    {
+        if (!state.IsCurrentRoomId("bedroom"))
+        {
+            WriteLineC64("You cannot focus on homework from here.");
+            return true;
+        }
+
+        if (stage != SceneStage.Studying)
+        {
+            WriteLineC64("Studying feels impossible now.");
+            return true;
+        }
+
+        RegisterStudyTurn();
+        return true;
+    }
+
+    // Red-herring open/close interactions that lead nowhere.
+    if (IsOpenDrawer(inputText))
+    {
+        WriteLineC64("You tug the drawer open. Stationery, old receipts, and nothing useful.");
+        return true;
+    }
+
+    if (IsCloseDrawer(inputText))
+    {
+        WriteLineC64("You close the drawer. It sticks at the end, then clicks.");
+        return true;
+    }
+
+    if (IsOpenBox(inputText))
+    {
+        WriteLineC64("You open the jewellery box. Trinkets and childhood clutter. No answers.");
+        return true;
+    }
+
+    if (IsCloseBox(inputText))
+    {
+        WriteLineC64("You close the little tin box and push it back into place.");
+        return true;
+    }
+
+    return false;
+}
+
+void RegisterStudyTurn()
+{
+    // TEST 2: after two successful study actions, scene transitions to CalledToDinner.
+    studyTurns++;
+
+    var line = studyTurns switch
+    {
+        1 => "You solve another page of algebra and rewrite a messy equation.",
+        2 => "You underline key formulas and check your working twice.",
+        _ => "You keep studying, trying to ignore every creak in the house."
+    };
+
+    WriteLineC64(line);
+
+    if (studyTurns < 2 || stage != SceneStage.Studying)
+        return;
+
+    stage = SceneStage.CalledToDinner;
+
+    WriteLineC64();
+    WriteLineC64("From downstairs, your mother's voice calls up through the stairwell:");
+    WriteLineC64("\"Dinner is ready, sweetheart!\"");
+    WriteLineC64("The house goes quiet immediately after.");
+}
+
+void TriggerLaundryReveal()
+{
+    // TEST 3: reveal moves player to laundry room, places Mum NPC, and presents ending text.
+    _ = state.Move(Direction.South);
+    stage = SceneStage.Revealed;
+    laundryRoom.AddNpc(mother);
+
+    WriteLineC64("You step toward the stairs.");
+    WriteLineC64("Suddenly, hands seize your arms and yank you sideways into the laundry room.");
+    WriteLineC64();
+    state.ShowRoom();
+    WriteLineC64();
+    WriteLineC64("Your mother is trembling, eyes red and wet.");
+    WriteLineC64("\"Don't go down there, honey. I heard it too.\"");
+    WriteLineC64();
+    WriteLineC64("=== GAME OVER ===");
+}
+
+static bool IsStudyMaterial(string itemName) =>
+    itemName.TextCompare("homework")
+    || itemName.TextCompare("textbook")
+    || itemName.TextCompare("diary");
+
+static bool IsStudyCommand(string inputText) =>
+    MatchesAny(inputText, "study", "do homework", "continue homework", "revise", "do maths", "do math");
+
+static bool IsOpenDrawer(string inputText) =>
+    MatchesAny(inputText, "open drawer", "open desk drawer", "pull drawer");
+
+static bool IsCloseDrawer(string inputText) =>
+    MatchesAny(inputText, "close drawer", "shut drawer");
+
+static bool IsOpenBox(string inputText) =>
+    MatchesAny(inputText, "open box", "open jewellery box", "open jewelry box");
+
+static bool IsCloseBox(string inputText) =>
+    MatchesAny(inputText, "close box", "close jewellery box", "close jewelry box", "shut box");
+
+static bool MatchesAny(string inputText, params string[] values)
+    => values.Any(inputText.TextCompare);
+
+enum SceneStage
+{
+    Studying,
+    CalledToDinner,
+    Revealed
+}

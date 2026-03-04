@@ -10,43 +10,68 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class CloseCommand : ICommand
+public class CloseCommand(string? target) : ICommand
 {
+    public string? Target { get; } = target;
+
     public CommandResult Execute(CommandContext context)
     {
-        Exit? exitWithDoor = context.State.CurrentLocation.Exits.Values
-            .FirstOrDefault(e => e.Door  is not null);
+        ILocation location = context.State.CurrentLocation;
 
-        if (exitWithDoor?.Door  is null)
+        IDoor? door = OpenCommand.ResolveDoor(location, Target);
+        if (door is not null)
+            return CloseDoor(context, door);
+
+        if (!string.IsNullOrWhiteSpace(Target))
         {
-            return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);
+            IItem? item = location.FindItem(Target) ?? context.State.Inventory.FindItem(Target);
+            if (item is IContainer<IItem> container)
+                return CloseContainer(item, container);
+            if (item is not null)
+                return CommandResult.Fail(Language.NothingToClose, GameError.ItemNotUsable);
+            return CommandResult.Fail(Language.NoSuchItemHere, GameError.ItemNotFound);
         }
 
-        string doorName = Language.EntityName(exitWithDoor.Door);
-        if (exitWithDoor.Door.State == DoorState.Destroyed)
+        foreach (IItem roomItem in location.Items)
         {
+            if (roomItem is IContainer<IItem>)
+                return CommandResult.Fail(Language.ContainerAlreadyClosed, GameError.DoorIsClosed);
+        }
+
+        return CommandResult.Fail(Language.NothingToClose, GameError.NoDoorHere);
+    }
+
+    private static CommandResult CloseDoor(CommandContext context, IDoor door)
+    {
+        string doorName = Language.EntityName(door);
+
+        if (door.State == DoorState.Destroyed)
             return CommandResult.Fail(Language.DoorAlreadyDestroyedMessage(doorName), GameError.DoorIsDestroyed);
-        }
 
-        if (exitWithDoor.Door.State == DoorState.Closed)
-        {
+        if (door.State == DoorState.Closed)
             return CommandResult.Fail(Language.DoorAlreadyClosedMessage(doorName), GameError.DoorIsClosed);
-        }
 
-        if (exitWithDoor.Door.State == DoorState.Locked)
-        {
+        if (door.State == DoorState.Locked)
             return CommandResult.Fail(Language.DoorLocked(doorName), GameError.DoorIsLocked);
-        }
 
-        if (exitWithDoor.Door.Close())
+        if (door.Close())
         {
-            context.State.Events.Publish(new GameEvent(GameEventType.CloseDoor, context.State, context.State.CurrentLocation, door: exitWithDoor.Door));
-            string? reaction = exitWithDoor.Door.GetReaction(DoorAction.Close);
-            return reaction  is not null
+            context.State.Events.Publish(new GameEvent(GameEventType.CloseDoor, context.State, context.State.CurrentLocation, door: door));
+            string? reaction = door.GetReaction(DoorAction.Close);
+            return reaction is not null
                 ? CommandResult.Ok(Language.DoorClosedByPlayer(doorName), reaction)
                 : CommandResult.Ok(Language.DoorClosedByPlayer(doorName));
         }
 
         return CommandResult.Fail(Language.DoorWontBudge(doorName), GameError.DoorIsClosed);
+    }
+
+    private static CommandResult CloseContainer(IItem item, IContainer<IItem> container)
+    {
+        string? reaction = item.GetReaction(ItemAction.Close);
+        string msg = Language.ContainerClosed(item.Name);
+        return reaction is not null
+            ? CommandResult.Ok(msg, reaction)
+            : CommandResult.Ok(msg);
     }
 }

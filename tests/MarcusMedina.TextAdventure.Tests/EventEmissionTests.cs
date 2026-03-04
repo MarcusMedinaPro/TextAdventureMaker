@@ -63,7 +63,7 @@ public class EventEmissionTests
         GameEvent? openEvent = null;
         events.Subscribe(GameEventType.OpenDoor, e => openEvent = e);
 
-        _ = new OpenCommand().Execute(new CommandContext(state));
+        _ = new OpenCommand(null).Execute(new CommandContext(state));
 
         Assert.Equal(door, openEvent?.Door);
         Assert.Equal(location, openEvent?.Location);
@@ -120,7 +120,7 @@ public class EventEmissionTests
         GameEvent? unlockEvent = null;
         events.Subscribe(GameEventType.UnlockDoor, e => unlockEvent = e);
 
-        _ = new UnlockCommand().Execute(new CommandContext(state));
+        _ = new UnlockCommand(null).Execute(new CommandContext(state));
 
         Assert.Equal(door, unlockEvent?.Door);
         Assert.Equal(location, unlockEvent?.Location);

@@ -234,6 +234,48 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 : ParseGoTarget(tokens);
         }
 
+        if (_config.Throw.Contains(keyword))
+            return ParseThrow(tokens);
+
+        if (_config.Repair.Contains(keyword))
+            return ParseRepair(tokens);
+
+        if (_config.Solve.Contains(keyword))
+            return ParseSolve(tokens);
+
+        if (_config.Shout.Contains(keyword))
+            return ParseShout(tokens);
+
+        if (_config.Listen.Contains(keyword))
+            return ParseListen(tokens);
+
+        if (_config.Buy.Contains(keyword))
+        {
+            string? buyItem = ParseItemName(tokens, 1);
+            return buyItem is not null ? new BuyCommand(buyItem) : new UnknownCommand();
+        }
+
+        if (_config.Sell.Contains(keyword))
+        {
+            string? sellItem = ParseItemName(tokens, 1);
+            return sellItem is not null ? new SellCommand(sellItem) : new UnknownCommand();
+        }
+
+        if (_config.Shop.Contains(keyword))
+            return new ShopCommand();
+
+        if (_config.Undo.Contains(keyword))
+            return new UndoCommand();
+
+        if (_config.Redo.Contains(keyword))
+            return new RedoCommand();
+
+        if (_config.Map.Contains(keyword))
+            return new MapCommand();
+
+        if (_config.History.Contains(keyword))
+            return new HistoryCommand();
+
         if (_config.EnableFuzzyMatching)
         {
             ICommand? fuzzy = TryParseFuzzyKeyword(keyword, tokens);
@@ -460,6 +502,48 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
                 : ParseGoTarget(tokens);
         }
 
+        if (_config.Throw.Contains(keyword))
+            return ParseThrow(tokens);
+
+        if (_config.Repair.Contains(keyword))
+            return ParseRepair(tokens);
+
+        if (_config.Solve.Contains(keyword))
+            return ParseSolve(tokens);
+
+        if (_config.Shout.Contains(keyword))
+            return ParseShout(tokens);
+
+        if (_config.Listen.Contains(keyword))
+            return ParseListen(tokens);
+
+        if (_config.Buy.Contains(keyword))
+        {
+            string? buyItem = ParseItemName(tokens, 1);
+            return buyItem is not null ? new BuyCommand(buyItem) : new UnknownCommand();
+        }
+
+        if (_config.Sell.Contains(keyword))
+        {
+            string? sellItem = ParseItemName(tokens, 1);
+            return sellItem is not null ? new SellCommand(sellItem) : new UnknownCommand();
+        }
+
+        if (_config.Shop.Contains(keyword))
+            return new ShopCommand();
+
+        if (_config.Undo.Contains(keyword))
+            return new UndoCommand();
+
+        if (_config.Redo.Contains(keyword))
+            return new RedoCommand();
+
+        if (_config.Map.Contains(keyword))
+            return new MapCommand();
+
+        if (_config.History.Contains(keyword))
+            return new HistoryCommand();
+
         return null;
     }
 
@@ -503,6 +587,18 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
             .Concat(_config.Eat)
             .Concat(_config.Drink)
             .Concat(_config.Hint)
+            .Concat(_config.Throw)
+            .Concat(_config.Repair)
+            .Concat(_config.Solve)
+            .Concat(_config.Shout)
+            .Concat(_config.Listen)
+            .Concat(_config.Buy)
+            .Concat(_config.Sell)
+            .Concat(_config.Shop)
+            .Concat(_config.Undo)
+            .Concat(_config.Redo)
+            .Concat(_config.Map)
+            .Concat(_config.History)
             .Concat(HelpKeywords)
             .Distinct(StringComparer.OrdinalIgnoreCase);
     }
@@ -540,6 +636,18 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         AppendCommandLine(lines, "hint", _config.Hint);
         AppendCommandLine(lines, "quit", _config.Quit);
         AppendCommandLine(lines, "again", _config.Again);
+        AppendCommandLine(lines, "throw", _config.Throw);
+        AppendCommandLine(lines, "repair", _config.Repair);
+        AppendCommandLine(lines, "solve", _config.Solve);
+        AppendCommandLine(lines, "shout", _config.Shout);
+        AppendCommandLine(lines, "listen", _config.Listen);
+        AppendCommandLine(lines, "buy", _config.Buy);
+        AppendCommandLine(lines, "sell", _config.Sell);
+        AppendCommandLine(lines, "shop", _config.Shop);
+        AppendCommandLine(lines, "undo", _config.Undo);
+        AppendCommandLine(lines, "redo", _config.Redo);
+        AppendCommandLine(lines, "map", _config.Map);
+        AppendCommandLine(lines, "history", _config.History);
 
         AppendOptionalSection(
             lines,
@@ -736,5 +844,72 @@ public class KeywordParser(KeywordParserConfig config) : ICommandParser
         string fluid = tokens.Skip(1).Take(index - 1).SpaceJoin();
         string container = tokens.Skip(index + 1).SpaceJoin();
         return new PourCommand(fluid, container);
+    }
+
+    private ICommand ParseThrow(string[] tokens)
+    {
+        // throw <item> <direction> — direction is last token if it parses as one
+        if (tokens.Length < 3)
+            return new UnknownCommand();
+
+        if (!TryParseDirection(tokens[^1], out Direction direction))
+            return new UnknownCommand();
+
+        string itemName = tokens.Skip(1).Take(tokens.Length - 2).SpaceJoin();
+        return string.IsNullOrWhiteSpace(itemName) ? new UnknownCommand() : new ThrowCommand(itemName, direction);
+    }
+
+    private ICommand ParseRepair(string[] tokens)
+    {
+        // repair <item> [with <tool>]
+        if (tokens.Length < 2)
+            return new UnknownCommand();
+
+        int withIndex = Array.FindIndex(tokens, 2, t => t.Equals("with", StringComparison.OrdinalIgnoreCase));
+        if (withIndex > 1)
+        {
+            string item = tokens.Skip(1).Take(withIndex - 1).SpaceJoin();
+            string tool = tokens.Skip(withIndex + 1).SpaceJoin();
+            return string.IsNullOrWhiteSpace(item) ? new UnknownCommand() : new RepairCommand(item, string.IsNullOrWhiteSpace(tool) ? null : tool);
+        }
+
+        string itemName = tokens.Skip(1).SpaceJoin();
+        return string.IsNullOrWhiteSpace(itemName) ? new UnknownCommand() : new RepairCommand(itemName);
+    }
+
+    private ICommand ParseSolve(string[] tokens)
+    {
+        // solve <puzzleId> <answer...>
+        if (tokens.Length < 3)
+            return new UnknownCommand();
+
+        string puzzleId = tokens[1];
+        string answer = tokens.Skip(2).SpaceJoin();
+        return new SolveCommand(puzzleId, answer);
+    }
+
+    private ICommand ParseShout(string[] tokens)
+    {
+        // shout [direction] [message]
+        if (tokens.Length < 2)
+            return new ShoutCommand();
+
+        if (TryParseDirection(tokens[1], out Direction dir))
+        {
+            string? msg = tokens.Length > 2 ? tokens.Skip(2).SpaceJoin() : null;
+            return new ShoutCommand(dir, string.IsNullOrWhiteSpace(msg) ? null : msg);
+        }
+
+        string message = tokens.Skip(1).SpaceJoin();
+        return new ShoutCommand(null, string.IsNullOrWhiteSpace(message) ? null : message);
+    }
+
+    private ICommand ParseListen(string[] tokens)
+    {
+        // listen [direction]
+        if (tokens.Length >= 2 && TryParseDirection(tokens[1], out Direction dir))
+            return new ListenCommand(dir);
+
+        return new ListenCommand();
     }
 }

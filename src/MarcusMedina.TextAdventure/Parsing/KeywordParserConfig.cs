@@ -124,6 +124,30 @@ public sealed class KeywordParserConfig
     public ISet<string> Again { get; }
     /// <summary>Pronouns that can refer to the last target.</summary>
     public ISet<string> Pronouns { get; }
+    /// <summary>Keywords used to throw an item in a direction.</summary>
+    public ISet<string> Throw { get; }
+    /// <summary>Keywords used to repair an item.</summary>
+    public ISet<string> Repair { get; }
+    /// <summary>Keywords used to solve a puzzle.</summary>
+    public ISet<string> Solve { get; }
+    /// <summary>Keywords used to shout.</summary>
+    public ISet<string> Shout { get; }
+    /// <summary>Keywords used to listen.</summary>
+    public ISet<string> Listen { get; }
+    /// <summary>Keywords used to buy from a store.</summary>
+    public ISet<string> Buy { get; }
+    /// <summary>Keywords used to sell to a store.</summary>
+    public ISet<string> Sell { get; }
+    /// <summary>Keywords used to view the shop.</summary>
+    public ISet<string> Shop { get; }
+    /// <summary>Keywords used to undo the last action.</summary>
+    public ISet<string> Undo { get; }
+    /// <summary>Keywords used to redo the last undone action.</summary>
+    public ISet<string> Redo { get; }
+    /// <summary>Keywords used to display the map.</summary>
+    public ISet<string> Map { get; }
+    /// <summary>Keywords used to display the history log.</summary>
+    public ISet<string> History { get; }
     /// <summary>Synonym map for command keywords.</summary>
     public IReadOnlyDictionary<string, string> Synonyms { get; }
     /// <summary>Multi-word phrase aliases mapped to canonical phrases.</summary>
@@ -192,7 +216,19 @@ public sealed class KeywordParserConfig
         string? helpTextOverride = null,
         bool allowDirectionEnumNames = false,
         bool enableFuzzyMatching = false,
-        int fuzzyMaxDistance = 1)
+        int fuzzyMaxDistance = 1,
+        ISet<string>? throw_ = null,
+        ISet<string>? repair = null,
+        ISet<string>? solve = null,
+        ISet<string>? shout = null,
+        ISet<string>? listen = null,
+        ISet<string>? buy = null,
+        ISet<string>? sell = null,
+        ISet<string>? shop = null,
+        ISet<string>? undo = null,
+        ISet<string>? redo = null,
+        ISet<string>? map = null,
+        ISet<string>? history = null)
     {
         Quit = quit ?? throw new ArgumentNullException(nameof(quit));
         Look = look ?? throw new ArgumentNullException(nameof(look));
@@ -235,6 +271,18 @@ public sealed class KeywordParserConfig
         AllowDirectionEnumNames = allowDirectionEnumNames;
         EnableFuzzyMatching = enableFuzzyMatching;
         FuzzyMaxDistance = Math.Max(0, fuzzyMaxDistance);
+        Throw = throw_ ?? CommandHelper.NewCommands("throw", "hurl", "toss");
+        Repair = repair ?? CommandHelper.NewCommands("repair", "fix");
+        Solve = solve ?? CommandHelper.NewCommands("solve", "answer");
+        Shout = shout ?? CommandHelper.NewCommands("shout", "yell", "call");
+        Listen = listen ?? CommandHelper.NewCommands("listen", "hear");
+        Buy = buy ?? CommandHelper.NewCommands("buy", "purchase");
+        Sell = sell ?? CommandHelper.NewCommands("sell");
+        Shop = shop ?? CommandHelper.NewCommands("shop", "store", "wares");
+        Undo = undo ?? CommandHelper.NewCommands("undo");
+        Redo = redo ?? CommandHelper.NewCommands("redo");
+        Map = map ?? CommandHelper.NewCommands("map");
+        History = history ?? CommandHelper.NewCommands("history", "log");
     }
 
     public KeywordParserConfig(

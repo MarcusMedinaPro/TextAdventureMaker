@@ -46,6 +46,18 @@ public sealed class KeywordParserConfigBuilder
     private ISet<string> _ignoreItemTokens;
     private ISet<string> _combineSeparators;
     private ISet<string> _pourPrepositions;
+    private ISet<string> _throw;
+    private ISet<string> _repair;
+    private ISet<string> _solve;
+    private ISet<string> _shout;
+    private ISet<string> _listen;
+    private ISet<string> _buy;
+    private ISet<string> _sell;
+    private ISet<string> _shop;
+    private ISet<string> _undo;
+    private ISet<string> _redo;
+    private ISet<string> _map;
+    private ISet<string> _history;
     private IReadOnlyDictionary<string, Direction> _directionAliases;
     private readonly Dictionary<string, string> _synonyms;
     private readonly Dictionary<string, string> _phraseAliases;
@@ -90,6 +102,18 @@ public sealed class KeywordParserConfigBuilder
         _ignoreItemTokens = CommandHelper.NewCommands("up", "to", "on", "off", "at", "the", "a");
         _combineSeparators = CommandHelper.NewCommands("and", "+");
         _pourPrepositions = CommandHelper.NewCommands("into", "in");
+        _throw = CommandHelper.NewCommands("throw", "hurl", "toss");
+        _repair = CommandHelper.NewCommands("repair", "fix");
+        _solve = CommandHelper.NewCommands("solve", "answer");
+        _shout = CommandHelper.NewCommands("shout", "yell", "call");
+        _listen = CommandHelper.NewCommands("listen", "hear");
+        _buy = CommandHelper.NewCommands("buy", "purchase");
+        _sell = CommandHelper.NewCommands("sell");
+        _shop = CommandHelper.NewCommands("shop", "store", "wares");
+        _undo = CommandHelper.NewCommands("undo");
+        _redo = CommandHelper.NewCommands("redo");
+        _map = CommandHelper.NewCommands("map");
+        _history = CommandHelper.NewCommands("history", "log");
         _directionAliases = new Dictionary<string, Direction>(StringComparer.OrdinalIgnoreCase)
         {
             ["n"] = Direction.North,
@@ -520,6 +544,90 @@ public sealed class KeywordParserConfigBuilder
         return this;
     }
 
+    /// <summary>Set keywords for throw.</summary>
+    public KeywordParserConfigBuilder WithThrow(params string[] commands)
+    {
+        _throw = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for repair.</summary>
+    public KeywordParserConfigBuilder WithRepair(params string[] commands)
+    {
+        _repair = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for solve.</summary>
+    public KeywordParserConfigBuilder WithSolve(params string[] commands)
+    {
+        _solve = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for shout.</summary>
+    public KeywordParserConfigBuilder WithShout(params string[] commands)
+    {
+        _shout = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for listen.</summary>
+    public KeywordParserConfigBuilder WithListen(params string[] commands)
+    {
+        _listen = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for buy.</summary>
+    public KeywordParserConfigBuilder WithBuy(params string[] commands)
+    {
+        _buy = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for sell.</summary>
+    public KeywordParserConfigBuilder WithSell(params string[] commands)
+    {
+        _sell = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for shop.</summary>
+    public KeywordParserConfigBuilder WithShop(params string[] commands)
+    {
+        _shop = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for undo.</summary>
+    public KeywordParserConfigBuilder WithUndo(params string[] commands)
+    {
+        _undo = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for redo.</summary>
+    public KeywordParserConfigBuilder WithRedo(params string[] commands)
+    {
+        _redo = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for map.</summary>
+    public KeywordParserConfigBuilder WithMap(params string[] commands)
+    {
+        _map = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
+    /// <summary>Set keywords for history.</summary>
+    public KeywordParserConfigBuilder WithHistory(params string[] commands)
+    {
+        _history = CommandHelper.NewCommands(commands);
+        return this;
+    }
+
     /// <summary>Build the parser configuration.</summary>
     public KeywordParserConfig Build()
     {
@@ -564,6 +672,18 @@ public sealed class KeywordParserConfigBuilder
             helpTextOverride: _helpTextOverride,
             allowDirectionEnumNames: _allowDirectionEnumNames,
             enableFuzzyMatching: _enableFuzzyMatching,
-            fuzzyMaxDistance: _fuzzyMaxDistance);
+            fuzzyMaxDistance: _fuzzyMaxDistance,
+            throw_: _throw,
+            repair: _repair,
+            solve: _solve,
+            shout: _shout,
+            listen: _listen,
+            buy: _buy,
+            sell: _sell,
+            shop: _shop,
+            undo: _undo,
+            redo: _redo,
+            map: _map,
+            history: _history);
     }
 }

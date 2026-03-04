@@ -21,7 +21,7 @@ One slice at a time. Mark `[>]` in progress, `[x]` done.
 
 ---
 
-### [ ] S002 — Register 12 orphaned commands in parser
+### [x] S002 — Register 12 orphaned commands in parser
 **Why:** These command classes exist but are never reachable by the player. They silently return `UnknownCommand`.
 **Commands to wire:** `ThrowCommand`, `RepairCommand`, `SolveCommand`, `ShoutCommand`, `ListenCommand`, `BuyCommand`, `SellCommand`, `ShopCommand`, `UndoCommand`, `RedoCommand`, `MapCommand`, `HistoryCommand`
 **Files:** `KeywordParserConfig`, `KeywordParser`, `KeywordParserConfigBuilder`

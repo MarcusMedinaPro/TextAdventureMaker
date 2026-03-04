@@ -10,16 +10,18 @@ namespace MarcusMedina.TextAdventure.Commands;
 
 public class RepairCommand(string itemName, string? toolName = null) : ICommand
 {
+    public string ItemName { get; } = itemName;
+    public string? ToolName { get; } = toolName;
     public string Name => "repair";
     public string[]? Aliases => null;
     public string Description => "Repair a damaged item (requires repair kit)";
 
     public CommandResult Execute(CommandContext context)
     {
-        IItem? item = context.State.CurrentLocation.FindItem(itemName);
+        IItem? item = context.State.CurrentLocation.FindItem(ItemName);
         if (item  is null)
         {
-            return CommandResult.Fail($"You don't see '{itemName}' here.", Enums.GameError.ItemNotFound);
+            return CommandResult.Fail($"You don't see '{ItemName}' here.", Enums.GameError.ItemNotFound);
         }
 
         if (!item.Durability.HasValue || !item.MaxDurability.HasValue)
@@ -32,7 +34,7 @@ public class RepairCommand(string itemName, string? toolName = null) : ICommand
             return CommandResult.Fail($"The {item.Name} is already in pristine condition.", Enums.GameError.None);
         }
 
-        IItem? repairKit = context.State.Inventory.FindItem(toolName ?? "repair kit");
+        IItem? repairKit = context.State.Inventory.FindItem(ToolName ?? "repair kit");
         if (repairKit  is null)
         {
             return CommandResult.Fail("You need a repair kit to repair items.", Enums.GameError.None);

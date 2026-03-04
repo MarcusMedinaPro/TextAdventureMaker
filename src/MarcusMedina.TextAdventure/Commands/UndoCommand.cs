@@ -16,7 +16,9 @@ public class UndoCommand : ICommand
     public string[]? Aliases => ["u"];
     public string Description => "Undo the last action";
 
-    private readonly GameState _state;
+    private readonly GameState? _state;
+
+    public UndoCommand() { }
 
     public UndoCommand(GameState state)
     {
@@ -26,14 +28,15 @@ public class UndoCommand : ICommand
 
     public CommandResult Execute(CommandContext context)
     {
-        GameMemento? memento = _state.History.Undo();
+        GameState state = _state ?? context.State;
+        GameMemento? memento = state.History.Undo();
 
         if (memento  is null)
         {
             return CommandResult.Fail("Nothing to undo.", Enums.GameError.None);
         }
 
-        _state.ApplyMemento(memento);
+        state.ApplyMemento(memento);
         return CommandResult.Ok("Undid the last action.");
     }
 }

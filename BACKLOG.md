@@ -146,7 +146,7 @@ Replace all 18 occurrences across commands. Tests: null reaction → no extra pa
 
 ## 🟢 P4 — Missing Interfaces
 
-### [ ] S016 — Add `IExaminable` + unify `LookCommand.ExecuteTarget`
+### [x] S016 — Add `IExaminable` + unify `LookCommand.ExecuteTarget`
 **Why:** `LookCommand.ExecuteTarget` is 110 lines of `if item → if npc → if door → if key → if room`. Adding a new entity type requires modifying this method. `IItem`, `INpc`, `IDoor` all independently define `GetDescription()`.
 **Files:** New `Interfaces/IExaminable.cs`, `Interfaces/IItem.cs`, `Interfaces/INpc.cs`, `Interfaces/IDoor.cs`, `Commands/LookCommand.cs`
 **Scope:**
@@ -161,7 +161,7 @@ public interface IExaminable
 
 ---
 
-### [ ] S017 — Add `IOpenable` + unify `OpenCommand`/`CloseCommand`
+### [x] S017 — Add `IOpenable` + unify `OpenCommand`/`CloseCommand`
 **Why:** After S001 adds container support, both `OpenCommand` and `CloseCommand` check for `IDoor` and `IContainer<T>` independently. An `IOpenable` interface unifies them.
 **Files:** New `Interfaces/IOpenable.cs`, `Interfaces/IDoor.cs`, `Interfaces/IContainer.cs`, `Commands/OpenCommand.cs`, `Commands/CloseCommand.cs`
 **Scope:**
@@ -177,7 +177,7 @@ public interface IOpenable
 
 ---
 
-### [ ] S018 — Add `IMatchable` + unify NPC name resolution
+### [x] S018 — Add `IMatchable` + unify NPC name resolution
 **Why:** `IItem.Matches(string)` and `IDoor.Matches(string)` exist on their interfaces. `INpc` has no `Matches()` — lookup uses `.Name.TextCompare()` inline in commands. Inconsistent.
 **Files:** New `Interfaces/IMatchable.cs`, `Interfaces/IItem.cs`, `Interfaces/IDoor.cs`, `Interfaces/INpc.cs`, `Models/Npc.cs`
 **Scope:** Add `IMatchable { bool Matches(string input); }`. `IItem`, `IDoor`, `INpc` all extend it. Add `Matches()` to `Npc.cs` (checks Id and Name case-insensitive). Update NPC-lookup code in commands to use `Matches()`. Tests: `npc.Matches("keeper")` and `npc.Matches("Keeper")` both true.

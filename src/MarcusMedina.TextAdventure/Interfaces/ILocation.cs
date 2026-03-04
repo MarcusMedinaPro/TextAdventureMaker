@@ -12,6 +12,7 @@ public interface ILocation : IPropertyBag
 {
     IReadOnlyDictionary<Direction, Exit> Exits { get; }
     string Id { get; }
+    string Name { get; }
     IReadOnlyList<IItem> Items { get; }
 
     IReadOnlyList<INpc> Npcs { get; }

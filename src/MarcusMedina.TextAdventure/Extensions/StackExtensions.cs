@@ -4,17 +4,16 @@
 // </copyright>
 
 using MarcusMedina.TextAdventure.Interfaces;
-using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Extensions;
 
 public static class StackExtensions
 {
     /// <summary>Create a stackable item with amount and weight-per-unit.</summary>
-    public static Item AsStack(this Item item, int amount, float weightPerUnit = 0f) =>
-        (Item)item.SetStackable()
-                  .SetAmount(amount)
-                  .SetWeight(weightPerUnit);
+    public static IItem AsStack(this IItem item, int amount, float weightPerUnit = 0f) =>
+        item.SetStackable()
+            .SetAmount(amount)
+            .SetWeight(weightPerUnit);
 
     /// <summary>Try to merge source into target stack. Returns true if merged.</summary>
     public static bool TryMerge(this IItem target, IItem source)

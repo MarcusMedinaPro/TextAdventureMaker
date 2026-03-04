@@ -12,9 +12,6 @@ public class RepairCommand(string itemName, string? toolName = null) : ICommand
 {
     public string ItemName { get; } = itemName;
     public string? ToolName { get; } = toolName;
-    public string Name => "repair";
-    public string[]? Aliases => null;
-    public string Description => "Repair a damaged item (requires repair kit)";
 
     public CommandResult Execute(CommandContext context)
     {

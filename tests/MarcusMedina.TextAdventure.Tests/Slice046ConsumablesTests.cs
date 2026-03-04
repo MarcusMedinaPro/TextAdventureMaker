@@ -157,7 +157,7 @@ public class Slice046ConsumablesTests
     [Fact]
     public void ConsumableExtensions_AsFood_ConfiguresConsumableProperties()
     {
-        Item item = new Item("apple", "Apple").AsFood(5);
+        IItem item = new Item("apple", "Apple").AsFood(5);
 
         Assert.True(item.IsFood);
         Assert.Equal(5, item.HealAmount);
@@ -166,7 +166,7 @@ public class Slice046ConsumablesTests
     [Fact]
     public void ConsumableExtensions_AsDrinkWithPoison_ConfiguresDrinkAndPoison()
     {
-        Item item = new Item("wine", "Wine").AsDrink(2).WithPoison(3, 4);
+        IItem item = new Item("wine", "Wine").AsDrink(2).WithPoison(3, 4);
 
         Assert.True(item.IsDrinkable);
         Assert.True(item.IsPoisoned);

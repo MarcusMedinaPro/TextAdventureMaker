@@ -3,18 +3,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Models;
+using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Extensions;
 
 public static class ConsumableExtensions
 {
-    public static Item AsFood(this Item item, int healAmount) =>
-        (Item)item.SetFood().SetHealAmount(healAmount);
+    public static IItem AsFood(this IItem item, int healAmount) =>
+        item.SetFood().SetHealAmount(healAmount);
 
-    public static Item AsDrink(this Item item, int healAmount) =>
-        (Item)item.SetDrinkable().SetHealAmount(healAmount);
+    public static IItem AsDrink(this IItem item, int healAmount) =>
+        item.SetDrinkable().SetHealAmount(healAmount);
 
-    public static Item WithPoison(this Item item, int damagePerTurn, int turns) =>
-        (Item)item.SetPoisoned().SetPoisonDamage(damagePerTurn, turns);
+    public static IItem WithPoison(this IItem item, int damagePerTurn, int turns) =>
+        item.SetPoisoned().SetPoisonDamage(damagePerTurn, turns);
 }

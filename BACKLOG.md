@@ -123,21 +123,21 @@ Replace all 18 occurrences across commands. Tests: null reaction → no extra pa
 
 ---
 
-### [ ] S013 — 4 door commands: extract shared `DoorCommandBase`
+### [x] S013 — 4 door commands: extract shared `DoorCommandBase`
 **Why:** `OpenCommand`, `CloseCommand`, `LockCommand`, `UnlockCommand` all repeat "find door by target name" logic after S001. Combine into base class.
 **Files:** New `Commands/DoorCommandBase.cs`, all four command files
 **Scope:** Extract `protected Exit? ResolveDoor(CommandContext, string? target)` into base class. Four concrete commands inherit and only provide the verb-specific action. Tests: all four still pass existing tests.
 
 ---
 
-### [ ] S014 — `EatCommand`/`DrinkCommand`: extract shared consume logic
+### [x] S014 — `EatCommand`/`DrinkCommand`: extract shared consume logic
 **Why:** Both commands have an identical "apply heal → check poison → remove from inventory → fire reaction" body.
 **File:** New helper or base class `ConsumableItemHandler`
 **Scope:** Extract `CommandResult ApplyConsumable(IItem item, CommandContext context, ItemAction action, string successMessage)`. Both commands delegate to it. Tests: eat food heals; drink poison damages; reaction fires.
 
 ---
 
-### [ ] S015 — `NpcReactionResolver`: OCP fix via `IReactableCommand`
+### [x] S015 — `NpcReactionResolver`: OCP fix via `IReactableCommand`
 **Why:** `BuildTriggers` is a type-switch on concrete command types. Every new command that wants NPC reactions requires modifying this static method. Violates Open/Closed.
 **Files:** `Engine/NpcReactionResolver.cs`, `Interfaces/ICommand.cs` or new `Interfaces/IReactableCommand.cs`
 **Scope:** Add `string[] GetNpcTriggers()` to an opt-in `IReactableCommand` interface. Commands that participate implement it. `BuildTriggers` checks `command is IReactableCommand r ? r.GetNpcTriggers() : []`. Update existing commands. Tests: new command implementing interface gets triggers without touching resolver.

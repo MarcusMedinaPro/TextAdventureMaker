@@ -13,6 +13,9 @@ public class ContainerItem<T>(string id, string name, int maxCount = 0) : Item(i
 
     public IReadOnlyList<T> Contents => _contents;
     public int MaxCount { get; private set; } = maxCount;
+    public bool IsOpen => true;
+    public bool Open() => true;
+    public bool Close() => true;
 
     public bool Add(T item)
     {

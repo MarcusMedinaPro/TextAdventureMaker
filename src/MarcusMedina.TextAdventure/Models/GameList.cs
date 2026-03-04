@@ -91,7 +91,7 @@ public sealed class GameList<T>(Func<string, T> factoryFromName) where T : IGame
         return item is not null;
     }
 
-    private static bool Matches(T item, string token) => item is IItem itemWithAliases
-            ? itemWithAliases.Matches(token)
-            : item is IDoor doorWithAliases ? doorWithAliases.Matches(token) : item.Id.TextCompare(token) || item.Name.TextCompare(token);
+    private static bool Matches(T item, string token) => item is IMatchable matchable
+        ? matchable.Matches(token)
+        : item.Id.TextCompare(token) || item.Name.TextCompare(token);
 }

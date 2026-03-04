@@ -4,6 +4,7 @@
 // </copyright>
 
 using MarcusMedina.TextAdventure.Enums;
+using MarcusMedina.TextAdventure.Extensions;
 using MarcusMedina.TextAdventure.Interfaces;
 
 namespace MarcusMedina.TextAdventure.Models;
@@ -39,6 +40,20 @@ public class Npc(string id, string name, NpcState state = NpcState.Friendly, ISt
     public bool IsAlive => State != NpcState.Dead && Stats.Health > 0;
 
     public string GetDescription() => _description;
+
+    public bool Matches(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return false;
+        string target = input.Trim();
+        if (Name.TextCompare(target) || Id.TextCompare(target))
+            return true;
+        string[] nameParts = Name.Split([' ', '-', '_'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (nameParts.Any(part => part.TextCompare(target)))
+            return true;
+        string[] idParts = Id.Split([' ', '-', '_'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return idParts.Any(part => part.TextCompare(target));
+    }
 
     public INpc Description(string text)
     {

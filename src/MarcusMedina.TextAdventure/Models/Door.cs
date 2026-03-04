@@ -30,6 +30,7 @@ public class Door(string id, string name, DoorState initialState = DoorState.Clo
     public event Action<IDoor>? OnDestroy;
 
     public bool IsPassable => State is DoorState.Open or DoorState.Destroyed;
+    public bool IsOpen => State == DoorState.Open;
 
     public Door(string id, string name, string description, DoorState initialState = DoorState.Closed)
         : this(id, name, initialState)
@@ -152,8 +153,6 @@ public class Door(string id, string name, DoorState initialState = DoorState.Clo
     IDoor IDoor.Description(string text) => Description(text);
 
     IDoor IDoor.AddAliases(params string[] aliases) => AddAliases(aliases);
-
-    bool IDoor.Matches(string name) => Matches(name);
 
     IDoor IDoor.SetReaction(DoorAction action, string text) => SetReaction(action, text);
 }

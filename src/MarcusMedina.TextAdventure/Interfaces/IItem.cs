@@ -7,12 +7,11 @@ using MarcusMedina.TextAdventure.Enums;
 
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface IItem : IGameEntity
+public interface IItem : IGameEntity, IExaminable
 {
     new string Id { get; }
     new string Name { get; }
     string? Description { get; }
-    string GetDescription();
     int? Amount { get; }
     bool IsStackable { get; }
     string? PresenceDescription { get; }
@@ -39,8 +38,6 @@ public interface IItem : IGameEntity
     event Action<IItem>? OnMove;
     event Action<IItem>? OnDestroy;
     event Action<IItem>? OnAmountEmpty;
-
-    bool Matches(string name);
     IItem SetTakeable(bool takeable);
     IItem SetWeight(float weight);
     IItem SetDescription(string description);

@@ -193,20 +193,7 @@ public class Location(string id) : ILocation
             return null;
 
         string target = name.Trim();
-        return _npcs.FirstOrDefault(npc => NpcMatches(npc, target));
-    }
-
-    private static bool NpcMatches(INpc npc, string target)
-    {
-        if (npc.Name.TextCompare(target) || npc.Id.TextCompare(target))
-            return true;
-
-        string[] nameParts = npc.Name.Split([' ', '-', '_'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (nameParts.Any(part => part.TextCompare(target)))
-            return true;
-
-        string[] idParts = npc.Id.Split([' ', '-', '_'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return idParts.Any(part => part.TextCompare(target));
+        return _npcs.FirstOrDefault(npc => npc.Matches(target));
     }
 
     public static implicit operator Location(string id) => new(id);

@@ -8,11 +8,10 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface INpc : IGameEntity
+public interface INpc : IGameEntity, IExaminable
 {
     new string Id { get; }
     new string Name { get; }
-    string GetDescription();
     NpcState State { get; }
     bool IsAlive { get; }
     INpcMovement Movement { get; }

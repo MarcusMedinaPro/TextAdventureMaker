@@ -83,8 +83,16 @@ public class LookCommand(string? target = null) : ICommand
         if (DirectionHelper.TryParse(target, out var direction))
             return LookInDirection(context, direction);
 
-        IItem? item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
+        if (target.TextCompare(location.Id) || target.TextCompare("here") || target.TextCompare("room"))
+        {
+            string roomDesc = location.GetDescription();
+            return CommandResult.Ok(string.IsNullOrWhiteSpace(roomDesc) ? Language.NothingToLookAt : roomDesc);
+        }
+
         string? suggestion = null;
+
+        // Items (room + inventory)
+        IItem? item = location.FindItem(target) ?? context.State.Inventory.FindItem(target);
         IEnumerable<IItem> itemCandidates = location.Items.Concat(context.State.Inventory.Items);
         (item, string? rawItemSuggestion) = FuzzyItemResolver.Resolve(context.State, itemCandidates, item, target);
         if (rawItemSuggestion is not null)
@@ -113,84 +121,63 @@ public class LookCommand(string? target = null) : ICommand
             return CommandResult.Ok(baseDescription).WithOptionalSuggestion(suggestion);
         }
 
-        INpc? npc = location.FindNpc(target);
-        if (npc is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
-        {
-            INpc? best = FuzzyMatcher.FindBestNpc(location.Npcs, target, context.State.FuzzyMaxDistance);
-            if (best is not null)
-            {
-                npc = best;
-                suggestion = Language.EntityName(best);
-            }
-        }
+        // NPCs, doors, and keys via IExaminable dispatch
+        IExaminable? examinable = FindExaminable(location, target);
 
-        if (npc is not null)
+        if (examinable is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
+            examinable = FuzzyFindExaminable(location, target, context.State.FuzzyMaxDistance, ref suggestion);
+
+        if (examinable is not null)
         {
-            string description = npc.GetDescription();
+            string description = examinable.GetDescription();
+            string entityName = examinable is IGameEntity entity ? Language.EntityName(entity) : target;
             CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(Language.EntityName(npc))
+                ? Language.ItemDescription(entityName)
                 : description);
             return result.WithOptionalSuggestion(suggestion);
-        }
-
-        IDoor? door = location.Exits.Values
-            .Select(e => e.Door)
-            .FirstOrDefault(d => d is not null && (target.TextCompare("door") || d.Matches(target)));
-
-        if (door is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
-        {
-            IEnumerable<IDoor> doors = location.Exits.Values.Select(e => e.Door).Where(d => d is not null).Cast<IDoor>();
-            door = FuzzyMatcher.FindBestDoor(doors, target, context.State.FuzzyMaxDistance);
-            if (door is not null)
-            {
-                suggestion = Language.EntityName(door);
-            }
-        }
-
-        if (door is not null)
-        {
-            string description = door.GetDescription();
-            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(Language.EntityName(door))
-                : description);
-            return result.WithOptionalSuggestion(suggestion);
-        }
-
-        IKey? key = location.Exits.Values
-            .Select(e => e.Door?.RequiredKey)
-            .FirstOrDefault(k => k is not null && k.Name.TextCompare(target));
-
-        if (key is null && context.State.EnableFuzzyMatching && !FuzzyMatcher.IsLikelyCommandToken(target))
-        {
-            IEnumerable<IItem> keys = location.Exits.Values
-                .Select(e => e.Door?.RequiredKey)
-                .Where(k => k is not null)
-                .Cast<IItem>();
-            key = FuzzyMatcher.FindBestItem(keys, target, context.State.FuzzyMaxDistance) as IKey;
-            if (key is not null)
-            {
-                suggestion = Language.EntityName(key);
-            }
-        }
-
-        if (key is not null)
-        {
-            string description = key.GetDescription();
-            CommandResult result = CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.ItemDescription(Language.EntityName(key))
-                : description);
-            return result.WithOptionalSuggestion(suggestion);
-        }
-
-        if (target.TextCompare(location.Id) || target.TextCompare("here") || target.TextCompare("room"))
-        {
-            string description = location.GetDescription();
-            return CommandResult.Ok(string.IsNullOrWhiteSpace(description)
-                ? Language.NothingToLookAt
-                : description);
         }
 
         return CommandResult.Fail(Language.NothingToLookAt, GameError.ItemNotFound);
+    }
+
+    private static IExaminable? FindExaminable(ILocation location, string target) =>
+        location.Npcs.OfType<IExaminable>().FirstOrDefault(e => e.Matches(target))
+        ?? (IExaminable?)location.Exits.Values
+            .Select(e => e.Door)
+            .FirstOrDefault(d => d is not null && (target.TextCompare("door") || d.Matches(target)))
+        ?? location.Exits.Values
+            .Select(e => e.Door?.RequiredKey)
+            .OfType<IExaminable>()
+            .FirstOrDefault(e => e.Matches(target));
+
+    private static IExaminable? FuzzyFindExaminable(ILocation location, string target, int maxDistance, ref string? suggestion)
+    {
+        INpc? bestNpc = FuzzyMatcher.FindBestNpc(location.Npcs, target, maxDistance);
+        if (bestNpc is not null)
+        {
+            suggestion = Language.EntityName(bestNpc);
+            return bestNpc;
+        }
+
+        IEnumerable<IDoor> doors = location.Exits.Values.Select(e => e.Door).OfType<IDoor>();
+        IDoor? bestDoor = FuzzyMatcher.FindBestDoor(doors, target, maxDistance);
+        if (bestDoor is not null)
+        {
+            suggestion = Language.EntityName(bestDoor);
+            return bestDoor;
+        }
+
+        IEnumerable<IItem> keys = location.Exits.Values
+            .Select(e => e.Door?.RequiredKey)
+            .OfType<IItem>();
+        IKey? bestKey = FuzzyMatcher.FindBestItem(keys, target, maxDistance) as IKey;
+        if (bestKey is not null)
+        {
+            suggestion = Language.EntityName(bestKey);
+            return bestKey;
+        }
+
+        return null;
     }
 
     private static CommandResult LookInDirection(CommandContext context, Direction direction)

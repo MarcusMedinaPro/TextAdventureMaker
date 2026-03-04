@@ -1,16 +1,13 @@
-// <copyright file="IContainer.cs" company="Marcus Ackre Medina">
+// <copyright file="IOpenable.cs" company="Marcus Ackre Medina">
 // Copyright (c) Marcus Ackre Medina. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace MarcusMedina.TextAdventure.Interfaces;
 
-public interface IContainer<T> : IOpenable
+public interface IOpenable
 {
-    IReadOnlyList<T> Contents { get; }
-
-    bool Add(T item);
-
-    bool CanAdd(T item);
-
-    bool Remove(T item);
+    bool Open();
+    bool Close();
+    bool IsOpen { get; }
 }

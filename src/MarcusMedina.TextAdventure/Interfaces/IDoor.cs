@@ -7,7 +7,7 @@ namespace MarcusMedina.TextAdventure.Interfaces;
 
 using MarcusMedina.TextAdventure.Enums;
 
-public interface IDoor : IGameEntity
+public interface IDoor : IGameEntity, IExaminable, IOpenable
 {
     event Action<IDoor>? OnClose;
 
@@ -29,21 +29,13 @@ public interface IDoor : IGameEntity
 
     IDoor AddAliases(params string[] aliases);
 
-    bool Close();
-
     IDoor Description(string text);
 
     bool Destroy();
 
-    string GetDescription();
-
     string? GetReaction(DoorAction action);
 
     bool Lock(IKey key);
-
-    bool Matches(string name);
-
-    bool Open();
 
     IDoor SetReaction(DoorAction action, string text);
 

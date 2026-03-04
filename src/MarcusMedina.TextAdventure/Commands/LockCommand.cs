@@ -10,13 +10,11 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class LockCommand(string? target) : ICommand
+public class LockCommand(string? target) : DoorCommandBase(target)
 {
-    public string? Target { get; } = target;
-
-    public CommandResult Execute(CommandContext context)
+    public override CommandResult Execute(CommandContext context)
     {
-        IDoor? door = OpenCommand.ResolveDoor(context.State.CurrentLocation, Target);
+        IDoor? door = ResolveDoor(context.State.CurrentLocation, Target);
 
         if (door is null)
             return CommandResult.Fail(Language.NoDoorHere, GameError.NoDoorHere);

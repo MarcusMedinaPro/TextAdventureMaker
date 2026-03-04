@@ -10,11 +10,9 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class OpenCommand(string? target) : ICommand
+public class OpenCommand(string? target) : DoorCommandBase(target)
 {
-    public string? Target { get; } = target;
-
-    public CommandResult Execute(CommandContext context)
+    public override CommandResult Execute(CommandContext context)
     {
         ILocation location = context.State.CurrentLocation;
 
@@ -39,17 +37,6 @@ public class OpenCommand(string? target) : ICommand
         }
 
         return CommandResult.Fail(Language.NothingToOpen, GameError.NoDoorHere);
-    }
-
-    internal static IDoor? ResolveDoor(ILocation location, string? target)
-    {
-        if (string.IsNullOrWhiteSpace(target))
-            return location.Exits.Values.FirstOrDefault(e => e.Door is not null)?.Door;
-
-        string tok = target.Trim();
-        return location.Exits.Values
-            .Select(e => e.Door)
-            .FirstOrDefault(d => d is not null && d.Matches(tok));
     }
 
     private static CommandResult OpenDoor(CommandContext context, IDoor door)

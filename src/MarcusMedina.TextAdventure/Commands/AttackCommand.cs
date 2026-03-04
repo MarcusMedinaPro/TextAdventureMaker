@@ -5,16 +5,17 @@
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-using System.Linq;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
-public class AttackCommand(string? target) : ICommand
+public class AttackCommand(string? target) : ICommand, IReactableCommand
 {
     public string? Target { get; } = target;
+
+    public string[] GetNpcTriggers() => ["attack"];
 
     public CommandResult Execute(CommandContext context)
     {

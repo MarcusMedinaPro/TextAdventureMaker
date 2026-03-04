@@ -5,7 +5,6 @@
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-using System.Linq;
 using System.Text;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
@@ -13,9 +12,11 @@ using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
 using MarcusMedina.TextAdventure.Models;
 
-public class TalkCommand(string? target) : ICommand
+public class TalkCommand(string? target) : ICommand, IReactableCommand
 {
     public string? Target { get; } = target;
+
+    public string[] GetNpcTriggers() => ["talk"];
 
     public CommandResult Execute(CommandContext context)
     {

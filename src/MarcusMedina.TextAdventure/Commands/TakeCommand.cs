@@ -11,7 +11,7 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class TakeCommand : ICommand
+public class TakeCommand : ICommand, IReactableCommand
 {
     public string ItemName { get; }
     public int? Amount { get; }
@@ -21,6 +21,11 @@ public class TakeCommand : ICommand
         ItemName = itemName;
         Amount = amount;
     }
+
+    public string[] GetNpcTriggers() =>
+        !string.IsNullOrWhiteSpace(ItemName)
+            ? [$"take:{ItemName.ToLowerInvariant()}", "take"]
+            : ["take"];
 
     public CommandResult Execute(CommandContext context)
     {

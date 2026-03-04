@@ -59,26 +59,15 @@ public static class NpcReactionResolver
         return new CommandResult(result.Success, result.Message, result.Error, endGame || result.ShouldQuit, combined);
     }
 
-    internal static string[] BuildTriggers(ICommand command, CommandResult result) => command switch
+    internal static string[] BuildTriggers(ICommand command, CommandResult result)
     {
-        CustomActionCommand ca when !string.IsNullOrWhiteSpace(ca.Target) =>
-            [$"{ca.Verb.ToLowerInvariant()}:{ca.Target.ToLowerInvariant()}", ca.Verb.ToLowerInvariant()],
+        // TalkCommand only fires reactions when it produced no message of its own
+        if (command is TalkCommand && !string.IsNullOrWhiteSpace(result.Message))
+            return [];
 
-        CustomActionCommand ca =>
-            [ca.Verb.ToLowerInvariant()],
+        if (command is IReactableCommand r)
+            return r.GetNpcTriggers();
 
-        UseCommand use when !string.IsNullOrWhiteSpace(use.ItemName) =>
-            [$"use:{use.ItemName.ToLowerInvariant()}", "use"],
-
-        AttackCommand =>
-            ["attack"],
-
-        TakeCommand take when !string.IsNullOrWhiteSpace(take.ItemName) =>
-            [$"take:{take.ItemName.ToLowerInvariant()}", "take"],
-
-        TalkCommand when string.IsNullOrWhiteSpace(result.Message) =>
-            ["talk"],
-
-        _ => []
-    };
+        return [];
+    }
 }

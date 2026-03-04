@@ -10,15 +10,13 @@ using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class CloseCommand(string? target) : ICommand
+public class CloseCommand(string? target) : DoorCommandBase(target)
 {
-    public string? Target { get; } = target;
-
-    public CommandResult Execute(CommandContext context)
+    public override CommandResult Execute(CommandContext context)
     {
         ILocation location = context.State.CurrentLocation;
 
-        IDoor? door = OpenCommand.ResolveDoor(location, Target);
+        IDoor? door = ResolveDoor(location, Target);
         if (door is not null)
             return CloseDoor(context, door);
 

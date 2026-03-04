@@ -3,12 +3,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MarcusMedina.TextAdventure.Engine;
 using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-using MarcusMedina.TextAdventure.Models;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
@@ -35,34 +33,6 @@ public class EatCommand(string itemName) : ICommand
         if (!item.IsFood)
             return CommandResult.Fail(Language.CannotEatThat, GameError.ItemNotUsable);
 
-        string displayName = Language.EntityName(item);
-        item.Use();
-
-        List<string> reactions = [];
-
-        if (item.HealAmount > 0)
-        {
-            context.State.Stats.Heal(item.HealAmount);
-            reactions.Add(Language.HealedAmount(item.HealAmount));
-        }
-
-        if (item.IsPoisoned && context.State is GameState gameState)
-        {
-            gameState.AddPoison(new PoisonEffect(displayName, item.PoisonDamagePerTurn, item.PoisonDurationTurns));
-            reactions.Add(Language.PoisonedMessage);
-        }
-
-        if (item.Amount.HasValue && item.Amount.Value == 0)
-            _ = context.State.Inventory.Remove(item);
-
-        string? onUse = item.GetReaction(ItemAction.Use);
-        if (onUse  is not null)
-            reactions.Add(onUse);
-
-        CommandResult result = reactions.Count > 0
-            ? CommandResult.Ok(Language.EatItem(displayName), [.. reactions])
-            : CommandResult.Ok(Language.EatItem(displayName));
-
-        return result.WithOptionalSuggestion(suggestion);
+        return ConsumableItemHandler.Apply(item, context, Language.EatItem(Language.EntityName(item)), suggestion);
     }
 }

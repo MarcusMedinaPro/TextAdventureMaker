@@ -12,11 +12,16 @@ namespace MarcusMedina.TextAdventure.Commands;
 /// Fired when the player uses a custom verb declared via <c>command:</c> in the DSL.
 /// No built-in logic — NPC reactions and author hooks handle the response.
 /// </summary>
-public sealed class CustomActionCommand(string verb, string? target = null) : ICommand
+public sealed class CustomActionCommand(string verb, string? target = null) : ICommand, IReactableCommand
 {
     public string Verb { get; } = verb;
     public string? Target { get; } = target;
 
     public CommandResult Execute(CommandContext context)
         => CommandResult.Ok(string.Empty); // reactions are appended by NpcReactionResolver
+
+    public string[] GetNpcTriggers() =>
+        !string.IsNullOrWhiteSpace(Target)
+            ? [$"{Verb.ToLowerInvariant()}:{Target.ToLowerInvariant()}", Verb.ToLowerInvariant()]
+            : [Verb.ToLowerInvariant()];
 }

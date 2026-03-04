@@ -7,11 +7,10 @@ using MarcusMedina.TextAdventure.Enums;
 using MarcusMedina.TextAdventure.Helpers;
 using MarcusMedina.TextAdventure.Interfaces;
 using MarcusMedina.TextAdventure.Localization;
-using System.Linq;
 
 namespace MarcusMedina.TextAdventure.Commands;
 
-public class UseCommand : ICommand
+public class UseCommand : ICommand, IReactableCommand
 {
     public string ItemName { get; }
 
@@ -19,6 +18,11 @@ public class UseCommand : ICommand
     {
         ItemName = itemName;
     }
+
+    public string[] GetNpcTriggers() =>
+        !string.IsNullOrWhiteSpace(ItemName)
+            ? [$"use:{ItemName.ToLowerInvariant()}", "use"]
+            : ["use"];
 
     public CommandResult Execute(CommandContext context)
     {
